@@ -7,21 +7,6 @@
     <title>Nueva Consulta - Aitana Aguilar</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <script>
-        function toggleMode(mode) {
-            document.getElementById('digitalForm').style.display = mode === 'digital' ? 'block' : 'none';
-            document.getElementById('manualForm').style.display = mode === 'manual' ? 'block' : 'none';
-
-            // Estilos de botones
-            document.getElementById('btnDigital').className = mode === 'digital' ?
-                'flex-1 bg-teal-600 text-white py-2 rounded-l-lg font-medium transition' :
-                'flex-1 bg-gray-200 text-gray-600 py-2 rounded-l-lg font-medium transition hover:bg-gray-300';
-
-            document.getElementById('btnManual').className = mode === 'manual' ?
-                'flex-1 bg-teal-600 text-white py-2 rounded-r-lg font-medium transition' :
-                'flex-1 bg-gray-200 text-gray-600 py-2 rounded-r-lg font-medium transition hover:bg-gray-300';
-        }
-    </script>
 </head>
 
 <body class="bg-gray-100 h-screen flex flex-col">
@@ -29,6 +14,9 @@
     <!-- Navbar Simple -->
     <nav class="bg-white shadow-sm border-b px-6 py-3 flex justify-between items-center">
         <div class="flex items-center space-x-4">
+            <a href="index.html" class="text-gray-500 hover:text-teal-600 transition" title="Volver al inicio">
+                <i class="fas fa-home text-lg"></i>
+            </a>
             <div class="h-10 w-10 bg-teal-100 rounded-full flex items-center justify-center text-teal-700 font-bold">AA
             </div>
             <div>
@@ -47,137 +35,45 @@
         <main class="flex-1 overflow-y-auto p-6">
 
             <!-- Selector de Modo (Híbrido) -->
-            <div class="flex mb-6 bg-white rounded-lg shadow-sm max-w-md mx-auto">
-                <button id="btnDigital" onclick="toggleMode('digital')"
-                    class="flex-1 bg-teal-600 text-white py-2 rounded-l-lg font-medium transition">
+            <div class="flex mb-6 bg-white rounded-lg shadow-sm max-w-md mx-auto gap-2">
+                <a href="detalleConsultaDigital.html"
+                    class="flex-1 bg-teal-600 text-white py-2 rounded-lg font-medium transition hover:bg-teal-700 flex items-center justify-center text-center no-underline">
                     <i class="fas fa-keyboard mr-2"></i> Consulta Digital
-                </button>
-                <button id="btnManual" onclick="toggleMode('manual')"
-                    class="flex-1 bg-gray-200 text-gray-600 py-2 rounded-r-lg font-medium transition hover:bg-gray-300">
+                </a>
+                <a href="verConsultaEscrita.html"
+                    class="flex-1 bg-gray-200 text-gray-600 py-2 rounded-lg font-medium transition hover:bg-gray-300 flex items-center justify-center text-center no-underline">
                     <i class="fas fa-camera mr-2"></i> Cargar Manual/Físico
-                </button>
+                </a>
             </div>
 
-            <!-- MODO DIGITAL -->
-            <div id="digitalForm" class="space-y-6">
-                <!-- Vitals (Para las curvas) -->
-                <div class="bg-white p-5 rounded-xl shadow-sm border-l-4 border-teal-500">
-                    <h3 class="text-sm font-bold text-gray-500 uppercase mb-3">Signos Vitales (Alimentan Curvas)</h3>
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div>
-                            <label class="block text-xs text-gray-500">Peso (kg)</label>
-                            <input type="number"
-                                class="w-full text-xl font-bold text-teal-700 border-b-2 border-teal-100 focus:border-teal-500 outline-none py-1"
-                                placeholder="0.00">
-                        </div>
-                        <div>
-                            <label class="block text-xs text-gray-500">Talla (cm)</label>
-                            <input type="number"
-                                class="w-full text-xl font-bold text-teal-700 border-b-2 border-teal-100 focus:border-teal-500 outline-none py-1"
-                                placeholder="0.0">
-                        </div>
-                        <div>
-                            <label class="block text-xs text-gray-500">P. Cefálico</label>
-                            <input type="number"
-                                class="w-full text-xl font-bold text-teal-700 border-b-2 border-teal-100 focus:border-teal-500 outline-none py-1"
-                                placeholder="0.0">
-                        </div>
-                        <div>
-                            <label class="block text-xs text-gray-500">Temperatura</label>
-                            <input type="number"
-                                class="w-full text-xl font-bold text-red-400 border-b-2 border-red-100 focus:border-red-500 outline-none py-1"
-                                placeholder="36.5">
-                        </div>
-                    </div>
+            <!-- Información de Bienvenida -->
+            <div class="max-w-xl mx-auto mt-12 space-y-6">
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 text-center">
+                    <i class="fas fa-info-circle text-blue-600 text-3xl mb-3 block"></i>
+                    <h2 class="text-xl font-bold text-gray-800 mb-2">Selecciona el modo de consulta</h2>
+                    <p class="text-gray-600 text-sm">Elige entre registrar una consulta completamente digital o cargar una consulta manual/física que será transcrita digitalmente.</p>
                 </div>
 
-                <!-- Anamnesis y Examen -->
-                <div class="bg-white p-5 rounded-xl shadow-sm">
-                    <div class="grid grid-cols-1 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Motivo de Consulta /
-                                Anamnesis</label>
-                            <textarea
-                                class="w-full border p-3 rounded-lg text-sm focus:ring-teal-500 focus:border-teal-500"
-                                rows="3" placeholder="Paciente acude por..."></textarea>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Examen Físico</label>
-                            <textarea
-                                class="w-full border p-3 rounded-lg text-sm focus:ring-teal-500 focus:border-teal-500"
-                                rows="3" placeholder="Fauces congestivas, pulmones ventilados..."></textarea>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Diagnóstico (CIE-10)</label>
-                            <input type="text" class="w-full border p-2 rounded-lg text-sm"
-                                placeholder="Buscar diagnóstico...">
-                        </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-white p-6 rounded-lg shadow-sm border border-teal-100 hover:shadow-md transition">
+                        <i class="fas fa-keyboard text-teal-600 text-2xl mb-2 block"></i>
+                        <h3 class="font-bold text-gray-800 mb-2">Consulta Digital</h3>
+                        <p class="text-sm text-gray-600">Completa el formulario de consulta con datos clínicos detallados. El sistema automáticamente genera las curvas de crecimiento.</p>
                     </div>
-                </div>
-            </div>
 
-            <!-- MODO MANUAL / OFFLINE -->
-            <div id="manualForm"
-                class="hidden bg-white p-8 rounded-xl shadow-sm border border-dashed border-gray-300 text-center">
-                <div class="max-w-md mx-auto">
-                    <div class="mb-4">
-                        <i class="fas fa-cloud-upload-alt text-4xl text-gray-300"></i>
-                    </div>
-                    <h3 class="text-lg font-medium text-gray-900">Digitalizar Consulta Física</h3>
-                    <p class="text-sm text-gray-500 mb-6">Suba una foto o escaneo de la receta/nota manuscrita. <br>El
-                        sistema guardará el archivo como: <br><code
-                            class="bg-gray-100 px-2 py-1 rounded text-xs">P0045-20260204-AitanaA.jpg</code></p>
-
-                    <!-- Simulación de carga -->
-                    <label
-                        class="w-full flex flex-col items-center px-4 py-6 bg-white text-teal-600 rounded-lg shadow-lg tracking-wide uppercase border border-blue cursor-pointer hover:bg-teal-50 transition">
-                        <i class="fas fa-camera"></i>
-                        <span class="mt-2 text-base leading-normal">Tomar Foto / Seleccionar Archivo</span>
-                        <input type='file' class="hidden" />
-                    </label>
-
-                    <div class="mt-6 text-left bg-yellow-50 p-4 rounded-lg border border-yellow-200">
-                        <div class="flex items-start">
-                            <input type="checkbox" id="pendingData"
-                                class="mt-1 h-4 w-4 text-yellow-600 border-gray-300 rounded">
-                            <label for="pendingData" class="ml-2 text-sm text-yellow-800">
-                                <strong>Marcar como "Pendiente de Transcribir"</strong><br>
-                                <span class="text-xs">Active esto si solo está subiendo la foto rápido. Le recordaremos
-                                    llenar el Peso y Talla después para que aparezcan en las curvas.</span>
-                            </label>
-                        </div>
+                    <div class="bg-white p-6 rounded-lg shadow-sm border border-orange-100 hover:shadow-md transition">
+                        <i class="fas fa-camera text-orange-600 text-2xl mb-2 block"></i>
+                        <h3 class="font-bold text-gray-800 mb-2">Consulta Manual</h3>
+                        <p class="text-sm text-gray-600">Carga una fotografía o escaneo de la consulta escrita. Podrás editar y transcribir los datos en la plataforma.</p>
                     </div>
                 </div>
             </div>
 
         </main>
 
-        <!-- Panel Derecho: Herramientas Rápidas (Recetas y Botiquín) -->
-        <aside class="w-80 bg-white border-l p-4 flex flex-col gap-4 shadow-xl z-10">
-            <h3 class="font-bold text-gray-700 text-sm uppercase tracking-wide">Herramientas Rápidas</h3>
+</body>
 
-            <!-- Generador de Recetas -->
-            <div class="border rounded-lg p-3 bg-gray-50">
-                <label class="text-xs font-bold text-teal-600 mb-2 block"><i
-                        class="fas fa-prescription-bottle-alt mr-1"></i> Generar Receta</label>
-                <select class="w-full text-sm border-gray-300 rounded mb-2 p-1">
-                    <option value="">Seleccionar Plantilla...</option>
-                    <option value="diarrea">Foco Intestinal / Diarrea</option>
-                    <option value="resp">Foco Pulmonar</option>
-                    <option value="parasito">Desparasitación Std.</option>
-                </select>
-                <button class="w-full bg-teal-100 text-teal-700 text-xs font-bold py-2 rounded hover:bg-teal-200">
-                    Cargar Plantilla
-                </button>
-            </div>
-
-            <!-- Botiquín -->
-            <div class="border rounded-lg p-3 bg-indigo-50 border-indigo-100">
-                <label class="text-xs font-bold text-indigo-600 mb-2 block"><i
-                        class="fas fa-briefcase-medical mr-1"></i> Imprimir Botiquín</label>
-                <p class="text-xs text-gray-500 mb-2">Instrucciones para fiebre/dolor basadas en peso actual.</p>
-                <div class="grid grid-cols-2 gap-2">
-                    <button
+</html>                    <button
                         class="bg-white border text-indigo-600 text-xs py-1 rounded hover:bg-indigo-50">Fiebre</button>
                     <button
                         class="bg-white border text-indigo-600 text-xs py-1 rounded hover:bg-indigo-50">Vómitos</button>

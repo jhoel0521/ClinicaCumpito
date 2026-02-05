@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prototipo PediApp - Navegación</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-slate-900 min-h-screen flex items-center justify-center font-sans">
+
+    <div class="max-w-md w-full bg-white rounded-xl shadow-2xl overflow-hidden m-4">
+        <div class="bg-teal-600 p-6 text-center">
+            <h1 class="text-2xl font-bold text-white mb-2">PediApp / VitalTrack</h1>
+            <p class="text-teal-100 text-sm">Prototipo de Navegación v1.0</p>
+        </div>
+
+        <div class="p-6 space-y-4">
+
+            <div class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">Flujos Principales</div>
+
+            <a href="dasboardPaciente.html"
+                class="block group relative p-4 border border-gray-200 rounded-xl hover:border-teal-500 hover:shadow-md transition bg-gray-50 hover:bg-white">
+                <div class="flex items-center">
+                    <div
+                        class="h-10 w-10 bg-teal-100 rounded-full flex items-center justify-center text-teal-600 group-hover:bg-teal-600 group-hover:text-white transition">
+                        <i class="fas fa-columns"></i>
+                    </div>
+                    <div class="ml-4">
+                        <h3 class="text-gray-900 font-bold group-hover:text-teal-700">Dashboard Paciente</h3>
+                        <p class="text-xs text-gray-500">Vista general, curvas y accesos rápidos.</p>
+                    </div>
+                    <i class="fas fa-chevron-right ml-auto text-gray-300 group-hover:text-teal-500"></i>
+                </div>
+            </a>
+
+            <a href="nuevaConsulta.html"
+                class="block group p-4 border border-gray-200 rounded-xl hover:border-teal-500 hover:shadow-md transition bg-gray-50 hover:bg-white">
+                <div class="flex items-center">
+                    <div
+                        class="h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition">
+                        <i class="fas fa-plus"></i>
+                    </div>
+                    <div class="ml-4">
+                        <h3 class="text-gray-900 font-bold group-hover:text-blue-700">Nueva Consulta</h3>
+                        <p class="text-xs text-gray-500">Selector Híbrido (Digital vs Manual).</p>
+                    </div>
+                    <i class="fas fa-chevron-right ml-auto text-gray-300 group-hover:text-blue-500"></i>
+                </div>
+            </a>
+
+            <div class="text-xs font-bold text-gray-400 uppercase tracking-wide mt-6 mb-2">Detalles y Formularios</div>
+
+            <div class="grid grid-cols-1 gap-2">
+                <a href="formularioPaciente.html"
+                    class="flex items-center p-3 rounded-lg hover:bg-gray-100 text-gray-700 transition text-sm">
+                    <i class="fas fa-user-plus w-6 text-gray-400"></i> Registro Nuevo Paciente
+                </a>
+                <a href="verConsulta.html"
+                    class="flex items-center p-3 rounded-lg hover:bg-gray-100 text-gray-700 transition text-sm">
+                    <i class="fas fa-file-medical-alt w-6 text-gray-400"></i> Detalle Híbrido (Split View)
+                </a>
+                <a href="detalleConsultaDigital.html"
+                    class="flex items-center p-3 rounded-lg hover:bg-gray-100 text-gray-700 transition text-sm">
+                    <i class="fas fa-laptop-medical w-6 text-gray-400"></i> Detalle 100% Digital
+                </a>
+            </div>
+
+        </div>
+
+        <div class="bg-gray-50 px-6 py-4 border-t text-center">
+            <p class="text-xs text-gray-400">Desarrollado para revisión de flujo clínico.</p>
+        </div>
+    </div>
+
+</body>
+
+</html>

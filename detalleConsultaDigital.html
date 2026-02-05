@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta Digital - PediApp</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 min-h-screen font-sans text-gray-800">
+
+    <!-- Header de Contexto -->
+    <header class="bg-white border-b px-6 py-4 flex justify-between items-center sticky top-0 z-20 shadow-sm">
+        <div class="flex items-center gap-4">
+            <button class="bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-full p-2 transition w-10 h-10 flex items-center justify-center">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <div>
+                <h1 class="text-xl font-bold text-gray-900">Control Niño Sano - 4 Meses</h1>
+                <p class="text-sm text-gray-500 flex items-center gap-2">
+                    <span><i class="far fa-calendar mr-1"></i> 04/02/2026</span>
+                    <span class="text-gray-300">|</span>
+                    <span class="bg-teal-50 text-teal-700 px-2 rounded text-xs font-bold border border-teal-100 uppercase tracking-wide">
+                        <i class="fas fa-laptop-medical mr-1"></i> 100% Digital
+                    </span>
+                </p>
+            </div>
+        </div>
+        
+        <!-- Botones de Acción -->
+        <div class="flex gap-3">
+            <button class="border border-gray-300 bg-white text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 shadow-sm transition">
+                <i class="fas fa-print mr-2"></i> Imprimir Informe
+            </button>
+            <button class="bg-teal-600 hover:bg-teal-700 text-white px-5 py-2 rounded-lg text-sm font-bold shadow-md transition flex items-center">
+                <i class="fas fa-pen mr-2"></i> Editar Registro
+            </button>
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto p-6 space-y-6">
+
+        <!-- 1. BLOQUE DE SIGNOS VITALES (Calculado) -->
+        <!-- Como es digital, el sistema calcula los percentiles automáticamente -->
+        <section class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div class="bg-gray-50 px-6 py-3 border-b border-gray-200 flex justify-between items-center">
+                <h2 class="text-sm font-bold text-gray-500 uppercase tracking-wide">Antropometría y Signos Vitales</h2>
+                <span class="text-xs text-gray-400">Calculado según OMS (4 meses)</span>
+            </div>
+            
+            <div class="p-6 grid grid-cols-2 md:grid-cols-4 gap-8">
+                <!-- Peso -->
+                <div class="relative">
+                    <p class="text-xs text-gray-500 uppercase mb-1">Peso</p>
+                    <div class="flex items-baseline gap-2">
+                        <span class="text-3xl font-bold text-gray-800">6.50</span>
+                        <span class="text-sm text-gray-600">kg</span>
+                    </div>
+                    <!-- Badge calculado -->
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 mt-1">
+                        <i class="fas fa-check-circle mr-1"></i> Normal (P50)
+                    </span>
+                </div>
+
+                <!-- Talla -->
+                <div>
+                    <p class="text-xs text-gray-500 uppercase mb-1">Talla</p>
+                    <div class="flex items-baseline gap-2">
+                        <span class="text-3xl font-bold text-gray-800">62.0</span>
+                        <span class="text-sm text-gray-600">cm</span>
+                    </div>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 mt-1">
+                        <i class="fas fa-check-circle mr-1"></i> Normal
+                    </span>
+                </div>
+
+                <!-- Perímetro Cefálico -->
+                <div>
+                    <p class="text-xs text-gray-500 uppercase mb-1">P. Cefálico</p>
+                    <div class="flex items-baseline gap-2">
+                        <span class="text-3xl font-bold text-gray-800">41.5</span>
+                        <span class="text-sm text-gray-600">cm</span>
+                    </div>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 mt-1">
+                        <i class="fas fa-check-circle mr-1"></i> Normal
+                    </span>
+                </div>
+
+                <!-- Temperatura -->
+                <div>
+                    <p class="text-xs text-gray-500 uppercase mb-1">Temperatura</p>
+                    <div class="flex items-baseline gap-2">
+                        <span class="text-3xl font-bold text-gray-800">36.5</span>
+                        <span class="text-sm text-gray-600">°C</span>
+                    </div>
+                     <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600 mt-1">
+                        Afebril
+                    </span>
+                </div>
+            </div>
+        </section>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            
+            <!-- 2. COLUMNA IZQUIERDA: EVOLUCIÓN (Texto) -->
+            <div class="md:col-span-2 space-y-6">
+                <!-- Anamnesis y Diagnóstico -->
+                <section class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                    <div class="mb-6">
+                        <h3 class="text-teal-700 font-bold text-sm uppercase mb-3 border-b border-gray-100 pb-2">Motivo de Consulta</h3>
+                        <p class="text-gray-700 leading-relaxed">
+                            Paciente acude a control de niño sano correspondiente al 4to mes. Madre refiere lactancia materna exclusiva con buena tolerancia. Sueño conservado. Diuresis y catarsis positivas normales.
+                        </p>
+                    </div>
+
+                    <div class="mb-6">
+                        <h3 class="text-teal-700 font-bold text-sm uppercase mb-3 border-b border-gray-100 pb-2">Examen Físico</h3>
+                        <p class="text-gray-700 leading-relaxed">
+                            Paciente activo, reactivo, sonrosado. Piel hidratada y elástica. <br>
+                            <strong>Cabeza:</strong> Normocéfalo, fontanela anterior normotensa.<br>
+                            <strong>Tórax:</strong> Buena entrada de aire bilateral, sin ruidos agregados.<br>
+                            <strong>Abdomen:</strong> Blando, depresible, no doloroso, RHA presentes.<br>
+                            <strong>Caderas:</strong> Maniobras de Ortolani y Barlow negativas.
+                        </p>
+                    </div>
+
+                    <div>
+                        <h3 class="text-teal-700 font-bold text-sm uppercase mb-3 border-b border-gray-100 pb-2">Diagnóstico (CIE-10)</h3>
+                        <div class="flex gap-2">
+                            <span class="bg-blue-50 text-blue-800 px-3 py-1 rounded-full text-sm font-medium border border-blue-100">
+                                Z00.1 - Control de salud de rutina del niño
+                            </span>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Laboratorios -->
+                <section class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-teal-700 font-bold text-sm uppercase">Solicitudes / Laboratorios</h3>
+                    </div>
+                    <div class="bg-gray-50 rounded border border-gray-200 p-4 text-center text-gray-500 text-sm">
+                        <i class="fas fa-info-circle mr-2"></i> No se solicitaron estudios complementarios en esta consulta.
+                    </div>
+                </section>
+            </div>
+
+            <!-- 3. COLUMNA DERECHA: PLAN Y RECETAS (Accionable) -->
+            <div class="space-y-6">
+                
+                <!-- Tarjeta de Receta Emitida -->
+                <section class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="bg-teal-600 px-4 py-3 flex justify-between items-center">
+                        <h3 class="text-white font-bold text-sm uppercase"><i class="fas fa-prescription-bottle-alt mr-2"></i> Receta Emitida</h3>
+                        <button class="text-white hover:text-teal-100 text-xs font-medium bg-teal-700 px-2 py-1 rounded transition">
+                            <i class="fas fa-print"></i>
+                        </button>
+                    </div>
+                    <div class="p-4 space-y-4">
+                        <!-- Medicamento 1 -->
+                        <div class="flex gap-3 items-start border-b border-gray-100 pb-3 last:border-0 last:pb-0">
+                            <div class="text-teal-600 mt-1"><i class="fas fa-circle text-[8px]"></i></div>
+                            <div>
+                                <p class="font-bold text-gray-800 text-sm">Vitamina D3 (Gotas)</p>
+                                <p class="text-sm text-gray-600 mt-0.5">Administrar <strong>3 gotas</strong> vía oral, una vez al día.</p>
+                                <span class="text-xs text-gray-400 mt-1 block">Duración: Continua</span>
+                            </div>
+                        </div>
+                         <!-- Medicamento 2 -->
+                         <div class="flex gap-3 items-start border-b border-gray-100 pb-3 last:border-0 last:pb-0">
+                            <div class="text-teal-600 mt-1"><i class="fas fa-circle text-[8px]"></i></div>
+                            <div>
+                                <p class="font-bold text-gray-800 text-sm">Sulfato Ferroso (Gotas)</p>
+                                <p class="text-sm text-gray-600 mt-0.5">Administrar <strong>10 gotas</strong> vía oral, alejado de la leche.</p>
+                                <span class="text-xs text-gray-400 mt-1 block">Preventivo Anemia</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 p-3 border-t border-gray-100">
+                        <button class="w-full text-teal-600 font-bold text-sm hover:underline">
+                            <i class="fab fa-whatsapp mr-1"></i> Re-enviar a Mamá
+                        </button>
+                    </div>
+                </section>
+
+                <!-- Tarjeta de Vacunas (Si aplica en control niño sano) -->
+                <section class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="px-4 py-3 border-b border-gray-100">
+                        <h3 class="text-gray-700 font-bold text-sm uppercase"><i class="fas fa-syringe mr-2 text-purple-500"></i> Vacunas Indicadas</h3>
+                    </div>
+                    <div class="p-4">
+                        <ul class="space-y-2 text-sm text-gray-600">
+                            <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Pentavalente (2da dosis)</li>
+                            <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Rotavirus (2da dosis)</li>
+                            <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Neumococo (2da dosis)</li>
+                        </ul>
+                    </div>
+                </section>
+
+                 <!-- Indicaciones / Botiquín -->
+                 <section class="bg-indigo-50 rounded-xl shadow-sm border border-indigo-100 overflow-hidden p-4">
+                    <h3 class="text-indigo-800 font-bold text-sm uppercase mb-2"><i class="fas fa-briefcase-medical mr-2"></i> Botiquín Actualizado</h3>
+                    <p class="text-xs text-indigo-700 mb-2">Se entregaron indicaciones para fiebre:</p>
+                    <div class="bg-white rounded p-2 text-sm border border-indigo-100">
+                        <strong>Paracetamol:</strong> 10 gotas (100mg/ml)<br>
+                        Solo en caso de T > 38°C
+                    </div>
+                </section>
+
+            </div>
+        </div>
+
+    </main>
+
+</body>
+</html>

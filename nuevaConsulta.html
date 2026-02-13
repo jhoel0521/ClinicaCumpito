@@ -7,21 +7,78 @@
     <title>Nueva Consulta - Aitana Aguilar</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script>
+        // Lógica simple para el Switch Digital/Manual
+        function toggleMode(mode) {
+            document.getElementById('digitalForm').style.display = mode === 'digital' ? 'block' : 'none';
+            document.getElementById('manualForm').style.display = mode === 'manual' ? 'block' : 'none';
+
+            // Estilos de botones
+            document.getElementById('btnDigital').className = mode === 'digital' ?
+                'flex-1 bg-teal-600 text-white py-2 rounded-l-lg font-medium transition' :
+                'flex-1 bg-gray-200 text-gray-600 py-2 rounded-l-lg font-medium transition hover:bg-gray-300';
+
+            document.getElementById('btnManual').className = mode === 'manual' ?
+                'flex-1 bg-teal-600 text-white py-2 rounded-r-lg font-medium transition' :
+                'flex-1 bg-gray-200 text-gray-600 py-2 rounded-r-lg font-medium transition hover:bg-gray-300';
+        }
+
+        // Lógica simulada para el CRUD de Laboratorios
+        function agregarLaboratorio() {
+            const tipo = document.getElementById('labTipo').value;
+            const obs = document.getElementById('labObs').value;
+
+            if (!tipo) return;
+
+            const lista = document.getElementById('listaLaboratorios');
+            const item = document.createElement('div');
+            item.className = 'flex justify-between items-center bg-blue-50 p-2 rounded border border-blue-100 mb-2 animate-fade-in-up';
+            item.innerHTML = `
+                <div>
+                    <span class="font-bold text-sm text-blue-800">${tipo}</span>
+                    <span class="text-xs text-gray-600 ml-2">${obs}</span>
+                </div>
+                <button onclick="this.parentElement.remove()" class="text-red-500 hover:text-red-700 text-xs font-bold px-2">
+                    <i class="fas fa-trash"></i>
+                </button>
+            `;
+            lista.appendChild(item);
+
+            // Limpiar inputs
+            document.getElementById('labTipo').value = "";
+            document.getElementById('labObs').value = "";
+        }
+    </script>
+    <style>
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fade-in-up {
+            animation: fadeInUp 0.3s ease-out;
+        }
+    </style>
 </head>
 
-<body class="bg-gray-100 h-screen flex flex-col">
+<body class="bg-gray-100 h-screen flex flex-col font-sans">
 
     <!-- Navbar Simple -->
-    <nav class="bg-white shadow-sm border-b px-6 py-3 flex justify-between items-center">
+    <nav class="bg-white shadow-sm border-b px-6 py-3 flex justify-between items-center shrink-0">
         <div class="flex items-center space-x-4">
-            <a href="index.html" class="text-gray-500 hover:text-teal-600 transition" title="Volver al inicio">
-                <i class="fas fa-home text-lg"></i>
-            </a>
-            <div class="h-10 w-10 bg-teal-100 rounded-full flex items-center justify-center text-teal-700 font-bold">AA
-            </div>
+            <div
+                class="h-10 w-10 bg-teal-100 rounded-full flex items-center justify-center text-teal-700 font-bold border-2 border-teal-200">
+                AA</div>
             <div>
-                <h2 class="text-lg font-bold text-gray-800">Aitana Aguilar</h2>
-                <span class="text-xs text-gray-500">1 Año 2 Meses | O+</span>
+                <h2 class="text-lg font-bold text-gray-800 leading-tight">Aitana Aguilar</h2>
+                <span class="text-xs text-gray-500 font-medium">1 Año 2 Meses | O+</span>
             </div>
         </div>
         <div class="text-sm text-gray-500">
@@ -31,60 +88,290 @@
 
     <div class="flex-1 overflow-hidden flex">
 
-        <!-- Panel Izquierdo: Datos Clínicos -->
-        <main class="flex-1 overflow-y-auto p-6">
+        <!-- Panel Izquierdo: Datos Clínicos (SOAP) -->
+        <main class="flex-1 overflow-y-auto p-6 scroll-smooth">
 
-            <!-- Selector de Modo (Híbrido) -->
-            <div class="flex mb-6 bg-white rounded-lg shadow-sm max-w-md mx-auto gap-2">
-                <a href="detalleConsultaDigital.html"
-                    class="flex-1 bg-teal-600 text-white py-2 rounded-lg font-medium transition hover:bg-teal-700 flex items-center justify-center text-center no-underline">
-                    <i class="fas fa-keyboard mr-2"></i> Consulta Digital
-                </a>
-                <a href="verConsultaEscrita.html"
-                    class="flex-1 bg-gray-200 text-gray-600 py-2 rounded-lg font-medium transition hover:bg-gray-300 flex items-center justify-center text-center no-underline">
+            <!-- Selector de Modo -->
+            <div class="flex mb-6 bg-white rounded-lg shadow-sm max-w-md mx-auto border border-gray-200">
+                <button id="btnDigital" onclick="toggleMode('digital')"
+                    class="flex-1 bg-teal-600 text-white py-2 rounded-l-lg font-medium transition text-sm">
+                    <i class="fas fa-keyboard mr-2"></i> Consulta Digital (SOAP)
+                </button>
+                <button id="btnManual" onclick="toggleMode('manual')"
+                    class="flex-1 bg-gray-200 text-gray-600 py-2 rounded-r-lg font-medium transition hover:bg-gray-300 text-sm">
                     <i class="fas fa-camera mr-2"></i> Cargar Manual/Físico
-                </a>
+                </button>
             </div>
 
-            <!-- Información de Bienvenida -->
-            <div class="max-w-xl mx-auto mt-12 space-y-6">
-                <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 text-center">
-                    <i class="fas fa-info-circle text-blue-600 text-3xl mb-3 block"></i>
-                    <h2 class="text-xl font-bold text-gray-800 mb-2">Selecciona el modo de consulta</h2>
-                    <p class="text-gray-600 text-sm">Elige entre registrar una consulta completamente digital o cargar una consulta manual/física que será transcrita digitalmente.</p>
-                </div>
+            <!-- MODO DIGITAL (SOAP) -->
+            <div id="digitalForm" class="space-y-6 pb-20">
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="bg-white p-6 rounded-lg shadow-sm border border-teal-100 hover:shadow-md transition">
-                        <i class="fas fa-keyboard text-teal-600 text-2xl mb-2 block"></i>
-                        <h3 class="font-bold text-gray-800 mb-2">Consulta Digital</h3>
-                        <p class="text-sm text-gray-600">Completa el formulario de consulta con datos clínicos detallados. El sistema automáticamente genera las curvas de crecimiento.</p>
+                <!-- S - SUBJETIVO -->
+                <section class="bg-white p-5 rounded-xl shadow-sm border-l-4 border-teal-500 relative">
+                    <div
+                        class="absolute -left-3 top-4 bg-teal-600 text-white font-bold rounded-r px-2 py-0.5 text-xs shadow-md">
+                        S</div>
+                    <h3 class="text-sm font-bold text-teal-800 uppercase mb-3 pl-2">Subjetivo (Anamnesis)</h3>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-500 mb-1">Motivo de Consulta / Enfermedad
+                            Actual</label>
+                        <textarea
+                            class="w-full border-gray-300 rounded-lg p-3 text-sm focus:ring-teal-500 focus:border-teal-500 border bg-gray-50 focus:bg-white transition"
+                            rows="3" placeholder="Madre refiere que el paciente presenta..."></textarea>
+                    </div>
+                </section>
+
+                <!-- O - OBJETIVO -->
+                <section class="bg-white p-5 rounded-xl shadow-sm border-l-4 border-blue-500 relative">
+                    <div
+                        class="absolute -left-3 top-4 bg-blue-600 text-white font-bold rounded-r px-2 py-0.5 text-xs shadow-md">
+                        O</div>
+                    <h3 class="text-sm font-bold text-blue-800 uppercase mb-3 pl-2">Objetivo (Examen Físico)</h3>
+
+                    <!-- Vitals -->
+                    <div class="bg-blue-50 rounded-lg p-3 mb-4 border border-blue-100">
+                        <label class="block text-xs font-bold text-blue-600 mb-2 uppercase">Signos Vitales</label>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div>
+                                <label class="block text-[10px] text-gray-500 uppercase">Peso (kg)</label>
+                                <input type="number" step="0.01"
+                                    class="w-full text-lg font-bold text-gray-700 bg-white border border-gray-300 rounded px-2 py-1 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+                                    placeholder="0.00">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] text-gray-500 uppercase">Talla (cm)</label>
+                                <input type="number" step="0.1"
+                                    class="w-full text-lg font-bold text-gray-700 bg-white border border-gray-300 rounded px-2 py-1 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+                                    placeholder="0.0">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] text-gray-500 uppercase">P. Cefálico</label>
+                                <input type="number" step="0.1"
+                                    class="w-full text-lg font-bold text-gray-700 bg-white border border-gray-300 rounded px-2 py-1 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+                                    placeholder="0.0">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] text-gray-500 uppercase">Temp (°C)</label>
+                                <input type="number" step="0.1"
+                                    class="w-full text-lg font-bold text-red-500 bg-white border border-red-200 rounded px-2 py-1 focus:border-red-500 focus:ring-1 focus:ring-red-500 outline-none"
+                                    placeholder="36.5">
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="bg-white p-6 rounded-lg shadow-sm border border-orange-100 hover:shadow-md transition">
-                        <i class="fas fa-camera text-orange-600 text-2xl mb-2 block"></i>
-                        <h3 class="font-bold text-gray-800 mb-2">Consulta Manual</h3>
-                        <p class="text-sm text-gray-600">Carga una fotografía o escaneo de la consulta escrita. Podrás editar y transcribir los datos en la plataforma.</p>
+                    <!-- Examen Segmentario -->
+                    <div>
+                        <label class="block text-xs font-medium text-gray-500 mb-1">Hallazgos Físicos Relevantes</label>
+                        <textarea
+                            class="w-full border-gray-300 rounded-lg p-3 text-sm focus:ring-blue-500 focus:border-blue-500 border bg-gray-50 focus:bg-white transition"
+                            rows="3"
+                            placeholder="Paciente activo, reactivo. Piel y mucosas... Orofaringe... Cardiopulmonar..."></textarea>
                     </div>
+                </section>
+
+                <!-- A - ANÁLISIS -->
+                <section class="bg-white p-5 rounded-xl shadow-sm border-l-4 border-purple-500 relative">
+                    <div
+                        class="absolute -left-3 top-4 bg-purple-600 text-white font-bold rounded-r px-2 py-0.5 text-xs shadow-md">
+                        A</div>
+                    <h3 class="text-sm font-bold text-purple-800 uppercase mb-3 pl-2">Análisis (Diagnóstico)</h3>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-500 mb-1">Impresión Diagnóstica
+                            (CIE-10)</label>
+                        <div class="relative">
+                            <input type="text"
+                                class="w-full border-gray-300 rounded-lg pl-8 p-2 text-sm focus:ring-purple-500 focus:border-purple-500 border"
+                                placeholder="Buscar diagnóstico (Ej: J00 Rinitis Aguda)">
+                            <i class="fas fa-search absolute left-3 top-2.5 text-gray-400"></i>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- P - PLAN -->
+                <section class="bg-white p-5 rounded-xl shadow-sm border-l-4 border-orange-500 relative">
+                    <div
+                        class="absolute -left-3 top-4 bg-orange-600 text-white font-bold rounded-r px-2 py-0.5 text-xs shadow-md">
+                        P</div>
+                    <h3 class="text-sm font-bold text-orange-800 uppercase mb-3 pl-2">Plan de Acción</h3>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                        <!-- 1. SOLICITUD DE LABORATORIOS (CRUD) -->
+                        <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-2"><i
+                                    class="fas fa-flask mr-1 text-teal-600"></i> Solicitar Estudios</label>
+
+                            <!-- Formulario Agregar -->
+                            <div class="flex gap-2 mb-3">
+                                <select id="labTipo"
+                                    class="flex-1 text-sm border-gray-300 rounded border p-1.5 focus:border-teal-500 outline-none">
+                                    <option value="" disabled selected>Tipo de Estudio...</option>
+                                    <option value="Hemograma Completo">Hemograma</option>
+                                    <option value="Ex. General de Orina">Orina (General)</option>
+                                    <option value="Urocultivo">Urocultivo</option>
+                                    <option value="Coproparasitológico">Coproparasitológico</option>
+                                    <option value="Moco Fecal">Moco Fecal</option>
+                                    <option value="Rayos X">Rayos X</option>
+                                    <option value="Ecografía">Ecografía</option>
+                                </select>
+                                <button onclick="agregarLaboratorio()"
+                                    class="bg-teal-600 text-white rounded px-3 hover:bg-teal-700 transition">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                            <input type="text" id="labObs" placeholder="Observación (Ej: AP y Lateral)"
+                                class="w-full text-xs border-gray-300 rounded border p-1.5 mb-3 focus:border-teal-500 outline-none">
+
+                            <!-- Lista (Container) -->
+                            <div id="listaLaboratorios" class="space-y-1">
+                                <!-- Items agregados aparecerán aquí -->
+                            </div>
+                        </div>
+
+                        <!-- 2. TRATAMIENTO (Recetas Rápidas) -->
+                        <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-2"><i
+                                    class="fas fa-prescription mr-1 text-teal-600"></i> Indicaciones / Recetas</label>
+                            <textarea
+                                class="w-full h-24 text-sm border-gray-300 rounded border p-2 focus:border-teal-500 outline-none resize-none"
+                                placeholder="1. Paracetamol..."></textarea>
+                            <button
+                                class="mt-2 w-full bg-white border border-teal-600 text-teal-600 text-xs font-bold py-1.5 rounded hover:bg-teal-50 transition">
+                                <i class="fas fa-magic mr-1"></i> Usar Plantilla
+                            </button>
+                        </div>
+
+                    </div>
+                </section>
+
+                <!-- CONTROL DE VACUNAS (PAI BOLIVIA) -->
+                <section class="bg-yellow-50 p-5 rounded-xl shadow-sm border border-yellow-200">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-sm font-bold text-yellow-800 uppercase flex items-center">
+                            <i class="fas fa-syringe mr-2 text-yellow-600"></i> Control de Vacunas (PAI)
+                        </h3>
+                        <span class="bg-white text-gray-500 text-[10px] px-2 py-1 rounded border border-gray-200">Edad:
+                            1a 2m</span>
+                    </div>
+
+                    <!-- Alertas de Vacunas según edad -->
+                    <div class="space-y-3">
+
+                        <!-- Vacuna Pendiente (Alerta) -->
+                        <div
+                            class="flex items-center justify-between bg-white p-3 rounded-lg border-l-4 border-red-400 shadow-sm">
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <span class="font-bold text-sm text-gray-800">SRP (Sarampión, Rubeola,
+                                        Paperas)</span>
+                                    <span class="bg-red-100 text-red-600 text-[10px] font-bold px-1.5 rounded">12
+                                        Meses</span>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-0.5">Correspondía hace 2 meses. ¿Administrar hoy?</p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button class="text-gray-400 hover:text-gray-600 text-xs font-medium px-2 py-1">Recordar
+                                    luego</button>
+                                <button
+                                    class="bg-teal-600 text-white text-xs font-bold px-3 py-1.5 rounded hover:bg-teal-700 shadow-sm">
+                                    <i class="fas fa-check mr-1"></i> Administrar
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Vacuna Pendiente (Alerta) -->
+                        <div
+                            class="flex items-center justify-between bg-white p-3 rounded-lg border-l-4 border-red-400 shadow-sm">
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <span class="font-bold text-sm text-gray-800">Fiebre Amarilla (Antiamarílica)</span>
+                                    <span class="bg-red-100 text-red-600 text-[10px] font-bold px-1.5 rounded">12
+                                        Meses</span>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-0.5">Dosis única.</p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button class="text-gray-400 hover:text-gray-600 text-xs font-medium px-2 py-1">Recordar
+                                    luego</button>
+                                <button
+                                    class="bg-teal-600 text-white text-xs font-bold px-3 py-1.5 rounded hover:bg-teal-700 shadow-sm">
+                                    <i class="fas fa-check mr-1"></i> Administrar
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Próxima Vacuna -->
+                        <div
+                            class="flex items-center justify-between bg-white p-3 rounded-lg border-l-4 border-gray-300 opacity-75">
+                            <div>
+                                <span class="font-bold text-sm text-gray-600">Refuerzo Pentavalente</span>
+                                <p class="text-xs text-gray-400 mt-0.5">Corresponde a los 18 meses (Faltan 4 meses).</p>
+                            </div>
+                            <span class="text-xs text-gray-400 font-medium"><i class="far fa-clock mr-1"></i> A
+                                tiempo</span>
+                        </div>
+
+                    </div>
+                </section>
+
+            </div>
+
+            <!-- MODO MANUAL (Sin cambios, solo oculto por defecto) -->
+            <div id="manualForm"
+                class="hidden h-full flex flex-col justify-center items-center bg-white rounded-xl border-2 border-dashed border-gray-300">
+                <div class="text-center p-8">
+                    <i class="fas fa-cloud-upload-alt text-5xl text-gray-300 mb-4"></i>
+                    <h3 class="text-lg font-medium text-gray-900">Modo Contingencia / Manual</h3>
+                    <p class="text-sm text-gray-500 mb-6">Suba la foto de la hoja SOAP manual.</p>
+                    <button class="bg-gray-800 text-white px-6 py-2 rounded-lg hover:bg-gray-900 transition">
+                        <i class="fas fa-camera mr-2"></i> Capturar Documento
+                    </button>
                 </div>
             </div>
 
         </main>
 
-</body>
+        <!-- Panel Derecho: Acciones Finales -->
+        <aside class="w-72 bg-white border-l p-5 flex flex-col gap-4 shadow-xl z-10 shrink-0">
+            <h3 class="font-bold text-gray-700 text-sm uppercase tracking-wide border-b pb-2">Resumen Consulta</h3>
 
-</html>                    <button
-                        class="bg-white border text-indigo-600 text-xs py-1 rounded hover:bg-indigo-50">Fiebre</button>
-                    <button
-                        class="bg-white border text-indigo-600 text-xs py-1 rounded hover:bg-indigo-50">Vómitos</button>
+            <div class="flex-1 space-y-4">
+                <!-- Estado del SOAP -->
+                <div class="text-xs space-y-2">
+                    <div class="flex justify-between items-center text-teal-700">
+                        <span><i class="fas fa-check-circle mr-1"></i> Subjetivo</span>
+                        <span class="font-bold">OK</span>
+                    </div>
+                    <div class="flex justify-between items-center text-blue-700">
+                        <span><i class="fas fa-check-circle mr-1"></i> Objetivo</span>
+                        <span class="font-bold">OK</span>
+                    </div>
+                    <div class="flex justify-between items-center text-gray-400">
+                        <span><i class="far fa-circle mr-1"></i> Análisis</span>
+                        <span>--</span>
+                    </div>
+                    <div class="flex justify-between items-center text-gray-400">
+                        <span><i class="far fa-circle mr-1"></i> Plan</span>
+                        <span>--</span>
+                    </div>
+                </div>
+
+                <!-- Botiquín Rápido -->
+                <div class="bg-indigo-50 rounded-lg p-3 border border-indigo-100 mt-4">
+                    <p class="text-[10px] font-bold text-indigo-800 uppercase mb-2">Botiquín (Imprimir)</p>
+                    <div class="flex gap-2">
+                        <button
+                            class="flex-1 bg-white border border-indigo-200 text-indigo-600 text-xs py-1 rounded hover:bg-indigo-100">Fiebre</button>
+                        <button
+                            class="flex-1 bg-white border border-indigo-200 text-indigo-600 text-xs py-1 rounded hover:bg-indigo-100">Vómitos</button>
+                    </div>
                 </div>
             </div>
 
-            <!-- Acción Final -->
-            <div class="mt-auto">
+            <div class="mt-auto pt-4 border-t">
                 <button
-                    class="w-full bg-teal-600 text-white font-bold py-3 rounded-lg shadow-lg hover:bg-teal-700 flex justify-center items-center">
-                    <i class="fas fa-save mr-2"></i> Finalizar Consulta
+                    class="w-full bg-teal-600 text-white font-bold py-3 rounded-lg shadow-lg hover:bg-teal-700 flex justify-center items-center transition transform hover:-translate-y-0.5">
+                    <i class="fas fa-save mr-2"></i> Guardar SOAP
                 </button>
             </div>
         </aside>

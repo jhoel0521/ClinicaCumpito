@@ -1,5 +1,7 @@
 <?php
 
+/** @var \Tests\TestCase $this */
+
 use App\Models\User;
 use Laravel\Fortify\Features;
 use Livewire\Livewire;
@@ -22,8 +24,8 @@ test('two factor settings page can be rendered', function () {
         ->withSession(['auth.password_confirmed_at' => time()])
         ->get(route('two-factor.show'))
         ->assertOk()
-        ->assertSee('Two Factor Authentication')
-        ->assertSee('Disabled');
+        ->assertSee('Autenticación de Dos Factores')
+        ->assertSee('Desactivado');
 });
 
 test('two factor settings page requires password confirmation when enabled', function () {

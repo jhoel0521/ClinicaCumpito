@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\ValueObjects\ConsultationStatus;
+use App\ValueObjects\ConsultationType;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -18,6 +20,8 @@ class Consultation extends Model
     protected $casts = [
         'consultation_date' => 'datetime',
         'pending_transcription' => 'boolean',
+        'type' => ConsultationType::class,
+        'status' => ConsultationStatus::class,
     ];
 
     protected $fillable = [

@@ -2,6 +2,10 @@
 
 namespace App\Models;
 
+use App\ValueObjects\Measurements\HeadCircumference;
+use App\ValueObjects\Measurements\Height;
+use App\ValueObjects\Measurements\Temperature;
+use App\ValueObjects\Measurements\Weight;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -14,10 +18,10 @@ class VitalSign extends Model
     protected $table = 'vital_signs';
 
     protected $casts = [
-        'weight' => 'decimal:2',
-        'height' => 'decimal:2',
-        'head_circumference' => 'decimal:2',
-        'temperature' => 'decimal:2',
+        'weight' => Weight::class,
+        'height' => Height::class,
+        'head_circumference' => HeadCircumference::class,
+        'temperature' => Temperature::class,
     ];
 
     protected $fillable = [

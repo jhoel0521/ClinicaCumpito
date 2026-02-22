@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\ValueObjects\LicenseNumber;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -17,6 +18,7 @@ class Doctor extends Model
 
     protected $casts = [
         'active' => 'boolean',
+        'license_number' => LicenseNumber::class,
     ];
 
     protected $fillable = [

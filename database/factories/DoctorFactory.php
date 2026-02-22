@@ -16,7 +16,7 @@ class DoctorFactory extends Factory
             'user_id' => null,
             'full_name' => $this->faker->name(),
             'specialty' => $this->faker->randomElement(['Pediatrician', 'Cardiologist', 'Neurologist', 'General Practitioner']),
-            'license_number' => $this->faker->unique()->numberBetween(10000, 99999),
+            'license_number' => $this->faker->unique()->numerify('MED-#####'),
             'active' => true,
         ];
     }

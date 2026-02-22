@@ -2,6 +2,10 @@
 
 namespace App\Models;
 
+use App\ValueObjects\BirthType;
+use App\ValueObjects\BloodGroup;
+use App\ValueObjects\Gender;
+use App\ValueObjects\MedicalStatus;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -17,7 +21,11 @@ class Patient extends Model
 
     protected $casts = [
         'date_of_birth' => 'date',
-        'gender' => 'string',
+        'gender' => Gender::class,
+        'blood_group' => BloodGroup::class,
+        'birth_type' => BirthType::class,
+        'chagas_status' => MedicalStatus::class,
+        'syphilis_status' => MedicalStatus::class,
     ];
 
     protected $fillable = [

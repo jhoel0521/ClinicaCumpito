@@ -1,67 +1,77 @@
 <x-layouts::auth>
     <div class="flex flex-col gap-6">
-        <x-auth-header :title="__('Create an account')" :description="__('Enter your details below to create your account')" />
+        <x-auth-header 
+            :title="__('Crear Cuenta')" 
+            :description="__('Registrarse en VitalTrack Pediátrico')" 
+        />
 
         <!-- Session Status -->
         <x-auth-session-status class="text-center" :status="session('status')" />
 
-        <form method="POST" action="{{ route('register.store') }}" class="flex flex-col gap-6">
+        <form method="POST" action="{{ route('register.store') }}" class="flex flex-col gap-5">
             @csrf
             <!-- Name -->
             <flux:input
                 name="name"
-                :label="__('Name')"
+                :label="__('Nombre Completo')"
                 :value="old('name')"
                 type="text"
                 required
                 autofocus
                 autocomplete="name"
-                :placeholder="__('Full name')"
+                :placeholder="__('Dr. Juan Pérez')"
             />
 
             <!-- Email Address -->
             <flux:input
                 name="email"
-                :label="__('Email address')"
+                :label="__('Correo Electrónico')"
                 :value="old('email')"
                 type="email"
                 required
                 autocomplete="email"
-                placeholder="email@example.com"
+                placeholder="doctor@email.com"
             />
 
             <!-- Password -->
             <flux:input
                 name="password"
-                :label="__('Password')"
+                :label="__('Contraseña')"
                 type="password"
                 required
                 autocomplete="new-password"
-                :placeholder="__('Password')"
+                :placeholder="__('••••••••')"
                 viewable
             />
 
             <!-- Confirm Password -->
             <flux:input
                 name="password_confirmation"
-                :label="__('Confirm password')"
+                :label="__('Confirmar Contraseña')"
                 type="password"
                 required
                 autocomplete="new-password"
-                :placeholder="__('Confirm password')"
+                :placeholder="__('••••••••')"
                 viewable
             />
 
-            <div class="flex items-center justify-end">
-                <flux:button type="submit" variant="primary" class="w-full" data-test="register-user-button">
-                    {{ __('Create account') }}
-                </flux:button>
-            </div>
+            <button 
+                type="submit" 
+                data-auth-button
+                class="mt-2"
+                data-test="register-user-button"
+            >
+                <i class="fas fa-user-plus mr-2"></i>{{ __('Crear mi Cuenta') }}
+            </button>
         </form>
 
-        <div class="space-x-1 rtl:space-x-reverse text-center text-sm text-zinc-600 dark:text-zinc-400">
-            <span>{{ __('Already have an account?') }}</span>
-            <flux:link :href="route('login')" wire:navigate>{{ __('Log in') }}</flux:link>
-        </div>
+        <!-- Divider -->
+        <div data-auth-divider><span>{{ __('o') }}</span></div>
+
+        <!-- Login Link -->
+        <p data-auth-footer>
+            {{ __('¿Ya tienes cuenta?') }}
+            <a href="{{ route('login') }}" wire:navigate>{{ __('Inicia sesión') }}</a>
+        </p>
     </div>
 </x-layouts::auth>

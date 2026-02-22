@@ -25,24 +25,24 @@
         >
             <div x-show="!showRecoveryInput">
                 <x-auth-header
-                    :title="__('Authentication Code')"
-                    :description="__('Enter the authentication code provided by your authenticator application.')"
+                    :title="__('Código de Autenticación')"
+                    :description="__('Ingresa el código de 6 dígitos de tu aplicación autenticadora.')"
                 />
             </div>
 
             <div x-show="showRecoveryInput">
                 <x-auth-header
-                    :title="__('Recovery Code')"
-                    :description="__('Please confirm access to your account by entering one of your emergency recovery codes.')"
+                    :title="__('Código de Recuperación')"
+                    :description="__('Ingresa uno de tus códigos de recuperación de emergencia.')"
                 />
             </div>
 
-            <form method="POST" action="{{ route('two-factor.login.store') }}">
+            <form method="POST" action="{{ route('two-factor.login.store') }}" class="flex flex-col gap-5">
                 @csrf
 
-                <div class="space-y-5 text-center">
+                <div class="space-y-5">
                     <div x-show="!showRecoveryInput">
-                        <div class="flex items-center justify-center my-5">
+                        <div class="flex items-center justify-center py-4">
                             <flux:otp
                                 x-model="code"
                                 length="6"
@@ -55,40 +55,41 @@
                     </div>
 
                     <div x-show="showRecoveryInput">
-                        <div class="my-5">
-                            <flux:input
-                                type="text"
-                                name="recovery_code"
-                                x-ref="recovery_code"
-                                x-bind:required="showRecoveryInput"
-                                autocomplete="one-time-code"
-                                x-model="recovery_code"
-                            />
-                        </div>
+                        <flux:input
+                            type="text"
+                            name="recovery_code"
+                            :label="__('Código de Recuperación')"
+                            x-ref="recovery_code"
+                            x-bind:required="showRecoveryInput"
+                            autocomplete="one-time-code"
+                            x-model="recovery_code"
+                        />
 
                         @error('recovery_code')
-                            <flux:text color="red">
+                            <p class="text-red-600 dark:text-red-400 text-sm mt-2 flex items-center gap-2">
+                                <i class="fas fa-exclamation-circle"></i>
                                 {{ $message }}
-                            </flux:text>
+                            </p>
                         @enderror
                     </div>
 
-                    <flux:button
-                        variant="primary"
-                        type="submit"
-                        class="w-full"
+                    <button 
+                        type="submit" 
+                        data-auth-button
+                        class="mt-2"
                     >
-                        {{ __('Continue') }}
-                    </flux:button>
+                        <i class="fas fa-arrow-right mr-2"></i>{{ __('Continuar') }}
+                    </button>
                 </div>
 
-                <div class="mt-5 space-x-0.5 text-sm leading-5 text-center">
-                    <span class="opacity-50">{{ __('or you can') }}</span>
-                    <div class="inline font-medium underline cursor-pointer opacity-80">
-                        <span x-show="!showRecoveryInput" @click="toggleInput()">{{ __('login using a recovery code') }}</span>
-                        <span x-show="showRecoveryInput" @click="toggleInput()">{{ __('login using an authentication code') }}</span>
-                    </div>
-                </div>
+                <div data-auth-divider><span>{{ __('o') }}</span></div>
+
+                <p class="text-center text-sm text-zinc-600 dark:text-zinc-400">
+                    <button type="button" @click="toggleInput()" class="text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 font-medium underline cursor-pointer">
+                        <span x-show="!showRecoveryInput"><i class="fas fa-key mr-1"></i>{{ __('Usar código de recuperación') }}</span>
+                        <span x-show="showRecoveryInput"><i class="fas fa-shield-alt mr-1"></i>{{ __('Usar código de autenticación') }}</span>
+                    </button>
+                </p>
             </form>
         </div>
     </div>

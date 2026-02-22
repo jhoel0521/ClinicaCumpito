@@ -3,20 +3,25 @@
     <head>
         @include('partials.head')
     </head>
-    <body class="min-h-screen bg-white antialiased dark:bg-linear-to-b dark:from-neutral-950 dark:to-neutral-900">
-        <div class="bg-background flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
-            <div class="flex w-full max-w-sm flex-col gap-2">
-                <a href="{{ route('home') }}" class="flex flex-col items-center gap-2 font-medium" wire:navigate>
-                    <span class="flex h-9 w-9 mb-1 items-center justify-center rounded-md">
-                        <x-app-logo-icon class="size-9 fill-current text-black dark:text-white" />
-                    </span>
-                    <span class="sr-only">{{ config('app.name', 'Laravel') }}</span>
-                </a>
-                <div class="flex flex-col gap-6">
-                    {{ $slot }}
+    <body class="antialiased" data-auth-layout>
+        <div data-auth-card>
+            <!-- Logo y Link a Home -->
+            <a href="{{ route('home') }}" class="flex flex-col items-center gap-3 mb-8 group" wire:navigate>
+                <div class="h-12 w-12 bg-gradient-to-br from-teal-500 to-teal-600 dark:from-teal-400 dark:to-teal-500 rounded-2xl flex items-center justify-center group-hover:shadow-lg transition-all">
+                    <x-app-logo-icon class="size-6 fill-white" />
                 </div>
+                <div class="text-center">
+                    <h1 class="text-lg font-bold text-zinc-900 dark:text-white">{{ config('app.name', 'VitalTrack') }}</h1>
+                    <p class="text-xs text-zinc-500 dark:text-zinc-400">Gestión Clínica Pediátrica</p>
+                </div>
+            </a>
+
+            <!-- Contenido Principal -->
+            <div class="flex flex-col gap-6">
+                {{ $slot }}
             </div>
         </div>
+
         @fluxScripts
     </body>
 </html>

@@ -65,10 +65,21 @@ class Temperature implements Castable, Stringable
         return "{$this->value}°C";
     }
 
+    /**
+     * @param  array<string, mixed>  $arguments
+     * @return \Illuminate\Contracts\Database\Eloquent\CastsAttributes<Temperature, float|int|string>
+     */
     public static function castUsing(array $arguments)
     {
         return new class implements \Illuminate\Contracts\Database\Eloquent\CastsAttributes
         {
+            /**
+             * @param  \Illuminate\Database\Eloquent\Model  $model
+             * @param  string  $key
+             * @param  float|int|string|null  $value
+             * @param  array<string, mixed>  $attributes
+             * @return Temperature|null
+             */
             public function get($model, $key, $value, $attributes)
             {
                 return $value !== null ? Temperature::make($value) : null;

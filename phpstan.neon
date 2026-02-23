@@ -1,0 +1,19 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+
+    paths:
+        - app/
+        - config/
+        - database/
+
+    # Level 9 is the highest level
+    level: 8
+
+    ignoreErrors:
+        # - '#PHPDoc tag @var [^ ]+ [^ ]+ is not subtype of [^ ]+ [^ ]+#'
+
+    excludePaths:
+        # - ./*/*/FileToBeExcluded.php
+

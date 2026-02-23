@@ -60,13 +60,25 @@ class MedicalStatus implements Castable, Stringable
             self::POSITIVE => 'Positivo',
             self::NEGATIVE => 'Negativo',
             self::NOT_TESTED => 'No testeado',
+            default => $this->value,
         };
     }
 
+    /**
+     * @param  array<string, mixed>  $arguments
+     * @return \Illuminate\Contracts\Database\Eloquent\CastsAttributes<MedicalStatus, string>
+     */
     public static function castUsing(array $arguments)
     {
         return new class implements \Illuminate\Contracts\Database\Eloquent\CastsAttributes
         {
+            /**
+             * @param  \Illuminate\Database\Eloquent\Model  $model
+             * @param  string  $key
+             * @param  string|null  $value
+             * @param  array<string, mixed>  $attributes
+             * @return MedicalStatus|null
+             */
             public function get($model, $key, $value, $attributes)
             {
                 return $value ? MedicalStatus::make($value) : null;

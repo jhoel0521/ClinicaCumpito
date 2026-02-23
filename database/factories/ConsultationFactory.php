@@ -7,6 +7,9 @@ use App\Models\Doctor;
 use App\Models\Patient;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+/**
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Consultation>
+ */
 class ConsultationFactory extends Factory
 {
     protected $model = Consultation::class;

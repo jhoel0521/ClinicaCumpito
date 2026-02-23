@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class VitalSign extends Model
 {
+    /** @use HasFactory<\Database\Factories\VitalSignFactory> */
     use HasFactory, HasUuids;
 
     protected $table = 'vital_signs';
@@ -32,6 +33,7 @@ class VitalSign extends Model
         'temperature',
     ];
 
+    /** @return BelongsTo<Consultation, $this> */
     public function consultation(): BelongsTo
     {
         return $this->belongsTo(Consultation::class);

@@ -60,10 +60,21 @@ class Height implements Castable, Stringable
         return "{$this->value} cm";
     }
 
+    /**
+     * @param  array<string, mixed>  $arguments
+     * @return \Illuminate\Contracts\Database\Eloquent\CastsAttributes<Height, float|int|string>
+     */
     public static function castUsing(array $arguments)
     {
         return new class implements \Illuminate\Contracts\Database\Eloquent\CastsAttributes
         {
+            /**
+             * @param  \Illuminate\Database\Eloquent\Model  $model
+             * @param  string  $key
+             * @param  float|int|string|null  $value
+             * @param  array<string, mixed>  $attributes
+             * @return Height|null
+             */
             public function get($model, $key, $value, $attributes)
             {
                 return $value !== null ? Height::make($value) : null;

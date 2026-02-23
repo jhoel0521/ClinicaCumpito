@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Doctor extends Model
 {
+    /** @use HasFactory<\Database\Factories\DoctorFactory> */
     use HasFactory, HasUuids, SoftDeletes;
 
     protected $table = 'doctors';
@@ -29,11 +30,13 @@ class Doctor extends Model
         'active',
     ];
 
+    /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /** @return HasMany<Consultation, $this> */
     public function consultations(): HasMany
     {
         return $this->hasMany(Consultation::class, 'doctor_id');

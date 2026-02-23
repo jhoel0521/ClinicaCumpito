@@ -60,13 +60,25 @@ class ConsultationStatus implements Castable, Stringable
             self::DRAFT => 'Borrador',
             self::SAVED => 'Guardada',
             self::FINALIZED => 'Finalizada',
+            default => $this->value,
         };
     }
 
+    /**
+     * @param  array<string, mixed>  $arguments
+     * @return \Illuminate\Contracts\Database\Eloquent\CastsAttributes<ConsultationStatus, string>
+     */
     public static function castUsing(array $arguments)
     {
         return new class implements \Illuminate\Contracts\Database\Eloquent\CastsAttributes
         {
+            /**
+             * @param  \Illuminate\Database\Eloquent\Model  $model
+             * @param  string  $key
+             * @param  string|null  $value
+             * @param  array<string, mixed>  $attributes
+             * @return ConsultationStatus|null
+             */
             public function get($model, $key, $value, $attributes)
             {
                 return $value ? ConsultationStatus::make($value) : null;

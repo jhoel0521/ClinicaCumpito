@@ -50,13 +50,25 @@ class Gender implements Castable, Stringable
         return match ($this->value) {
             self::MALE => 'Masculino',
             self::FEMALE => 'Femenino',
+            default => $this->value,
         };
     }
 
+    /**
+     * @param  array<string, mixed>  $arguments
+     * @return \Illuminate\Contracts\Database\Eloquent\CastsAttributes<Gender, string>
+     */
     public static function castUsing(array $arguments)
     {
         return new class implements \Illuminate\Contracts\Database\Eloquent\CastsAttributes
         {
+            /**
+             * @param  \Illuminate\Database\Eloquent\Model  $model
+             * @param  string  $key
+             * @param  string|null  $value
+             * @param  array<string, mixed>  $attributes
+             * @return Gender|null
+             */
             public function get($model, $key, $value, $attributes)
             {
                 return $value ? Gender::make($value) : null;

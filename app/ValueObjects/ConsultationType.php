@@ -52,13 +52,25 @@ class ConsultationType implements Castable, Stringable
         return match ($this->value) {
             self::DIGITAL => 'Consulta Digital',
             self::MANUAL => 'Consulta Manual',
+            default => $this->value,
         };
     }
 
+    /**
+     * @param  array<string, mixed>  $arguments
+     * @return \Illuminate\Contracts\Database\Eloquent\CastsAttributes<ConsultationType, string>
+     */
     public static function castUsing(array $arguments)
     {
         return new class implements \Illuminate\Contracts\Database\Eloquent\CastsAttributes
         {
+            /**
+             * @param  \Illuminate\Database\Eloquent\Model  $model
+             * @param  string  $key
+             * @param  string|null  $value
+             * @param  array<string, mixed>  $attributes
+             * @return ConsultationType|null
+             */
             public function get($model, $key, $value, $attributes)
             {
                 return $value ? ConsultationType::make($value) : null;

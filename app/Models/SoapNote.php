@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class SoapNote extends Model
 {
+    /** @use HasFactory<\Database\Factories\SoapNoteFactory> */
     use HasFactory, HasUuids;
 
     protected $table = 'soap_notes';
@@ -21,6 +22,7 @@ class SoapNote extends Model
         'plan',
     ];
 
+    /** @return BelongsTo<Consultation, $this> */
     public function consultation(): BelongsTo
     {
         return $this->belongsTo(Consultation::class);

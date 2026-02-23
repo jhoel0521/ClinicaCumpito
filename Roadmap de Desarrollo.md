@@ -98,6 +98,27 @@ Usar este bloque al crear una subtarea para forzar cumplimiento:
 - [ ] **3.2 Layouts maestros**: crear componentes Blade/Livewire para Dashboard, Sidebar y Navbar.
 - [ ] **3.3 Componentes atómicos**: crear componentes reutilizables (Inputs, Buttons, Modals, Alerts) con Alpine.js.
 
+## ⚡ Fase 3.5: Prioridad actual — CRUDs de Catálogos Clínicos
+
+> **Objetivo**: adelantar estos módulos para habilitar el flujo de recetas y laboratorios desde etapas tempranas.
+
+- [ ] **3.5.1 Catálogo de recetas (medicamentos/plantillas)**:
+	- Migración + modelo + factory del catálogo de medicamentos.
+	- CRUD Livewire completo (listar, crear, editar, desactivar/activar).
+	- Búsqueda reactiva y validaciones de unicidad por nombre/código.
+	- Test unitario del modelo/reglas + test de integración del componente Livewire.
+
+- [ ] **3.5.2 Catálogo de laboratorios (exámenes/plantillas)**:
+	- Migración + modelo + factory del catálogo de exámenes de laboratorio.
+	- CRUD Livewire completo (listar, crear, editar, desactivar/activar).
+	- Clasificación por tipo de estudio y soporte para plantillas frecuentes.
+	- Test unitario del modelo/reglas + test de integración del componente Livewire.
+
+- [ ] **3.5.3 Seguridad y auditoría de catálogos**:
+	- Policies/permisos por rol (Doctor/Admin) para cada acción de catálogo.
+	- Trazabilidad mínima de cambios críticos (quién, cuándo, qué cambió).
+	- Tests de integración de autorización (permitido/denegado).
+
 ## 🗄 Fase 4: Capa de Datos (Modelos, Migraciones y Factories)
 
 > **Nota**: cada modelo debe crearse junto con su Factory y su test unitario de existencia.
@@ -127,7 +148,7 @@ Usar este bloque al crear una subtarea para forzar cumplimiento:
 	- Tests de integración del componente Livewire (creación exitosa y errores de validación).
 
 - [ ] **6.2 Gestión de doctores**: perfil del médico y configuración de matrícula.
-- [ ] **6.3 Gestión de catálogos**: CRUDs para exámenes y vacunas.
+- [ ] **6.3 Gestión de catálogos complementarios**: CRUDs para vacunas y otros catálogos no clínicos críticos.
 
 ## 🏥 Fase 7: Módulo de Consulta Médica (El Corazón)
 
@@ -137,6 +158,7 @@ Usar este bloque al crear una subtarea para forzar cumplimiento:
 	- Módulo híbrido: subida de archivos (PDF/JPG) para historias antiguas.
 
 - [ ] **7.2 Recetas y laboratorios**:
+	- Uso de catálogos ya implementados en Fase 3.5 (recetas y laboratorios).
 	- Buscador de medicamentos/exámenes.
 	- Aplicación de plantillas (snapshots).
 	- Generación de PDF para impresión.

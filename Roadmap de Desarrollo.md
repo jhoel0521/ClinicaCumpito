@@ -4,10 +4,12 @@ Este documento detalla las tareas necesarias para construir el sistema, prioriza
 
 - calidad de código,
 - cumplimiento de principios SOLID,
-- cobertura de pruebas.
+- cobertura de pruebas,
+- y el **alcance contractual del MVP (20+ clases/módulos)** solicitado por cliente.
+
+> **Regla contractual**: el MVP **no se reduce** sin aprobación explícita del cliente.
 
 ---
-
 
 ## 📜 Criterios de Desarrollo Obligatorios (Aplican a Todas las Subtareas)
 
@@ -16,173 +18,183 @@ Este documento detalla las tareas necesarias para construir el sistema, prioriza
 - **Modelos Eloquent**: solo persistencia, relaciones, scopes, casts y accessors/mutators simples.
 - **Lógica de negocio**: debe vivir en `app/Actions`, `app/Services` o `app/ValueObjects`.
 - **Controladores / Livewire**: coordinan flujo; no deben contener reglas de negocio complejas.
-- **Regla de carpetas**: cada nueva pieza debe respetar la estructura actual del proyecto (no crear capas paralelas sin justificar).
+- **Contratos**: usar `app/Contracts` cuando el desacople aporte valor real (evitar sobreingeniería).
+- **Regla de carpetas**: respetar estructura actual del proyecto.
 
 ### 2) Principios SOLID (Criterio de aceptación)
 
-- **S (Single Responsibility)**: una clase = una razón de cambio.
-- **O (Open/Closed)**: extender por composición/estrategias, evitar modificar comportamiento estable.
-- **L (Liskov)**: contratos consistentes; no romper comportamiento esperado en implementaciones.
-- **I (Interface Segregation)**: interfaces pequeñas y específicas por caso de uso.
-- **D (Dependency Inversion)**: depender de contratos/abstracciones, no de concreciones acopladas.
+- **S**: una clase = una razón de cambio.
+- **O**: extender por composición/estrategias.
+- **L**: contratos consistentes.
+- **I**: interfaces pequeñas por caso de uso.
+- **D**: depender de abstracciones, no de concreciones.
 
 ### 3) Estilo y consistencia de código
 
 - **PSR-12 + Laravel Pint** obligatorio antes de cerrar una tarea.
-- **Nombres explícitos**: prohibidos nombres ambiguos (`data`, `temp`, `helper` genérico).
-- **Métodos cortos**: preferir extracción de métodos y clases por intención.
-- **Sin duplicación**: si se repite lógica en 2+ lugares, extraer componente reutilizable.
-- **Blade/Tailwind**: sin estilos inline; usar componentes Blade para patrones repetidos.
+- **PHPStan** en el nivel definido por el proyecto, sin violaciones críticas nuevas.
+- **Nombres explícitos**: evitar nombres ambiguos.
+- **Sin duplicación**: extraer lógica repetida.
+- **Blade/Tailwind**: sin estilos inline.
 
 ### 4) Reglas específicas del dominio clínico
 
-- **Inmutabilidad histórica**: una consulta cerrada no se edita; se versiona o se crea snapshot.
-- **Datos sensibles**: validación estricta de entrada y políticas de acceso por rol.
-- **Trazabilidad**: toda acción crítica debe poder auditarse (quién, cuándo, qué cambió).
+- **Inmutabilidad histórica**: una consulta cerrada no se edita; se versiona o se guarda snapshot.
+- **Datos sensibles**: validación estricta + policies por rol.
+- **Trazabilidad**: acciones críticas auditables (quién, cuándo, qué cambió).
 
 ### 5) Política de pruebas obligatoria (No negociable)
 
-- **Toda implementación nueva** (modelo, acción, servicio, componente Livewire, endpoint o regla de dominio) debe incluir:
-	- **mínimo 1 test unitario** del comportamiento principal,
-	- **mínimo 1 test de integración** del flujo real donde se usa.
-- **Toda modificación** de código existente debe actualizar sus tests unitarios y de integración afectados.
-- **No se permite cerrar subtareas** con cobertura solo manual o pruebas "pendientes".
-- **Objetivo de pruebas**: validar no solo que el código funcione aislado, sino que se integre correctamente con el resto del sistema.
+- Toda implementación nueva (modelo, acción, servicio, componente Livewire, endpoint o regla de dominio) debe incluir:
+  - mínimo 1 test unitario,
+  - mínimo 1 test de integración/feature.
+- Toda modificación de código existente debe actualizar tests afectados.
 
 ### 6) Definición de Terminado (Definition of Done)
 
-Una subtarea se considera **terminada** solo si cumple todo lo siguiente:
+Una subtarea se considera terminada solo si cumple todo:
 
 - [ ] Implementación funcional completa del alcance.
-- [ ] Pruebas automatizadas creadas/actualizadas (`.test.php`) y pasando.
-- [ ] Cada desarrollo nuevo incluye test unitario + test de integración obligatorios.
+- [ ] Ciclo completo aplicado cuando corresponda: Migración + Modelo + Factory + Servicio/Action.
+- [ ] Pruebas unitarias + feature pasando.
 - [ ] `php artisan test` sin fallos en el scope afectado.
 - [ ] `./vendor/bin/pint` aplicado sin cambios pendientes.
-- [ ] Sin violaciones críticas de análisis estático (PHPStan en nivel definido por el proyecto).
-- [ ] Documentación mínima actualizada (README, roadmap o notas técnicas si aplica).
+- [ ] `./vendor/bin/phpstan analyse` sin regresiones críticas.
+- [ ] Documentación mínima actualizada (roadmap/README/nota técnica).
 
-### 7) Plantilla obligatoria para pedir subtareas al agente
+### 7) Regla de alcance MVP
 
-Usar este bloque al crear una subtarea para forzar cumplimiento:
-
-> **Restricciones obligatorias de implementación**
-> - Respetar arquitectura actual (`Models` delgados, lógica en `Actions/Services/VO`).
-> - Aplicar SOLID explícitamente y justificar decisiones de diseño.
-> - No introducir estilos inline ni romper convención Blade/Tailwind.
-> - Entregar con pruebas (`Pest`) y validación de formato (`Pint`).
-> - Incluir siempre test unitario + test de integración por cada funcionalidad nueva.
-> - No cerrar tarea si no cumple la Definition of Done del roadmap.
+- [ ] Cumplir el **MVP contractual completo (20+ clases/módulos)**.
+- [ ] No mover módulos MVP a post-MVP sin aprobación del cliente.
 
 ---
 
 ## 📅 Fase 1: Inicialización y Entorno
 
-- [x] **1.1 Bootstrap del proyecto**: instalar Laravel 12 con PHP 8.4.
-- [x] **1.2 Git Flow**: configurar repositorio y reglas de commits.
-- [x] **1.3 Configuración de DB**: configurar MySQL/MariaDB y variables de entorno.
-- [x] **1.4 CI/CD Setup**: configurar GitHub Actions (o similar) para ejecutar tests en cada push.
-
+- [x] **1.1 Bootstrap del proyecto**: Laravel 12 + PHP 8.4.
+- [x] **1.2 Git Flow**: configuración de repositorio.
+- [x] **1.3 Configuración de DB**: entorno local configurado.
+- [x] **1.4 CI/CD Setup**: pipeline de tests base.
 
 ## 🛠 Fase 2: Librerías y Herramientas Base
 
-- [x] **2.1 Autenticación**: instalar y configurar Laravel Breeze (Livewire Functional).
-- [x] **2.2 Permisos**: instalar `spatie/laravel-permission` y crear roles base (Doctor, Admin).
-- [x] **2.3 Herramientas de calidad**: instalar PHPStan (Nivel 8) y Pint para estilo de código.
-- [x] **2.4 Testing engine**: configurar Pest PHP como motor principal de pruebas.
-
-
-
-## 🎨 Fase 3: Diseño y UI Base (Tailwind CSS)
-
-- [ ] **3.1 Configuración de Tailwind**: personalizar `tailwind.config.js` con paleta corporativa (Teal/Pink/Indigo).
-- [ ] **3.2 Layouts maestros**: crear componentes Blade/Livewire para Dashboard, Sidebar y Navbar.
-- [ ] **3.3 Componentes atómicos**: crear componentes reutilizables (Inputs, Buttons, Modals, Alerts) con Alpine.js.
-
-## ⚡ Fase 3.5: Prioridad actual — CRUDs de Catálogos Clínicos
-
-> **Objetivo**: adelantar estos módulos para habilitar el flujo de recetas y laboratorios desde etapas tempranas.
-
-- [ ] **3.5.1 Catálogo de recetas (medicamentos/plantillas)**:
-	- Migración + modelo + factory del catálogo de medicamentos.
-	- CRUD Livewire completo (listar, crear, editar, desactivar/activar).
-	- Búsqueda reactiva y validaciones de unicidad por nombre/código.
-	- Test unitario del modelo/reglas + test de integración del componente Livewire.
-
-- [ ] **3.5.2 Catálogo de laboratorios (exámenes/plantillas)**:
-	- Migración + modelo + factory del catálogo de exámenes de laboratorio.
-	- CRUD Livewire completo (listar, crear, editar, desactivar/activar).
-	- Clasificación por tipo de estudio y soporte para plantillas frecuentes.
-	- Test unitario del modelo/reglas + test de integración del componente Livewire.
-
-- [ ] **3.5.3 Seguridad y auditoría de catálogos**:
-	- Policies/permisos por rol (Doctor/Admin) para cada acción de catálogo.
-	- Trazabilidad mínima de cambios críticos (quién, cuándo, qué cambió).
-	- Tests de integración de autorización (permitido/denegado).
-
-## 🗄 Fase 4: Capa de Datos (Modelos, Migraciones y Factories)
-
-> **Nota**: cada modelo debe crearse junto con su Factory y su test unitario de existencia.
-
-- [ ] **4.1 Estructura médica**: migraciones y modelos para Doctor y User (relación 1:1).
-- [ ] **4.2 Estructura paciente**: migración y modelo Paciente (campos de nacimiento y antecedentes).
-- [ ] **4.3 Estructura clínica**: migraciones para Consulta, SignosVitales y NotasSoap.
-- [ ] **4.4 Estructura de apoyo**: migraciones para Receta, SolicitudLaboratorio y sus detalles inmutables.
-- [ ] **4.5 Catálogos**: migraciones para CatalogoVacunas y CatalogoExamenes.
-
-## 🧠 Fase 5: Dominio y Lógica de Negocio (Value Objects & Services)
-
-- [ ] **5.1 Value Objects (VO)**:
-	- `AgeValueObject`: cálculo de edad precisa (días, semanas, meses, años) con `readonly classes` en PHP 8.4.
-	- `BloodGroupValueObject`: validación de tipos de sangre.
-	- `ZScoreValueObject`: lógica matemática para interpretación de datos OMS.
-
-- [ ] **5.2 Services**:
-	- `ConsultationSnapshotService`: copiar datos de plantillas a registros reales.
-	- `GrowthChartService`: preparar arrays para Chart.js.
-
-## 📋 Fase 6: CRUDs Reactivos (Livewire 3)
-
-- [ ] **6.1 Gestión de pacientes**:
-	- Listado con búsqueda AJAX (Livewire).
-	- Formulario de registro con validación en tiempo real.
-	- Tests de integración del componente Livewire (creación exitosa y errores de validación).
-
-- [ ] **6.2 Gestión de doctores**: perfil del médico y configuración de matrícula.
-- [ ] **6.3 Gestión de catálogos complementarios**: CRUDs para vacunas y otros catálogos no clínicos críticos.
-
-## 🏥 Fase 7: Módulo de Consulta Médica (El Corazón)
-
-- [ ] **7.1 Flujo de consulta**:
-	- Registro de signos vitales.
-	- Notas SOAP (Subjetivo, Objetivo, Análisis, Plan).
-	- Módulo híbrido: subida de archivos (PDF/JPG) para historias antiguas.
-
-- [ ] **7.2 Recetas y laboratorios**:
-	- Uso de catálogos ya implementados en Fase 3.5 (recetas y laboratorios).
-	- Buscador de medicamentos/exámenes.
-	- Aplicación de plantillas (snapshots).
-	- Generación de PDF para impresión.
-
-## 📈 Fase 8: Módulo de Crecimiento OMS
-
-- [ ] **8.1 Seeding masivo**: script para importar CSV de la OMS (Z-Scores y percentiles) a `oms_datos_graficas`.
-- [ ] **8.2 Componente Livewire de gráficas**:
-	- Integración con Chart.js.
-	- Lógica de radio buttons para cambiar “boletas”.
-	- Toggle Médico/Padres (Z-Score vs Percentil).
-
-- [ ] **8.3 Pruebas de integración**: verificar que un paciente con datos específicos genere coordenadas correctas en la gráfica.
-
-## 🧪 Fase 9: Calidad y Pruebas Finales
-
-- [ ] **9.1 Cobertura de tests**: asegurar >80% de cobertura en modelos y controladores.
-- [ ] **9.2 Pruebas de estrés**: validar rendimiento con carga masiva de datos OMS.
-- [ ] **9.3 Auditoría de seguridad**: revisar policies para que cada doctor vea solo sus pacientes (o según configuración).
-
-## 🚀 Fase 10: Despliegue (Bono de Escaneado)
-
-- [ ] **10.1 Preparación de producción**: configuración de servidor (Forge, Vapor o VPS).
-- [ ] **10.2 Migración de datos físicos**: carga de escaneos prometidos en el contrato.
-- [ ] **10.3 Capacitación**: entrega de manual de usuario a la doctora.
+- [x] **2.1 Autenticación**: Fortify/Livewire starter.
+- [x] **2.2 Permisos**: `spatie/laravel-permission`.
+- [x] **2.3 Calidad**: Pint + PHPStan.
+- [x] **2.4 Testing**: Pest como motor principal.
 
 ---
+
+## ⚡ Fase 3: UI Base y Componentes (sin bloquear dominio)
+
+- [ ] **3.1 Tailwind/Design tokens**: configuración base del tema.
+- [ ] **3.2 Layouts maestros**: Dashboard, Sidebar, Navbar.
+- [ ] **3.3 Componentes atómicos**: Inputs, Buttons, Alerts, Modals.
+
+---
+
+## 🧱 Fase 4: MVP Contractual Completo (20+ clases/módulos)
+
+> Ciclo obligatorio por CRUD: Migración + Modelo + Factory + Action/Service + Test Unitario + Test Feature.
+
+### 4.1 Perfil Médico y Roles
+
+- [ ] **4.1.1 CRUD Doctor** (User 1:1, matrícula, especialidad, estado).
+
+### 4.2 Catálogos Clínicos (Prioridad temprana solicitada)
+
+- [ ] **4.2.1 CRUD CategoriaLaboratorio** (Hematología, Orina, Imágenes, etc.).
+- [ ] **4.2.2 CRUD CatalogoExamenLaboratorio** (exámenes individuales).
+- [ ] **4.2.3 CRUD CatalogoMedicamento** (catálogo para recetas).
+- [ ] **4.2.4 CRUD CatalogoVacuna** (PAI Bolivia).
+
+### 4.3 Módulo Pacientes
+
+- [ ] **4.3.1 CRUD Paciente** (filiación, nacimiento, antecedentes).
+
+### 4.4 Módulo Plantillas (Ahorro de tiempo)
+
+- [ ] **4.4.1 CRUD PlantillaReceta**.
+- [ ] **4.4.2 CRUD ItemPlantillaReceta**.
+- [ ] **4.4.3 CRUD PlantillaLaboratorio**.
+- [ ] **4.4.4 CRUD ItemPlantillaLaboratorio**.
+
+### 4.5 Flujo de Consulta (SOAP)
+
+- [ ] **4.5.1 CRUD Consulta** (digital/manual, estado).
+- [ ] **4.5.2 CRUD SignosVitales** (1:1 con consulta).
+- [ ] **4.5.3 CRUD NotasSoap** (1:1 con consulta).
+- [ ] **4.5.4 CRUD VacunaPaciente** (aplicaciones reales).
+
+### 4.6 Resultados e Inmutabilidad (Snapshots)
+
+- [ ] **4.6.1 CRUD Receta**.
+- [ ] **4.6.2 CRUD DetalleReceta** (snapshot inmutable).
+- [ ] **4.6.3 CRUD SolicitudLaboratorio**.
+- [ ] **4.6.4 CRUD DetalleSolicitudLaboratorio** (snapshot + resultado).
+
+### 4.7 Motor OMS (catálogo y datos)
+
+- [ ] **4.7.1 CRUD OmsCatalogoGrafica** (boletas oficiales OMS).
+- [ ] **4.7.2 CRUD OmsDatoGrafica** (LMS, Z-Score, percentiles).
+
+### 4.8 Seguridad, policies y auditoría
+
+- [ ] **4.8.1 Policies por rol** (Admin/Doctor y alcance por paciente).
+- [ ] **4.8.2 Auditoría mínima** en acciones críticas de catálogos y consulta.
+
+---
+
+## 🧠 Fase 5: Lógica de Dominio (Services/Value Objects)
+
+- [ ] **5.1 AgeValueObject**: cálculo de edad exacta (días/semanas/meses/años).
+- [ ] **5.2 BloodGroupValueObject**: validación tipológica.
+- [ ] **5.3 ZScoreService/ValueObject**: cálculo clínico OMS.
+- [ ] **5.4 ConsultationSnapshotService**: copia inmutable de plantillas a transacciones.
+- [ ] **5.5 GrowthChartService**: preparación de datasets para Chart.js.
+
+---
+
+## 📋 Fase 6: Integración de Flujo Clínico Completo (Livewire)
+
+- [ ] **6.1 Gestión de pacientes**: listado, búsqueda, registro y edición.
+- [ ] **6.2 Atención activa**: SOAP + signos + aplicación de plantillas.
+- [ ] **6.3 Recetas y laboratorios**: creación, edición permitida por estado, cierre final.
+- [ ] **6.4 Módulo híbrido**: subida y visualización de PDF/JPG históricos.
+
+---
+
+## 📈 Fase 7: Motor Gráfico OMS
+
+- [ ] **7.1 Seeding masivo OMS**: importación CSV a `oms_datos_graficas`.
+- [ ] **7.2 Gráficas Chart.js**: boletas, radio buttons y rangos.
+- [ ] **7.3 Modo dual**: Médico (Z-Score) vs Padres (Percentil).
+- [ ] **7.4 Pruebas de precisión**: coordenadas de pacientes de prueba.
+
+---
+
+## 🧪 Fase 8: Calidad, Seguridad y Cierre Técnico
+
+- [ ] **8.1 Cobertura**: fortalecer suite de pruebas en módulos críticos.
+- [ ] **8.2 Pruebas de autorización**: acceso correcto por rol/propietario.
+- [ ] **8.3 Pruebas de regresión** del flujo completo de consulta.
+
+---
+
+## 🚀 Fase 9: Despliegue y Capacitación
+
+- [ ] **9.1 Preparación productiva**: servidor, colas, storage, backup.
+- [ ] **9.2 Carga inicial**: escaneos históricos comprometidos.
+- [ ] **9.3 Capacitación**: uso operativo con la doctora.
+
+---
+
+## 📌 Orden recomendado de ejecución (sin recortar alcance)
+
+1. **4.2 Catálogos clínicos** (lab + medicamentos) para habilitar flujos.
+2. **4.3 + 4.5 Pacientes y Consulta** para atención real.
+3. **4.4 + 4.6 Plantillas y snapshots** para ahorro de tiempo e inmutabilidad.
+4. **4.7 OMS + Fase 7** para el componente gráfico completo.
+5. **4.8 + Fase 8/9** para seguridad, cierre y salida a producción.
+
+Este orden **no reduce** el MVP; solo optimiza la ejecución del alcance completo solicitado por cliente.

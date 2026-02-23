@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Consultation extends Model
 {
+    /** @use HasFactory<\Database\Factories\ConsultationFactory> */
     use HasFactory, HasUuids, SoftDeletes;
 
     protected $table = 'consultations';
@@ -34,21 +35,25 @@ class Consultation extends Model
         'pending_transcription',
     ];
 
+    /** @return BelongsTo<Patient, $this> */
     public function patient(): BelongsTo
     {
         return $this->belongsTo(Patient::class);
     }
 
+    /** @return BelongsTo<Doctor, $this> */
     public function doctor(): BelongsTo
     {
         return $this->belongsTo(Doctor::class);
     }
 
+    /** @return HasOne<VitalSign, $this> */
     public function vitalSigns(): HasOne
     {
         return $this->hasOne(VitalSign::class, 'consultation_id');
     }
 
+    /** @return HasOne<SoapNote, $this> */
     public function soapNote(): HasOne
     {
         return $this->hasOne(SoapNote::class, 'consultation_id');

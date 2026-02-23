@@ -77,17 +77,20 @@ Usar este bloque al crear una subtarea para forzar cumplimiento:
 
 ## 📅 Fase 1: Inicialización y Entorno
 
-- [ ] **1.1 Bootstrap del proyecto**: instalar Laravel 12 con PHP 8.4.
-- [ ] **1.2 Git Flow**: configurar repositorio y reglas de commits.
-- [ ] **1.3 Configuración de DB**: configurar MySQL/MariaDB y variables de entorno.
-- [ ] **1.4 CI/CD Setup**: configurar GitHub Actions (o similar) para ejecutar tests en cada push.
+- [x] **1.1 Bootstrap del proyecto**: instalar Laravel 12 con PHP 8.4.
+- [x] **1.2 Git Flow**: configurar repositorio y reglas de commits.
+- [x] **1.3 Configuración de DB**: configurar MySQL/MariaDB y variables de entorno.
+- [x] **1.4 CI/CD Setup**: configurar GitHub Actions (o similar) para ejecutar tests en cada push.
+
 
 ## 🛠 Fase 2: Librerías y Herramientas Base
 
-- [ ] **2.1 Autenticación**: instalar y configurar Laravel Breeze (Livewire Functional).
-- [ ] **2.2 Permisos**: instalar `spatie/laravel-permission` y crear roles base (Doctor, Admin, Assistant).
-- [ ] **2.3 Herramientas de calidad**: instalar PHPStan (Nivel 8+) y Pint para estilo de código.
-- [ ] **2.4 Testing engine**: configurar Pest PHP como motor principal de pruebas.
+- [x] **2.1 Autenticación**: instalar y configurar Laravel Breeze (Livewire Functional).
+- [x] **2.2 Permisos**: instalar `spatie/laravel-permission` y crear roles base (Doctor, Admin).
+- [x] **2.3 Herramientas de calidad**: instalar PHPStan (Nivel 8) y Pint para estilo de código.
+- [x] **2.4 Testing engine**: configurar Pest PHP como motor principal de pruebas.
+
+
 
 ## 🎨 Fase 3: Diseño y UI Base (Tailwind CSS)
 

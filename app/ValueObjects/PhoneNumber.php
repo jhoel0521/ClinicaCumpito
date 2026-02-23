@@ -23,7 +23,7 @@ class PhoneNumber implements Castable, Stringable
             throw new \InvalidArgumentException('El formato del número de teléfono es inválido');
         }
 
-        $digitsOnly = preg_replace('/\D/', '', $this->value);
+        $digitsOnly = preg_replace('/\D/', '', $this->value) ?? '';
         if (strlen($digitsOnly) < 7) {
             throw new \InvalidArgumentException('El número de teléfono debe contener al menos 7 dígitos');
         }
@@ -45,7 +45,7 @@ class PhoneNumber implements Castable, Stringable
 
     public function digitsOnly(): string
     {
-        return preg_replace('/\D/', '', $this->value);
+        return preg_replace('/\D/', '', $this->value) ?? '';
     }
 
     public function equals(self $other): bool
@@ -58,10 +58,21 @@ class PhoneNumber implements Castable, Stringable
         return $this->value;
     }
 
+    /**
+     * @param  array<string, mixed>  $arguments
+     * @return \Illuminate\Contracts\Database\Eloquent\CastsAttributes<PhoneNumber, string>
+     */
     public static function castUsing(array $arguments)
     {
         return new class implements \Illuminate\Contracts\Database\Eloquent\CastsAttributes
         {
+            /**
+             * @param  \Illuminate\Database\Eloquent\Model  $model
+             * @param  string  $key
+             * @param  string|null  $value
+             * @param  array<string, mixed>  $attributes
+             * @return PhoneNumber|null
+             */
             public function get($model, $key, $value, $attributes)
             {
                 return $value ? PhoneNumber::make($value) : null;

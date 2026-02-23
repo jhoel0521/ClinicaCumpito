@@ -6,6 +6,9 @@ use App\Models\Consultation;
 use App\Models\VitalSign;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+/**
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\VitalSign>
+ */
 class VitalSignFactory extends Factory
 {
     protected $model = VitalSign::class;

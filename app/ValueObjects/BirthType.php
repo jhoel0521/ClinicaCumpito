@@ -52,13 +52,25 @@ class BirthType implements Castable, Stringable
         return match ($this->value) {
             self::NORMAL => 'Parto Natural',
             self::CESAREAN => 'Parto por Cesárea',
+            default => $this->value,
         };
     }
 
+    /**
+     * @param  array<string, mixed>  $arguments
+     * @return \Illuminate\Contracts\Database\Eloquent\CastsAttributes<BirthType, string>
+     */
     public static function castUsing(array $arguments)
     {
         return new class implements \Illuminate\Contracts\Database\Eloquent\CastsAttributes
         {
+            /**
+             * @param  \Illuminate\Database\Eloquent\Model  $model
+             * @param  string  $key
+             * @param  string|null  $value
+             * @param  array<string, mixed>  $attributes
+             * @return BirthType|null
+             */
             public function get($model, $key, $value, $attributes)
             {
                 return $value ? BirthType::make($value) : null;

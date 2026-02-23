@@ -6,6 +6,9 @@ use App\Models\Consultation;
 use App\Models\SoapNote;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+/**
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\SoapNote>
+ */
 class SoapNoteFactory extends Factory
 {
     protected $model = SoapNote::class;

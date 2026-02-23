@@ -5,11 +5,11 @@ namespace App\Models;
 use App\ValueObjects\BirthType;
 use App\ValueObjects\BloodGroup;
 use App\ValueObjects\Gender;
-use App\ValueObjects\MedicalStatus;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -24,8 +24,6 @@ class Patient extends Model
         'gender' => Gender::class,
         'blood_group' => BloodGroup::class,
         'birth_type' => BirthType::class,
-        'chagas_status' => MedicalStatus::class,
-        'syphilis_status' => MedicalStatus::class,
     ];
 
     protected $fillable = [
@@ -40,8 +38,6 @@ class Patient extends Model
         'birth_type',
         'birth_place',
         'blood_group',
-        'chagas_status',
-        'syphilis_status',
         'allergies',
         'pathologies',
         'surgeries',
@@ -60,5 +56,12 @@ class Patient extends Model
     public function consultations(): HasMany
     {
         return $this->hasMany(Consultation::class, 'patient_id');
+    }
+
+    public function medicalConditions(): BelongsToMany
+    {
+        return $this->belongsToMany(MedicalCondition::class, 'patient_medical_conditions')
+            ->withPivot(['status', 'notes'])
+            ->withTimestamps();
     }
 }

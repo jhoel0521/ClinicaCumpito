@@ -25,8 +25,6 @@ return new class extends Migration
 
             // Medical history
             $table->string('blood_group', 5)->nullable();
-            $table->enum('chagas_status', ['Positive', 'Negative', 'Not tested'])->nullable();
-            $table->enum('syphilis_status', ['Positive', 'Negative', 'Not tested'])->nullable();
             $table->text('allergies')->nullable();
             $table->text('pathologies')->nullable();
             $table->text('surgeries')->nullable();

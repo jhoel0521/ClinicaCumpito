@@ -25,8 +25,6 @@ class PatientFactory extends Factory
             'birth_type' => $this->faker->randomElement(['Normal', 'Cesarean']),
             'birth_place' => $this->faker->city(),
             'blood_group' => $this->faker->randomElement(['O+', 'O-', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-']),
-            'chagas_status' => $this->faker->randomElement(['Positive', 'Negative', 'Not tested']),
-            'syphilis_status' => $this->faker->randomElement(['Positive', 'Negative', 'Not tested']),
             'allergies' => $this->faker->optional()->sentence(),
             'pathologies' => $this->faker->optional()->sentence(),
             'surgeries' => $this->faker->optional()->sentence(),

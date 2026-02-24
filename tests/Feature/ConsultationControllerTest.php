@@ -3,8 +3,10 @@
 use App\Models\Consultation;
 use App\Models\Doctor;
 use App\Models\Patient;
+use App\Models\PatientVaccine;
 use App\Models\SoapNote;
 use App\Models\User;
+use App\Models\Vaccine;
 use App\Models\VitalSign;
 
 describe('ConsultationController', function () {
@@ -110,9 +112,10 @@ describe('ConsultationController', function () {
         expect($consultation->status->value())->toBe('finalized');
     });
 
-    test('vista show integra secciones de signos vitales y nota soap', function () {
+    test('vista show integra secciones de signos vitales, nota soap y vacunas aplicadas', function () {
         $user = User::factory()->create();
         $consultation = Consultation::factory()->create();
+        $vaccine = Vaccine::factory()->create();
 
         VitalSign::factory()->create([
             'consultation_id' => $consultation->id,
@@ -122,12 +125,18 @@ describe('ConsultationController', function () {
             'consultation_id' => $consultation->id,
         ]);
 
+        PatientVaccine::factory()->create([
+            'consultation_id' => $consultation->id,
+            'vaccine_id' => $vaccine->id,
+        ]);
+
         $response = $this->actingAs($user)
             ->get(route('consultas.show', $consultation->id));
 
         $response->assertOk()
             ->assertSee('Signos Vitales')
             ->assertSee('Nota SOAP')
+            ->assertSee('Vacunas Aplicadas')
             ->assertSee('Actualizar SOAP', false);
     });
 });

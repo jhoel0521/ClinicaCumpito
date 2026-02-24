@@ -193,5 +193,170 @@
                 </form>
             </div>
         </div>
+
+        <div class="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl p-6 mt-6">
+            <h2 class="text-xl font-semibold text-blue-700 dark:text-blue-400 mb-4">Vacunas Aplicadas</h2>
+
+            <form
+                action="{{ route('consultas.patient-vaccines.store', $consultation->id) }}"
+                method="POST"
+                class="space-y-4"
+            >
+                @csrf
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="lg:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Vacuna</label>
+                        <select
+                            name="vaccine_id"
+                            class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100"
+                            required
+                        >
+                            <option value="">Selecciona una vacuna</option>
+                            @foreach ($vaccines as $vaccine)
+                                <option value="{{ $vaccine->id }}" @selected(old('vaccine_id') === $vaccine->id)>
+                                    {{ $vaccine->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Fecha de aplicación
+                        </label>
+                        <input
+                            type="datetime-local"
+                            name="applied_at"
+                            value="{{ old('applied_at', now()->format('Y-m-d\\TH:i')) }}"
+                            class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100"
+                            required
+                        />
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Dosis #</label>
+                        <input
+                            type="number"
+                            name="dose_number"
+                            min="1"
+                            max="20"
+                            value="{{ old('dose_number') }}"
+                            class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100"
+                        />
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Notas</label>
+                    <textarea
+                        name="notes"
+                        rows="2"
+                        class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100"
+                    >
+{{ old('notes') }}</textarea
+                    >
+                </div>
+
+                <div class="flex justify-end">
+                    <x-ui.button type="submit" variant="primary">Guardar Vacuna</x-ui.button>
+                </div>
+            </form>
+
+            <div class="mt-6 space-y-3">
+                @forelse ($consultation->patientVaccines as $patientVaccine)
+                    <div class="border border-gray-200 dark:border-zinc-800 rounded-lg p-4">
+                        <form
+                            action="{{ route('consultas.patient-vaccines.update', [$consultation->id, $patientVaccine->id]) }}"
+                            method="POST"
+                            class="space-y-3"
+                        >
+                            @csrf
+                            @method('PUT')
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+                                <div class="lg:col-span-2">
+                                    <label class="block text-xs uppercase text-gray-500 dark:text-gray-400 mb-1">
+                                        Vacuna
+                                    </label>
+                                    <select
+                                        name="vaccine_id"
+                                        class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100"
+                                        required
+                                    >
+                                        @foreach ($vaccines as $vaccine)
+                                            <option
+                                                value="{{ $vaccine->id }}"
+                                                @selected($patientVaccine->vaccine_id === $vaccine->id)
+                                            >
+                                                {{ $vaccine->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs uppercase text-gray-500 dark:text-gray-400 mb-1">
+                                        Aplicada
+                                    </label>
+                                    <input
+                                        type="datetime-local"
+                                        name="applied_at"
+                                        value="{{ optional($patientVaccine->applied_at)->format('Y-m-d\\TH:i') }}"
+                                        class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100"
+                                        required
+                                    />
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs uppercase text-gray-500 dark:text-gray-400 mb-1">
+                                        Dosis
+                                    </label>
+                                    <input
+                                        type="number"
+                                        name="dose_number"
+                                        min="1"
+                                        max="20"
+                                        value="{{ $patientVaccine->dose_number }}"
+                                        class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100"
+                                    />
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs uppercase text-gray-500 dark:text-gray-400 mb-1">
+                                    Notas
+                                </label>
+                                <textarea
+                                    name="notes"
+                                    rows="2"
+                                    class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100"
+                                >
+{{ $patientVaccine->notes }}</textarea
+                                >
+                            </div>
+
+                            <div class="flex justify-end">
+                                <x-ui.button type="submit" variant="secondary">Actualizar Vacuna</x-ui.button>
+                            </div>
+                        </form>
+
+                        <form
+                            action="{{ route('consultas.patient-vaccines.destroy', [$consultation->id, $patientVaccine->id]) }}"
+                            method="POST"
+                            class="mt-2 flex justify-end"
+                        >
+                            @csrf
+                            @method('DELETE')
+                            <x-ui.button type="submit" variant="ghost">Eliminar</x-ui.button>
+                        </form>
+                    </div>
+                @empty
+                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                        Sin vacunas aplicadas registradas para esta consulta.
+                    </p>
+                @endforelse
+            </div>
+        </div>
     </div>
 </x-layouts::app>

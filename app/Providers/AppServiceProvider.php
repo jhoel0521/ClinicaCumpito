@@ -44,6 +44,11 @@ class AppServiceProvider extends ServiceProvider
             \App\Contracts\SoapNoteServiceContract::class,
             \App\Services\SoapNoteService::class
         );
+
+        $this->app->bind(
+            \App\Contracts\PatientVaccineServiceContract::class,
+            \App\Services\PatientVaccineService::class
+        );
     }
 
     /**

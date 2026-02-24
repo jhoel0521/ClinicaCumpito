@@ -9,6 +9,7 @@ use App\Http\Requests\UpdateConsultationRequest;
 use App\Models\Consultation;
 use App\Models\Doctor;
 use App\Models\Patient;
+use App\Models\Vaccine;
 use Illuminate\View\View;
 
 class ConsultationController extends Controller
@@ -41,9 +42,13 @@ class ConsultationController extends Controller
 
     public function show(Consultation $consulta): View
     {
-        $consulta->load(['patient', 'doctor', 'vitalSigns', 'soapNote']);
+        $consulta->load(['patient', 'doctor', 'vitalSigns', 'soapNote', 'patientVaccines.vaccine']);
+        $vaccines = Vaccine::query()->orderBy('name')->get(['id', 'name']);
 
-        return view('consultas.show', ['consultation' => $consulta]);
+        return view('consultas.show', [
+            'consultation' => $consulta,
+            'vaccines' => $vaccines,
+        ]);
     }
 
     public function edit(Consultation $consulta): View

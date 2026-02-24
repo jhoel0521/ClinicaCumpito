@@ -45,6 +45,15 @@
                     >
                         {{ __('Plantillas') }}
                     </flux:sidebar.item>
+
+                    <flux:sidebar.item
+                        icon="clipboard"
+                        :href="route('consultas.index')"
+                        :current="request()->routeIs('consultas.*')"
+                        wire:navigate
+                    >
+                        {{ __('Consultas') }}
+                    </flux:sidebar.item>
                 </flux:sidebar.group>
 
                 @role('Admin')
@@ -175,6 +184,14 @@
                     wire:navigate
                 >
                     {{ __('Plantillas') }}
+                </flux:navbar.item>
+                <flux:navbar.item
+                    icon="clipboard"
+                    :href="route('consultas.index')"
+                    :current="request()->routeIs('consultas.*')"
+                    wire:navigate
+                >
+                    {{ __('Consultas') }}
                 </flux:navbar.item>
             </flux:navbar>
 

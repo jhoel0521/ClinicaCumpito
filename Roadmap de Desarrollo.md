@@ -108,21 +108,21 @@ Una subtarea se considera terminada solo si cumple todo:
 - [x] **4.2.3 CRUD CatalogoMedicamento** (catálogo para recetas). — 100% ✔ Migraciones + Modelo + Factory + DTO + Servicio + UI Livewire.
 - [x] **4.2.4 CRUD CatalogoVacuna** (PAI Bolivia). — 100% ✔ Migraciones + Modelo + Factory + DTO + Servicio + UI Livewire + Seeder PAI Bolivia completo.
 
-### 4.3 Módulo Pacientes — 85%
+### 4.3 Módulo Pacientes — 100%
 
 - [x] **4.3.1 CRUD Paciente** (filiación, nacimiento, antecedentes). — 100% ✔ Migración + Modelo (`Patient.php`) + Factory + `PacienteService` + `PacienteServiceContract` + `PacienteDTO` + `PacienteController` + `StorePacienteRequest` + `UpdatePacienteRequest` + Vistas (`index/create/edit/show`) + `PacienteControllerTest` (feature) + `PatientFactoryTest` (unit) + Componente Livewire de búsqueda/gestión activa (`⚡patient-list.blade.php`).
 
-### 4.4 Módulo Plantillas (Ahorro de tiempo) — 0%
+### 4.4 Módulo Plantillas (Ahorro de tiempo) — 100%
 
-- [ ] **4.4.1 CRUD PlantillaReceta**. — 0%
-- [ ] **4.4.2 CRUD ItemPlantillaReceta**. — 0%
-- [ ] **4.4.3 CRUD PlantillaLaboratorio**. — 0%
-- [ ] **4.4.4 CRUD ItemPlantillaLaboratorio**. — 0%
+- [x] **4.4.1 CRUD PlantillaReceta**. — 100% ✔ `PrescriptionTemplate` + migración + factory + `PrescriptionTemplateDTO` + `TemplateService` + UI (`resources/views/pages/templates/⚡prescription-templates.blade.php`).
+- [x] **4.4.2 CRUD ItemPlantillaReceta**. — 100% ✔ `PrescriptionTemplateItem` + migración + factory + `PrescriptionTemplateItemDTO` + pruebas unitarias de servicio.
+- [x] **4.4.3 CRUD PlantillaLaboratorio**. — 100% ✔ `LaboratoryTemplate` + migración + factory + `LaboratoryTemplateDTO` + UI (`resources/views/pages/templates/⚡laboratory-templates.blade.php`).
+- [x] **4.4.4 CRUD ItemPlantillaLaboratorio**. — 100% ✔ `LaboratoryTemplateItem` + migración + factory + `LaboratoryTemplateItemDTO` + pruebas unitarias de servicio.
 
-### 4.5 Flujo de Consulta (SOAP) — 35%
+### 4.5 Flujo de Consulta (SOAP) — 56%
 
-- [~] **4.5.1 CRUD Consulta** (digital/manual, estado). — 50% ✔ Migración + Modelo (`Consultation.php`, casts `ConsultationType`/`ConsultationStatus`) + Factory + `ConsultationFactoryTest`. ✘ Sin Service/Action, sin Controller/Livewire, sin Feature test.
-- [~] **4.5.2 CRUD SignosVitales** (1:1 con consulta). — 50% ✔ Migración + Modelo (`VitalSign.php`) + Factory + `VitalSignFactoryTest`. ✘ Sin Service/Action, sin UI.
+- [x] **4.5.1 CRUD Consulta** (digital/manual, estado). — 100% ✔ Migración + Modelo (`Consultation.php`, casts `ConsultationType`/`ConsultationStatus`) + Factory + `ConsultationService` + `ConsultationServiceContract` + `ConsultationDTO` + `ConsultationController` + `StoreConsultationRequest` + `UpdateConsultationRequest` + Vistas (`consultas/index/create/show/edit`) + `ConsultationServiceTest` (unit) + `ConsultationControllerTest` (feature) + navegación en sidebar/navbar.
+- [~] **4.5.2 CRUD SignosVitales** (1:1 con consulta). — 75% ✔ Migración + Modelo (`VitalSign.php`) + Factory + `VitalSignFactoryTest` + `VitalSignService` + `VitalSignServiceContract` + `VitalSignDTO` + `VitalSignController` + endpoints (`consultas/{consulta}/signos-vitales`) + `VitalSignServiceTest` (unit) + `VitalSignControllerTest` (feature). ✘ Sin UI clínica integrada en pantalla de consulta.
 - [~] **4.5.3 CRUD NotasSoap** (1:1 con consulta). — 50% ✔ Migración + Modelo (`SoapNote.php`) + Factory + `SoapNoteFactoryTest`. ✘ Sin Service/Action, sin UI.
 - [ ] **4.5.4 CRUD VacunaPaciente** (aplicaciones reales). — 0%
 
@@ -173,9 +173,9 @@ Una subtarea se considera terminada solo si cumple todo:
 
 ---
 
-## 🧪 Fase 8: Calidad, Seguridad y Cierre Técnico — 10%
+## 🧪 Fase 8: Calidad, Seguridad y Cierre Técnico — 25%
 
-- [~] **8.1 Cobertura**: fortalecer suite de pruebas en módulos críticos. — 15% ✔ Tests unitarios para Value Objects (`BirthType`, `BloodGroup`, `ConsultationStatus`, `ConsultationType`, `Gender`, `LicenseNumber`, `Measurements/*`, `MedicalStatus`, `PhoneNumber`), Factories (`Doctor`, `Patient`, `Consultation`, `VitalSign`, `SoapNote`, `User`) y `PacienteServiceTest`. ✘ Sin cobertura en catálogos, plantillas, snapshots, OMS.
+- [~] **8.1 Cobertura**: fortalecer suite de pruebas en módulos críticos. — 30% ✔ Tests unitarios para Value Objects (`BirthType`, `BloodGroup`, `ConsultationStatus`, `ConsultationType`, `Gender`, `LicenseNumber`, `Measurements/*`, `MedicalStatus`, `PhoneNumber`), Factories (`Doctor`, `Patient`, `Consultation`, `VitalSign`, `SoapNote`, `User`), `PacienteServiceTest`, `TemplateServiceTest`, `ConsultationServiceTest` y feature `ConsultationControllerTest`. ✘ Pendiente cobertura en snapshots, OMS, policies y flujo clínico completo.
 - [ ] **8.2 Pruebas de autorización**: acceso correcto por rol/propietario. — 0%
 - [ ] **8.3 Pruebas de regresión** del flujo completo de consulta. — 0%
 
@@ -202,18 +202,24 @@ Una subtarea se considera terminada solo si cumple todo:
 | 4.2 | Catálogos Clínicos | ✅ 100% |
 | 4.3 | Módulo Pacientes | ✅ 100% |
 | 4.4 | Módulo Plantillas | ✅ 100% |
-| 4.5 | Flujo de Consulta (SOAP) | 🟡 35% |
+| 4.5 | Flujo de Consulta (SOAP) | 🟡 56% |
 | 4.6 | Resultados / Snapshots | 🔴 0% |
 | 4.7 | Motor OMS (datos) | 🔴 0% |
 | 4.8 | Seguridad / Policies | 🔴 0% |
 | 5 | Lógica de Dominio (VO/Services) | 🟡 35% |
 | 6 | Livewire Clínico | 🔴 0% |
 | 7 | Motor Gráfico OMS | 🔴 0% |
-| 8 | Calidad / Cierre Técnico | � 40% |
+| 8 | Calidad / Cierre Técnico | 🟡 30% |
 | 9 | Despliegue y Capacitación | 🔴 0% |
-| **Total MVP** | **Fase 4 progresando** | **~25%** |
+| **Total MVP** | **Fase 4 progresando** | **~38%** |
 
 > **Evidencia de auditoría**: `git status`, listado de `app/`, `database/migrations/`, `tests/`, `resources/views/`, `app/Livewire/`. Fecha: 24-02-2026.
+
+### ✅ Actualización de ejecución (24-02-2026)
+
+- Pre-commit ejecutado en verde: `./vendor/bin/pint`, `./vendor/bin/phpstan analyse`, `php artisan test`.
+- Estado de calidad posterior al avance: **191 tests pasando** y **PHPStan sin errores**.
+- Siguiente fase activa recomendada: **4.5.3 CRUD NotasSoap** para cerrar el bloque SOAP y luego completar UI clínica en `4.5.2`.
 
 ---
 

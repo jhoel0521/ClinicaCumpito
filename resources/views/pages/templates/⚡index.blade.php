@@ -31,7 +31,8 @@ new class extends Component {
                 <flux:icon name="beaker" class="w-8 h-8 text-purple-500" />
                 <flux:heading size="lg">{{ __('Plantillas de Laboratorio') }}</flux:heading>
             </div>
-            <flux:text>{{ __('Configura conjuntos de exámenes y estudios por especialidad o sospecha clínica.') }}
+            <flux:text>
+                {{ __('Configura conjuntos de exámenes y estudios por especialidad o sospecha clínica.') }}
             </flux:text>
             <flux:button variant="primary" :href="route('templates.laboratories')" wire:navigate>
                 {{ __('Administrar') }}

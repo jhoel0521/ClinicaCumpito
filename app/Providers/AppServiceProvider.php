@@ -29,6 +29,16 @@ class AppServiceProvider extends ServiceProvider
             \App\Contracts\TemplateServiceContract::class,
             \App\Services\TemplateService::class
         );
+
+        $this->app->bind(
+            \App\Contracts\ConsultationServiceContract::class,
+            \App\Services\ConsultationService::class
+        );
+
+        $this->app->bind(
+            \App\Contracts\VitalSignServiceContract::class,
+            \App\Services\VitalSignService::class
+        );
     }
 
     /**

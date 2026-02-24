@@ -30,6 +30,8 @@ interface PacienteServiceContract
 
     /**
      * Obtener todos los pacientes
+     *
+     * @return Collection<int, Patient>
      */
     public function all(): Collection;
 

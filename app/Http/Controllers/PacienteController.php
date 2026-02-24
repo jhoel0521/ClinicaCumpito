@@ -37,7 +37,7 @@ class PacienteController extends Controller
     /**
      * Store a newly created patient in database.
      */
-    public function store(StorePacienteRequest $request)
+    public function store(StorePacienteRequest $request): \Illuminate\Http\RedirectResponse
     {
         $dto = PacienteDTO::fromArray($request->validated());
         $patient = $this->service->create($dto);
@@ -70,7 +70,7 @@ class PacienteController extends Controller
     /**
      * Update the specified patient in database.
      */
-    public function update(UpdatePacienteRequest $request, Patient $patient)
+    public function update(UpdatePacienteRequest $request, Patient $patient): \Illuminate\Http\RedirectResponse
     {
         $dto = PacienteDTO::fromArray($request->validated());
         $patient = $this->service->update($patient->id, $dto);
@@ -82,7 +82,7 @@ class PacienteController extends Controller
     /**
      * Remove the specified patient from database.
      */
-    public function destroy(Patient $patient)
+    public function destroy(Patient $patient): \Illuminate\Http\RedirectResponse
     {
         $this->service->delete($patient->id);
 

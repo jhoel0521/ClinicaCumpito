@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class MedicalCondition extends Model
 {
+    /** @use HasFactory<\Database\Factories\MedicalConditionFactory> */
     use HasFactory, HasUuids;
 
     protected $fillable = [
@@ -18,6 +19,8 @@ class MedicalCondition extends Model
 
     /**
      * Obtener los pacientes con esta condición médica
+     *
+     * @return BelongsToMany<Patient, $this>
      */
     public function patients(): BelongsToMany
     {

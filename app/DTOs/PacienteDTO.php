@@ -26,11 +26,15 @@ class PacienteDTO
         public readonly ?string $allergies = null,
         public readonly ?string $pathologies = null,
         public readonly ?string $surgeries = null,
+        /** @var array<int, array{condition_id: string, status?: string, notes?: string}>|null */
         public readonly ?array $medical_conditions = null, // Array de condiciones médicas con status
+
     ) {}
 
     /**
      * Crear DTO desde array
+     *
+     * @param  array<string, mixed>  $data
      */
     public static function fromArray(array $data): self
     {
@@ -57,6 +61,8 @@ class PacienteDTO
 
     /**
      * Convertir DTO a array
+     *
+     * @return array<string, mixed>
      */
     public function toArray(): array
     {

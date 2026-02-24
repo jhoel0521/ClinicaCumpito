@@ -20,7 +20,13 @@ class PacienteService implements PacienteServiceContract
             $this->syncMedicalConditions($patient, $dto->medical_conditions);
         }
 
-        return $patient->fresh();
+        $freshPatient = $patient->fresh();
+        if (! $freshPatient instanceof Patient) {
+            throw new \RuntimeException('Failed to fetch fresh patient model');
+        }
+
+        return $freshPatient;
+
     }
 
     /**
@@ -35,7 +41,13 @@ class PacienteService implements PacienteServiceContract
             $this->syncMedicalConditions($patient, $dto->medical_conditions);
         }
 
-        return $patient->fresh();
+        $freshPatient = $patient->fresh();
+        if (! $freshPatient instanceof Patient) {
+            throw new \RuntimeException('Failed to fetch fresh patient model');
+        }
+
+        return $freshPatient;
+
     }
 
     /**
@@ -43,9 +55,13 @@ class PacienteService implements PacienteServiceContract
      */
     public function delete(string $id): bool
     {
+        if (! \Illuminate\Support\Str::isUuid($id)) {
+            throw (new \Illuminate\Database\Eloquent\ModelNotFoundException)->setModel(Patient::class, [$id]);
+        }
+
         $patient = Patient::findOrFail($id);
 
-        return $patient->delete();
+        return (bool) $patient->delete();
     }
 
     /**
@@ -53,11 +69,17 @@ class PacienteService implements PacienteServiceContract
      */
     public function find(string $id): ?Patient
     {
+        if (! \Illuminate\Support\Str::isUuid($id)) {
+            return null;
+        }
+
         return Patient::find($id);
     }
 
     /**
      * Obtener todos los pacientes
+     *
+     * @return Collection<int, Patient>
      */
     public function all(): Collection
     {
@@ -69,11 +91,17 @@ class PacienteService implements PacienteServiceContract
      */
     public function findByUserId(string $userId): ?Patient
     {
+        if (! \Illuminate\Support\Str::isUuid($userId)) {
+            return null;
+        }
+
         return Patient::where('user_id', $userId)->first();
     }
 
     /**
      * Sincronizar condiciones médicas del paciente
+     *
+     * @param  array<int, array{condition_id: string, status?: string, notes?: string}>  $conditions
      */
     private function syncMedicalConditions(Patient $patient, array $conditions): void
     {

@@ -41,4 +41,16 @@ class Doctor extends Model
     {
         return $this->hasMany(Consultation::class, 'doctor_id');
     }
+
+    /** @return HasMany<PrescriptionTemplate, $this> */
+    public function prescriptionTemplates(): HasMany
+    {
+        return $this->hasMany(PrescriptionTemplate::class, 'doctor_id');
+    }
+
+    /** @return HasMany<LaboratoryTemplate, $this> */
+    public function laboratoryTemplates(): HasMany
+    {
+        return $this->hasMany(LaboratoryTemplate::class, 'doctor_id');
+    }
 }

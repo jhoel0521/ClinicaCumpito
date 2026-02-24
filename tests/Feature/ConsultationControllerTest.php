@@ -3,7 +3,9 @@
 use App\Models\Consultation;
 use App\Models\Doctor;
 use App\Models\Patient;
+use App\Models\SoapNote;
 use App\Models\User;
+use App\Models\VitalSign;
 
 describe('ConsultationController', function () {
     test('usuario autenticado puede ver lista de consultas', function () {
@@ -106,5 +108,26 @@ describe('ConsultationController', function () {
 
         $consultation->refresh();
         expect($consultation->status->value())->toBe('finalized');
+    });
+
+    test('vista show integra secciones de signos vitales y nota soap', function () {
+        $user = User::factory()->create();
+        $consultation = Consultation::factory()->create();
+
+        VitalSign::factory()->create([
+            'consultation_id' => $consultation->id,
+        ]);
+
+        SoapNote::factory()->create([
+            'consultation_id' => $consultation->id,
+        ]);
+
+        $response = $this->actingAs($user)
+            ->get(route('consultas.show', $consultation->id));
+
+        $response->assertOk()
+            ->assertSee('Signos Vitales')
+            ->assertSee('Nota SOAP')
+            ->assertSee('Actualizar SOAP', false);
     });
 });

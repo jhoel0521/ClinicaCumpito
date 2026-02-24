@@ -7,7 +7,8 @@
         "dev": "vite",
         "format:blade": "prettier --write resources/views/**/*.blade.php",
         "lint:blade": "prettier --check resources/views/**/*.blade.php",
-        "blade:fix": "npm run format:blade"
+        "blade:fix": "npm run format:blade",
+        "pre-commit": "php vendor/bin/pint && npm run blade:fix && ./vendor/bin/phpstan analyse && php artisan test"
     },
     "dependencies": {
         "@tailwindcss/vite": "^4.1.11",

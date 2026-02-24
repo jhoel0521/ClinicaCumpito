@@ -39,6 +39,11 @@ class AppServiceProvider extends ServiceProvider
             \App\Contracts\VitalSignServiceContract::class,
             \App\Services\VitalSignService::class
         );
+
+        $this->app->bind(
+            \App\Contracts\SoapNoteServiceContract::class,
+            \App\Services\SoapNoteService::class
+        );
     }
 
     /**

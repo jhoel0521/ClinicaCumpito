@@ -142,6 +142,23 @@ resources/views/
 
 ## 🎨 UI/UX Standards
 
+### Heurísticas de Nielsen (OBLIGATORIO en frontend)
+
+Todo desarrollo de interfaz debe validarse contra las **10 heurísticas de Nielsen**:
+
+1. **Visibilidad del estado del sistema** (feedback claro y oportuno).
+2. **Relación entre el sistema y el mundo real** (lenguaje natural y clínico comprensible).
+3. **Control y libertad del usuario** (cancelar, volver atrás, deshacer cuando aplique).
+4. **Consistencia y estándares** (patrones UI uniformes en todo el sistema).
+5. **Prevención de errores** (validar antes de guardar, confirmar acciones críticas).
+6. **Reconocimiento antes que recuerdo** (opciones visibles, labels claros, contexto presente).
+7. **Flexibilidad y eficiencia de uso** (flujos rápidos para personal médico frecuente).
+8. **Diseño estético y minimalista** (sin ruido visual ni elementos innecesarios).
+9. **Ayuda para reconocer, diagnosticar y recuperarse de errores** (mensajes claros en español y accionables).
+10. **Ayuda y documentación** (instrucciones breves cuando la tarea no sea evidente).
+
+> Regla práctica: antes de cerrar cualquier tarea frontend, revisar explícitamente estas 10 heurísticas y corregir desviaciones.
+
 ### Componentes Flux
 ```php
 <!-- Header -->
@@ -272,8 +289,9 @@ Antes de hacer commit:
 9. **Documentación**: Actualiza AGENTES.md si hay nuevas reglas o patrones
 10. **Mensajes en ESPAÑOL**: Toda validación, labels, mensajes flash
 11. **Commit solo si**: Pint aplicado + Tests pasan + Cambios quirúrgicos + SOLID cumplido + Tests nuevos incluidos
+12. **Frontend UX**: Validado contra las 10 heurísticas de Nielsen
 
 ---
 
-**Última actualización**: 22 de febrero, 2026
-**Versión**: 1.1 (Agregados: SOLID, Testing Unit+Integration, Checklist de testing)
+**Última actualización**: 24 de febrero, 2026
+**Versión**: 1.2 (Agregado: cumplimiento obligatorio de las 10 heurísticas de Nielsen en frontend)

@@ -101,12 +101,12 @@ Una subtarea se considera terminada solo si cumple todo:
 
 - [x] **4.1.1 Perfil Doctor** (Especialidad, Matrícula Profesional). — 100% ✔ Modelo `Doctor` + `DoctorDTO` + `DoctorService` + `UpdateDoctorRequest` + Componente Livewire Volt `⚡doctor-profile` + `DoctorProfileTest`.
 
-### 4.2 Catálogos Clínicos (Prioridad temprana solicitada) — 0%
+### 4.2 Catálogos Clínicos (Prioridad temprana solicitada) — 100%
 
-- [ ] **4.2.1 CRUD CategoriaLaboratorio** (Hematología, Orina, Imágenes, etc.). — 0%
-- [ ] **4.2.2 CRUD CatalogoExamenLaboratorio** (exámenes individuales). — 0%
-- [ ] **4.2.3 CRUD CatalogoMedicamento** (catálogo para recetas). — 0%
-- [ ] **4.2.4 CRUD CatalogoVacuna** (PAI Bolivia). — 0%
+- [x] **4.2.1 CRUD CategoriaLaboratorio** (Hematología, Orina, Imágenes, etc.). — 100% ✔ Migraciones + Modelo + Factory + DTO + Servicio + UI Livewire.
+- [x] **4.2.2 CRUD CatalogoExamenLaboratorio** (exámenes individuales). — 100% ✔ Migraciones + Modelo + Factory + DTO + Servicio + UI Livewire.
+- [x] **4.2.3 CRUD CatalogoMedicamento** (catálogo para recetas). — 100% ✔ Migraciones + Modelo + Factory + DTO + Servicio + UI Livewire.
+- [x] **4.2.4 CRUD CatalogoVacuna** (PAI Bolivia). — 100% ✔ Migraciones + Modelo + Factory + DTO + Servicio + UI Livewire + Seeder PAI Bolivia completo.
 
 ### 4.3 Módulo Pacientes — 85%
 
@@ -199,7 +199,7 @@ Una subtarea se considera terminada solo si cumple todo:
 | 2 | Librerías y Herramientas Base | ✅ 100% |
 | 3 | UI Base y Componentes | ✅ 100% |
 | 4.1 | Perfil Médico (Doctor) | ✅ 100% |
-| 4.2 | Catálogos Clínicos | 🔴 0% |
+| 4.2 | Catálogos Clínicos | ✅ 100% |
 | 4.3 | Módulo Pacientes | ✅ 100% |
 | 4.4 | Módulo Plantillas | 🔴 0% |
 | 4.5 | Flujo de Consulta (SOAP) | 🟡 35% |
@@ -209,9 +209,9 @@ Una subtarea se considera terminada solo si cumple todo:
 | 5 | Lógica de Dominio (VO/Services) | 🟡 35% |
 | 6 | Livewire Clínico | 🔴 0% |
 | 7 | Motor Gráfico OMS | 🔴 0% |
-| 8 | Calidad / Cierre Técnico | 🔴 10% |
+| 8 | Calidad / Cierre Técnico | � 40% |
 | 9 | Despliegue y Capacitación | 🔴 0% |
-| **Total MVP** | **Fase 4 completa** | **~20%** |
+| **Total MVP** | **Fase 4 progresando** | **~25%** |
 
 > **Evidencia de auditoría**: `git status`, listado de `app/`, `database/migrations/`, `tests/`, `resources/views/`, `app/Livewire/`. Fecha: 24-02-2026.
 

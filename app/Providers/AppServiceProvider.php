@@ -19,6 +19,11 @@ class AppServiceProvider extends ServiceProvider
             \App\Contracts\DoctorServiceContract::class,
             \App\Services\DoctorService::class
         );
+
+        $this->app->bind(
+            \App\Contracts\CatalogServiceContract::class,
+            \App\Services\CatalogService::class
+        );
     }
 
     /**

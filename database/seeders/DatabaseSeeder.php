@@ -14,13 +14,12 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
+            RolesAndPermissionsSeeder::class,
             MedicalConditionSeeder::class,
+            LaboratoryCatalogSeeder::class,
+            MedicationCatalogSeeder::class,
+            VaccineCatalogSeeder::class,
         ]);
-
-        // User::factory(10)->create();
-
-        // llamar a RolesAndPermissionsSeeder
-        $this->call(RolesAndPermissionsSeeder::class);
 
         User::factory()->create([
             'name' => 'Test User',

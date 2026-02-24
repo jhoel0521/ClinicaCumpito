@@ -85,11 +85,11 @@ Una subtarea se considera terminada solo si cumple todo:
 
 ---
 
-## ⚡ Fase 3: UI Base y Componentes (sin bloquear dominio)
+## ⚡ Fase 3: UI Base y Componentes (sin bloquear dominio) — 40%
 
-- [ ] **3.1 Tailwind/Design tokens**: configuración base del tema.
-- [ ] **3.2 Layouts maestros**: Dashboard, Sidebar, Navbar.
-- [ ] **3.3 Componentes atómicos**: Inputs, Buttons, Alerts, Modals.
+- [x] **3.1 Tailwind/Design tokens**: configuración base del tema. ✔ `@tailwindcss/vite` en `vite.config.js`, CSS base en `resources/css/`.
+- [~] **3.2 Layouts maestros**: Dashboard, Sidebar, Navbar. — 60% (`app.blade.php` + `layouts/app/{header,sidebar}.blade.php` existen, no hay Navbar independiente ni layout de dashboard completo).
+- [ ] **3.3 Componentes atómicos**: Inputs, Buttons, Alerts, Modals. — 0% (solo componentes de auth generados por Fortify/Flux).
 
 ---
 
@@ -97,95 +97,123 @@ Una subtarea se considera terminada solo si cumple todo:
 
 > Ciclo obligatorio por CRUD: Migración + Modelo + Factory + Action/Service + Test Unitario + Test Feature.
 
-### 4.1 Perfil Médico y Roles
+### 4.1 Perfil Médico y Roles — 50%
 
-- [ ] **4.1.1 CRUD Doctor** (User 1:1, matrícula, especialidad, estado).
+- [~] **4.1.1 CRUD Doctor** (User 1:1, matrícula, especialidad, estado). — 50% ✔ Migración + Modelo + Factory + `LicenseNumber` ValueObject + `DoctorFactoryTest`. ✘ Sin `DoctorService`/Action, sin Controller/Livewire, sin Feature test de CRUD.
 
-### 4.2 Catálogos Clínicos (Prioridad temprana solicitada)
+### 4.2 Catálogos Clínicos (Prioridad temprana solicitada) — 0%
 
-- [ ] **4.2.1 CRUD CategoriaLaboratorio** (Hematología, Orina, Imágenes, etc.).
-- [ ] **4.2.2 CRUD CatalogoExamenLaboratorio** (exámenes individuales).
-- [ ] **4.2.3 CRUD CatalogoMedicamento** (catálogo para recetas).
-- [ ] **4.2.4 CRUD CatalogoVacuna** (PAI Bolivia).
+- [ ] **4.2.1 CRUD CategoriaLaboratorio** (Hematología, Orina, Imágenes, etc.). — 0%
+- [ ] **4.2.2 CRUD CatalogoExamenLaboratorio** (exámenes individuales). — 0%
+- [ ] **4.2.3 CRUD CatalogoMedicamento** (catálogo para recetas). — 0%
+- [ ] **4.2.4 CRUD CatalogoVacuna** (PAI Bolivia). — 0%
 
-### 4.3 Módulo Pacientes
+### 4.3 Módulo Pacientes — 85%
 
-- [ ] **4.3.1 CRUD Paciente** (filiación, nacimiento, antecedentes).
+- [~] **4.3.1 CRUD Paciente** (filiación, nacimiento, antecedentes). — 85% ✔ Migración + Modelo (`Patient.php`) + Factory + `PacienteService` + `PacienteServiceContract` + `PacienteDTO` + `PacienteController` + `StorePacienteRequest` + `UpdatePacienteRequest` + Vistas (`index/create/edit/show`) + `PacienteControllerTest` (feature) + `PatientFactoryTest` (unit). ✘ Sin componente Livewire de búsqueda/gestión activa, sin test unitario del Service.
 
-### 4.4 Módulo Plantillas (Ahorro de tiempo)
+### 4.4 Módulo Plantillas (Ahorro de tiempo) — 0%
 
-- [ ] **4.4.1 CRUD PlantillaReceta**.
-- [ ] **4.4.2 CRUD ItemPlantillaReceta**.
-- [ ] **4.4.3 CRUD PlantillaLaboratorio**.
-- [ ] **4.4.4 CRUD ItemPlantillaLaboratorio**.
+- [ ] **4.4.1 CRUD PlantillaReceta**. — 0%
+- [ ] **4.4.2 CRUD ItemPlantillaReceta**. — 0%
+- [ ] **4.4.3 CRUD PlantillaLaboratorio**. — 0%
+- [ ] **4.4.4 CRUD ItemPlantillaLaboratorio**. — 0%
 
-### 4.5 Flujo de Consulta (SOAP)
+### 4.5 Flujo de Consulta (SOAP) — 35%
 
-- [ ] **4.5.1 CRUD Consulta** (digital/manual, estado).
-- [ ] **4.5.2 CRUD SignosVitales** (1:1 con consulta).
-- [ ] **4.5.3 CRUD NotasSoap** (1:1 con consulta).
-- [ ] **4.5.4 CRUD VacunaPaciente** (aplicaciones reales).
+- [~] **4.5.1 CRUD Consulta** (digital/manual, estado). — 50% ✔ Migración + Modelo (`Consultation.php`, casts `ConsultationType`/`ConsultationStatus`) + Factory + `ConsultationFactoryTest`. ✘ Sin Service/Action, sin Controller/Livewire, sin Feature test.
+- [~] **4.5.2 CRUD SignosVitales** (1:1 con consulta). — 50% ✔ Migración + Modelo (`VitalSign.php`) + Factory + `VitalSignFactoryTest`. ✘ Sin Service/Action, sin UI.
+- [~] **4.5.3 CRUD NotasSoap** (1:1 con consulta). — 50% ✔ Migración + Modelo (`SoapNote.php`) + Factory + `SoapNoteFactoryTest`. ✘ Sin Service/Action, sin UI.
+- [ ] **4.5.4 CRUD VacunaPaciente** (aplicaciones reales). — 0%
 
-### 4.6 Resultados e Inmutabilidad (Snapshots)
+### 4.6 Resultados e Inmutabilidad (Snapshots) — 0%
 
-- [ ] **4.6.1 CRUD Receta**.
-- [ ] **4.6.2 CRUD DetalleReceta** (snapshot inmutable).
-- [ ] **4.6.3 CRUD SolicitudLaboratorio**.
-- [ ] **4.6.4 CRUD DetalleSolicitudLaboratorio** (snapshot + resultado).
+- [ ] **4.6.1 CRUD Receta**. — 0%
+- [ ] **4.6.2 CRUD DetalleReceta** (snapshot inmutable). — 0%
+- [ ] **4.6.3 CRUD SolicitudLaboratorio**. — 0%
+- [ ] **4.6.4 CRUD DetalleSolicitudLaboratorio** (snapshot + resultado). — 0%
 
-### 4.7 Motor OMS (catálogo y datos)
+### 4.7 Motor OMS (catálogo y datos) — 0%
 
-- [ ] **4.7.1 CRUD OmsCatalogoGrafica** (boletas oficiales OMS).
-- [ ] **4.7.2 CRUD OmsDatoGrafica** (LMS, Z-Score, percentiles).
+- [ ] **4.7.1 CRUD OmsCatalogoGrafica** (boletas oficiales OMS). — 0%
+- [ ] **4.7.2 CRUD OmsDatoGrafica** (LMS, Z-Score, percentiles). — 0%
 
-### 4.8 Seguridad, policies y auditoría
+### 4.8 Seguridad, policies y auditoría — 0%
 
-- [ ] **4.8.1 Policies por rol** (Admin/Doctor y alcance por paciente).
-- [ ] **4.8.2 Auditoría mínima** en acciones críticas de catálogos y consulta.
-
----
-
-## 🧠 Fase 5: Lógica de Dominio (Services/Value Objects)
-
-- [ ] **5.1 AgeValueObject**: cálculo de edad exacta (días/semanas/meses/años).
-- [ ] **5.2 BloodGroupValueObject**: validación tipológica.
-- [ ] **5.3 ZScoreService/ValueObject**: cálculo clínico OMS.
-- [ ] **5.4 ConsultationSnapshotService**: copia inmutable de plantillas a transacciones.
-- [ ] **5.5 GrowthChartService**: preparación de datasets para Chart.js.
+- [ ] **4.8.1 Policies por rol** (Admin/Doctor y alcance por paciente). — 0% (no existe carpeta `app/Policies/`)
+- [ ] **4.8.2 Auditoría mínima** en acciones críticas de catálogos y consulta. — 0%
 
 ---
 
-## 📋 Fase 6: Integración de Flujo Clínico Completo (Livewire)
+## 🧠 Fase 5: Lógica de Dominio (Services/Value Objects) — 35%
 
-- [ ] **6.1 Gestión de pacientes**: listado, búsqueda, registro y edición.
-- [ ] **6.2 Atención activa**: SOAP + signos + aplicación de plantillas.
-- [ ] **6.3 Recetas y laboratorios**: creación, edición permitida por estado, cierre final.
-- [ ] **6.4 Módulo híbrido**: subida y visualización de PDF/JPG históricos.
-
----
-
-## 📈 Fase 7: Motor Gráfico OMS
-
-- [ ] **7.1 Seeding masivo OMS**: importación CSV a `oms_datos_graficas`.
-- [ ] **7.2 Gráficas Chart.js**: boletas, radio buttons y rangos.
-- [ ] **7.3 Modo dual**: Médico (Z-Score) vs Padres (Percentil).
-- [ ] **7.4 Pruebas de precisión**: coordenadas de pacientes de prueba.
+- [ ] **5.1 AgeValueObject**: cálculo de edad exacta (días/semanas/meses/años). — 0%
+- [x] **5.2 BloodGroupValueObject**: validación tipológica. ✔ `BloodGroup.php` completo (8 tipos, validación, Castable, Stringable) + `BloodGroupTest.php`. Nota: también existen `Gender`, `BirthType`, `ConsultationStatus`, `ConsultationType`, `LicenseNumber`, `PhoneNumber`, `MedicalStatus` y `Measurements/{Height,Weight,Temperature,HeadCircumference}` — todos con tests unitarios.
+- [ ] **5.3 ZScoreService/ValueObject**: cálculo clínico OMS. — 0%
+- [ ] **5.4 ConsultationSnapshotService**: copia inmutable de plantillas a transacciones. — 0%
+- [ ] **5.5 GrowthChartService**: preparación de datasets para Chart.js. — 0%
 
 ---
 
-## 🧪 Fase 8: Calidad, Seguridad y Cierre Técnico
+## 📋 Fase 6: Integración de Flujo Clínico Completo (Livewire) — 0%
 
-- [ ] **8.1 Cobertura**: fortalecer suite de pruebas en módulos críticos.
-- [ ] **8.2 Pruebas de autorización**: acceso correcto por rol/propietario.
-- [ ] **8.3 Pruebas de regresión** del flujo completo de consulta.
+- [ ] **6.1 Gestión de pacientes**: listado, búsqueda, registro y edición. — 0% (solo existe `Livewire/Actions/Logout.php`; no hay componentes Livewire de dominio)
+- [ ] **6.2 Atención activa**: SOAP + signos + aplicación de plantillas. — 0%
+- [ ] **6.3 Recetas y laboratorios**: creación, edición permitida por estado, cierre final. — 0%
+- [ ] **6.4 Módulo híbrido**: subida y visualización de PDF/JPG históricos. — 0%
 
 ---
 
-## 🚀 Fase 9: Despliegue y Capacitación
+## 📈 Fase 7: Motor Gráfico OMS — 0%
 
-- [ ] **9.1 Preparación productiva**: servidor, colas, storage, backup.
-- [ ] **9.2 Carga inicial**: escaneos históricos comprometidos.
-- [ ] **9.3 Capacitación**: uso operativo con la doctora.
+- [ ] **7.1 Seeding masivo OMS**: importación CSV a `oms_datos_graficas`. — 0%
+- [ ] **7.2 Gráficas Chart.js**: boletas, radio buttons y rangos. — 0%
+- [ ] **7.3 Modo dual**: Médico (Z-Score) vs Padres (Percentil). — 0%
+- [ ] **7.4 Pruebas de precisión**: coordenadas de pacientes de prueba. — 0%
+
+---
+
+## 🧪 Fase 8: Calidad, Seguridad y Cierre Técnico — 10%
+
+- [~] **8.1 Cobertura**: fortalecer suite de pruebas en módulos críticos. — 15% ✔ Tests unitarios para Value Objects (`BirthType`, `BloodGroup`, `ConsultationStatus`, `ConsultationType`, `Gender`, `LicenseNumber`, `Measurements/*`, `MedicalStatus`, `PhoneNumber`), Factories (`Doctor`, `Patient`, `Consultation`, `VitalSign`, `SoapNote`, `User`) y `PacienteServiceTest`. ✘ Sin cobertura en catálogos, plantillas, snapshots, OMS.
+- [ ] **8.2 Pruebas de autorización**: acceso correcto por rol/propietario. — 0%
+- [ ] **8.3 Pruebas de regresión** del flujo completo de consulta. — 0%
+
+---
+
+## 🚀 Fase 9: Despliegue y Capacitación — 0%
+
+- [ ] **9.1 Preparación productiva**: servidor, colas, storage, backup. — 0%
+- [ ] **9.2 Carga inicial**: escaneos históricos comprometidos. — 0%
+- [ ] **9.3 Capacitación**: uso operativo con la doctora. — 0%
+
+---
+
+---
+
+## 📊 Resumen de Auditoría — 24 Feb 2026
+
+| Fase | Descripción | Avance |
+|------|------------|--------|
+| 1 | Inicialización y Entorno | ✅ 100% |
+| 2 | Librerías y Herramientas Base | ✅ 100% |
+| 3 | UI Base y Componentes | 🟡 40% |
+| 4.1 | Perfil Médico (Doctor) | 🟡 50% |
+| 4.2 | Catálogos Clínicos | 🔴 0% |
+| 4.3 | Módulo Pacientes | 🟢 85% |
+| 4.4 | Módulo Plantillas | 🔴 0% |
+| 4.5 | Flujo de Consulta (SOAP) | 🟡 35% |
+| 4.6 | Resultados / Snapshots | 🔴 0% |
+| 4.7 | Motor OMS (datos) | 🔴 0% |
+| 4.8 | Seguridad / Policies | 🔴 0% |
+| 5 | Lógica de Dominio (VO/Services) | 🟡 35% |
+| 6 | Livewire Clínico | 🔴 0% |
+| 7 | Motor Gráfico OMS | 🔴 0% |
+| 8 | Calidad / Cierre Técnico | 🔴 10% |
+| 9 | Despliegue y Capacitación | 🔴 0% |
+| **Total MVP** | **Fase 4 completa** | **~20%** |
+
+> **Evidencia de auditoría**: `git status`, listado de `app/`, `database/migrations/`, `tests/`, `resources/views/`, `app/Livewire/`. Fecha: 24-02-2026.
 
 ---
 

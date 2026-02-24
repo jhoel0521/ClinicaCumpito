@@ -71,7 +71,7 @@ Una subtarea se considera terminada solo si cumple todo:
 
 ## 📅 Fase 1: Inicialización y Entorno
 
-- [x] **1.1 Bootstrap del proyecto**: Laravel 12 + PHP 8.4.
+- [~] **1.1 Bootstrap del proyecto**: Laravel 12 + PHP 8.4. — 80% ✔ Laravel 12 operativo. ✘ `composer.json` mantiene `php: ^8.2` (no fijado explícitamente a 8.4).
 - [x] **1.2 Git Flow**: configuración de repositorio.
 - [x] **1.3 Configuración de DB**: entorno local configurado.
 - [x] **1.4 CI/CD Setup**: pipeline de tests base.
@@ -97,27 +97,27 @@ Una subtarea se considera terminada solo si cumple todo:
 
 > Ciclo obligatorio por CRUD: Migración + Modelo + Factory + Action/Service + Test Unitario + Test Feature.
 
-### 4.1 Perfil Médico y Roles — 100%
+### 4.1 Perfil Médico y Roles — 85%
 
-- [x] **4.1.1 Perfil Doctor** (Especialidad, Matrícula Profesional). — 100% ✔ Modelo `Doctor` + `DoctorDTO` + `DoctorService` + `UpdateDoctorRequest` + Componente Livewire Volt `⚡doctor-profile` + `DoctorProfileTest`.
+- [~] **4.1.1 Perfil Doctor** (Especialidad, Matrícula Profesional). — 85% ✔ Modelo `Doctor` + `DoctorDTO` + `DoctorService` + `UpdateDoctorRequest` + Componente Livewire Volt `⚡doctor-profile` + `DoctorProfileTest` (feature). ✘ Falta test unitario específico de `DoctorService` según política obligatoria.
 
-### 4.2 Catálogos Clínicos (Prioridad temprana solicitada) — 100%
+### 4.2 Catálogos Clínicos (Prioridad temprana solicitada) — 85%
 
-- [x] **4.2.1 CRUD CategoriaLaboratorio** (Hematología, Orina, Imágenes, etc.). — 100% ✔ Migraciones + Modelo + Factory + DTO + Servicio + UI Livewire.
-- [x] **4.2.2 CRUD CatalogoExamenLaboratorio** (exámenes individuales). — 100% ✔ Migraciones + Modelo + Factory + DTO + Servicio + UI Livewire.
-- [x] **4.2.3 CRUD CatalogoMedicamento** (catálogo para recetas). — 100% ✔ Migraciones + Modelo + Factory + DTO + Servicio + UI Livewire.
-- [x] **4.2.4 CRUD CatalogoVacuna** (PAI Bolivia). — 100% ✔ Migraciones + Modelo + Factory + DTO + Servicio + UI Livewire + Seeder PAI Bolivia completo.
+- [~] **4.2.1 CRUD CategoriaLaboratorio** (Hematología, Orina, Imágenes, etc.). — 85% ✔ Migraciones + Modelo + Factory + DTO + Servicio + UI Livewire + tests feature de catálogos. ✘ Falta cobertura unitaria de servicio.
+- [~] **4.2.2 CRUD CatalogoExamenLaboratorio** (exámenes individuales). — 85% ✔ Migraciones + Modelo + Factory + DTO + Servicio + UI Livewire + tests feature de catálogos. ✘ Falta cobertura unitaria de servicio.
+- [~] **4.2.3 CRUD CatalogoMedicamento** (catálogo para recetas). — 85% ✔ Migraciones + Modelo + Factory + DTO + Servicio + UI Livewire + tests feature de catálogos. ✘ Falta cobertura unitaria de servicio.
+- [~] **4.2.4 CRUD CatalogoVacuna** (PAI Bolivia). — 85% ✔ Migraciones + Modelo + Factory + DTO + Servicio + UI Livewire + Seeder PAI Bolivia + tests feature de catálogos. ✘ Falta cobertura unitaria de servicio.
 
 ### 4.3 Módulo Pacientes — 100%
 
 - [x] **4.3.1 CRUD Paciente** (filiación, nacimiento, antecedentes). — 100% ✔ Migración + Modelo (`Patient.php`) + Factory + `PacienteService` + `PacienteServiceContract` + `PacienteDTO` + `PacienteController` + `StorePacienteRequest` + `UpdatePacienteRequest` + Vistas (`index/create/edit/show`) + `PacienteControllerTest` (feature) + `PatientFactoryTest` (unit) + Componente Livewire de búsqueda/gestión activa (`⚡patient-list.blade.php`).
 
-### 4.4 Módulo Plantillas (Ahorro de tiempo) — 100%
+### 4.4 Módulo Plantillas (Ahorro de tiempo) — 85%
 
-- [x] **4.4.1 CRUD PlantillaReceta**. — 100% ✔ `PrescriptionTemplate` + migración + factory + `PrescriptionTemplateDTO` + `TemplateService` + UI (`resources/views/pages/templates/⚡prescription-templates.blade.php`).
-- [x] **4.4.2 CRUD ItemPlantillaReceta**. — 100% ✔ `PrescriptionTemplateItem` + migración + factory + `PrescriptionTemplateItemDTO` + pruebas unitarias de servicio.
-- [x] **4.4.3 CRUD PlantillaLaboratorio**. — 100% ✔ `LaboratoryTemplate` + migración + factory + `LaboratoryTemplateDTO` + UI (`resources/views/pages/templates/⚡laboratory-templates.blade.php`).
-- [x] **4.4.4 CRUD ItemPlantillaLaboratorio**. — 100% ✔ `LaboratoryTemplateItem` + migración + factory + `LaboratoryTemplateItemDTO` + pruebas unitarias de servicio.
+- [~] **4.4.1 CRUD PlantillaReceta**. — 85% ✔ `PrescriptionTemplate` + migración + factory + `PrescriptionTemplateDTO` + `TemplateService` + UI (`resources/views/pages/templates/⚡prescription-templates.blade.php`) + tests unitarios de servicio. ✘ Falta test feature/end-to-end de módulo.
+- [~] **4.4.2 CRUD ItemPlantillaReceta**. — 85% ✔ `PrescriptionTemplateItem` + migración + factory + `PrescriptionTemplateItemDTO` + pruebas unitarias de servicio. ✘ Falta test feature/end-to-end del flujo.
+- [~] **4.4.3 CRUD PlantillaLaboratorio**. — 85% ✔ `LaboratoryTemplate` + migración + factory + `LaboratoryTemplateDTO` + UI (`resources/views/pages/templates/⚡laboratory-templates.blade.php`) + tests unitarios de servicio. ✘ Falta test feature/end-to-end de módulo.
+- [~] **4.4.4 CRUD ItemPlantillaLaboratorio**. — 85% ✔ `LaboratoryTemplateItem` + migración + factory + `LaboratoryTemplateItemDTO` + pruebas unitarias de servicio. ✘ Falta test feature/end-to-end del flujo.
 
 ### 4.5 Flujo de Consulta (SOAP) — 56%
 
@@ -148,7 +148,7 @@ Una subtarea se considera terminada solo si cumple todo:
 ## 🧠 Fase 5: Lógica de Dominio (Services/Value Objects) — 35%
 
 - [ ] **5.1 AgeValueObject**: cálculo de edad exacta (días/semanas/meses/años). — 0%
-- [x] **5.2 BloodGroupValueObject**: validación tipológica. ✔ `BloodGroup.php` completo (8 tipos, validación, Castable, Stringable) + `BloodGroupTest.php`. Nota: también existen `Gender`, `BirthType`, `ConsultationStatus`, `ConsultationType`, `LicenseNumber`, `PhoneNumber`, `MedicalStatus` y `Measurements/{Height,Weight,Temperature,HeadCircumference}` — todos con tests unitarios.
+- [~] **5.2 BloodGroupValueObject**: validación tipológica. — 90% ✔ `BloodGroup.php` completo (8 tipos, validación, Castable, Stringable) + `BloodGroupTest.php`; además existen `Gender`, `BirthType`, `ConsultationStatus`, `ConsultationType`, `LicenseNumber`, `PhoneNumber`, `MedicalStatus` y `Measurements/{Height,Weight,Temperature,HeadCircumference}` con tests unitarios. ✘ Pendiente evidencia de integración/uso transversal para cerrar con política estricta de unit + feature.
 - [ ] **5.3 ZScoreService/ValueObject**: cálculo clínico OMS. — 0%
 - [ ] **5.4 ConsultationSnapshotService**: copia inmutable de plantillas a transacciones. — 0%
 - [ ] **5.5 GrowthChartService**: preparación de datasets para Chart.js. — 0%
@@ -195,23 +195,23 @@ Una subtarea se considera terminada solo si cumple todo:
 
 | Fase | Descripción | Avance |
 |------|------------|--------|
-| 1 | Inicialización y Entorno | ✅ 100% |
+| 1 | Inicialización y Entorno | 🟡 95% |
 | 2 | Librerías y Herramientas Base | ✅ 100% |
 | 3 | UI Base y Componentes | ✅ 100% |
-| 4.1 | Perfil Médico (Doctor) | ✅ 100% |
-| 4.2 | Catálogos Clínicos | ✅ 100% |
+| 4.1 | Perfil Médico (Doctor) | 🟡 85% |
+| 4.2 | Catálogos Clínicos | 🟡 85% |
 | 4.3 | Módulo Pacientes | ✅ 100% |
-| 4.4 | Módulo Plantillas | ✅ 100% |
+| 4.4 | Módulo Plantillas | 🟡 85% |
 | 4.5 | Flujo de Consulta (SOAP) | 🟡 56% |
 | 4.6 | Resultados / Snapshots | 🔴 0% |
 | 4.7 | Motor OMS (datos) | 🔴 0% |
 | 4.8 | Seguridad / Policies | 🔴 0% |
-| 5 | Lógica de Dominio (VO/Services) | 🟡 35% |
+| 5 | Lógica de Dominio (VO/Services) | 🟡 30% |
 | 6 | Livewire Clínico | 🔴 0% |
 | 7 | Motor Gráfico OMS | 🔴 0% |
 | 8 | Calidad / Cierre Técnico | 🟡 30% |
 | 9 | Despliegue y Capacitación | 🔴 0% |
-| **Total MVP** | **Fase 4 progresando** | **~38%** |
+| **Total MVP** | **Fase 4 progresando** | **~34%** |
 
 > **Evidencia de auditoría**: `git status`, listado de `app/`, `database/migrations/`, `tests/`, `resources/views/`, `app/Livewire/`. Fecha: 24-02-2026.
 

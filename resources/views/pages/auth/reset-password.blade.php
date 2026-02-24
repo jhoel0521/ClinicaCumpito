@@ -1,8 +1,8 @@
 <x-layouts::auth>
     <div class="flex flex-col gap-6">
-        <x-auth-header 
-            :title="__('Nueva Contraseña')" 
-            :description="__('Ingresa tu nueva contraseña a continuación')" 
+        <x-auth-header
+            :title="__('Nueva Contraseña')"
+            :description="__('Ingresa tu nueva contraseña a continuación')"
         />
 
         <!-- Session Status -->
@@ -11,7 +11,7 @@
         <form method="POST" action="{{ route('password.update') }}" class="flex flex-col gap-5">
             @csrf
             <!-- Token -->
-            <input type="hidden" name="token" value="{{ request()->route('token') }}">
+            <input type="hidden" name="token" value="{{ request()->route('token') }}" />
 
             <!-- Email Address -->
             <flux:input
@@ -45,13 +45,9 @@
                 viewable
             />
 
-            <button 
-                type="submit" 
-                data-auth-button
-                class="mt-2"
-                data-test="reset-password-button"
-            >
-                <i class="fas fa-key mr-2"></i>{{ __('Establecer Nueva Contraseña') }}
+            <button type="submit" data-auth-button class="mt-2" data-test="reset-password-button">
+                <i class="fas fa-key mr-2"></i>
+                {{ __('Establecer Nueva Contraseña') }}
             </button>
         </form>
     </div>

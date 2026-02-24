@@ -85,11 +85,11 @@ Una subtarea se considera terminada solo si cumple todo:
 
 ---
 
-## ⚡ Fase 3: UI Base y Componentes (sin bloquear dominio) — 40%
+## ⚡ Fase 3: UI Base y Componentes (sin bloquear dominio) — 100%
 
 - [x] **3.1 Tailwind/Design tokens**: configuración base del tema. ✔ `@tailwindcss/vite` en `vite.config.js`, CSS base en `resources/css/`.
-- [~] **3.2 Layouts maestros**: Dashboard, Sidebar, Navbar. — 60% (`app.blade.php` + `layouts/app/{header,sidebar}.blade.php` existen, no hay Navbar independiente ni layout de dashboard completo).
-- [ ] **3.3 Componentes atómicos**: Inputs, Buttons, Alerts, Modals. — 0% (solo componentes de auth generados por Fortify/Flux).
+- [x] **3.2 Layouts maestros**: Dashboard, Sidebar, Navbar. ✔ Layout dashboard + `layouts/app/sidebar.blade.php` + navbar maestro desktop.
+- [x] **3.3 Componentes atómicos**: Inputs, Buttons, Alerts, Modals. ✔ Componentes en `resources/views/components/ui/{input,button,alert,modal}.blade.php` e integrados en vistas de pacientes.
 
 ---
 
@@ -197,7 +197,7 @@ Una subtarea se considera terminada solo si cumple todo:
 |------|------------|--------|
 | 1 | Inicialización y Entorno | ✅ 100% |
 | 2 | Librerías y Herramientas Base | ✅ 100% |
-| 3 | UI Base y Componentes | 🟡 40% |
+| 3 | UI Base y Componentes | ✅ 100% |
 | 4.1 | Perfil Médico (Doctor) | 🟡 50% |
 | 4.2 | Catálogos Clínicos | 🔴 0% |
 | 4.3 | Módulo Pacientes | 🟢 85% |

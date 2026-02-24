@@ -71,8 +71,8 @@ new class extends Component {
     #[Computed]
     public function showDeleteUser(): bool
     {
-        return ! Auth::user() instanceof MustVerifyEmail
-            || (Auth::user() instanceof MustVerifyEmail && Auth::user()->hasVerifiedEmail());
+        return ! Auth::user() instanceof MustVerifyEmail ||
+            (Auth::user() instanceof MustVerifyEmail && Auth::user()->hasVerifiedEmail());
     }
 }; ?>
 
@@ -93,7 +93,10 @@ new class extends Component {
                         <flux:text class="mt-4">
                             {{ __('Your email address is unverified.') }}
 
-                            <flux:link class="text-sm cursor-pointer" wire:click.prevent="resendVerificationNotification">
+                            <flux:link
+                                class="text-sm cursor-pointer"
+                                wire:click.prevent="resendVerificationNotification"
+                            >
                                 {{ __('Click here to re-send the verification email.') }}
                             </flux:link>
                         </flux:text>

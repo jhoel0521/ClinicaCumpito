@@ -20,13 +20,9 @@
                 viewable
             />
 
-            <button 
-                type="submit" 
-                data-auth-button
-                class="mt-2"
-                data-test="confirm-password-button"
-            >
-                <i class="fas fa-shield-alt mr-2"></i>{{ __('Confirmar') }}
+            <button type="submit" data-auth-button class="mt-2" data-test="confirm-password-button">
+                <i class="fas fa-shield-alt mr-2"></i>
+                {{ __('Confirmar') }}
             </button>
         </form>
     </div>

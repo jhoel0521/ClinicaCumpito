@@ -1,8 +1,8 @@
 <x-layouts::auth>
     <div class="flex flex-col gap-6">
-        <x-auth-header 
-            :title="__('Bienvenido de Vuelta')" 
-            :description="__('Iniciar sesión en VitalTrack Pediátrico')" 
+        <x-auth-header
+            :title="__('Bienvenido de Vuelta')"
+            :description="__('Iniciar sesión en VitalTrack Pediátrico')"
         />
 
         <!-- Session Status -->
@@ -37,9 +37,9 @@
             <!-- Remember Me -->
             <div class="flex items-center justify-between">
                 <label class="flex items-center gap-3 cursor-pointer group">
-                    <input 
-                        type="checkbox" 
-                        name="remember" 
+                    <input
+                        type="checkbox"
+                        name="remember"
                         :checked="old('remember')"
                         class="w-5 h-5 rounded-md border-2 border-zinc-300 dark:border-zinc-600 cursor-pointer accent-teal-600 dark:accent-teal-400 transition-all group-hover:border-teal-400"
                     />
@@ -52,13 +52,9 @@
                 @endif
             </div>
 
-            <button 
-                type="submit" 
-                data-auth-button
-                class="mt-2"
-                data-test="login-button"
-            >
-                <i class="fas fa-sign-in-alt mr-2"></i>{{ __('Iniciar Sesión') }}
+            <button type="submit" data-auth-button class="mt-2" data-test="login-button">
+                <i class="fas fa-sign-in-alt mr-2"></i>
+                {{ __('Iniciar Sesión') }}
             </button>
         </form>
 

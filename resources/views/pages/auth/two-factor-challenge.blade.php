@@ -8,18 +8,18 @@
                 code: '',
                 recovery_code: '',
                 toggleInput() {
-                    this.showRecoveryInput = !this.showRecoveryInput;
+                    this.showRecoveryInput = ! this.showRecoveryInput
 
-                    this.code = '';
-                    this.recovery_code = '';
+                    this.code = ''
+                    this.recovery_code = ''
 
-                    $dispatch('clear-2fa-auth-code');
+                    $dispatch('clear-2fa-auth-code')
 
                     $nextTick(() => {
                         this.showRecoveryInput
                             ? this.$refs.recovery_code?.focus()
-                            : $dispatch('focus-2fa-auth-code');
-                    });
+                            : $dispatch('focus-2fa-auth-code')
+                    })
                 },
             }"
         >
@@ -50,7 +50,7 @@
                                 label="OTP Code"
                                 label:sr-only
                                 class="mx-auto"
-                             />
+                            />
                         </div>
                     </div>
 
@@ -73,21 +73,28 @@
                         @enderror
                     </div>
 
-                    <button 
-                        type="submit" 
-                        data-auth-button
-                        class="mt-2"
-                    >
-                        <i class="fas fa-arrow-right mr-2"></i>{{ __('Continuar') }}
+                    <button type="submit" data-auth-button class="mt-2">
+                        <i class="fas fa-arrow-right mr-2"></i>
+                        {{ __('Continuar') }}
                     </button>
                 </div>
 
                 <div data-auth-divider><span>{{ __('o') }}</span></div>
 
                 <p class="text-center text-sm text-zinc-600 dark:text-zinc-400">
-                    <button type="button" @click="toggleInput()" class="text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 font-medium underline cursor-pointer">
-                        <span x-show="!showRecoveryInput"><i class="fas fa-key mr-1"></i>{{ __('Usar código de recuperación') }}</span>
-                        <span x-show="showRecoveryInput"><i class="fas fa-shield-alt mr-1"></i>{{ __('Usar código de autenticación') }}</span>
+                    <button
+                        type="button"
+                        @click="toggleInput()"
+                        class="text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 font-medium underline cursor-pointer"
+                    >
+                        <span x-show="!showRecoveryInput">
+                            <i class="fas fa-key mr-1"></i>
+                            {{ __('Usar código de recuperación') }}
+                        </span>
+                        <span x-show="showRecoveryInput">
+                            <i class="fas fa-shield-alt mr-1"></i>
+                            {{ __('Usar código de autenticación') }}
+                        </span>
                     </button>
                 </p>
             </form>

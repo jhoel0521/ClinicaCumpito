@@ -1,8 +1,8 @@
 <x-layouts::auth>
     <div class="flex flex-col gap-6">
-        <x-auth-header 
-            :title="__('Recuperar Contraseña')" 
-            :description="__('Ingresa tu correo para recibir un enlace de restablecimiento')" 
+        <x-auth-header
+            :title="__('Recuperar Contraseña')"
+            :description="__('Ingresa tu correo para recibir un enlace de restablecimiento')"
         />
 
         <!-- Session Status -->
@@ -21,13 +21,9 @@
                 placeholder="tu@email.com"
             />
 
-            <button 
-                type="submit" 
-                data-auth-button
-                class="mt-2"
-                data-test="email-password-reset-link-button"
-            >
-                <i class="fas fa-envelope mr-2"></i>{{ __('Enviar Enlace de Restablecimiento') }}
+            <button type="submit" data-auth-button class="mt-2" data-test="email-password-reset-link-button">
+                <i class="fas fa-envelope mr-2"></i>
+                {{ __('Enviar Enlace de Restablecimiento') }}
             </button>
         </form>
 

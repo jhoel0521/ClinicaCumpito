@@ -4,7 +4,11 @@
         @include('partials.head')
     </head>
     <body class="min-h-screen bg-white dark:bg-zinc-800">
-        <flux:sidebar sticky collapsible="mobile" class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
+        <flux:sidebar
+            sticky
+            collapsible="mobile"
+            class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900"
+        >
             <flux:sidebar.header>
                 <x-app-logo :sidebar="true" href="{{ route('dashboard') }}" wire:navigate />
                 <flux:sidebar.collapse class="lg:hidden" />
@@ -12,13 +16,23 @@
 
             <flux:sidebar.nav>
                 <flux:sidebar.group :heading="__('Platform')" class="grid">
-                    <flux:sidebar.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
+                    <flux:sidebar.item
+                        icon="home"
+                        :href="route('dashboard')"
+                        :current="request()->routeIs('dashboard')"
+                        wire:navigate
+                    >
                         {{ __('Dashboard') }}
                     </flux:sidebar.item>
                 </flux:sidebar.group>
 
                 <flux:sidebar.group :heading="__('Módulos')" class="grid">
-                    <flux:sidebar.item icon="users" :href="route('pacientes.index')" :current="request()->routeIs('pacientes.*')" wire:navigate>
+                    <flux:sidebar.item
+                        icon="users"
+                        :href="route('pacientes.index')"
+                        :current="request()->routeIs('pacientes.*')"
+                        wire:navigate
+                    >
                         {{ __('Pacientes') }}
                     </flux:sidebar.item>
                 </flux:sidebar.group>
@@ -28,26 +42,38 @@
 
             <flux:sidebar.nav>
                 <div class="px-3 py-2">
-                    <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase mb-2">Tema</label>
-                    <select id="themeSelect" class="w-full px-3 py-2 rounded-lg text-sm bg-white dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-teal-500 focus:border-transparent transition">
+                    <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase mb-2">
+                        Tema
+                    </label>
+                    <select
+                        id="themeSelect"
+                        class="w-full px-3 py-2 rounded-lg text-sm bg-white dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
+                    >
                         <option value="system">Sistema</option>
                         <option value="dark">Oscuro</option>
                         <option value="light">Claro</option>
                     </select>
                 </div>
 
-                <flux:sidebar.item icon="folder-git-2" href="https://github.com/laravel/livewire-starter-kit" target="_blank">
+                <flux:sidebar.item
+                    icon="folder-git-2"
+                    href="https://github.com/laravel/livewire-starter-kit"
+                    target="_blank"
+                >
                     {{ __('Repository') }}
                 </flux:sidebar.item>
 
-                <flux:sidebar.item icon="book-open-text" href="https://laravel.com/docs/starter-kits#livewire" target="_blank">
+                <flux:sidebar.item
+                    icon="book-open-text"
+                    href="https://laravel.com/docs/starter-kits#livewire"
+                    target="_blank"
+                >
                     {{ __('Documentation') }}
                 </flux:sidebar.item>
             </flux:sidebar.nav>
 
             <x-desktop-user-menu class="hidden lg:block" :name="auth()->user()->name" />
         </flux:sidebar>
-
 
         <!-- Mobile User Menu -->
         <flux:header class="lg:hidden">
@@ -56,19 +82,13 @@
             <flux:spacer />
 
             <flux:dropdown position="top" align="end">
-                <flux:profile
-                    :initials="auth()->user()->initials()"
-                    icon-trailing="chevron-down"
-                />
+                <flux:profile :initials="auth()->user()->initials()" icon-trailing="chevron-down" />
 
                 <flux:menu>
                     <flux:menu.radio.group>
                         <div class="p-0 text-sm font-normal">
                             <div class="flex items-center gap-2 px-1 py-1.5 text-start text-sm">
-                                <flux:avatar
-                                    :name="auth()->user()->name"
-                                    :initials="auth()->user()->initials()"
-                                />
+                                <flux:avatar :name="auth()->user()->name" :initials="auth()->user()->initials()" />
 
                                 <div class="grid flex-1 text-start text-sm leading-tight">
                                     <flux:heading class="truncate">{{ auth()->user()->name }}</flux:heading>
@@ -102,6 +122,34 @@
                     </form>
                 </flux:menu>
             </flux:dropdown>
+        </flux:header>
+
+        <flux:header
+            container
+            class="max-lg:hidden border-b border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900"
+        >
+            <flux:navbar class="-mb-px">
+                <flux:navbar.item
+                    icon="home"
+                    :href="route('dashboard')"
+                    :current="request()->routeIs('dashboard')"
+                    wire:navigate
+                >
+                    {{ __('Dashboard') }}
+                </flux:navbar.item>
+                <flux:navbar.item
+                    icon="users"
+                    :href="route('pacientes.index')"
+                    :current="request()->routeIs('pacientes.*')"
+                    wire:navigate
+                >
+                    {{ __('Pacientes') }}
+                </flux:navbar.item>
+            </flux:navbar>
+
+            <flux:spacer />
+
+            <x-desktop-user-menu class="hidden lg:block" :name="auth()->user()->name" />
         </flux:header>
 
         {{ $slot }}
@@ -144,10 +192,10 @@
             }
 
             // Inicializar evento del select
-            document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('DOMContentLoaded', function () {
                 const themeSelect = document.getElementById('themeSelect');
                 if (themeSelect) {
-                    themeSelect.addEventListener('change', function(e) {
+                    themeSelect.addEventListener('change', function (e) {
                         handleThemeChange(e.target.value);
                     });
                 }
@@ -158,7 +206,7 @@
             });
 
             // Detectar cambios en la preferencia del sistema
-            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function() {
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function () {
                 if (!localStorage.getItem('theme')) {
                     applyTheme('system');
                     updateThemeSelect('system');

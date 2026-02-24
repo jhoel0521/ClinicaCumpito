@@ -1,9 +1,6 @@
 <x-layouts::auth>
     <div class="flex flex-col gap-6">
-        <x-auth-header 
-            :title="__('Crear Cuenta')" 
-            :description="__('Registrarse en VitalTrack Pediátrico')" 
-        />
+        <x-auth-header :title="__('Crear Cuenta')" :description="__('Registrarse en VitalTrack Pediátrico')" />
 
         <!-- Session Status -->
         <x-auth-session-status class="text-center" :status="session('status')" />
@@ -55,13 +52,9 @@
                 viewable
             />
 
-            <button 
-                type="submit" 
-                data-auth-button
-                class="mt-2"
-                data-test="register-user-button"
-            >
-                <i class="fas fa-user-plus mr-2"></i>{{ __('Crear mi Cuenta') }}
+            <button type="submit" data-auth-button class="mt-2" data-test="register-user-button">
+                <i class="fas fa-user-plus mr-2"></i>
+                {{ __('Crear mi Cuenta') }}
             </button>
         </form>
 

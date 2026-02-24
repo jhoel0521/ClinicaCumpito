@@ -240,6 +240,8 @@ php vendor/bin/pint
 Este paso es **INELUDIBLE** antes de commit. Pint aplica estándares PSR-12 y las reglas del proyecto.
 
 Antes de hacer commit:
+- [ ] ¿He ejecutado `npm run blade:fix` para formatear?
+- [ ] ¿He ejecutado `./vendor/bin/phpstan analyse` para formatear?
 - [ ] ¿He ejecutado `php vendor/bin/pint` para formatear?
 - [ ] ¿He ejecutado `php artisan test`?
 - [ ] ¿Todos los tests pasan (164+ pasando)?

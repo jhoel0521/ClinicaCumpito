@@ -17,7 +17,9 @@ describe('PacienteController - Index', function () {
 
         $response->assertStatus(200)
             ->assertViewIs('pacientes.index')
-            ->assertViewHas('patients');
+            ->assertViewHas('patients')
+            ->assertSee('data-ui="button"', false)
+            ->assertSee('data-ui="modal"', false);
     });
 
     test('usuario no autenticado es redirigido a login', function () {
@@ -43,7 +45,8 @@ describe('PacienteController - Create', function () {
 
         $response->assertStatus(200)
             ->assertViewIs('pacientes.create')
-            ->assertViewHas('conditions');
+            ->assertViewHas('conditions')
+            ->assertSee('data-ui="input"', false);
     });
 
     test('formulario incluye lista de condiciones médicas', function () {

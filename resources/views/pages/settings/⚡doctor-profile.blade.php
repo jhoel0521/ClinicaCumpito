@@ -58,16 +58,33 @@ new class extends Component {
 <section class="w-full">
     <flux:heading class="sr-only">{{ __('Doctor Professional Settings') }}</flux:heading>
 
-    <x-pages::settings.layout :heading="__('Información Profesional')" :subheading="__('Actualiza tu especialidad y número de matrícula médica')">
+    <x-pages::settings.layout
+        :heading="__('Información Profesional')"
+        :subheading="__('Actualiza tu especialidad y número de matrícula médica')"
+    >
         <form wire:submit="updateDoctorInformation" class="my-6 w-full space-y-6">
-            <flux:input wire:model="full_name" :label="__('Nombre Completo')" type="text" required
-                autocomplete="name" />
+            <flux:input
+                wire:model="full_name"
+                :label="__('Nombre Completo')"
+                type="text"
+                required
+                autocomplete="name"
+            />
 
-            <flux:input wire:model="specialty" :label="__('Especialidad')" type="text"
-                placeholder="Ej. Pediatría, Cardiología..." />
+            <flux:input
+                wire:model="specialty"
+                :label="__('Especialidad')"
+                type="text"
+                placeholder="Ej. Pediatría, Cardiología..."
+            />
 
-            <flux:input wire:model="license_number" :label="__('Número de Matrícula / Licencia')" type="text" required
-                placeholder="Matrícula profesional" />
+            <flux:input
+                wire:model="license_number"
+                :label="__('Número de Matrícula / Licencia')"
+                type="text"
+                required
+                placeholder="Matrícula profesional"
+            />
 
             <div class="flex items-center gap-4">
                 <flux:button variant="primary" type="submit" class="w-full">

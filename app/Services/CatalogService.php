@@ -34,9 +34,12 @@ class CatalogService implements CatalogServiceContract
 
     public function deleteLaboratoryCategory(string $id): bool
     {
-        return DB::transaction(fn () => LaboratoryCategory::findOrFail($id)->delete());
+        return (bool) DB::transaction(fn () => LaboratoryCategory::findOrFail($id)->delete());
     }
 
+    /**
+     * @return Collection<int, LaboratoryCategory>
+     */
     public function getAllLaboratoryCategories(): Collection
     {
         return LaboratoryCategory::all();
@@ -60,9 +63,12 @@ class CatalogService implements CatalogServiceContract
 
     public function deleteLaboratoryExam(string $id): bool
     {
-        return DB::transaction(fn () => LaboratoryExam::findOrFail($id)->delete());
+        return (bool) DB::transaction(fn () => LaboratoryExam::findOrFail($id)->delete());
     }
 
+    /**
+     * @return Collection<int, LaboratoryExam>
+     */
     public function getExamsByCategory(string $categoryId): Collection
     {
         return LaboratoryExam::where('category_id', $categoryId)->get();
@@ -86,9 +92,12 @@ class CatalogService implements CatalogServiceContract
 
     public function deleteMedication(string $id): bool
     {
-        return DB::transaction(fn () => Medication::findOrFail($id)->delete());
+        return (bool) DB::transaction(fn () => Medication::findOrFail($id)->delete());
     }
 
+    /**
+     * @return Collection<int, Medication>
+     */
     public function getAllMedications(): Collection
     {
         return Medication::all();
@@ -112,9 +121,12 @@ class CatalogService implements CatalogServiceContract
 
     public function deleteVaccine(string $id): bool
     {
-        return DB::transaction(fn () => Vaccine::findOrFail($id)->delete());
+        return (bool) DB::transaction(fn () => Vaccine::findOrFail($id)->delete());
     }
 
+    /**
+     * @return Collection<int, Vaccine>
+     */
     public function getAllVaccines(): Collection
     {
         return Vaccine::all();

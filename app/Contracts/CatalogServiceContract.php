@@ -21,6 +21,9 @@ interface CatalogServiceContract
 
     public function deleteLaboratoryCategory(string $id): bool;
 
+    /**
+     * @return Collection<int, LaboratoryCategory>
+     */
     public function getAllLaboratoryCategories(): Collection;
 
     // Laboratory Exams
@@ -30,6 +33,9 @@ interface CatalogServiceContract
 
     public function deleteLaboratoryExam(string $id): bool;
 
+    /**
+     * @return Collection<int, LaboratoryExam>
+     */
     public function getExamsByCategory(string $categoryId): Collection;
 
     // Medications
@@ -39,6 +45,9 @@ interface CatalogServiceContract
 
     public function deleteMedication(string $id): bool;
 
+    /**
+     * @return Collection<int, Medication>
+     */
     public function getAllMedications(): Collection;
 
     // Vaccines
@@ -48,5 +57,8 @@ interface CatalogServiceContract
 
     public function deleteVaccine(string $id): bool;
 
+    /**
+     * @return Collection<int, Vaccine>
+     */
     public function getAllVaccines(): Collection;
 }

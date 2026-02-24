@@ -31,11 +31,17 @@ new class extends Component {
     {
         return [
             'categories' => LaboratoryCategory::query()
-                ->when($this->search && $this->tab === 'categories', fn($q) => $q->where('name', 'like', "%{$this->search}%"))
+                ->when(
+                    $this->search && $this->tab === 'categories',
+                    fn ($q) => $q->where('name', 'like', "%{$this->search}%"),
+                )
                 ->latest()
                 ->paginate(10, ['*'], 'catPage'),
             'exams' => LaboratoryExam::with('category')
-                ->when($this->search && $this->tab === 'exams', fn($q) => $q->where('name', 'like', "%{$this->search}%"))
+                ->when(
+                    $this->search && $this->tab === 'exams',
+                    fn ($q) => $q->where('name', 'like', "%{$this->search}%"),
+                )
                 ->latest()
                 ->paginate(10, ['*'], 'examPage'),
             'allCategories' => LaboratoryCategory::all(),
@@ -136,7 +142,7 @@ new class extends Component {
             'examDescription',
             'examUnit',
             'examReferenceRange',
-            'editingExamId'
+            'editingExamId',
         ]);
     }
 }; ?>
@@ -145,7 +151,8 @@ new class extends Component {
     <div class="mb-6 flex justify-between items-end">
         <div>
             <flux:heading size="xl">{{ __('Laboratorios') }}</flux:heading>
-            <flux:subheading>{{ __('Gestiona las categorías de análisis y los exámenes disponibles.') }}
+            <flux:subheading>
+                {{ __('Gestiona las categorías de análisis y los exámenes disponibles.') }}
             </flux:subheading>
         </div>
         <div class="flex gap-2">
@@ -161,12 +168,16 @@ new class extends Component {
     <!-- Filtros y Tabs Simplificados -->
     <div class="mb-6 border-b border-gray-200 dark:border-zinc-700">
         <div class="flex gap-4">
-            <button wire:click="$set('tab', 'categories')"
-                class="py-2 px-4 border-b-2 transition-colors {{ $tab === 'categories' ? 'border-teal-500 text-teal-600' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
+            <button
+                wire:click="$set('tab', 'categories')"
+                class="py-2 px-4 border-b-2 transition-colors {{ $tab === 'categories' ? 'border-teal-500 text-teal-600' : 'border-transparent text-gray-500 hover:text-gray-700' }}"
+            >
                 {{ __('Categorías') }}
             </button>
-            <button wire:click="$set('tab', 'exams')"
-                class="py-2 px-4 border-b-2 transition-colors {{ $tab === 'exams' ? 'border-teal-500 text-teal-600' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
+            <button
+                wire:click="$set('tab', 'exams')"
+                class="py-2 px-4 border-b-2 transition-colors {{ $tab === 'exams' ? 'border-teal-500 text-teal-600' : 'border-transparent text-gray-500 hover:text-gray-700' }}"
+            >
                 {{ __('Exámenes') }}
             </button>
         </div>
@@ -174,22 +185,33 @@ new class extends Component {
 
     @if ($tab === 'categories')
         <div class="space-y-4">
-            <flux:input wire:model.live.debounce.300ms="search" placeholder="Buscar categoría..." icon="magnifying-glass" />
+            <flux:input
+                wire:model.live.debounce.300ms="search"
+                placeholder="Buscar categoría..."
+                icon="magnifying-glass"
+            />
 
             <div
-                class="bg-white dark:bg-zinc-900 shadow-md rounded-lg overflow-hidden border border-gray-100 dark:border-zinc-800">
+                class="bg-white dark:bg-zinc-900 shadow-md rounded-lg overflow-hidden border border-gray-100 dark:border-zinc-800"
+            >
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-zinc-700">
                     <thead class="bg-gray-50 dark:bg-zinc-800">
                         <tr>
                             <th
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                {{ __('Nombre') }}</th>
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider"
+                            >
+                                {{ __('Nombre') }}
+                            </th>
                             <th
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                {{ __('Descripción') }}</th>
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider"
+                            >
+                                {{ __('Descripción') }}
+                            </th>
                             <th
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                {{ __('Acciones') }}</th>
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider"
+                            >
+                                {{ __('Acciones') }}
+                            </th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200 dark:divide-zinc-700 text-sm">
@@ -198,10 +220,18 @@ new class extends Component {
                                 <td class="px-6 py-4">{{ $category->name }}</td>
                                 <td class="px-6 py-4 truncate max-w-xs">{{ $category->description }}</td>
                                 <td class="px-6 py-4 flex gap-2">
-                                    <flux:button variant="ghost" size="sm" icon="pencil"
-                                        wire:click="editCategory('{{ $category->id }}')" />
-                                    <flux:button variant="ghost" size="sm" icon="trash"
-                                        wire:click="deleteCategory('{{ $category->id }}')" />
+                                    <flux:button
+                                        variant="ghost"
+                                        size="sm"
+                                        icon="pencil"
+                                        wire:click="editCategory('{{ $category->id }}')"
+                                    />
+                                    <flux:button
+                                        variant="ghost"
+                                        size="sm"
+                                        icon="trash"
+                                        wire:click="deleteCategory('{{ $category->id }}')"
+                                    />
                                 </td>
                             </tr>
                         @endforeach
@@ -214,28 +244,43 @@ new class extends Component {
         </div>
     @else
         <div class="space-y-4">
-            <flux:input wire:model.live.debounce.300ms="search" placeholder="Buscar examen..." icon="magnifying-glass" />
+            <flux:input
+                wire:model.live.debounce.300ms="search"
+                placeholder="Buscar examen..."
+                icon="magnifying-glass"
+            />
 
             <div
-                class="bg-white dark:bg-zinc-900 shadow-md rounded-lg overflow-hidden border border-gray-100 dark:border-zinc-800">
+                class="bg-white dark:bg-zinc-900 shadow-md rounded-lg overflow-hidden border border-gray-100 dark:border-zinc-800"
+            >
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-zinc-700">
                     <thead class="bg-gray-50 dark:bg-zinc-800">
                         <tr>
                             <th
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                {{ __('Nombre') }}</th>
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider"
+                            >
+                                {{ __('Nombre') }}
+                            </th>
                             <th
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                {{ __('Categoría') }}</th>
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider"
+                            >
+                                {{ __('Categoría') }}
+                            </th>
                             <th
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                {{ __('Unidad') }}</th>
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider"
+                            >
+                                {{ __('Unidad') }}
+                            </th>
                             <th
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                {{ __('Ref.') }}</th>
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider"
+                            >
+                                {{ __('Ref.') }}
+                            </th>
                             <th
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                {{ __('Acciones') }}</th>
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider"
+                            >
+                                {{ __('Acciones') }}
+                            </th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200 dark:divide-zinc-700 text-sm">
@@ -246,10 +291,18 @@ new class extends Component {
                                 <td class="px-6 py-4">{{ $exam->unit }}</td>
                                 <td class="px-6 py-4">{{ $exam->reference_range }}</td>
                                 <td class="px-6 py-4 flex gap-2">
-                                    <flux:button variant="ghost" size="sm" icon="pencil"
-                                        wire:click="editExam('{{ $exam->id }}')" />
-                                    <flux:button variant="ghost" size="sm" icon="trash"
-                                        wire:click="deleteExam('{{ $exam->id }}')" />
+                                    <flux:button
+                                        variant="ghost"
+                                        size="sm"
+                                        icon="pencil"
+                                        wire:click="editExam('{{ $exam->id }}')"
+                                    />
+                                    <flux:button
+                                        variant="ghost"
+                                        size="sm"
+                                        icon="trash"
+                                        wire:click="deleteExam('{{ $exam->id }}')"
+                                    />
                                 </td>
                             </tr>
                         @endforeach
@@ -266,7 +319,8 @@ new class extends Component {
     <flux:modal name="category-modal" class="md:w-[500px]">
         <div class="space-y-6">
             <div>
-                <flux:heading size="lg">{{ $editingCategoryId ? __('Editar Categoría') : __('Nueva Categoría') }}
+                <flux:heading size="lg">
+                    {{ $editingCategoryId ? __('Editar Categoría') : __('Nueva Categoría') }}
                 </flux:heading>
                 <flux:subheading>{{ __('Ingresa los detalles de la categoría de laboratorio.') }}</flux:subheading>
             </div>
@@ -295,8 +349,11 @@ new class extends Component {
             <form wire:submit="saveExam" class="space-y-4">
                 <flux:input wire:model="examName" :label="__('Nombre del Examen')" required />
 
-                <flux:select wire:model="examCategoryId" :label="__('Categoría')"
-                    placeholder="Selecciona una categoría">
+                <flux:select
+                    wire:model="examCategoryId"
+                    :label="__('Categoría')"
+                    placeholder="Selecciona una categoría"
+                >
                     @foreach ($allCategories as $cat)
                         <flux:select.option :value="$cat->id">{{ $cat->name }}</flux:select.option>
                     @endforeach

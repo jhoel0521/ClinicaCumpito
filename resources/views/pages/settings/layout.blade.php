@@ -16,9 +16,9 @@
             </flux:navlist.item>
 
             @role('Doctor')
-            <flux:navlist.item :href="route('doctor-profile.edit')" wire:navigate>
-                {{ __('Perfil Profesional') }}
-            </flux:navlist.item>
+                <flux:navlist.item :href="route('doctor-profile.edit')" wire:navigate>
+                    {{ __('Perfil Profesional') }}
+                </flux:navlist.item>
             @endrole
         </flux:navlist>
     </div>

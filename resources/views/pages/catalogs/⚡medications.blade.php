@@ -22,7 +22,12 @@ new class extends Component {
     {
         return [
             'medications' => Medication::query()
-                ->when($this->search, fn($q) => $q->where('name', 'like', "%{$this->search}%")->orWhere('generic_name', 'like', "%{$this->search}%"))
+                ->when(
+                    $this->search,
+                    fn ($q) => $q
+                        ->where('name', 'like', "%{$this->search}%")
+                        ->orWhere('generic_name', 'like', "%{$this->search}%"),
+                )
                 ->latest()
                 ->paginate(10),
         ];
@@ -81,7 +86,8 @@ new class extends Component {
     <div class="mb-6 flex justify-between items-end">
         <div>
             <flux:heading size="xl">{{ __('Medicamentos') }}</flux:heading>
-            <flux:subheading>{{ __('Gestiona el catálogo de fármacos disponibles para las recetas.') }}
+            <flux:subheading>
+                {{ __('Gestiona el catálogo de fármacos disponibles para las recetas.') }}
             </flux:subheading>
         </div>
         <flux:button variant="primary" icon="plus" wire:click="$dispatch('open-modal', 'medication-modal')">
@@ -90,33 +96,42 @@ new class extends Component {
     </div>
 
     <div class="mb-4">
-        <flux:input wire:model.live.debounce.300ms="search" placeholder="Buscar por nombre..."
-            icon="magnifying-glass" />
+        <flux:input
+            wire:model.live.debounce.300ms="search"
+            placeholder="Buscar por nombre..."
+            icon="magnifying-glass"
+        />
     </div>
 
     <div
-        class="bg-white dark:bg-zinc-900 shadow-md rounded-lg overflow-hidden border border-gray-100 dark:border-zinc-800">
+        class="bg-white dark:bg-zinc-900 shadow-md rounded-lg overflow-hidden border border-gray-100 dark:border-zinc-800"
+    >
         <table class="min-w-full divide-y divide-gray-200 dark:divide-zinc-700">
             <thead class="bg-gray-50 dark:bg-zinc-800">
                 <tr>
                     <th
-                        class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider"
+                    >
                         {{ __('Nombre Comercial') }}
                     </th>
                     <th
-                        class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider"
+                    >
                         {{ __('Nombre Genérico') }}
                     </th>
                     <th
-                        class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider"
+                    >
                         {{ __('Forma Farmacéutica') }}
                     </th>
                     <th
-                        class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider"
+                    >
                         {{ __('Concentración') }}
                     </th>
                     <th
-                        class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider"
+                    >
                         {{ __('Acciones') }}
                     </th>
                 </tr>
@@ -129,10 +144,18 @@ new class extends Component {
                         <td class="px-6 py-4">{{ $medication->pharmaceutical_form }}</td>
                         <td class="px-6 py-4">{{ $medication->concentration }}</td>
                         <td class="px-6 py-4 flex gap-2">
-                            <flux:button variant="ghost" size="sm" icon="pencil"
-                                wire:click="edit('{{ $medication->id }}')" />
-                            <flux:button variant="ghost" size="sm" icon="trash"
-                                wire:click="delete('{{ $medication->id }}')" />
+                            <flux:button
+                                variant="ghost"
+                                size="sm"
+                                icon="pencil"
+                                wire:click="edit('{{ $medication->id }}')"
+                            />
+                            <flux:button
+                                variant="ghost"
+                                size="sm"
+                                icon="trash"
+                                wire:click="delete('{{ $medication->id }}')"
+                            />
                         </td>
                     </tr>
                 @endforeach
@@ -147,7 +170,8 @@ new class extends Component {
     <flux:modal name="medication-modal" class="md:w-[500px]">
         <div class="space-y-6">
             <div>
-                <flux:heading size="lg">{{ $editingMedicationId ? __('Editar Medicamento') : __('Nuevo Medicamento') }}
+                <flux:heading size="lg">
+                    {{ $editingMedicationId ? __('Editar Medicamento') : __('Nuevo Medicamento') }}
                 </flux:heading>
                 <flux:subheading>{{ __('Ingresa los detalles del fármaco.') }}</flux:subheading>
             </div>
@@ -157,8 +181,11 @@ new class extends Component {
                 <flux:input wire:model="genericName" :label="__('Nombre Genérico')" />
 
                 <div class="grid grid-cols-2 gap-4">
-                    <flux:input wire:model="pharmaceuticalForm" :label="__('Forma Farmacéutica')"
-                        placeholder="Tab, Jarabe..." />
+                    <flux:input
+                        wire:model="pharmaceuticalForm"
+                        :label="__('Forma Farmacéutica')"
+                        placeholder="Tab, Jarabe..."
+                    />
                     <flux:input wire:model="concentration" :label="__('Concentración')" placeholder="500mg, 10%..." />
                 </div>
 

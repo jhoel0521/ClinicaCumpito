@@ -2,12 +2,13 @@
 
 use Livewire\Component;
 
-new class extends Component { }; ?>
+new class extends Component {}; ?>
 
 <section class="p-6">
     <div class="mb-8">
         <flux:heading size="xl" level="1">{{ __('Catálogos Clínicos') }}</flux:heading>
-        <flux:subheading size="lg">{{ __('Gestiona los datos maestros para laboratorios, medicamentos y vacunas.') }}
+        <flux:subheading size="lg">
+            {{ __('Gestiona los datos maestros para laboratorios, medicamentos y vacunas.') }}
         </flux:subheading>
     </div>
 

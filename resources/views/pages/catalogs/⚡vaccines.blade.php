@@ -22,7 +22,12 @@ new class extends Component {
     {
         return [
             'vaccines' => Vaccine::query()
-                ->when($this->search, fn($q) => $q->where('name', 'like', "%{$this->search}%")->orWhere('disease_prevented', 'like', "%{$this->search}%"))
+                ->when(
+                    $this->search,
+                    fn ($q) => $q
+                        ->where('name', 'like', "%{$this->search}%")
+                        ->orWhere('disease_prevented', 'like', "%{$this->search}%"),
+                )
                 ->orderBy('dose_sequence')
                 ->paginate(15),
         ];
@@ -81,8 +86,7 @@ new class extends Component {
     <div class="mb-6 flex justify-between items-end">
         <div>
             <flux:heading size="xl">{{ __('Vacunas') }}</flux:heading>
-            <flux:subheading>{{ __('Gestiona el esquema de vacunación y dosis recomendadas.') }}
-            </flux:subheading>
+            <flux:subheading>{{ __('Gestiona el esquema de vacunación y dosis recomendadas.') }}</flux:subheading>
         </div>
         <flux:button variant="primary" icon="plus" wire:click="$dispatch('open-modal', 'vaccine-modal')">
             {{ __('Nueva Vacuna') }}
@@ -94,25 +98,36 @@ new class extends Component {
     </div>
 
     <div
-        class="bg-white dark:bg-zinc-900 shadow-md rounded-lg overflow-hidden border border-gray-100 dark:border-zinc-800">
+        class="bg-white dark:bg-zinc-900 shadow-md rounded-lg overflow-hidden border border-gray-100 dark:border-zinc-800"
+    >
         <table class="min-w-full divide-y divide-gray-200 dark:divide-zinc-700">
             <thead class="bg-gray-50 dark:bg-zinc-800">
                 <tr>
                     <th
-                        class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                        {{ __('Sec.') }}</th>
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider"
+                    >
+                        {{ __('Sec.') }}
+                    </th>
                     <th
-                        class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                        {{ __('Nombre') }}</th>
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider"
+                    >
+                        {{ __('Nombre') }}
+                    </th>
                     <th
-                        class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                        {{ __('Enfermedad Prevenida') }}</th>
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider"
+                    >
+                        {{ __('Enfermedad Prevenida') }}
+                    </th>
                     <th
-                        class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                        {{ __('Edad Rec.') }}</th>
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider"
+                    >
+                        {{ __('Edad Rec.') }}
+                    </th>
                     <th
-                        class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                        {{ __('Acciones') }}</th>
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider"
+                    >
+                        {{ __('Acciones') }}
+                    </th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-200 dark:divide-zinc-700 text-sm">
@@ -123,8 +138,18 @@ new class extends Component {
                         <td class="px-6 py-4">{{ $vaccine->disease_prevented }}</td>
                         <td class="px-6 py-4">{{ $vaccine->recommended_age }}</td>
                         <td class="px-6 py-4 flex gap-2">
-                            <flux:button variant="ghost" size="sm" icon="pencil" wire:click="edit('{{ $vaccine->id }}')" />
-                            <flux:button variant="ghost" size="sm" icon="trash" wire:click="delete('{{ $vaccine->id }}')" />
+                            <flux:button
+                                variant="ghost"
+                                size="sm"
+                                icon="pencil"
+                                wire:click="edit('{{ $vaccine->id }}')"
+                            />
+                            <flux:button
+                                variant="ghost"
+                                size="sm"
+                                icon="trash"
+                                wire:click="delete('{{ $vaccine->id }}')"
+                            />
                         </td>
                     </tr>
                 @endforeach
@@ -139,7 +164,8 @@ new class extends Component {
     <flux:modal name="vaccine-modal" class="md:w-[500px]">
         <div class="space-y-6">
             <div>
-                <flux:heading size="lg">{{ $editingVaccineId ? __('Editar Vacuna') : __('Nueva Vacuna') }}
+                <flux:heading size="lg">
+                    {{ $editingVaccineId ? __('Editar Vacuna') : __('Nueva Vacuna') }}
                 </flux:heading>
                 <flux:subheading>{{ __('Ingresa los detalles de la vacuna y su esquema.') }}</flux:subheading>
             </div>

@@ -12,6 +12,9 @@ class MedicationDTO
         public readonly ?string $concentration = null,
     ) {}
 
+    /**
+     * @param  array<string, mixed>  $data
+     */
     public static function fromArray(array $data): self
     {
         return new self(
@@ -23,6 +26,9 @@ class MedicationDTO
         );
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function toArray(): array
     {
         return array_filter([

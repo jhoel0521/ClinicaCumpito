@@ -5,7 +5,7 @@
 // NOTA: Los campos en código (migraciones) están en INGLÉS
 
 Table usuarios {
-  id bigint [pk, increment]
+  id uuid  [pk]
   nombre varchar
   correo varchar [unique]
   contraseña varchar
@@ -22,8 +22,8 @@ Table usuarios {
 // ==========================================
 
 Table doctores {
-  id bigint [pk, increment]
-  usuario_id bigint [unique, nullable, note: 'FK → usuarios (1:1 opcional)']
+  id uuid  [pk]
+  usuario_id uuid [unique, nullable, note: 'FK → usuarios (1:1 opcional)']
   nombre_completo varchar
   especialidad varchar [nullable, note: 'Ej: Pediatra']
   numero_colegiado varchar [unique, note: 'En lugar de numero_licencia']
@@ -38,9 +38,9 @@ Table doctores {
 // ==========================================
 
 Table pacientes {
-  id bigint [pk, increment]
-  doctor_responsable_id bigint [nullable, note: 'FK → doctores (médico principal)']
-  user_id bigint [nullable, note: 'FK → usuarios (si el paciente es usuario del sistema)']
+  id uuid  [pk]
+  doctor_responsable_id uuid [nullable, note: 'FK → doctores (médico principal)']
+  user_id uuid [nullable, note: 'FK → usuarios (si el paciente es usuario del sistema)']
   nombre_completo varchar
   fecha_nacimiento date [note: 'Para calcular edad exacta']
   genero enum('M', 'F')
@@ -72,9 +72,9 @@ Table pacientes {
 // ==========================================
 
 Table consultas {
-  id bigint [pk, increment]
-  paciente_id bigint
-  doctor_id bigint [note: 'Doctor que atendió']
+  id uuid  [pk]
+  paciente_id uuid
+  doctor_id uuid [note: 'Doctor que atendió']
   
   tipo enum('digital', 'manual') [note: 'Digital = SOAP, Manual = escaneo']
   estado enum('borrador', 'guardada', 'finalizada') [default: 'guardada', note: 'Nuevo: estado de la consulta']
@@ -90,8 +90,8 @@ Table consultas {
 }
 
 Table signos_vitales {
-  id bigint [pk, increment]
-  consulta_id bigint [unique]
+  id uuid  [pk]
+  consulta_id uuid [unique]
   
   peso decimal(5,2) [nullable, note: 'kg - Alimenta la gráfica']
   talla decimal(5,2) [nullable, note: 'cm - Alimenta la gráfica']
@@ -102,8 +102,8 @@ Table signos_vitales {
 }
 
 Table notas_soap {
-  id bigint [pk, increment]
-  consulta_id bigint [unique]
+  id uuid  [pk]
+  consulta_id uuid [unique]
   
   subjetivo text [nullable, note: 'Anamnesis / Motivo consulta']
   objetivo text [nullable, note: 'Examen físico']
@@ -118,15 +118,15 @@ Table notas_soap {
 // ==========================================
 
 Table categorias_laboratorio {
-  id bigint [pk, increment]
+  id uuid  [pk]
   nombre varchar [note: 'Ej: Hematología, Orina, Rayos X, Ecografía']
   created_at timestamp
   updated_at timestamp
 }
 
 Table catalogo_examenes_laboratorio {
-  id bigint [pk, increment]
-  categoria_laboratorio_id bigint
+  id uuid  [pk]
+  categoria_laboratorio_id uuid
   nombre varchar [note: 'Ej: Glucosa, Radiografía de Tórax, Ecografía Abdominal']
   created_at timestamp
   updated_at timestamp
@@ -137,8 +137,8 @@ Table catalogo_examenes_laboratorio {
 // ==========================================
 
 Table plantillas_receta {
-  id bigint [pk, increment]
-  doctor_id bigint [note: 'FK → doctores (Dueño de la plantilla)']
+  id uuid  [pk]
+  doctor_id uuid [note: 'FK → doctores (Dueño de la plantilla)']
   nombre_plantilla varchar [note: 'Ej: Diarrea, Multi-vitaminas niña']
   observaciones_generales text [nullable]
   created_at timestamp
@@ -147,8 +147,8 @@ Table plantillas_receta {
 }
 
 Table items_plantilla_receta {
-  id bigint [pk, increment]
-  plantilla_receta_id bigint
+  id uuid  [pk]
+  plantilla_receta_id uuid
   nombre_medicamento varchar
   dosis varchar [note: 'Ej: 15 gotas']
   frecuencia varchar [note: 'Ej: cada 8 horas']
@@ -158,8 +158,8 @@ Table items_plantilla_receta {
 }
 
 Table plantillas_laboratorio {
-  id bigint [pk, increment]
-  doctor_id bigint [note: 'FK → doctores (Dueño de la plantilla)']
+  id uuid  [pk]
+  doctor_id uuid [note: 'FK → doctores (Dueño de la plantilla)']
   nombre_plantilla varchar [note: 'Ej: Rutina Anual, Perfil Pre-Quirúrgico']
   observaciones_defecto text [nullable, note: 'Detalles que siempre pide para este grupo']
   created_at timestamp
@@ -168,9 +168,9 @@ Table plantillas_laboratorio {
 }
 
 Table items_plantilla_laboratorio {
-  id bigint [pk, increment]
-  plantilla_laboratorio_id bigint
-  catalogo_examen_id bigint [note: 'FK → catalogo_examenes_laboratorio']
+  id uuid  [pk]
+  plantilla_laboratorio_id uuid
+  catalogo_examen_id uuid [note: 'FK → catalogo_examenes_laboratorio']
   created_at timestamp
   updated_at timestamp
 }
@@ -180,9 +180,9 @@ Table items_plantilla_laboratorio {
 // ==========================================
 
 Table solicitudes_laboratorio {
-  id bigint [pk, increment]
-  consulta_id bigint
-  plantilla_origen_id bigint [nullable, note: 'De dónde se copió (Snapshot)']
+  id uuid  [pk]
+  consulta_id uuid
+  plantilla_origen_id uuid [nullable, note: 'De dónde se copió (Snapshot)']
   observaciones text [nullable]
   estado enum('Pendiente', 'Recibido') [note: 'Estado de la solicitud']
   resumen_resultado text [nullable]
@@ -193,8 +193,8 @@ Table solicitudes_laboratorio {
 }
 
 Table detalles_solicitud_laboratorio {
-  id bigint [pk, increment]
-  solicitud_laboratorio_id bigint
+  id uuid  [pk]
+  solicitud_laboratorio_id uuid
   categoria_examen varchar [note: 'COPIA inmutable del nombre']
   nombre_examen varchar [note: 'COPIA inmutable del nombre']
   resultado_valor varchar [nullable]
@@ -204,9 +204,9 @@ Table detalles_solicitud_laboratorio {
 }
 
 Table recetas {
-  id bigint [pk, increment]
-  consulta_id bigint
-  plantilla_origen_id bigint [nullable, note: 'De dónde se copió (Snapshot)']
+  id uuid  [pk]
+  consulta_id uuid
+  plantilla_origen_id uuid [nullable, note: 'De dónde se copió (Snapshot)']
   observaciones text [nullable]
   created_at timestamp
   updated_at timestamp
@@ -214,8 +214,8 @@ Table recetas {
 }
 
 Table detalles_receta {
-  id bigint [pk, increment]
-  receta_id bigint
+  id uuid  [pk]
+  receta_id uuid
   nombre_medicamento varchar [note: 'COPIA inmutable del nombre']
   dosis varchar [note: 'COPIA inmutable']
   frecuencia varchar [note: 'COPIA inmutable']
@@ -229,7 +229,7 @@ Table detalles_receta {
 // ==========================================
 
 Table catalogo_vacunas {
-  id bigint [pk, increment]
+  id uuid  [pk]
   nombre varchar [note: 'Ej: BCG, Pentavalente 1, SRP']
   mes_recomendado int [note: 'Mes de vida recomendado']
   es_obligatoria boolean [default: true]
@@ -238,11 +238,11 @@ Table catalogo_vacunas {
 }
 
 Table vacunas_paciente {
-  id bigint [pk, increment]
-  paciente_id bigint
-  catalogo_vacuna_id bigint
+  id uuid  [pk]
+  paciente_id uuid
+  catalogo_vacuna_id uuid
   fecha_aplicacion date
-  aplicada_por_doctor_id bigint [note: 'FK → doctores']
+  aplicada_por_doctor_id uuid [note: 'FK → doctores']
   observaciones text [nullable]
   created_at timestamp
   updated_at timestamp
@@ -253,7 +253,7 @@ Table vacunas_paciente {
 // ==========================================
 
 Table oms_catalogo_graficas {
-  id bigint [pk, increment]
+  id uuid  [pk]
   nombre_boleta varchar [note: 'Ej: Girls chart - Talla por edad: 0-6 meses']
   
   // Filtros para saber a quién aplica esta boleta
@@ -269,8 +269,8 @@ Table oms_catalogo_graficas {
 }
 
 Table oms_datos_graficas {
-  id bigint [pk, increment]
-  oms_catalogo_grafica_id bigint [note: 'FK a la boleta específica']
+  id uuid  [pk]
+  oms_catalogo_grafica_id uuid [note: 'FK a la boleta específica']
   
   // El tiempo (Semana 1, Mes 2, etc.)
   tiempo_valor decimal(5,2) [note: 'Ej: 0, 1, 2, 3...']

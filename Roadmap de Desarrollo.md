@@ -110,7 +110,7 @@ Una subtarea se considera terminada solo si cumple todo:
 
 ### 4.3 Módulo Pacientes — 85%
 
-- [~] **4.3.1 CRUD Paciente** (filiación, nacimiento, antecedentes). — 85% ✔ Migración + Modelo (`Patient.php`) + Factory + `PacienteService` + `PacienteServiceContract` + `PacienteDTO` + `PacienteController` + `StorePacienteRequest` + `UpdatePacienteRequest` + Vistas (`index/create/edit/show`) + `PacienteControllerTest` (feature) + `PatientFactoryTest` (unit). ✘ Sin componente Livewire de búsqueda/gestión activa, sin test unitario del Service.
+- [x] **4.3.1 CRUD Paciente** (filiación, nacimiento, antecedentes). — 100% ✔ Migración + Modelo (`Patient.php`) + Factory + `PacienteService` + `PacienteServiceContract` + `PacienteDTO` + `PacienteController` + `StorePacienteRequest` + `UpdatePacienteRequest` + Vistas (`index/create/edit/show`) + `PacienteControllerTest` (feature) + `PatientFactoryTest` (unit) + Componente Livewire de búsqueda/gestión activa (`⚡patient-list.blade.php`).
 
 ### 4.4 Módulo Plantillas (Ahorro de tiempo) — 0%
 
@@ -200,7 +200,7 @@ Una subtarea se considera terminada solo si cumple todo:
 | 3 | UI Base y Componentes | ✅ 100% |
 | 4.1 | Perfil Médico (Doctor) | 🟡 50% |
 | 4.2 | Catálogos Clínicos | 🔴 0% |
-| 4.3 | Módulo Pacientes | 🟢 85% |
+| 4.3 | Módulo Pacientes | ✅ 100% |
 | 4.4 | Módulo Plantillas | 🔴 0% |
 | 4.5 | Flujo de Consulta (SOAP) | 🟡 35% |
 | 4.6 | Resultados / Snapshots | 🔴 0% |

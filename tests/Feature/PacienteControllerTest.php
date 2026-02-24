@@ -17,9 +17,8 @@ describe('PacienteController - Index', function () {
 
         $response->assertStatus(200)
             ->assertViewIs('pacientes.index')
-            ->assertViewHas('patients')
-            ->assertSee('data-ui="button"', false)
-            ->assertSee('data-ui="modal"', false);
+            ->assertSeeLivewire('patient-list')
+            ->assertSee('data-ui="button"', false);
     });
 
     test('usuario no autenticado es redirigido a login', function () {
@@ -34,7 +33,8 @@ describe('PacienteController - Index', function () {
         $response = $this->actingAs(User::factory()->create())
             ->get(route('pacientes.index'));
 
-        $response->assertViewHas('patients');
+        $response->assertStatus(200)
+            ->assertSeeLivewire('patient-list');
     });
 });
 

@@ -19,9 +19,7 @@ class PacienteController extends Controller
      */
     public function index(): View
     {
-        $patients = Patient::with(['user', 'medicalConditions'])->paginate(15);
-
-        return view('pacientes.index', compact('patients'));
+        return view('pacientes.index');
     }
 
     /**

@@ -97,16 +97,16 @@ Una subtarea se considera terminada solo si cumple todo:
 
 > Ciclo obligatorio por CRUD: Migración + Modelo + Factory + Action/Service + Test Unitario + Test Feature.
 
-### 4.1 Perfil Médico y Roles — 85%
+### 4.1 Perfil Médico y Roles — 100%
 
-- [~] **4.1.1 Perfil Doctor** (Especialidad, Matrícula Profesional). — 85% ✔ Modelo `Doctor` + `DoctorDTO` + `DoctorService` + `UpdateDoctorRequest` + Componente Livewire Volt `⚡doctor-profile` + `DoctorProfileTest` (feature). ✘ Falta test unitario específico de `DoctorService` según política obligatoria.
+- [x] **4.1.1 Perfil Doctor** (Especialidad, Matrícula Profesional). s— 100% ✔ Modelo `Doctor` + `DoctorDTO` + `DoctorService` + `UpdateDoctorRequest` + Componente Livewire Volt `⚡doctor-profile` + `DoctorProfileTest` (feature) + `DoctorServiceTest` (unit).
 
-### 4.2 Catálogos Clínicos (Prioridad temprana solicitada) — 85%
+### 4.2 Catálogos Clínicos (Prioridad temprana solicitada) — 100%
 
-- [~] **4.2.1 CRUD CategoriaLaboratorio** (Hematología, Orina, Imágenes, etc.). — 85% ✔ Migraciones + Modelo + Factory + DTO + Servicio + UI Livewire + tests feature de catálogos. ✘ Falta cobertura unitaria de servicio.
-- [~] **4.2.2 CRUD CatalogoExamenLaboratorio** (exámenes individuales). — 85% ✔ Migraciones + Modelo + Factory + DTO + Servicio + UI Livewire + tests feature de catálogos. ✘ Falta cobertura unitaria de servicio.
-- [~] **4.2.3 CRUD CatalogoMedicamento** (catálogo para recetas). — 85% ✔ Migraciones + Modelo + Factory + DTO + Servicio + UI Livewire + tests feature de catálogos. ✘ Falta cobertura unitaria de servicio.
-- [~] **4.2.4 CRUD CatalogoVacuna** (PAI Bolivia). — 85% ✔ Migraciones + Modelo + Factory + DTO + Servicio + UI Livewire + Seeder PAI Bolivia + tests feature de catálogos. ✘ Falta cobertura unitaria de servicio.
+- [x] **4.2.1 CRUD CategoriaLaboratorio** (Hematología, Orina, Imágenes, etc.). — 100% ✔ Migraciones + Modelo + Factory + DTO + Servicio + UI Livewire + tests feature de catálogos + `CatalogServiceTest` (unit).
+- [x] **4.2.2 CRUD CatalogoExamenLaboratorio** (exámenes individuales). — 100% ✔ Migraciones + Modelo + Factory + DTO + Servicio + UI Livewire + tests feature de catálogos + `CatalogServiceTest` (unit).
+- [x] **4.2.3 CRUD CatalogoMedicamento** (catálogo para recetas). — 100% ✔ Migraciones + Modelo + Factory + DTO + Servicio + UI Livewire + tests feature de catálogos + `CatalogServiceTest` (unit).
+- [x] **4.2.4 CRUD CatalogoVacuna** (PAI Bolivia). — 100% ✔ Migraciones + Modelo + Factory + DTO + Servicio + UI Livewire + Seeder PAI Bolivia + tests feature de catálogos + `CatalogServiceTest` (unit).
 
 ### 4.3 Módulo Pacientes — 100%
 
@@ -195,11 +195,11 @@ Una subtarea se considera terminada solo si cumple todo:
 
 | Fase | Descripción | Avance |
 |------|------------|--------|
-| 1 | Inicialización y Entorno | 🟡 95% |
+| 1 | Inicialización y Entorno | ✅ 100% |
 | 2 | Librerías y Herramientas Base | ✅ 100% |
 | 3 | UI Base y Componentes | ✅ 100% |
-| 4.1 | Perfil Médico (Doctor) | 🟡 85% |
-| 4.2 | Catálogos Clínicos | 🟡 85% |
+| 4.1 | Perfil Médico (Doctor) | ✅ 100% |
+| 4.2 | Catálogos Clínicos | ✅ 100% |
 | 4.3 | Módulo Pacientes | ✅ 100% |
 | 4.4 | Módulo Plantillas | 🟡 85% |
 | 4.5 | Flujo de Consulta (SOAP) | 🟡 56% |
@@ -211,15 +211,15 @@ Una subtarea se considera terminada solo si cumple todo:
 | 7 | Motor Gráfico OMS | 🔴 0% |
 | 8 | Calidad / Cierre Técnico | 🟡 30% |
 | 9 | Despliegue y Capacitación | 🔴 0% |
-| **Total MVP** | **Fase 4 progresando** | **~34%** |
+| **Total MVP** | **Fase 4 progresando** | **~36%** |
 
 > **Evidencia de auditoría**: `git status`, listado de `app/`, `database/migrations/`, `tests/`, `resources/views/`, `app/Livewire/`. Fecha: 24-02-2026.
 
 ### ✅ Actualización de ejecución (24-02-2026)
 
 - Pre-commit ejecutado en verde: `./vendor/bin/pint`, `./vendor/bin/phpstan analyse`, `php artisan test`.
-- Estado de calidad posterior al avance: **191 tests pasando** y **PHPStan sin errores**.
-- Siguiente fase activa recomendada: **4.5.3 CRUD NotasSoap** para cerrar el bloque SOAP y luego completar UI clínica en `4.5.2`.
+- Estado de calidad posterior al avance: **204 tests pasando** y **PHPStan sin errores**.
+- Siguiente fase activa recomendada: **4.4 (feature tests de plantillas)** y **4.5.3 CRUD NotasSoap** para completar el bloque clínico.
 
 ---
 

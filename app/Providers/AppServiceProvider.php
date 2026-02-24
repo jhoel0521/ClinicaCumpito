@@ -49,6 +49,11 @@ class AppServiceProvider extends ServiceProvider
             \App\Contracts\PatientVaccineServiceContract::class,
             \App\Services\PatientVaccineService::class
         );
+
+        $this->app->bind(
+            \App\Contracts\PrescriptionServiceContract::class,
+            \App\Services\PrescriptionService::class
+        );
     }
 
     /**

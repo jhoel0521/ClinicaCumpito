@@ -60,6 +60,12 @@ class Consultation extends Model
         return $this->hasOne(SoapNote::class, 'consultation_id');
     }
 
+    /** @return HasOne<Prescription, $this> */
+    public function prescription(): HasOne
+    {
+        return $this->hasOne(Prescription::class, 'consultation_id');
+    }
+
     /** @return HasMany<PatientVaccine, $this> */
     public function patientVaccines(): HasMany
     {

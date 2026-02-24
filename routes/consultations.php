@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ConsultationController;
 use App\Http\Controllers\PatientVaccineController;
+use App\Http\Controllers\PrescriptionController;
 use App\Http\Controllers\SoapNoteController;
 use App\Http\Controllers\VitalSignController;
 use Illuminate\Support\Facades\Route;
@@ -31,4 +32,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('consultas.patient-vaccines.update');
     Route::delete('consultas/{consulta}/vacunas-paciente/{vacunaPaciente}', [PatientVaccineController::class, 'destroy'])
         ->name('consultas.patient-vaccines.destroy');
+
+    Route::post('consultas/{consulta}/recetas', [PrescriptionController::class, 'store'])
+        ->name('consultas.prescriptions.store');
+    Route::put('consultas/{consulta}/recetas', [PrescriptionController::class, 'update'])
+        ->name('consultas.prescriptions.update');
+    Route::delete('consultas/{consulta}/recetas', [PrescriptionController::class, 'destroy'])
+        ->name('consultas.prescriptions.destroy');
 });

@@ -136,6 +136,7 @@ describe('ConsultationController', function () {
         $response->assertOk()
             ->assertSee('Signos Vitales')
             ->assertSee('Nota SOAP')
+            ->assertSee('Receta')
             ->assertSee('Vacunas Aplicadas')
             ->assertSee('Actualizar SOAP', false);
     });

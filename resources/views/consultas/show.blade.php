@@ -195,6 +195,70 @@
         </div>
 
         <div class="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl p-6 mt-6">
+            <h2 class="text-xl font-semibold text-blue-700 dark:text-blue-400 mb-4">Receta</h2>
+
+            <form
+                action="{{ $consultation->prescription ? route('consultas.prescriptions.update', $consultation->id) : route('consultas.prescriptions.store', $consultation->id) }}"
+                method="POST"
+                class="space-y-4"
+            >
+                @csrf
+                @if ($consultation->prescription)
+                    @method('PUT')
+                @endif
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Plantilla origen (opcional)
+                    </label>
+                    <select
+                        name="source_template_id"
+                        class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100"
+                    >
+                        <option value="">Sin plantilla</option>
+                        @foreach ($prescriptionTemplates as $template)
+                            <option
+                                value="{{ $template->id }}"
+                                @selected(old('source_template_id', $consultation->prescription?->source_template_id) === $template->id)
+                            >
+                                {{ $template->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Observaciones</label>
+                    <textarea
+                        name="observations"
+                        rows="3"
+                        class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100"
+                    >
+{{ old('observations', $consultation->prescription?->observations) }}</textarea
+                    >
+                </div>
+
+                <div class="flex justify-end gap-2">
+                    <x-ui.button type="submit" variant="primary">
+                        {{ $consultation->prescription ? 'Actualizar Receta' : 'Guardar Receta' }}
+                    </x-ui.button>
+                </div>
+            </form>
+
+            @if ($consultation->prescription)
+                <form
+                    action="{{ route('consultas.prescriptions.destroy', $consultation->id) }}"
+                    method="POST"
+                    class="mt-3 flex justify-end"
+                >
+                    @csrf
+                    @method('DELETE')
+                    <x-ui.button type="submit" variant="ghost">Eliminar Receta</x-ui.button>
+                </form>
+            @endif
+        </div>
+
+        <div class="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl p-6 mt-6">
             <h2 class="text-xl font-semibold text-blue-700 dark:text-blue-400 mb-4">Vacunas Aplicadas</h2>
 
             <form

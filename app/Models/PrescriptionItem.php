@@ -16,7 +16,6 @@ class PrescriptionItem extends Model
 
     protected $fillable = [
         'prescription_id',
-        'source_template_item_id',
         'medication_name',
         'dose',
         'frequency',
@@ -28,11 +27,5 @@ class PrescriptionItem extends Model
     public function prescription(): BelongsTo
     {
         return $this->belongsTo(Prescription::class);
-    }
-
-    /** @return BelongsTo<PrescriptionTemplateItem, $this> */
-    public function sourceTemplateItem(): BelongsTo
-    {
-        return $this->belongsTo(PrescriptionTemplateItem::class, 'source_template_item_id');
     }
 }

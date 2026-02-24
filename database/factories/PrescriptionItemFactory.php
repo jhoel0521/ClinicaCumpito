@@ -17,7 +17,6 @@ class PrescriptionItemFactory extends Factory
     {
         return [
             'prescription_id' => Prescription::factory(),
-            'source_template_item_id' => null,
             'medication_name' => $this->faker->words(2, true),
             'dose' => '5 ml',
             'frequency' => 'Cada 8 horas',

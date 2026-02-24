@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Contracts\PatientVaccineServiceContract;
 use App\DTOs\PatientVaccineDTO;
+use App\Models\Consultation;
 use App\Models\PatientVaccine;
 use Illuminate\Support\Collection;
 
@@ -11,8 +12,12 @@ class PatientVaccineService implements PatientVaccineServiceContract
 {
     public function create(string $consultationId, PatientVaccineDTO $dto): PatientVaccine
     {
+        $consultation = Consultation::findOrFail($consultationId);
+
         $patientVaccine = PatientVaccine::create([
+            'patient_id' => $consultation->patient_id,
             'consultation_id' => $consultationId,
+            'applied_by_doctor_id' => $dto->applied_by_doctor_id ?? $consultation->doctor_id,
             ...$dto->toArray(),
         ]);
 

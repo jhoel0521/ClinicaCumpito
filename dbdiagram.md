@@ -54,8 +54,6 @@ Table pacientes {
   
   // Checklist inicial
   grupo_sanguineo varchar(5) [nullable]
-  estado_chagas enum('Positivo', 'Negativo', 'No realizado') [nullable]
-  estado_sifilis enum('Positivo', 'Negativo', 'No realizado') [nullable]
   
   // Antecedentes (Textos largos)
   alergias text [nullable]
@@ -65,6 +63,27 @@ Table pacientes {
   created_at timestamp
   updated_at timestamp
   eliminado_en timestamp [nullable, note: 'Soft delete']
+}
+
+Table condiciones_medicas {
+  id uuid [pk]
+  nombre varchar [unique, note: 'Ej: Chagas, Sífilis, HIV']
+  descripcion text [nullable]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table paciente_condiciones_medicas {
+  paciente_id uuid
+  condicion_medica_id uuid
+  estado enum('Positivo', 'Negativo', 'No realizado')
+  notas text [nullable]
+  created_at timestamp
+  updated_at timestamp
+
+  indexes {
+    (paciente_id, condicion_medica_id) [pk]
+  }
 }
 
 // ==========================================
@@ -240,9 +259,11 @@ Table catalogo_vacunas {
 Table vacunas_paciente {
   id uuid  [pk]
   paciente_id uuid
+  consulta_id uuid [nullable, note: 'Si se registró durante una consulta interna']
   catalogo_vacuna_id uuid
+  aplicada_por_doctor_id uuid [nullable, note: 'FK → doctores; null cuando fue en centro externo']
+  lugar_aplicacion varchar [nullable, note: 'Ej: Centro externo / Vacunatorio municipal']
   fecha_aplicacion date
-  aplicada_por_doctor_id uuid [note: 'FK → doctores']
   observaciones text [nullable]
   created_at timestamp
   updated_at timestamp
@@ -310,6 +331,8 @@ Ref: doctores.usuario_id - usuarios.id
 
 Ref: pacientes.doctor_responsable_id > doctores.id
 Ref: pacientes.user_id > usuarios.id
+Ref: paciente_condiciones_medicas.paciente_id > pacientes.id
+Ref: paciente_condiciones_medicas.condicion_medica_id > condiciones_medicas.id
 
 Ref: consultas.paciente_id > pacientes.id
 Ref: consultas.doctor_id > doctores.id
@@ -333,6 +356,7 @@ Ref: detalles_solicitud_laboratorio.solicitud_laboratorio_id > solicitudes_labor
 Ref: solicitudes_laboratorio.plantilla_origen_id > plantillas_laboratorio.id
 
 Ref: vacunas_paciente.paciente_id > pacientes.id
+Ref: vacunas_paciente.consulta_id > consultas.id
 Ref: vacunas_paciente.catalogo_vacuna_id > catalogo_vacunas.id
 Ref: vacunas_paciente.aplicada_por_doctor_id > doctores.id
 

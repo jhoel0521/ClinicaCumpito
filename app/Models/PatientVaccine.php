@@ -19,12 +19,21 @@ class PatientVaccine extends Model
     ];
 
     protected $fillable = [
+        'patient_id',
         'consultation_id',
         'vaccine_id',
+        'applied_by_doctor_id',
+        'application_site',
         'applied_at',
         'dose_number',
         'notes',
     ];
+
+    /** @return BelongsTo<Patient, $this> */
+    public function patient(): BelongsTo
+    {
+        return $this->belongsTo(Patient::class);
+    }
 
     /** @return BelongsTo<Consultation, $this> */
     public function consultation(): BelongsTo
@@ -36,5 +45,11 @@ class PatientVaccine extends Model
     public function vaccine(): BelongsTo
     {
         return $this->belongsTo(Vaccine::class);
+    }
+
+    /** @return BelongsTo<Doctor, $this> */
+    public function appliedByDoctor(): BelongsTo
+    {
+        return $this->belongsTo(Doctor::class, 'applied_by_doctor_id');
     }
 }

@@ -15,6 +15,7 @@ describe('PatientVaccineService', function () {
         $dto = PatientVaccineDTO::fromArray([
             'vaccine_id' => $vaccine->id,
             'applied_at' => now()->subDay()->toDateTimeString(),
+            'application_site' => 'Centro externo',
             'dose_number' => 1,
             'notes' => 'Primera dosis aplicada sin reacción.',
         ]);
@@ -23,6 +24,7 @@ describe('PatientVaccineService', function () {
 
         expect($patientVaccine)->toBeInstanceOf(PatientVaccine::class)
             ->and($patientVaccine->consultation_id)->toBe($consultation->id)
+            ->and($patientVaccine->patient_id)->toBe($consultation->patient_id)
             ->and($patientVaccine->vaccine_id)->toBe($vaccine->id)
             ->and($patientVaccine->dose_number)->toBe(1);
     });
@@ -37,6 +39,8 @@ describe('PatientVaccineService', function () {
         $dto = PatientVaccineDTO::fromArray([
             'vaccine_id' => $newVaccine->id,
             'applied_at' => now()->toDateTimeString(),
+            'applied_by_doctor_id' => null,
+            'application_site' => 'Vacunatorio municipal',
             'dose_number' => 2,
             'notes' => 'Segunda dosis aplicada.',
         ]);

@@ -16,9 +16,14 @@ class PatientVaccineFactory extends Factory
 
     public function definition(): array
     {
+        $consultation = Consultation::factory()->create();
+
         return [
-            'consultation_id' => Consultation::factory(),
+            'patient_id' => $consultation->patient_id,
+            'consultation_id' => $consultation->id,
             'vaccine_id' => Vaccine::factory(),
+            'applied_by_doctor_id' => null,
+            'application_site' => $this->faker->optional()->company(),
             'applied_at' => $this->faker->dateTimeBetween('-1 year', 'now'),
             'dose_number' => $this->faker->numberBetween(1, 4),
             'notes' => $this->faker->optional()->sentence(),

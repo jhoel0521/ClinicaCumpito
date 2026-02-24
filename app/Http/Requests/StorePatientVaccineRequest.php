@@ -19,6 +19,8 @@ class StorePatientVaccineRequest extends FormRequest
         return [
             'vaccine_id' => ['required', 'uuid', 'exists:vaccines,id'],
             'applied_at' => ['required', 'date'],
+            'applied_by_doctor_id' => ['nullable', 'uuid', 'exists:doctors,id'],
+            'application_site' => ['nullable', 'string', 'max:255'],
             'dose_number' => ['nullable', 'integer', 'min:1', 'max:20'],
             'notes' => ['nullable', 'string', 'max:1000'],
         ];

@@ -71,7 +71,7 @@ Una subtarea se considera terminada solo si cumple todo:
 
 ## 📅 Fase 1: Inicialización y Entorno
 
-- [~] **1.1 Bootstrap del proyecto**: Laravel 12 + PHP 8.4. — 80% ✔ Laravel 12 operativo. ✘ `composer.json` mantiene `php: ^8.2` (no fijado explícitamente a 8.4).
+- [x] **1.1 Bootstrap del proyecto**: Laravel 12 + PHP 8.4.
 - [x] **1.2 Git Flow**: configuración de repositorio.
 - [x] **1.3 Configuración de DB**: entorno local configurado.
 - [x] **1.4 CI/CD Setup**: pipeline de tests base.

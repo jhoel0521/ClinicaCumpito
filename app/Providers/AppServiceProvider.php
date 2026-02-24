@@ -24,6 +24,11 @@ class AppServiceProvider extends ServiceProvider
             \App\Contracts\CatalogServiceContract::class,
             \App\Services\CatalogService::class
         );
+
+        $this->app->bind(
+            \App\Contracts\TemplateServiceContract::class,
+            \App\Services\TemplateService::class
+        );
     }
 
     /**

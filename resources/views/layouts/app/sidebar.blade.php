@@ -36,6 +36,15 @@
                     >
                         {{ __('Pacientes') }}
                     </flux:sidebar.item>
+
+                    <flux:sidebar.item
+                        icon="clipboard-document-list"
+                        :href="route('templates.index')"
+                        :current="request()->routeIs('templates.*')"
+                        wire:navigate
+                    >
+                        {{ __('Plantillas') }}
+                    </flux:sidebar.item>
                 </flux:sidebar.group>
 
                 @role('Admin')
@@ -158,6 +167,14 @@
                     wire:navigate
                 >
                     {{ __('Pacientes') }}
+                </flux:navbar.item>
+                <flux:navbar.item
+                    icon="clipboard-document-list"
+                    :href="route('templates.index')"
+                    :current="request()->routeIs('templates.*')"
+                    wire:navigate
+                >
+                    {{ __('Plantillas') }}
                 </flux:navbar.item>
             </flux:navbar>
 

@@ -201,7 +201,7 @@ Una subtarea se considera terminada solo si cumple todo:
 | 4.1 | Perfil Médico (Doctor) | ✅ 100% |
 | 4.2 | Catálogos Clínicos | ✅ 100% |
 | 4.3 | Módulo Pacientes | ✅ 100% |
-| 4.4 | Módulo Plantillas | 🔴 0% |
+| 4.4 | Módulo Plantillas | ✅ 100% |
 | 4.5 | Flujo de Consulta (SOAP) | 🟡 35% |
 | 4.6 | Resultados / Snapshots | 🔴 0% |
 | 4.7 | Motor OMS (datos) | 🔴 0% |

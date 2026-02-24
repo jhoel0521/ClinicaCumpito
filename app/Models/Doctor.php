@@ -6,8 +6,8 @@ use App\ValueObjects\LicenseNumber;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Doctor extends Model
@@ -23,17 +23,16 @@ class Doctor extends Model
     ];
 
     protected $fillable = [
-        'user_id',
         'full_name',
         'specialty',
         'license_number',
         'active',
     ];
 
-    /** @return BelongsTo<User, $this> */
-    public function user(): BelongsTo
+    /** @return HasOne<User, $this> */
+    public function user(): HasOne
     {
-        return $this->belongsTo(User::class);
+        return $this->hasOne(User::class, 'doctor_id');
     }
 
     /** @return HasMany<Consultation, $this> */

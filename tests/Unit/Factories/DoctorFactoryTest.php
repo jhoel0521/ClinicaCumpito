@@ -15,6 +15,8 @@ test('doctor factory creates a valid record', function () {
 test('doctor factory can attach a user', function () {
     $doctor = Doctor::factory()->withUser()->create();
 
-    expect($doctor->user_id)->not->toBeNull()
-        ->and($doctor->user)->not->toBeNull();
+    $doctor->refresh();
+
+    expect($doctor->user)->not->toBeNull()
+        ->and($doctor->user?->doctor_id)->toBe($doctor->id);
 });

@@ -23,6 +23,7 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
+        'doctor_id',
         'name',
         'email',
         'password',
@@ -68,12 +69,12 @@ class User extends Authenticatable
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasOne<\App\Models\Doctor, \App\Models\User>
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Doctor, \App\Models\User>
      */
-    public function doctor(): \Illuminate\Database\Eloquent\Relations\HasOne
+    public function doctor(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
-        /** @var \Illuminate\Database\Eloquent\Relations\HasOne<\App\Models\Doctor, \App\Models\User> $relation */
-        $relation = $this->hasOne(Doctor::class);
+        /** @var \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Doctor, \App\Models\User> $relation */
+        $relation = $this->belongsTo(Doctor::class, 'doctor_id');
 
         return $relation;
     }

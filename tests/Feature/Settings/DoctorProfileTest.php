@@ -17,7 +17,8 @@ test('doctor professional settings page can be rendered by doctors', function ()
     $user->assignRole('Doctor');
 
     // Crear el registro de doctor vinculado
-    Doctor::factory()->create(['user_id' => $user->id]);
+    $doctor = Doctor::factory()->create();
+    $user->update(['doctor_id' => $doctor->id]);
 
     $this->actingAs($user)
         ->get(route('doctor-profile.edit'))
@@ -39,11 +40,11 @@ test('doctor professional information can be updated', function () {
     $user->assignRole('Doctor');
 
     $doctor = Doctor::factory()->create([
-        'user_id' => $user->id,
         'full_name' => 'Old Name',
         'specialty' => 'Old Specialty',
         'license_number' => '123456',
     ]);
+    $user->update(['doctor_id' => $doctor->id]);
 
     $this->actingAs($user);
 

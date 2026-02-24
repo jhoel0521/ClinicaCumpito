@@ -16,11 +16,9 @@ class PatientVaccineFactory extends Factory
 
     public function definition(): array
     {
-        $consultation = Consultation::factory()->create();
-
         return [
-            'patient_id' => $consultation->patient_id,
-            'consultation_id' => $consultation->id,
+            'consultation_id' => Consultation::factory(),
+            'patient_id' => null,
             'vaccine_id' => Vaccine::factory(),
             'applied_by_doctor_id' => null,
             'application_site' => $this->faker->optional()->company(),
@@ -28,5 +26,24 @@ class PatientVaccineFactory extends Factory
             'dose_number' => $this->faker->numberBetween(1, 4),
             'notes' => $this->faker->optional()->sentence(),
         ];
+    }
+
+    public function configure(): static
+    {
+        return $this->afterMaking(function (PatientVaccine $patientVaccine): void {
+            if ($patientVaccine->consultation_id && ! $patientVaccine->patient_id) {
+                $consultation = Consultation::query()->find($patientVaccine->consultation_id);
+                if ($consultation) {
+                    $patientVaccine->patient_id = $consultation->patient_id;
+                }
+            }
+        })->afterCreating(function (PatientVaccine $patientVaccine): void {
+            if ($patientVaccine->consultation_id && ! $patientVaccine->patient_id) {
+                $consultation = Consultation::query()->find($patientVaccine->consultation_id);
+                if ($consultation) {
+                    $patientVaccine->update(['patient_id' => $consultation->patient_id]);
+                }
+            }
+        });
     }
 }

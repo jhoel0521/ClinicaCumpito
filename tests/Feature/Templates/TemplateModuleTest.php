@@ -11,7 +11,8 @@ use Livewire\Livewire;
 describe('Template module', function () {
     beforeEach(function () {
         $this->user = User::factory()->create();
-        $this->doctor = Doctor::factory()->create(['user_id' => $this->user->id]);
+        $this->doctor = Doctor::factory()->create();
+        $this->user->update(['doctor_id' => $this->doctor->id]);
     });
 
     test('rutas de plantillas requieren autenticacion', function () {

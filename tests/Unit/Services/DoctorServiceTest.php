@@ -24,7 +24,8 @@ describe('DoctorService', function () {
         $doctor = $this->service->create($dto);
 
         expect($doctor)->toBeInstanceOf(Doctor::class);
-        expect($doctor->user_id)->toBe($user->id);
+        $user->refresh();
+        expect($user->doctor_id)->toBe($doctor->id);
         expect($doctor->full_name)->toBe('Dra. Ana Flores');
         expect($doctor->specialty)->toBe('Pediatría');
         expect($doctor->license_number->value())->toBe('MED-12345');
@@ -54,7 +55,8 @@ describe('DoctorService', function () {
 
     test('puede encontrar doctor por user_id', function () {
         $user = User::factory()->create();
-        $doctor = Doctor::factory()->create(['user_id' => $user->id]);
+        $doctor = Doctor::factory()->create();
+        $user->update(['doctor_id' => $doctor->id]);
 
         $found = $this->service->findByUserId($user->id);
 

@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Contracts\DoctorServiceContract;
 use App\DTOs\DoctorDTO;
 use App\Models\Doctor;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -15,8 +16,13 @@ class DoctorService implements DoctorServiceContract
      */
     public function findByUserId(string $userId): ?Doctor
     {
+        $user = User::query()->select(['id', 'doctor_id'])->find($userId);
+        if (! $user?->doctor_id) {
+            return null;
+        }
+
         /** @var Doctor|null $doctor */
-        $doctor = Doctor::where('user_id', $userId)->first();
+        $doctor = Doctor::find($user->doctor_id);
 
         return $doctor;
     }
@@ -29,6 +35,10 @@ class DoctorService implements DoctorServiceContract
         return DB::transaction(function () use ($dto) {
             /** @var Doctor $doctor */
             $doctor = Doctor::create($dto->toArray());
+
+            if ($dto->user_id) {
+                User::whereKey($dto->user_id)->update(['doctor_id' => $doctor->id]);
+            }
 
             return $doctor;
         });

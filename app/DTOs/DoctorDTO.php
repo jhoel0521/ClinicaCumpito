@@ -39,7 +39,6 @@ class DoctorDTO
     {
         return array_filter([
             'id' => $this->id,
-            'user_id' => $this->user_id,
             'full_name' => $this->full_name,
             'specialty' => $this->specialty,
             'license_number' => $this->license_number,

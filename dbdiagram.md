@@ -6,6 +6,7 @@
 
 Table usuarios {
   id uuid  [pk]
+  doctor_id uuid [unique, nullable, note: 'FK → doctores (1:1 opcional)']
   nombre varchar
   correo varchar [unique]
   contraseña varchar
@@ -23,7 +24,6 @@ Table usuarios {
 
 Table doctores {
   id uuid  [pk]
-  usuario_id uuid [unique, nullable, note: 'FK → usuarios (1:1 opcional)']
   nombre_completo varchar
   especialidad varchar [nullable, note: 'Ej: Pediatra']
   numero_colegiado varchar [unique, note: 'En lugar de numero_licencia']
@@ -327,7 +327,7 @@ Table oms_datos_graficas {
 // RELACIONES (Foreign Keys)
 // ==========================================
 
-Ref: doctores.usuario_id - usuarios.id
+Ref: usuarios.doctor_id - doctores.id
 
 Ref: pacientes.doctor_responsable_id > doctores.id
 Ref: pacientes.user_id > usuarios.id

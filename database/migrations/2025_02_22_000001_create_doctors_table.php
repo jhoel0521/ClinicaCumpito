@@ -10,23 +10,28 @@ return new class extends Migration
     {
         Schema::create('doctors', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->uuid('user_id')->nullable()->unique();
             $table->string('full_name');
             $table->string('specialty')->nullable();
             $table->string('license_number')->unique();
             $table->boolean('active')->default(true);
             $table->softDeletes();
             $table->timestamps();
+        });
 
-            $table->foreign('user_id')
+        Schema::table('users', function (Blueprint $table) {
+            $table->foreign('doctor_id')
                 ->references('id')
-                ->on('users')
+                ->on('doctors')
                 ->onDelete('set null');
         });
     }
 
     public function down(): void
     {
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropForeign(['doctor_id']);
+        });
+
         Schema::dropIfExists('doctors');
     }
 };

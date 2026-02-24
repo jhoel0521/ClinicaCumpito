@@ -66,4 +66,15 @@ class User extends Authenticatable
             ->map(fn ($word) => Str::substr($word, 0, 1))
             ->implode('');
     }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne<\App\Models\Doctor, \App\Models\User>
+     */
+    public function doctor(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        /** @var \Illuminate\Database\Eloquent\Relations\HasOne<\App\Models\Doctor, \App\Models\User> $relation */
+        $relation = $this->hasOne(Doctor::class);
+
+        return $relation;
+    }
 }

@@ -97,9 +97,9 @@ Una subtarea se considera terminada solo si cumple todo:
 
 > Ciclo obligatorio por CRUD: Migración + Modelo + Factory + Action/Service + Test Unitario + Test Feature.
 
-### 4.1 Perfil Médico y Roles — 50%
+### 4.1 Perfil Médico y Roles — 100%
 
-- [~] **4.1.1 CRUD Doctor** (User 1:1, matrícula, especialidad, estado). — 50% ✔ Migración + Modelo + Factory + `LicenseNumber` ValueObject + `DoctorFactoryTest`. ✘ Sin `DoctorService`/Action, sin Controller/Livewire, sin Feature test de CRUD.
+- [x] **4.1.1 Perfil Doctor** (Especialidad, Matrícula Profesional). — 100% ✔ Modelo `Doctor` + `DoctorDTO` + `DoctorService` + `UpdateDoctorRequest` + Componente Livewire Volt `⚡doctor-profile` + `DoctorProfileTest`.
 
 ### 4.2 Catálogos Clínicos (Prioridad temprana solicitada) — 0%
 
@@ -198,7 +198,7 @@ Una subtarea se considera terminada solo si cumple todo:
 | 1 | Inicialización y Entorno | ✅ 100% |
 | 2 | Librerías y Herramientas Base | ✅ 100% |
 | 3 | UI Base y Componentes | ✅ 100% |
-| 4.1 | Perfil Médico (Doctor) | 🟡 50% |
+| 4.1 | Perfil Médico (Doctor) | ✅ 100% |
 | 4.2 | Catálogos Clínicos | 🔴 0% |
 | 4.3 | Módulo Pacientes | ✅ 100% |
 | 4.4 | Módulo Plantillas | 🔴 0% |

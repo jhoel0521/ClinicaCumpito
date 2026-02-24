@@ -3,6 +3,7 @@
 use App\Http\Controllers\ConsultationController;
 use App\Http\Controllers\PatientVaccineController;
 use App\Http\Controllers\PrescriptionController;
+use App\Http\Controllers\PrescriptionItemController;
 use App\Http\Controllers\SoapNoteController;
 use App\Http\Controllers\VitalSignController;
 use Illuminate\Support\Facades\Route;
@@ -39,4 +40,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('consultas.prescriptions.update');
     Route::delete('consultas/{consulta}/recetas', [PrescriptionController::class, 'destroy'])
         ->name('consultas.prescriptions.destroy');
+
+    Route::post('consultas/{consulta}/recetas/detalles', [PrescriptionItemController::class, 'store'])
+        ->name('consultas.prescription-items.store');
+    Route::put('consultas/{consulta}/recetas/detalles/{detalleReceta}', [PrescriptionItemController::class, 'update'])
+        ->name('consultas.prescription-items.update');
+    Route::delete('consultas/{consulta}/recetas/detalles/{detalleReceta}', [PrescriptionItemController::class, 'destroy'])
+        ->name('consultas.prescription-items.destroy');
 });

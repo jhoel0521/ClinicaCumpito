@@ -4,6 +4,7 @@ use App\Models\Consultation;
 use App\Models\Doctor;
 use App\Models\Patient;
 use App\Models\PatientVaccine;
+use App\Models\Prescription;
 use App\Models\SoapNote;
 use App\Models\User;
 use App\Models\Vaccine;
@@ -125,6 +126,10 @@ describe('ConsultationController', function () {
             'consultation_id' => $consultation->id,
         ]);
 
+        Prescription::factory()->create([
+            'consultation_id' => $consultation->id,
+        ]);
+
         PatientVaccine::factory()->create([
             'consultation_id' => $consultation->id,
             'vaccine_id' => $vaccine->id,
@@ -137,6 +142,7 @@ describe('ConsultationController', function () {
             ->assertSee('Signos Vitales')
             ->assertSee('Nota SOAP')
             ->assertSee('Receta')
+            ->assertSee('Detalles de receta (snapshot)')
             ->assertSee('Vacunas Aplicadas')
             ->assertSee('Actualizar SOAP', false);
     });

@@ -126,10 +126,10 @@ Una subtarea se considera terminada solo si cumple todo:
 - [x] **4.5.3 CRUD NotasSoap** (1:1 con consulta). — 100% ✔ Migración + Modelo (`SoapNote.php`) + Factory + `SoapNoteFactoryTest` + `SoapNoteService` + `SoapNoteServiceContract` + `SoapNoteDTO` + `SoapNoteController` + endpoints (`consultas/{consulta}/soap`) + `SoapNoteServiceTest` (unit) + `SoapNoteControllerTest` (feature) + UI integrada en `consultas/show`.
 - [x] **4.5.4 CRUD VacunaPaciente** (aplicaciones reales). — 100% ✔ Migración (`patient_vaccines`) + Modelo (`PatientVaccine.php`) + Factory + `PatientVaccineFactoryTest` + `PatientVaccineService` + `PatientVaccineServiceContract` + `PatientVaccineDTO` + `PatientVaccineController` + endpoints (`consultas/{consulta}/vacunas-paciente`) + `StorePatientVaccineRequest` + `PatientVaccineServiceTest` (unit) + `PatientVaccineControllerTest` (feature) + UI integrada en `consultas/show`.
 
-### 4.6 Resultados e Inmutabilidad (Snapshots) — 25%
+### 4.6 Resultados e Inmutabilidad (Snapshots) — 50%
 
 - [x] **4.6.1 CRUD Receta**. — 100% ✔ Migración (`prescriptions`) + Modelo (`Prescription.php`) + Factory + `PrescriptionFactoryTest` + `PrescriptionService` + `PrescriptionServiceContract` + `PrescriptionDTO` + `StorePrescriptionRequest` + `PrescriptionController` + endpoints (`consultas/{consulta}/recetas`) + `PrescriptionServiceTest` (unit) + `PrescriptionControllerTest` (feature) + UI integrada en `consultas/show` con bloqueo por consulta finalizada.
-- [ ] **4.6.2 CRUD DetalleReceta** (snapshot inmutable). — 0%
+- [x] **4.6.2 CRUD DetalleReceta** (snapshot inmutable). — 100% ✔ Migración (`prescription_items`) + Modelo (`PrescriptionItem.php`) + Factory + `PrescriptionItemFactoryTest` + `PrescriptionItemService` + `PrescriptionItemServiceContract` + `PrescriptionItemDTO` + `StorePrescriptionItemRequest` + `PrescriptionItemController` + endpoints (`consultas/{consulta}/recetas/detalles`) + `PrescriptionItemServiceTest` (unit) + `PrescriptionItemControllerTest` (feature) + UI integrada en `consultas/show`.
 - [ ] **4.6.3 CRUD SolicitudLaboratorio**. — 0%
 - [ ] **4.6.4 CRUD DetalleSolicitudLaboratorio** (snapshot + resultado). — 0%
 
@@ -173,9 +173,9 @@ Una subtarea se considera terminada solo si cumple todo:
 
 ---
 
-## 🧪 Fase 8: Calidad, Seguridad y Cierre Técnico — 32%
+## 🧪 Fase 8: Calidad, Seguridad y Cierre Técnico — 34%
 
-- [~] **8.1 Cobertura**: fortalecer suite de pruebas en módulos críticos. — 50% ✔ Tests unitarios para Value Objects (`BirthType`, `BloodGroup`, `ConsultationStatus`, `ConsultationType`, `Gender`, `LicenseNumber`, `Measurements/*`, `MedicalStatus`, `PhoneNumber`), Factories (`Doctor`, `Patient`, `Consultation`, `VitalSign`, `SoapNote`, `PatientVaccine`, `Prescription`, `User`), `PacienteServiceTest`, `TemplateServiceTest`, `ConsultationServiceTest`, `DoctorServiceTest`, `CatalogServiceTest`, `VitalSignServiceTest`, `SoapNoteServiceTest`, `PatientVaccineServiceTest`, `PrescriptionServiceTest` y feature `ConsultationControllerTest` + `TemplateModuleTest` + `VitalSignControllerTest` + `SoapNoteControllerTest` + `PatientVaccineControllerTest` + `PrescriptionControllerTest`. ✘ Pendiente cobertura en snapshots completos (detalles), OMS, policies y flujo clínico completo.
+- [~] **8.1 Cobertura**: fortalecer suite de pruebas en módulos críticos. — 55% ✔ Tests unitarios para Value Objects (`BirthType`, `BloodGroup`, `ConsultationStatus`, `ConsultationType`, `Gender`, `LicenseNumber`, `Measurements/*`, `MedicalStatus`, `PhoneNumber`), Factories (`Doctor`, `Patient`, `Consultation`, `VitalSign`, `SoapNote`, `PatientVaccine`, `Prescription`, `PrescriptionItem`, `User`), `PacienteServiceTest`, `TemplateServiceTest`, `ConsultationServiceTest`, `DoctorServiceTest`, `CatalogServiceTest`, `VitalSignServiceTest`, `SoapNoteServiceTest`, `PatientVaccineServiceTest`, `PrescriptionServiceTest`, `PrescriptionItemServiceTest` y feature `ConsultationControllerTest` + `TemplateModuleTest` + `VitalSignControllerTest` + `SoapNoteControllerTest` + `PatientVaccineControllerTest` + `PrescriptionControllerTest` + `PrescriptionItemControllerTest`. ✘ Pendiente cobertura en snapshots de laboratorio, OMS, policies y flujo clínico completo.
 - [ ] **8.2 Pruebas de autorización**: acceso correcto por rol/propietario. — 0%
 - [ ] **8.3 Pruebas de regresión** del flujo completo de consulta. — 0%
 
@@ -203,23 +203,23 @@ Una subtarea se considera terminada solo si cumple todo:
 | 4.3 | Módulo Pacientes | ✅ 100% |
 | 4.4 | Módulo Plantillas | ✅ 100% |
 | 4.5 | Flujo de Consulta (SOAP) | ✅ 100% |
-| 4.6 | Resultados / Snapshots | 🟡 25% |
+| 4.6 | Resultados / Snapshots | 🟡 50% |
 | 4.7 | Motor OMS (datos) | 🔴 0% |
 | 4.8 | Seguridad / Policies | 🔴 0% |
 | 5 | Lógica de Dominio (VO/Services) | 🟡 30% |
 | 6 | Livewire Clínico | 🔴 0% |
 | 7 | Motor Gráfico OMS | 🔴 0% |
-| 8 | Calidad / Cierre Técnico | 🟡 50% |
+| 8 | Calidad / Cierre Técnico | 🟡 55% |
 | 9 | Despliegue y Capacitación | 🔴 0% |
-| **Total MVP** | **Fase 4 avanzando en snapshots** | **~47%** |
+| **Total MVP** | **Fase 4 avanzando en snapshots** | **~50%** |
 
 > **Evidencia de auditoría**: `git status`, listado de `app/`, `database/migrations/`, `tests/`, `resources/views/`, `app/Livewire/`. Fecha: 24-02-2026.
 
 ### ✅ Actualización de ejecución (24-02-2026)
 
 - Pre-commit ejecutado en verde: `./vendor/bin/pint`, `./vendor/bin/phpstan analyse`, `php artisan test`.
-- Estado de calidad posterior al avance: **230 tests pasando** y **PHPStan sin errores**.
-- Siguiente fase activa recomendada: **4.6.2 CRUD DetalleReceta** para completar el snapshot inmutable de medicamentos por receta.
+- Estado de calidad posterior al avance: **237 tests pasando** y **PHPStan sin errores**.
+- Siguiente fase activa recomendada: **4.6.3 CRUD SolicitudLaboratorio**.
 
 ---
 

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class PrescriptionTemplateItem extends Model
 {
@@ -37,5 +38,13 @@ class PrescriptionTemplateItem extends Model
     public function medication(): BelongsTo
     {
         return $this->belongsTo(Medication::class);
+    }
+
+    /**
+     * @return HasMany<PrescriptionItem, $this>
+     */
+    public function prescriptionItems(): HasMany
+    {
+        return $this->hasMany(PrescriptionItem::class, 'source_template_item_id');
     }
 }

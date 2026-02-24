@@ -255,6 +255,160 @@
                     @method('DELETE')
                     <x-ui.button type="submit" variant="ghost">Eliminar Receta</x-ui.button>
                 </form>
+
+                <div class="mt-6 border-t border-gray-200 dark:border-zinc-800 pt-4">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
+                        Detalles de receta (snapshot)
+                    </h3>
+
+                    <form
+                        action="{{ route('consultas.prescription-items.store', $consultation->id) }}"
+                        method="POST"
+                        class="space-y-3"
+                    >
+                        @csrf
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Medicamento
+                                </label>
+                                <input
+                                    type="text"
+                                    name="medication_name"
+                                    value="{{ old('medication_name') }}"
+                                    class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100"
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Dosis
+                                </label>
+                                <input
+                                    type="text"
+                                    name="dose"
+                                    value="{{ old('dose') }}"
+                                    class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100"
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Frecuencia
+                                </label>
+                                <input
+                                    type="text"
+                                    name="frequency"
+                                    value="{{ old('frequency') }}"
+                                    class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100"
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Duración
+                                </label>
+                                <input
+                                    type="text"
+                                    name="duration"
+                                    value="{{ old('duration') }}"
+                                    class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100"
+                                    required
+                                />
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                Instrucciones
+                            </label>
+                            <textarea
+                                name="instructions"
+                                rows="2"
+                                class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100"
+                            >
+{{ old('instructions') }}</textarea
+                            >
+                        </div>
+
+                        <div class="flex justify-end">
+                            <x-ui.button type="submit" variant="secondary">Agregar Detalle</x-ui.button>
+                        </div>
+                    </form>
+
+                    <div class="mt-4 space-y-3">
+                        @forelse ($consultation->prescription->items as $item)
+                            <div class="border border-gray-200 dark:border-zinc-800 rounded-lg p-4">
+                                <form
+                                    action="{{ route('consultas.prescription-items.update', [$consultation->id, $item->id]) }}"
+                                    method="POST"
+                                    class="space-y-3"
+                                >
+                                    @csrf
+                                    @method('PUT')
+
+                                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+                                        <input
+                                            type="text"
+                                            name="medication_name"
+                                            value="{{ $item->medication_name }}"
+                                            class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100"
+                                            required
+                                        />
+                                        <input
+                                            type="text"
+                                            name="dose"
+                                            value="{{ $item->dose }}"
+                                            class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100"
+                                            required
+                                        />
+                                        <input
+                                            type="text"
+                                            name="frequency"
+                                            value="{{ $item->frequency }}"
+                                            class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100"
+                                            required
+                                        />
+                                        <input
+                                            type="text"
+                                            name="duration"
+                                            value="{{ $item->duration }}"
+                                            class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100"
+                                            required
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <textarea
+                                            name="instructions"
+                                            rows="2"
+                                            class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100"
+                                        >
+{{ $item->instructions }}</textarea
+                                        >
+                                    </div>
+
+                                    <div class="flex justify-end">
+                                        <x-ui.button type="submit" variant="secondary">Actualizar Detalle</x-ui.button>
+                                    </div>
+                                </form>
+
+                                <form
+                                    action="{{ route('consultas.prescription-items.destroy', [$consultation->id, $item->id]) }}"
+                                    method="POST"
+                                    class="mt-2 flex justify-end"
+                                >
+                                    @csrf
+                                    @method('DELETE')
+                                    <x-ui.button type="submit" variant="ghost">Eliminar</x-ui.button>
+                                </form>
+                            </div>
+                        @empty
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Sin detalles de receta registrados.</p>
+                        @endforelse
+                    </div>
+                </div>
             @endif
         </div>
 

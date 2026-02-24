@@ -43,7 +43,7 @@ class ConsultationController extends Controller
 
     public function show(Consultation $consulta): View
     {
-        $consulta->load(['patient', 'doctor', 'vitalSigns', 'soapNote', 'prescription.sourceTemplate', 'patientVaccines.vaccine']);
+        $consulta->load(['patient', 'doctor', 'vitalSigns', 'soapNote', 'prescription.sourceTemplate', 'prescription.items', 'patientVaccines.vaccine']);
         $vaccines = Vaccine::query()->orderBy('name')->get(['id', 'name']);
         $prescriptionTemplates = PrescriptionTemplate::query()
             ->where('doctor_id', $consulta->doctor_id)

@@ -35,6 +35,18 @@ describe('Template module', function () {
             ->assertOk();
     });
 
+    test('openCreateModal resetea el formulario y dispara modal-show en recetas', function () {
+        $this->actingAs($this->user);
+
+        Livewire::test('pages::templates.prescription-templates')
+            ->set('name', 'borrador')
+            ->call('openCreateModal')
+            ->assertSet('name', '')
+            ->assertSet('items', [])
+            ->assertSet('editingTemplateId', null)
+            ->assertDispatched('modal-show');
+    });
+
     test('puede crear plantilla de receta con items', function () {
         $this->actingAs($this->user);
 
@@ -53,7 +65,8 @@ describe('Template module', function () {
                 'instructions' => 'Con alimentos',
             ]])
             ->call('save')
-            ->assertHasNoErrors();
+            ->assertHasNoErrors()
+            ->assertDispatched('modal-close');
 
         $this->assertDatabaseHas('prescription_templates', [
             'doctor_id' => $this->doctor->id,
@@ -68,6 +81,18 @@ describe('Template module', function () {
             'template_id' => $template->id,
             'medication_id' => $medication->id,
         ]);
+    });
+
+    test('openCreateModal resetea el formulario y dispara modal-show en laboratorio', function () {
+        $this->actingAs($this->user);
+
+        Livewire::test('pages::templates.laboratory-templates')
+            ->set('name', 'borrador lab')
+            ->call('openCreateModal')
+            ->assertSet('name', '')
+            ->assertSet('items', [])
+            ->assertSet('editingTemplateId', null)
+            ->assertDispatched('modal-show');
     });
 
     test('puede crear plantilla de laboratorio con items', function () {
@@ -87,7 +112,8 @@ describe('Template module', function () {
                 'indications' => 'Ayuno de 8 horas',
             ]])
             ->call('save')
-            ->assertHasNoErrors();
+            ->assertHasNoErrors()
+            ->assertDispatched('modal-close');
 
         $this->assertDatabaseHas('laboratory_templates', [
             'doctor_id' => $this->doctor->id,

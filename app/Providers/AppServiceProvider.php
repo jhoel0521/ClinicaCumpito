@@ -59,6 +59,16 @@ class AppServiceProvider extends ServiceProvider
             \App\Contracts\PrescriptionItemServiceContract::class,
             \App\Services\PrescriptionItemService::class
         );
+
+        $this->app->bind(
+            \App\Contracts\LaboratoryRequestServiceContract::class,
+            \App\Services\LaboratoryRequestService::class
+        );
+
+        $this->app->bind(
+            \App\Contracts\LaboratoryRequestItemServiceContract::class,
+            \App\Services\LaboratoryRequestItemService::class
+        );
     }
 
     /**

@@ -413,6 +413,161 @@
         </div>
 
         <div class="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl p-6 mt-6">
+            <h2 class="text-xl font-semibold text-blue-700 dark:text-blue-400 mb-4">Solicitud de Laboratorio</h2>
+
+            <form
+                action="{{ $consultation->laboratoryRequest ? route('consultas.laboratory-requests.update', $consultation->id) : route('consultas.laboratory-requests.store', $consultation->id) }}"
+                method="POST"
+                class="space-y-4"
+            >
+                @csrf
+                @if ($consultation->laboratoryRequest)
+                    @method('PUT')
+                @endif
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Plantilla origen (opcional)
+                    </label>
+                    <select
+                        name="source_template_id"
+                        class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100"
+                    >
+                        <option value="">Sin plantilla</option>
+                        @foreach ($laboratoryTemplates as $template)
+                            <option
+                                value="{{ $template->id }}"
+                                @selected(old('source_template_id', $consultation->laboratoryRequest?->source_template_id) === $template->id)
+                            >
+                                {{ $template->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Observaciones</label>
+                    <textarea
+                        name="observations"
+                        rows="3"
+                        class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100"
+                    >
+{{ old('observations', $consultation->laboratoryRequest?->observations) }}</textarea
+                    >
+                </div>
+
+                <div class="flex justify-end gap-2">
+                    <x-ui.button type="submit" variant="primary">
+                        {{ $consultation->laboratoryRequest ? 'Actualizar Solicitud' : 'Guardar Solicitud' }}
+                    </x-ui.button>
+                </div>
+            </form>
+
+            @if ($consultation->laboratoryRequest)
+                <form
+                    action="{{ route('consultas.laboratory-requests.destroy', $consultation->id) }}"
+                    method="POST"
+                    class="mt-3 flex justify-end"
+                >
+                    @csrf
+                    @method('DELETE')
+                    <x-ui.button type="submit" variant="ghost">Eliminar Solicitud</x-ui.button>
+                </form>
+
+                <div class="mt-6 border-t border-gray-200 dark:border-zinc-800 pt-4">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
+                        Exámenes solicitados (snapshot)
+                    </h3>
+
+                    <form
+                        action="{{ route('consultas.laboratory-request-items.store', $consultation->id) }}"
+                        method="POST"
+                        class="space-y-3"
+                    >
+                        @csrf
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Nombre del examen
+                                </label>
+                                <input
+                                    type="text"
+                                    name="exam_name"
+                                    value="{{ old('exam_name') }}"
+                                    class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100"
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Indicaciones
+                                </label>
+                                <input
+                                    type="text"
+                                    name="indications"
+                                    value="{{ old('indications') }}"
+                                    class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100"
+                                />
+                            </div>
+                        </div>
+
+                        <div class="flex justify-end">
+                            <x-ui.button type="submit" variant="secondary">Agregar Examen</x-ui.button>
+                        </div>
+                    </form>
+
+                    <div class="mt-4 space-y-3">
+                        @forelse ($consultation->laboratoryRequest->items as $item)
+                            <div class="border border-gray-200 dark:border-zinc-800 rounded-lg p-4">
+                                <form
+                                    action="{{ route('consultas.laboratory-request-items.update', [$consultation->id, $item->id]) }}"
+                                    method="POST"
+                                    class="space-y-3"
+                                >
+                                    @csrf
+                                    @method('PUT')
+
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                        <input
+                                            type="text"
+                                            name="exam_name"
+                                            value="{{ $item->exam_name }}"
+                                            class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100"
+                                            required
+                                        />
+                                        <input
+                                            type="text"
+                                            name="indications"
+                                            value="{{ $item->indications }}"
+                                            class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100"
+                                        />
+                                    </div>
+
+                                    <div class="flex justify-end">
+                                        <x-ui.button type="submit" variant="secondary">Actualizar Examen</x-ui.button>
+                                    </div>
+                                </form>
+
+                                <form
+                                    action="{{ route('consultas.laboratory-request-items.destroy', [$consultation->id, $item->id]) }}"
+                                    method="POST"
+                                    class="mt-2 flex justify-end"
+                                >
+                                    @csrf
+                                    @method('DELETE')
+                                    <x-ui.button type="submit" variant="ghost">Eliminar</x-ui.button>
+                                </form>
+                            </div>
+                        @empty
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Sin exámenes registrados.</p>
+                        @endforelse
+                    </div>
+                </div>
+            @endif
+        </div>
+
+        <div class="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl p-6 mt-6">
             <h2 class="text-xl font-semibold text-blue-700 dark:text-blue-400 mb-4">Vacunas Aplicadas</h2>
 
             <form

@@ -8,6 +8,7 @@ use App\Http\Requests\StoreConsultationRequest;
 use App\Http\Requests\UpdateConsultationRequest;
 use App\Models\Consultation;
 use App\Models\Doctor;
+use App\Models\LaboratoryTemplate;
 use App\Models\Patient;
 use App\Models\PrescriptionTemplate;
 use App\Models\Vaccine;
@@ -43,9 +44,19 @@ class ConsultationController extends Controller
 
     public function show(Consultation $consulta): View
     {
-        $consulta->load(['patient', 'doctor', 'vitalSigns', 'soapNote', 'prescription.sourceTemplate', 'prescription.items', 'patientVaccines.vaccine']);
+        $consulta->load([
+            'patient', 'doctor', 'vitalSigns', 'soapNote',
+            'prescription.sourceTemplate', 'prescription.items',
+            'laboratoryRequest.sourceTemplate', 'laboratoryRequest.items',
+            'patientVaccines.vaccine',
+        ]);
         $vaccines = Vaccine::query()->orderBy('name')->get(['id', 'name']);
         $prescriptionTemplates = PrescriptionTemplate::query()
+            ->where('doctor_id', $consulta->doctor_id)
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get(['id', 'name']);
+        $laboratoryTemplates = LaboratoryTemplate::query()
             ->where('doctor_id', $consulta->doctor_id)
             ->where('is_active', true)
             ->orderBy('name')
@@ -55,6 +66,7 @@ class ConsultationController extends Controller
             'consultation' => $consulta,
             'vaccines' => $vaccines,
             'prescriptionTemplates' => $prescriptionTemplates,
+            'laboratoryTemplates' => $laboratoryTemplates,
         ]);
     }
 

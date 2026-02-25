@@ -66,6 +66,12 @@ class Consultation extends Model
         return $this->hasOne(Prescription::class, 'consultation_id');
     }
 
+    /** @return HasOne<LaboratoryRequest, $this> */
+    public function laboratoryRequest(): HasOne
+    {
+        return $this->hasOne(LaboratoryRequest::class, 'consultation_id');
+    }
+
     /** @return HasMany<PatientVaccine, $this> */
     public function patientVaccines(): HasMany
     {

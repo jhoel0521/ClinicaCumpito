@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\ConsultationController;
+use App\Http\Controllers\LaboratoryRequestController;
+use App\Http\Controllers\LaboratoryRequestItemController;
 use App\Http\Controllers\PatientVaccineController;
 use App\Http\Controllers\PrescriptionController;
 use App\Http\Controllers\PrescriptionItemController;
@@ -47,4 +49,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('consultas.prescription-items.update');
     Route::delete('consultas/{consulta}/recetas/detalles/{detalleReceta}', [PrescriptionItemController::class, 'destroy'])
         ->name('consultas.prescription-items.destroy');
+
+    Route::post('consultas/{consulta}/laboratorios', [LaboratoryRequestController::class, 'store'])
+        ->name('consultas.laboratory-requests.store');
+    Route::put('consultas/{consulta}/laboratorios', [LaboratoryRequestController::class, 'update'])
+        ->name('consultas.laboratory-requests.update');
+    Route::delete('consultas/{consulta}/laboratorios', [LaboratoryRequestController::class, 'destroy'])
+        ->name('consultas.laboratory-requests.destroy');
+
+    Route::post('consultas/{consulta}/laboratorios/detalles', [LaboratoryRequestItemController::class, 'store'])
+        ->name('consultas.laboratory-request-items.store');
+    Route::put('consultas/{consulta}/laboratorios/detalles/{detalleLabor}', [LaboratoryRequestItemController::class, 'update'])
+        ->name('consultas.laboratory-request-items.update');
+    Route::delete('consultas/{consulta}/laboratorios/detalles/{detalleLabor}', [LaboratoryRequestItemController::class, 'destroy'])
+        ->name('consultas.laboratory-request-items.destroy');
 });

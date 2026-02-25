@@ -45,6 +45,12 @@ new class extends Component {
         $this->items = array_values($this->items);
     }
 
+    public function openCreateModal(): void
+    {
+        $this->resetForm();
+        $this->dispatch('modal-show', name: 'template-modal');
+    }
+
     public function save(TemplateServiceContract $service): void
     {
         $doctor = auth()->user()->doctor;
@@ -79,7 +85,7 @@ new class extends Component {
         }
 
         $this->resetForm();
-        $this->dispatch('close-modal', 'template-modal');
+        $this->dispatch('modal-close', name: 'template-modal');
     }
 
     public function edit(string $id): void
@@ -100,7 +106,7 @@ new class extends Component {
             )
             ->toArray();
 
-        $this->dispatch('open-modal', 'template-modal');
+        $this->dispatch('modal-show', name: 'template-modal');
     }
 
     public function delete(string $id, TemplateServiceContract $service): void
@@ -123,12 +129,7 @@ new class extends Component {
                 {{ __('Configura conjuntos de exámenes y estudios por especialidad.') }}
             </flux:subheading>
         </div>
-        <flux:button
-            variant="primary"
-            icon="plus"
-            wire:click="addItem"
-            onclick="$dispatch('open-modal', { name: 'template-modal' })"
-        >
+        <flux:button dusk="btn-nueva-plantilla-lab" variant="primary" icon="plus" wire:click="openCreateModal">
             {{ __('Nueva Plantilla') }}
         </flux:button>
     </div>
@@ -226,7 +227,7 @@ new class extends Component {
                 <div class="space-y-4">
                     <div class="flex justify-between items-center border-b pb-2 dark:border-zinc-800">
                         <flux:heading size="md">{{ __('Exámenes Clínicos') }}</flux:heading>
-                        <flux:button size="sm" icon="plus" wire:click="addItem">
+                        <flux:button dusk="btn-agregar-examen" size="sm" icon="plus" wire:click="addItem">
                             {{ __('Agregar Examen') }}
                         </flux:button>
                     </div>
@@ -255,6 +256,7 @@ new class extends Component {
                                     <div class="flex flex-col gap-1">
                                         <flux:label>{{ __('Examen del Catálogo') }}</flux:label>
                                         <select
+                                            dusk="select-examen-{{ $index }}"
                                             wire:model="items.{{ $index }}.laboratory_exam_id"
                                             class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-zinc-900 dark:border-zinc-700"
                                         >
@@ -269,6 +271,7 @@ new class extends Component {
                                         </select>
                                     </div>
                                     <flux:input
+                                        dusk="input-indicaciones-{{ $index }}"
                                         wire:model="items.{{ $index }}.indications"
                                         :label="__('Indicaciones Especiales')"
                                         :placeholder="__('Ej: Ayuno, recolectar primera orina...')"
@@ -289,7 +292,9 @@ new class extends Component {
                     <flux:modal.close>
                         <flux:button variant="ghost">{{ __('Cancelar') }}</flux:button>
                     </flux:modal.close>
-                    <flux:button type="submit" variant="primary">{{ __('Guardar Plantilla') }}</flux:button>
+                    <flux:button dusk="btn-guardar-plantilla-lab" type="submit" variant="primary">
+                        {{ __('Guardar Plantilla') }}
+                    </flux:button>
                 </div>
             </form>
         </div>

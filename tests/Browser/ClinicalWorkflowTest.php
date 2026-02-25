@@ -503,24 +503,31 @@ class ClinicalWorkflowTest extends DuskTestCase
             $this->loginAs($browser, 'lucia@clinica.com');
 
             // ── 2. Ir a la consulta ───────────────────────────────────────────
+            // dusk="lab-source-template" y dusk="lab-observations" evitan colisión
+            // con los selects/textareas de nombre idéntico del formulario de Receta.
             $browser
                 ->visit('/consultas/'.$consultation->id)
                 ->waitForText('Solicitud de Laboratorio', 10);
 
             // ── 3. Seleccionar plantilla y agregar observaciones ───────────────
+            // select() usa findByCss("select[dusk='lab-source-template']") como fallback.
+            // type() usa findByCss('textarea[dusk="lab-observations"]') como fallback.
             $browser
-                ->select('name=source_template_id', $labTemplate->id)
-                ->type('name=observations', 'Ayunas de 8 horas previo al examen.')
+                ->select('[dusk="lab-source-template"]', $labTemplate->id)
+                ->type('textarea[dusk="lab-observations"]', 'Ayunas de 8 horas previo al examen.')
                 ->press('Guardar Solicitud')
                 ->waitForText('guardada exitosamente', 10);
 
             // ── 4. Agregar un examen al snapshot ──────────────────────────────
+            // Tras el redirect, la sección de exámenes aparece en el DOM.
+            // assertSee no aplica porque el nombre queda en value="" de un input,
+            // no en texto visible; la verificación final usa assertDatabaseHas.
             $browser
-                ->type('name=exam_name', 'Hemograma completo')
-                ->type('name=indications', 'Sin restricciones')
+                ->waitFor('[dusk="lab-exam-name"]', 10)
+                ->type('[dusk="lab-exam-name"]', 'Hemograma completo')
+                ->type('[dusk="lab-indications"]', 'Sin restricciones')
                 ->press('Agregar Examen')
-                ->waitForText('guardado exitosamente', 10)
-                ->assertSee('Hemograma completo');
+                ->waitForText('guardado exitosamente', 10);
         });
 
         $this->assertDatabaseHas('laboratory_requests', [

@@ -126,12 +126,12 @@ Una subtarea se considera terminada solo si cumple todo:
 - [x] **4.5.3 CRUD NotasSoap** (1:1 con consulta). — 100% ✔ Migración + Modelo (`SoapNote.php`) + Factory + `SoapNoteFactoryTest` + `SoapNoteService` + `SoapNoteServiceContract` + `SoapNoteDTO` + `SoapNoteController` + endpoints (`consultas/{consulta}/soap`) + `SoapNoteServiceTest` (unit) + `SoapNoteControllerTest` (feature) + UI integrada en `consultas/show`.
 - [x] **4.5.4 CRUD VacunaPaciente** (aplicaciones reales). — 100% ✔ Migración (`patient_vaccines`) + Modelo (`PatientVaccine.php`) + Factory + `PatientVaccineFactoryTest` + `PatientVaccineService` + `PatientVaccineServiceContract` + `PatientVaccineDTO` + `PatientVaccineController` + endpoints (`consultas/{consulta}/vacunas-paciente`) + `StorePatientVaccineRequest` + `PatientVaccineServiceTest` (unit) + `PatientVaccineControllerTest` (feature) + UI integrada en `consultas/show`.
 
-### 4.6 Resultados e Inmutabilidad (Snapshots) — 50%
+### 4.6 Resultados e Inmutabilidad (Snapshots) — 100%
 
 - [x] **4.6.1 CRUD Receta**. — 100% ✔ Migración (`prescriptions`) + Modelo (`Prescription.php`) + Factory + `PrescriptionFactoryTest` + `PrescriptionService` + `PrescriptionServiceContract` + `PrescriptionDTO` + `StorePrescriptionRequest` + `PrescriptionController` + endpoints (`consultas/{consulta}/recetas`) + `PrescriptionServiceTest` (unit) + `PrescriptionControllerTest` (feature) + UI integrada en `consultas/show` con bloqueo por consulta finalizada.
 - [x] **4.6.2 CRUD DetalleReceta** (snapshot inmutable). — 100% ✔ Migración (`prescription_items`) + Modelo (`PrescriptionItem.php`) + Factory + `PrescriptionItemFactoryTest` + `PrescriptionItemService` + `PrescriptionItemServiceContract` + `PrescriptionItemDTO` + `StorePrescriptionItemRequest` + `PrescriptionItemController` + endpoints (`consultas/{consulta}/recetas/detalles`) + `PrescriptionItemServiceTest` (unit) + `PrescriptionItemControllerTest` (feature) + UI integrada en `consultas/show`.
-- [ ] **4.6.3 CRUD SolicitudLaboratorio**. — 0%
-- [ ] **4.6.4 CRUD DetalleSolicitudLaboratorio** (snapshot + resultado). — 0%
+- [x] **4.6.3 CRUD SolicitudLaboratorio**. — 100% ✔ Migración (`laboratory_requests`) + Modelo (`LaboratoryRequest.php`) + Factory + `LaboratoryRequestService` + `LaboratoryRequestServiceContract` + `LaboratoryRequestDTO` + `StoreLaboratoryRequestRequest` + `LaboratoryRequestController` + endpoints (`consultas/{consulta}/laboratorios`) + `LaboratoryRequestServiceTest` (unit) + `LaboratoryRequestControllerTest` (feature) + UI integrada en `consultas/show`.
+- [x] **4.6.4 CRUD DetalleSolicitudLaboratorio** (snapshot + resultado). — 100% ✔ Migración (`laboratory_request_items`) + Modelo (`LaboratoryRequestItem.php`) + Factory + `LaboratoryRequestItemService` + `LaboratoryRequestItemServiceContract` + `LaboratoryRequestItemDTO` + `StoreLaboratoryRequestItemRequest` + `LaboratoryRequestItemController` + endpoints (`consultas/{consulta}/laboratorios/detalles`) + `LaboratoryRequestItemServiceTest` (unit) + `LaboratoryRequestItemControllerTest` (feature) + UI integrada en `consultas/show`.
 
 ### 4.7 Motor OMS (catálogo y datos) — 0%
 
@@ -203,7 +203,7 @@ Una subtarea se considera terminada solo si cumple todo:
 | 4.3 | Módulo Pacientes | ✅ 100% |
 | 4.4 | Módulo Plantillas | ✅ 100% |
 | 4.5 | Flujo de Consulta (SOAP) | ✅ 100% |
-| 4.6 | Resultados / Snapshots | 🟡 50% |
+| 4.6 | Resultados / Snapshots | ✅ 100% |
 | 4.7 | Motor OMS (datos) | 🔴 0% |
 | 4.8 | Seguridad / Policies | 🔴 0% |
 | 5 | Lógica de Dominio (VO/Services) | 🟡 30% |
@@ -218,8 +218,8 @@ Una subtarea se considera terminada solo si cumple todo:
 ### ✅ Actualización de ejecución (24-02-2026)
 
 - Pre-commit ejecutado en verde: `./vendor/bin/pint`, `./vendor/bin/phpstan analyse`, `php artisan test`.
-- Estado de calidad posterior al avance: **237 tests pasando** y **PHPStan sin errores**.
-- Siguiente fase activa recomendada: **4.6.3 CRUD SolicitudLaboratorio**.
+- Estado de calidad posterior al avance: **260 tests pasando** (Unit+Feature) + **8 tests Dusk** y **PHPStan sin errores**.
+- Siguiente fase activa recomendada: **4.7.1 CRUD OmsCatalogoGrafica**.
 
 ---
 

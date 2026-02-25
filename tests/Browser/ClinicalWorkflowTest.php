@@ -2,9 +2,11 @@
 
 namespace Tests\Browser;
 
+use App\Models\Consultation;
 use App\Models\Doctor;
 use App\Models\LaboratoryCategory;
 use App\Models\LaboratoryExam;
+use App\Models\LaboratoryTemplate;
 use App\Models\Medication;
 use App\Models\Patient;
 use App\Models\User;
@@ -462,6 +464,72 @@ class ClinicalWorkflowTest extends DuskTestCase
         $this->assertDatabaseHas('consultations', [
             'doctor_id' => $doctor->id,
             'type' => 'digital',
+        ]);
+    }
+
+    // =========================================================================
+    // TEST 8: CREAR SOLICITUD DE LABORATORIO DESDE CONSULTA
+    // =========================================================================
+
+    /**
+     * El doctor puede crear una solicitud de laboratorio desde la vista de consulta:
+     * - Guarda la solicitud (observaciones)
+     * - Agrega un examen al snapshot
+     */
+    public function test_08_puede_crear_solicitud_de_laboratorio(): void
+    {
+        $doctor = Doctor::factory()->create([
+            'full_name' => 'Dra. Lucía Mendez',
+            'license_number' => 'MP-60006',
+        ]);
+        User::factory()->create([
+            'email' => 'lucia@clinica.com',
+            'password' => bcrypt('password'),
+            'doctor_id' => $doctor->id,
+        ]);
+        $patient = Patient::factory()->create(['full_name' => 'Emilio Castillo']);
+        $labTemplate = LaboratoryTemplate::factory()->create([
+            'doctor_id' => $doctor->id,
+            'name' => 'Panel Básico',
+        ]);
+        $consultation = Consultation::factory()->create([
+            'doctor_id' => $doctor->id,
+            'patient_id' => $patient->id,
+            'status' => 'saved',
+        ]);
+
+        $this->browse(function (Browser $browser) use ($consultation, $labTemplate) {
+            // ── 1. Login ──────────────────────────────────────────────────────
+            $this->loginAs($browser, 'lucia@clinica.com');
+
+            // ── 2. Ir a la consulta ───────────────────────────────────────────
+            $browser
+                ->visit('/consultas/'.$consultation->id)
+                ->waitForText('Solicitud de Laboratorio', 10);
+
+            // ── 3. Seleccionar plantilla y agregar observaciones ───────────────
+            $browser
+                ->select('name=source_template_id', $labTemplate->id)
+                ->type('name=observations', 'Ayunas de 8 horas previo al examen.')
+                ->press('Guardar Solicitud')
+                ->waitForText('guardada exitosamente', 10);
+
+            // ── 4. Agregar un examen al snapshot ──────────────────────────────
+            $browser
+                ->type('name=exam_name', 'Hemograma completo')
+                ->type('name=indications', 'Sin restricciones')
+                ->press('Agregar Examen')
+                ->waitForText('guardado exitosamente', 10)
+                ->assertSee('Hemograma completo');
+        });
+
+        $this->assertDatabaseHas('laboratory_requests', [
+            'consultation_id' => $consultation->id,
+            'source_template_id' => $labTemplate->id,
+        ]);
+
+        $this->assertDatabaseHas('laboratory_request_items', [
+            'exam_name' => 'Hemograma completo',
         ]);
     }
 }

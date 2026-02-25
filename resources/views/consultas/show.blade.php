@@ -431,6 +431,7 @@
                     </label>
                     <select
                         name="source_template_id"
+                        dusk="lab-source-template"
                         class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100"
                     >
                         <option value="">Sin plantilla</option>
@@ -449,6 +450,7 @@
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Observaciones</label>
                     <textarea
                         name="observations"
+                        dusk="lab-observations"
                         rows="3"
                         class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100"
                     >
@@ -494,6 +496,7 @@
                                 <input
                                     type="text"
                                     name="exam_name"
+                                    dusk="lab-exam-name"
                                     value="{{ old('exam_name') }}"
                                     class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100"
                                     required
@@ -506,6 +509,7 @@
                                 <input
                                     type="text"
                                     name="indications"
+                                    dusk="lab-indications"
                                     value="{{ old('indications') }}"
                                     class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100"
                                 />

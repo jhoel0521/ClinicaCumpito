@@ -19,6 +19,8 @@ class PacienteController extends Controller
      */
     public function index(): View
     {
+        $this->authorize('viewAny', Patient::class);
+
         return view('pacientes.index');
     }
 
@@ -27,6 +29,8 @@ class PacienteController extends Controller
      */
     public function create(): View
     {
+        $this->authorize('create', Patient::class);
+
         $conditions = MedicalCondition::all();
 
         return view('pacientes.create', compact('conditions'));
@@ -37,6 +41,8 @@ class PacienteController extends Controller
      */
     public function store(StorePacienteRequest $request): \Illuminate\Http\RedirectResponse
     {
+        $this->authorize('create', Patient::class);
+
         $dto = PacienteDTO::fromArray($request->validated());
         $patient = $this->service->create($dto);
 
@@ -49,6 +55,8 @@ class PacienteController extends Controller
      */
     public function show(Patient $patient): View
     {
+        $this->authorize('view', $patient);
+
         $patient->load(['user', 'medicalConditions', 'consultations']);
 
         return view('pacientes.show', compact('patient'));
@@ -59,6 +67,8 @@ class PacienteController extends Controller
      */
     public function edit(Patient $patient): View
     {
+        $this->authorize('update', $patient);
+
         $conditions = MedicalCondition::all();
         $patient->load('medicalConditions');
 
@@ -70,6 +80,8 @@ class PacienteController extends Controller
      */
     public function update(UpdatePacienteRequest $request, Patient $patient): \Illuminate\Http\RedirectResponse
     {
+        $this->authorize('update', $patient);
+
         $dto = PacienteDTO::fromArray($request->validated());
         $patient = $this->service->update($patient->id, $dto);
 
@@ -82,6 +94,8 @@ class PacienteController extends Controller
      */
     public function destroy(Patient $patient): \Illuminate\Http\RedirectResponse
     {
+        $this->authorize('delete', $patient);
+
         $this->service->delete($patient->id);
 
         return redirect()->route('pacientes.index')

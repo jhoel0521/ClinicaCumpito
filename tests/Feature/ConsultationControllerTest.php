@@ -29,9 +29,9 @@ describe('ConsultationController', function () {
     });
 
     test('puede crear una consulta con datos validos', function () {
-        $user = User::factory()->create();
-        $patient = Patient::factory()->create();
         $doctor = Doctor::factory()->create();
+        $user = User::factory()->create(['doctor_id' => $doctor->id]);
+        $patient = Patient::factory()->create();
 
         $response = $this->actingAs($user)
             ->post(route('consultas.store'), [
@@ -54,8 +54,8 @@ describe('ConsultationController', function () {
     });
 
     test('falla validacion al crear consulta sin paciente', function () {
-        $user = User::factory()->create();
         $doctor = Doctor::factory()->create();
+        $user = User::factory()->create(['doctor_id' => $doctor->id]);
 
         $response = $this->actingAs($user)
             ->post(route('consultas.store'), [
@@ -69,10 +69,12 @@ describe('ConsultationController', function () {
     });
 
     test('puede actualizar consulta no finalizada', function () {
-        $user = User::factory()->create();
+        $doctor = Doctor::factory()->create();
+        $user = User::factory()->create(['doctor_id' => $doctor->id]);
         $consultation = Consultation::factory()->create([
             'status' => 'saved',
             'type' => 'digital',
+            'doctor_id' => $doctor->id,
         ]);
 
         $response = $this->actingAs($user)
@@ -93,9 +95,11 @@ describe('ConsultationController', function () {
     });
 
     test('no permite actualizar consulta finalizada', function () {
-        $user = User::factory()->create();
+        $doctor = Doctor::factory()->create();
+        $user = User::factory()->create(['doctor_id' => $doctor->id]);
         $consultation = Consultation::factory()->create([
             'status' => 'finalized',
+            'doctor_id' => $doctor->id,
         ]);
 
         $response = $this->actingAs($user)

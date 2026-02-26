@@ -138,10 +138,10 @@ Una subtarea se considera terminada solo si cumple todo:
 - [x] **4.7.1 CRUD OmsCatalogoGrafica** (boletas oficiales OMS). — 100% ✔ Migración (`oms_catalogo_graficas`) + Modelo (`OmsCatalogoGrafica.php`) + Factory + `OmsCatalogoGraficaDTO` + 4 métodos en `CatalogService`/`CatalogServiceContract` + UI Livewire Volt (`⚡oms-graficas.blade.php`) con búsqueda y modal + ruta `catalogs/oms-graficas` + card en índice + `OmsGraficasTest` (feature, 5 tests) + `OmsCatalogoGraficaServiceTest` (unit, 3 tests) + `test_09` Dusk. 268 tests PHP pasando · Pint ✔
 - [x] **4.7.2 CRUD OmsDatoGrafica** (LMS, Z-Score, percentiles). — 100% ✔ Migración (`oms_datos_graficas`, FK cascadeOnDelete) + Modelo (`OmsDatoGrafica.php`, `$table` explícito, `belongsTo`) + relación `hasMany datos()` en `OmsCatalogoGrafica` + Factory (7 puntos LMS reales OMS) + `OmsDatoGraficaDTO` + 4 métodos en `CatalogService`/`CatalogServiceContract` + UI Livewire Volt (`⚡oms-datos.blade.php`) con mount por URL segment + botón "Ver Datos" en `⚡oms-graficas.blade.php` + ruta `catalogs/oms-datos/{graficaId}` + `OmsDatosTest` (feature, 5 tests) + `OmsDatoGraficaServiceTest` (unit, 3 tests). 276 tests PHP pasando · Pint ✔
 
-### 4.8 Seguridad, policies y auditoría — 0%
+### 4.8 Seguridad, policies y auditoría — 100%
 
-- [ ] **4.8.1 Policies por rol** (Admin/Doctor y alcance por paciente). — 0% (no existe carpeta `app/Policies/`)
-- [ ] **4.8.2 Auditoría mínima** en acciones críticas de catálogos y consulta. — 0%
+- [x] **4.8.1 Policies por rol** (Admin/Doctor y alcance por paciente). — 100% ✔ 5 policies creadas (`ConsultationPolicy`, `PatientPolicy`, `PrescriptionTemplatePolicy`, `LaboratoryTemplatePolicy`, `CatalogPolicy`) + `AuthorizesRequests` en `Controller` base + `Gate::define('manage-catalog')` en `AppServiceProvider` + `authorize()` en `ConsultationController`, `PacienteController` + `authorize()` en templates Livewire + tests de policies (ConsultationPolicyTest: 8 tests, PatientPolicyTest: 6 tests, TemplatePolicyTest: 4 tests).
+- [x] **4.8.2 Auditoría mínima** en acciones críticas de catálogos y consulta. — 100% ✔ Migración `audit_logs` (UUID, user_id nullable FK, action, auditable_type/id, old/new values JSONB, ip, user_agent) + `AuditLog` model + `Auditable` trait (`bootAuditable` con updating/created/updated/deleted hooks) aplicado a `Consultation` y `OmsCatalogoGrafica` + `AuditLogTest` (7 tests).
 
 ---
 
@@ -205,13 +205,13 @@ Una subtarea se considera terminada solo si cumple todo:
 | 4.5 | Flujo de Consulta (SOAP) | ✅ 100% |
 | 4.6 | Resultados / Snapshots | ✅ 100% |
 | 4.7 | Motor OMS (datos) | ✅ 100% |
-| 4.8 | Seguridad / Policies | 🔴 0% |
+| 4.8 | Seguridad / Policies | ✅ 100% |
 | 5 | Lógica de Dominio (VO/Services) | 🟡 30% |
 | 6 | Livewire Clínico | 🔴 0% |
 | 7 | Motor Gráfico OMS | 🔴 0% |
 | 8 | Calidad / Cierre Técnico | 🟡 55% |
 | 9 | Despliegue y Capacitación | 🔴 0% |
-| **Total MVP** | **Fase 4 completa — inicio Fase 4.8** | **~60%** |
+| **Total MVP** | **Fase 4 completa** | **~65%** |
 
 > **Evidencia de auditoría**: `git status`, listado de `app/`, `database/migrations/`, `tests/`, `resources/views/`, `app/Livewire/`. Fecha: 24-02-2026.
 
@@ -223,6 +223,17 @@ Una subtarea se considera terminada solo si cumple todo:
 - 4.7.2 completado: `OmsDatoGrafica` CRUD completo (método LMS, 17 columnas, hard delete), 5 tests feature + 3 tests unit + `test_10` Dusk. Bug resuelto: `$table` explícito en modelo porque Laravel infiere `oms_dato_graficas` en lugar de `oms_datos_graficas`.
 - Estado actual: **276 tests PHP pasando** · **10 tests Dusk implementados** · Pint ✔ · DB Dusk migrada.
 - Siguiente fase activa recomendada: **4.8 Seguridad, policies y auditoría**.
+
+### ✅ Actualización de ejecución (26-02-2026) — Fase 4.8
+
+- Pre-commit ejecutado en verde: `./vendor/bin/pint`, `./vendor/bin/phpstan analyse`, `php artisan test`.
+- 4.8.1 completado: 5 policies + `AuthorizesRequests` en Controller base + `Gate::define` en AppServiceProvider + `authorize()` en controllers y templates Livewire + 18 tests de policies (8 ConsultationPolicy + 6 PatientPolicy + 4 TemplatePolicy).
+- 4.8.2 completado: migración `audit_logs` + `AuditLog` model + `Auditable` trait (updating/created/updated/deleted hooks, captura old/new values) aplicado a `Consultation` y `OmsCatalogoGrafica` + 7 tests de AuditLog.
+- Bug resuelto: `Controller` base en Laravel 12 no incluye `AuthorizesRequests` → agregado explícitamente.
+- Estado actual: **301 tests PHP pasando** · **11 tests Dusk implementados** · Pint ✔ · PHPStan ✔.
+- `DefaultUsersSeeder` creado con 3 usuarios por defecto: `admin@clinica.com` (Admin), `doctor@clinica.com` (Dr. Carlos García), `doctora@clinica.com` (Dra. Ana López).
+- `test_11` Dusk: verifica policies en el navegador (sin rol = 403 sin form, Doctor/Admin = acceso a Nueva Consulta).
+- Siguiente fase activa recomendada: **5.x Lógica de Dominio (VO/Services)**.
 
 ---
 

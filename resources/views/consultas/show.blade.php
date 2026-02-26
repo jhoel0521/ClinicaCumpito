@@ -459,7 +459,7 @@
                 </div>
 
                 <div class="flex justify-end gap-2">
-                    <x-ui.button type="submit" variant="primary">
+                    <x-ui.button type="submit" variant="primary" dusk="lab-save-btn">
                         {{ $consultation->laboratoryRequest ? 'Actualizar Solicitud' : 'Guardar Solicitud' }}
                     </x-ui.button>
                 </div>
@@ -517,7 +517,9 @@
                         </div>
 
                         <div class="flex justify-end">
-                            <x-ui.button type="submit" variant="secondary">Agregar Examen</x-ui.button>
+                            <x-ui.button type="submit" variant="secondary" dusk="lab-add-exam-btn">
+                                Agregar Examen
+                            </x-ui.button>
                         </div>
                     </form>
 

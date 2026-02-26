@@ -542,4 +542,57 @@ class ClinicalWorkflowTest extends DuskTestCase
             'exam_name' => 'Hemograma completo',
         ]);
     }
+
+    // =========================================================================
+    // TEST 9: CREAR BOLETA OMS DESDE EL CATÁLOGO
+    // =========================================================================
+
+    /**
+     * El admin puede crear una boleta OMS desde el frontend:
+     * login → navega a /catalogs/oms-graficas → abre modal → llena form → guarda.
+     */
+    public function test_09_admin_puede_crear_boleta_oms(): void
+    {
+        $adminRole = Role::firstOrCreate(['name' => 'Admin', 'guard_name' => 'web']);
+
+        $admin = User::factory()->create([
+            'email' => 'admin@test.com',
+            'password' => bcrypt('password'),
+            'email_verified_at' => now(),
+        ]);
+        $admin->assignRole($adminRole);
+
+        $this->browse(function (Browser $browser) {
+            // ── 1. Login ──────────────────────────────────────────────────────
+            $this->loginAs($browser, 'admin@test.com');
+
+            // ── 2. Navegar al catálogo de gráficas OMS ────────────────────────
+            $browser
+                ->visit('/catalogs/oms-graficas')
+                ->waitFor('@btn-nueva-grafica', 10)
+                ->assertSee('Gráficas OMS');
+
+            // ── 3. Abrir modal ────────────────────────────────────────────────
+            $browser->script("document.querySelector('[dusk=\"btn-nueva-grafica\"]').click()");
+            $browser->waitFor('dialog[open]', 10);
+
+            // ── 4. Llenar el formulario ───────────────────────────────────────
+            $browser
+                ->type('input[wire\\:model="nombre"]', 'Peso para Talla - Niños')
+                ->type('input[wire\\:model="codigo"]', 'WHO_WT_LEN_MALE_0_24M')
+                ->select('select[wire\\:model="tipoGrafica"]', 'peso_talla')
+                ->type('input[wire\\:model="rangoEdad"]', '0-24 meses')
+                ->select('select[wire\\:model="sexo"]', 'M');
+
+            // ── 5. Guardar ────────────────────────────────────────────────────
+            $browser->script("document.querySelector('[dusk=\"btn-guardar-grafica\"]').click()");
+            $browser
+                ->waitUntilMissing('dialog[open]', 15)
+                ->assertSee('Peso para Talla - Niños');
+        });
+
+        $this->assertDatabaseHas('oms_catalogo_graficas', [
+            'codigo' => 'WHO_WT_LEN_MALE_0_24M',
+        ]);
+    }
 }

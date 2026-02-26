@@ -14,7 +14,7 @@
                         </div>
                         <div>
                             <p class="text-teal-100 text-sm">Edad</p>
-                            <p class="text-lg font-semibold">{{ $patient->date_of_birth->diffInYears(now()) }} años</p>
+                            <p class="text-lg font-semibold">{{ $patient->age()->forDisplay() }}</p>
                         </div>
                         <div>
                             <p class="text-teal-100 text-sm">Género</p>

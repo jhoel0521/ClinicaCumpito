@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\ValueObjects\Age;
 use App\ValueObjects\BirthType;
 use App\ValueObjects\BloodGroup;
 use App\ValueObjects\Gender;
@@ -68,5 +69,10 @@ class Patient extends Model
         return $this->belongsToMany(MedicalCondition::class, 'patient_medical_conditions')
             ->withPivot(['status', 'notes'])
             ->withTimestamps();
+    }
+
+    public function age(): Age
+    {
+        return Age::fromDates($this->date_of_birth);
     }
 }

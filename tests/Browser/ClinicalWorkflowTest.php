@@ -512,11 +512,14 @@ class ClinicalWorkflowTest extends DuskTestCase
             // ── 3. Seleccionar plantilla y agregar observaciones ───────────────
             // select() usa findByCss("select[dusk='lab-source-template']") como fallback.
             // type() usa findByCss('textarea[dusk="lab-observations"]') como fallback.
+            // Los botones usan JS click para evitar ElementClickInterceptedException
+            // causado por el SVG del sidebar Flux que bloquea el click en (67, 636).
+            // script() retorna el resultado JS (array), no el Browser → no se puede encadenar
             $browser
                 ->select('[dusk="lab-source-template"]', $labTemplate->id)
-                ->type('textarea[dusk="lab-observations"]', 'Ayunas de 8 horas previo al examen.')
-                ->press('Guardar Solicitud')
-                ->waitForText('guardada exitosamente', 10);
+                ->type('textarea[dusk="lab-observations"]', 'Ayunas de 8 horas previo al examen.');
+            $browser->script("document.querySelector('[dusk=\"lab-save-btn\"]').click()");
+            $browser->waitForText('guardada exitosamente', 10);
 
             // ── 4. Agregar un examen al snapshot ──────────────────────────────
             // Tras el redirect, la sección de exámenes aparece en el DOM.
@@ -525,9 +528,9 @@ class ClinicalWorkflowTest extends DuskTestCase
             $browser
                 ->waitFor('[dusk="lab-exam-name"]', 10)
                 ->type('[dusk="lab-exam-name"]', 'Hemograma completo')
-                ->type('[dusk="lab-indications"]', 'Sin restricciones')
-                ->press('Agregar Examen')
-                ->waitForText('guardado exitosamente', 10);
+                ->type('[dusk="lab-indications"]', 'Sin restricciones');
+            $browser->script("document.querySelector('[dusk=\"lab-add-exam-btn\"]').click()");
+            $browser->waitForText('guardado exitosamente', 10);
         });
 
         $this->assertDatabaseHas('laboratory_requests', [

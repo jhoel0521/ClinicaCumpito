@@ -145,9 +145,9 @@ Una subtarea se considera terminada solo si cumple todo:
 
 ---
 
-## 🧠 Fase 5: Lógica de Dominio (Services/Value Objects) — 35%
+## 🧠 Fase 5: Lógica de Dominio (Services/Value Objects) — 38%
 
-- [ ] **5.1 AgeValueObject**: cálculo de edad exacta (días/semanas/meses/años). — 0%
+- [x] **5.1 AgeValueObject**: cálculo de edad exacta (días/semanas/meses/años). — 100% ✔ `Age.php` implementado con cálculo exacto por `days()/weeks()/months()/years()` y representación clínica `forDisplay()`; integración transversal en `Patient::age()` y uso en `pacientes/show`; pruebas `AgeTest` (unit, 5 tests) + `PacienteControllerTest` (feature) para visualización clínica.
 - [~] **5.2 BloodGroupValueObject**: validación tipológica. — 90% ✔ `BloodGroup.php` completo (8 tipos, validación, Castable, Stringable) + `BloodGroupTest.php`; además existen `Gender`, `BirthType`, `ConsultationStatus`, `ConsultationType`, `LicenseNumber`, `PhoneNumber`, `MedicalStatus` y `Measurements/{Height,Weight,Temperature,HeadCircumference}` con tests unitarios. ✘ Pendiente evidencia de integración/uso transversal para cerrar con política estricta de unit + feature.
 - [ ] **5.3 ZScoreService/ValueObject**: cálculo clínico OMS. — 0%
 - [ ] **5.4 ConsultationSnapshotService**: copia inmutable de plantillas a transacciones. — 0%
@@ -206,7 +206,7 @@ Una subtarea se considera terminada solo si cumple todo:
 | 4.6 | Resultados / Snapshots | ✅ 100% |
 | 4.7 | Motor OMS (datos) | ✅ 100% |
 | 4.8 | Seguridad / Policies | ✅ 100% |
-| 5 | Lógica de Dominio (VO/Services) | 🟡 30% |
+| 5 | Lógica de Dominio (VO/Services) | 🟡 38% |
 | 6 | Livewire Clínico | 🔴 0% |
 | 7 | Motor Gráfico OMS | 🔴 0% |
 | 8 | Calidad / Cierre Técnico | 🟡 55% |
@@ -230,10 +230,18 @@ Una subtarea se considera terminada solo si cumple todo:
 - 4.8.1 completado: 5 policies + `AuthorizesRequests` en Controller base + `Gate::define` en AppServiceProvider + `authorize()` en controllers y templates Livewire + 18 tests de policies (8 ConsultationPolicy + 6 PatientPolicy + 4 TemplatePolicy).
 - 4.8.2 completado: migración `audit_logs` + `AuditLog` model + `Auditable` trait (updating/created/updated/deleted hooks, captura old/new values) aplicado a `Consultation` y `OmsCatalogoGrafica` + 7 tests de AuditLog.
 - Bug resuelto: `Controller` base en Laravel 12 no incluye `AuthorizesRequests` → agregado explícitamente.
-- Estado actual: **301 tests PHP pasando** · **11 tests Dusk implementados** · Pint ✔ · PHPStan ✔.
+- Estado actual: **301 tests PHP pasando** · **12 tests Dusk implementados** · Pint ✔ · PHPStan ✔.
 - `DefaultUsersSeeder` creado con 3 usuarios por defecto: `admin@clinica.com` (Admin), `doctor@clinica.com` (Dr. Carlos García), `doctora@clinica.com` (Dra. Ana López).
 - `test_11` Dusk: verifica policies en el navegador (sin rol = 403 sin form, Doctor/Admin = acceso a Nueva Consulta).
+- `test_12` Dusk: valida visualización de edad clínica exacta en perfil de paciente (`14 días`) tras integrar `AgeValueObject`.
 - Siguiente fase activa recomendada: **5.x Lógica de Dominio (VO/Services)**.
+
+### ✅ Actualización de ejecución (26-02-2026) — Fase 5.1
+
+- Revisión de consistencia realizada sobre los últimos 2 commits: `09b2579` (policies/auditoría) y `f7f04a5` (OMS datos), manteniendo patrón de implementación con evidencia en tests.
+- 5.1 completado: `Age` Value Object con cálculo exacto de edad clínica por días/semanas/meses/años y formato legible.
+- Integración de dominio: agregado `age()` en `Patient` y reemplazo de cálculo directo en vista de paciente por `forDisplay()`.
+- Pruebas añadidas: `tests/Unit/ValueObjects/AgeTest.php` (5 tests) y caso feature en `PacienteControllerTest` para validar render de edad exacta.
 
 ---
 

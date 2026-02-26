@@ -735,4 +735,36 @@ class ClinicalWorkflowTest extends DuskTestCase
                 ->assertSee('Nueva Consulta');
         });
     }
+
+    // =========================================================================
+    // TEST 12: EDAD CLÍNICA EXACTA EN PERFIL DE PACIENTE
+    // =========================================================================
+
+    /**
+     * Verifica que la vista de paciente renderiza la edad clínica exacta
+     * usando el AgeValueObject (días/semanas/meses/años).
+     */
+    public function test_12_muestra_edad_clinica_exacta_en_paciente(): void
+    {
+        User::factory()->create([
+            'email' => 'edad@test.com',
+            'password' => bcrypt('password'),
+            'email_verified_at' => now(),
+        ]);
+
+        $patient = Patient::factory()->create([
+            'full_name' => 'Paciente Edad Exacta',
+            'date_of_birth' => now()->subDays(14)->toDateString(),
+        ]);
+
+        $this->browse(function (Browser $browser) use ($patient) {
+            $this->loginAs($browser, 'edad@test.com');
+
+            $browser
+                ->visit('/pacientes/'.$patient->id)
+                ->waitForText('Paciente Edad Exacta', 10)
+                ->assertSee('Edad')
+                ->assertSee('14 días');
+        });
+    }
 }

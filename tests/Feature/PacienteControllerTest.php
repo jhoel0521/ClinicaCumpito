@@ -3,6 +3,7 @@
 use App\Models\MedicalCondition;
 use App\Models\Patient;
 use App\Models\User;
+use Carbon\Carbon;
 
 beforeEach(function () {
     $this->user = User::factory()->create();
@@ -222,6 +223,22 @@ describe('PacienteController - Show', function () {
         $response = $this->get(route('pacientes.show', $this->patient->id));
 
         $response->assertRedirect(route('login'));
+    });
+
+    test('dashboard muestra edad con formato clinico exacto', function () {
+        Carbon::setTestNow('2026-02-26');
+
+        $patient = Patient::factory()->create([
+            'date_of_birth' => '2026-02-12',
+        ]);
+
+        $response = $this->actingAs(User::factory()->create())
+            ->get(route('pacientes.show', $patient->id));
+
+        $response->assertStatus(200)
+            ->assertSee('14 días');
+
+        Carbon::setTestNow();
     });
 });
 

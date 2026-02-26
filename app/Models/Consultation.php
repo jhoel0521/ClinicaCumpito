@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\Auditable;
 use App\ValueObjects\ConsultationStatus;
 use App\ValueObjects\ConsultationType;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -15,7 +16,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Consultation extends Model
 {
     /** @use HasFactory<\Database\Factories\ConsultationFactory> */
-    use HasFactory, HasUuids, SoftDeletes;
+    use Auditable, HasFactory, HasUuids, SoftDeletes;
 
     protected $table = 'consultations';
 

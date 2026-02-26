@@ -53,6 +53,12 @@ new class extends Component {
 
     public function save(TemplateServiceContract $service): void
     {
+        if ($this->editingTemplateId) {
+            $this->authorize('update', LaboratoryTemplate::findOrFail($this->editingTemplateId));
+        } else {
+            $this->authorize('create', LaboratoryTemplate::class);
+        }
+
         $doctor = auth()->user()->doctor;
 
         if (! $doctor) {
@@ -111,6 +117,7 @@ new class extends Component {
 
     public function delete(string $id, TemplateServiceContract $service): void
     {
+        $this->authorize('delete', LaboratoryTemplate::findOrFail($id));
         $service->deleteLaboratoryTemplate($id);
         $this->dispatch('notify', variant: 'success', content: __('Plantilla eliminada.'));
     }

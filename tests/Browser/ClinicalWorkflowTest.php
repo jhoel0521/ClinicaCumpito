@@ -658,4 +658,81 @@ class ClinicalWorkflowTest extends DuskTestCase
             'oms_catalogo_grafica_id' => $grafica->id,
         ]);
     }
+
+    // =========================================================================
+    // TEST 11: CONTROL DE ACCESO POR ROL (POLICIES)
+    // =========================================================================
+
+    /**
+     * Verifica que las policies se aplican correctamente en el navegador:
+     *
+     *  - Un usuario sin rol Doctor NO puede acceder a crear consultas (403).
+     *  - Un Doctor SÍ puede acceder y ver el formulario.
+     *  - Un Admin también puede acceder (tiene permiso por política).
+     */
+    public function test_11_politicas_de_acceso_por_rol(): void
+    {
+        $doctorRole = Role::firstOrCreate(['name' => 'Doctor', 'guard_name' => 'web']);
+        $adminRole = Role::firstOrCreate(['name' => 'Admin', 'guard_name' => 'web']);
+
+        // Usuario sin ningún rol
+        User::factory()->create([
+            'email' => 'sinrol@test.com',
+            'password' => bcrypt('password'),
+            'email_verified_at' => now(),
+        ]);
+
+        // Doctor con perfil de médico
+        $doctor = Doctor::factory()->create([
+            'full_name' => 'Dra. Prueba Políticas',
+            'specialty' => 'Pediatría',
+            'license_number' => 'MP-POLICY01',
+        ]);
+        $userDoctor = User::factory()->create([
+            'email' => 'doctorpolicy@test.com',
+            'password' => bcrypt('password'),
+            'email_verified_at' => now(),
+            'doctor_id' => $doctor->id,
+        ]);
+        $userDoctor->assignRole($doctorRole);
+
+        // Admin
+        $admin = User::factory()->create([
+            'email' => 'adminpolicy@test.com',
+            'password' => bcrypt('password'),
+            'email_verified_at' => now(),
+        ]);
+        $admin->assignRole($adminRole);
+
+        $this->browse(function (Browser $browser) {
+            // ── ESCENARIO A: usuario sin rol no puede crear consulta ──────────
+            $this->loginAs($browser, 'sinrol@test.com');
+
+            $browser
+                ->visit('/consultas/create')
+                ->pause(1500);   // esperar renderizado del error
+
+            // El formulario de Nueva Consulta NO debe estar visible
+            $browser->assertDontSee('Nueva Consulta');
+
+            // ── ESCENARIO B: doctor SÍ puede crear consulta ───────────────────
+            // Nueva sesión
+            $browser->driver->manage()->deleteAllCookies();
+            $this->loginAs($browser, 'doctorpolicy@test.com');
+
+            $browser
+                ->visit('/consultas/create')
+                ->waitForText('Nueva Consulta', 10)
+                ->assertSee('Nueva Consulta');
+
+            // ── ESCENARIO C: admin también puede crear consulta ───────────────
+            $browser->driver->manage()->deleteAllCookies();
+            $this->loginAs($browser, 'adminpolicy@test.com');
+
+            $browser
+                ->visit('/consultas/create')
+                ->waitForText('Nueva Consulta', 10)
+                ->assertSee('Nueva Consulta');
+        });
+    }
 }

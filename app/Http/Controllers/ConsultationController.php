@@ -20,6 +20,8 @@ class ConsultationController extends Controller
 
     public function index(): View
     {
+        $this->authorize('viewAny', Consultation::class);
+
         $consultations = $this->service->paginate();
 
         return view('consultas.index', compact('consultations'));
@@ -27,6 +29,8 @@ class ConsultationController extends Controller
 
     public function create(): View
     {
+        $this->authorize('create', Consultation::class);
+
         $patients = Patient::query()->orderBy('full_name')->get(['id', 'full_name']);
         $doctors = Doctor::query()->orderBy('full_name')->get(['id', 'full_name']);
 
@@ -35,6 +39,8 @@ class ConsultationController extends Controller
 
     public function store(StoreConsultationRequest $request): \Illuminate\Http\RedirectResponse
     {
+        $this->authorize('create', Consultation::class);
+
         $dto = ConsultationDTO::fromArray($request->validated());
         $consultation = $this->service->create($dto);
 
@@ -44,6 +50,8 @@ class ConsultationController extends Controller
 
     public function show(Consultation $consulta): View
     {
+        $this->authorize('view', $consulta);
+
         $consulta->load([
             'patient', 'doctor', 'vitalSigns', 'soapNote',
             'prescription.sourceTemplate', 'prescription.items',
@@ -72,6 +80,8 @@ class ConsultationController extends Controller
 
     public function edit(Consultation $consulta): View
     {
+        $this->authorize('update', $consulta);
+
         $patients = Patient::query()->orderBy('full_name')->get(['id', 'full_name']);
         $doctors = Doctor::query()->orderBy('full_name')->get(['id', 'full_name']);
 
@@ -84,6 +94,8 @@ class ConsultationController extends Controller
 
     public function update(UpdateConsultationRequest $request, Consultation $consulta): \Illuminate\Http\RedirectResponse
     {
+        $this->authorize('update', $consulta);
+
         try {
             $dto = ConsultationDTO::fromArray($request->validated());
             $consultation = $this->service->update($consulta->id, $dto);
@@ -99,6 +111,8 @@ class ConsultationController extends Controller
 
     public function destroy(Consultation $consulta): \Illuminate\Http\RedirectResponse
     {
+        $this->authorize('delete', $consulta);
+
         try {
             $this->service->delete($consulta->id);
 

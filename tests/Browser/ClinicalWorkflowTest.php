@@ -8,6 +8,7 @@ use App\Models\LaboratoryCategory;
 use App\Models\LaboratoryExam;
 use App\Models\LaboratoryTemplate;
 use App\Models\Medication;
+use App\Models\OmsCatalogoGrafica;
 use App\Models\Patient;
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
@@ -593,6 +594,68 @@ class ClinicalWorkflowTest extends DuskTestCase
 
         $this->assertDatabaseHas('oms_catalogo_graficas', [
             'codigo' => 'WHO_WT_LEN_MALE_0_24M',
+        ]);
+    }
+
+    // =========================================================================
+    // TEST 10: AGREGAR DATO LMS A UNA BOLETA OMS
+    // =========================================================================
+
+    /**
+     * El admin puede agregar un punto de datos LMS a una boleta OMS:
+     * login → navega a /catalogs/oms-datos/{id} → abre modal → llena form → guarda.
+     */
+    public function test_10_admin_puede_agregar_dato_oms(): void
+    {
+        $adminRole = Role::firstOrCreate(['name' => 'Admin', 'guard_name' => 'web']);
+
+        $admin = User::factory()->create([
+            'email' => 'admin.datos@test.com',
+            'password' => bcrypt('password'),
+            'email_verified_at' => now(),
+        ]);
+        $admin->assignRole($adminRole);
+
+        $grafica = OmsCatalogoGrafica::factory()->create([
+            'nombre' => 'Talla para Edad - Niños OMS',
+            'codigo' => 'WHO_LEN_AGE_M_0_5Y_DUSK',
+            'tipo_grafica' => 'talla_edad',
+            'rango_edad' => '0-5 años',
+            'sexo' => 'M',
+        ]);
+
+        $this->browse(function (Browser $browser) use ($grafica) {
+            // ── 1. Login ──────────────────────────────────────────────────────
+            $this->loginAs($browser, 'admin.datos@test.com');
+
+            // ── 2. Navegar directamente a los datos de la boleta OMS ──────────
+            $browser
+                ->visit('/catalogs/oms-datos/'.$grafica->id)
+                ->waitFor('@btn-nuevo-dato', 10)
+                ->assertSee('Talla para Edad - Niños OMS');
+
+            // ── 3. Abrir modal ────────────────────────────────────────────────
+            $browser->script("document.querySelector('[dusk=\"btn-nuevo-dato\"]').click()");
+            $browser->waitFor('dialog[open]', 10);
+
+            // ── 4. Llenar el formulario (LMS obligatorios) ────────────────────
+            $browser
+                ->type('input[wire\\:model="xValue"]', '3')
+                ->type('input[wire\\:model="lValue"]', '0.1738')
+                ->type('input[wire\\:model="mValue"]', '6.3762')
+                ->type('input[wire\\:model="sValue"]', '0.11727');
+
+            // ── 5. Guardar ────────────────────────────────────────────────────
+            $browser->script("document.querySelector('[dusk=\"btn-guardar-dato\"]').click()");
+            $browser->waitUntilMissing('dialog[open]', 15);
+
+            // ── 6. Verificar que el dato aparece en la tabla ──────────────────
+            // x_value = 3 aparece como "3.0000" en la columna X de la tabla
+            $browser->assertSee('3.0000');
+        });
+
+        $this->assertDatabaseHas('oms_datos_graficas', [
+            'oms_catalogo_grafica_id' => $grafica->id,
         ]);
     }
 }

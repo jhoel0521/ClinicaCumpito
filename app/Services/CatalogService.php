@@ -7,11 +7,13 @@ use App\DTOs\Catalogs\LaboratoryCategoryDTO;
 use App\DTOs\Catalogs\LaboratoryExamDTO;
 use App\DTOs\Catalogs\MedicationDTO;
 use App\DTOs\Catalogs\OmsCatalogoGraficaDTO;
+use App\DTOs\Catalogs\OmsDatoGraficaDTO;
 use App\DTOs\Catalogs\VaccineDTO;
 use App\Models\LaboratoryCategory;
 use App\Models\LaboratoryExam;
 use App\Models\Medication;
 use App\Models\OmsCatalogoGrafica;
+use App\Models\OmsDatoGrafica;
 use App\Models\Vaccine;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
@@ -161,5 +163,36 @@ class CatalogService implements CatalogServiceContract
     public function getAllOmsCatalogos(): Collection
     {
         return OmsCatalogoGrafica::all();
+    }
+
+    // OMS Datos Graficas
+    public function createOmsDato(OmsDatoGraficaDTO $dto): OmsDatoGrafica
+    {
+        return DB::transaction(fn () => OmsDatoGrafica::create($dto->toArray()));
+    }
+
+    public function updateOmsDato(string $id, OmsDatoGraficaDTO $dto): OmsDatoGrafica
+    {
+        return DB::transaction(function () use ($id, $dto) {
+            $dato = OmsDatoGrafica::findOrFail($id);
+            $dato->update($dto->toArray());
+
+            return $dato;
+        });
+    }
+
+    public function deleteOmsDato(string $id): bool
+    {
+        return (bool) DB::transaction(fn () => OmsDatoGrafica::findOrFail($id)->delete());
+    }
+
+    /**
+     * @return Collection<int, OmsDatoGrafica>
+     */
+    public function getDatosByGrafica(string $graficaId): Collection
+    {
+        return OmsDatoGrafica::where('oms_catalogo_grafica_id', $graficaId)
+            ->orderBy('x_value')
+            ->get();
     }
 }

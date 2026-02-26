@@ -6,11 +6,13 @@ use App\DTOs\Catalogs\LaboratoryCategoryDTO;
 use App\DTOs\Catalogs\LaboratoryExamDTO;
 use App\DTOs\Catalogs\MedicationDTO;
 use App\DTOs\Catalogs\OmsCatalogoGraficaDTO;
+use App\DTOs\Catalogs\OmsDatoGraficaDTO;
 use App\DTOs\Catalogs\VaccineDTO;
 use App\Models\LaboratoryCategory;
 use App\Models\LaboratoryExam;
 use App\Models\Medication;
 use App\Models\OmsCatalogoGrafica;
+use App\Models\OmsDatoGrafica;
 use App\Models\Vaccine;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -75,4 +77,16 @@ interface CatalogServiceContract
      * @return Collection<int, OmsCatalogoGrafica>
      */
     public function getAllOmsCatalogos(): Collection;
+
+    // OMS Datos Graficas
+    public function createOmsDato(OmsDatoGraficaDTO $dto): OmsDatoGrafica;
+
+    public function updateOmsDato(string $id, OmsDatoGraficaDTO $dto): OmsDatoGrafica;
+
+    public function deleteOmsDato(string $id): bool;
+
+    /**
+     * @return Collection<int, OmsDatoGrafica>
+     */
+    public function getDatosByGrafica(string $graficaId): Collection;
 }

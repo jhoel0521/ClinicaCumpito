@@ -133,10 +133,10 @@ Una subtarea se considera terminada solo si cumple todo:
 - [x] **4.6.3 CRUD SolicitudLaboratorio**. — 100% ✔ Migración (`laboratory_requests`) + Modelo (`LaboratoryRequest.php`) + Factory + `LaboratoryRequestService` + `LaboratoryRequestServiceContract` + `LaboratoryRequestDTO` + `StoreLaboratoryRequestRequest` + `LaboratoryRequestController` + endpoints (`consultas/{consulta}/laboratorios`) + `LaboratoryRequestServiceTest` (unit) + `LaboratoryRequestControllerTest` (feature) + UI integrada en `consultas/show`.
 - [x] **4.6.4 CRUD DetalleSolicitudLaboratorio** (snapshot + resultado). — 100% ✔ Migración (`laboratory_request_items`) + Modelo (`LaboratoryRequestItem.php`) + Factory + `LaboratoryRequestItemService` + `LaboratoryRequestItemServiceContract` + `LaboratoryRequestItemDTO` + `StoreLaboratoryRequestItemRequest` + `LaboratoryRequestItemController` + endpoints (`consultas/{consulta}/laboratorios/detalles`) + `LaboratoryRequestItemServiceTest` (unit) + `LaboratoryRequestItemControllerTest` (feature) + UI integrada en `consultas/show`.
 
-### 4.7 Motor OMS (catálogo y datos) — 50%
+### 4.7 Motor OMS (catálogo y datos) — 100%
 
 - [x] **4.7.1 CRUD OmsCatalogoGrafica** (boletas oficiales OMS). — 100% ✔ Migración (`oms_catalogo_graficas`) + Modelo (`OmsCatalogoGrafica.php`) + Factory + `OmsCatalogoGraficaDTO` + 4 métodos en `CatalogService`/`CatalogServiceContract` + UI Livewire Volt (`⚡oms-graficas.blade.php`) con búsqueda y modal + ruta `catalogs/oms-graficas` + card en índice + `OmsGraficasTest` (feature, 5 tests) + `OmsCatalogoGraficaServiceTest` (unit, 3 tests) + `test_09` Dusk. 268 tests PHP pasando · Pint ✔
-- [ ] **4.7.2 CRUD OmsDatoGrafica** (LMS, Z-Score, percentiles). — 0%
+- [x] **4.7.2 CRUD OmsDatoGrafica** (LMS, Z-Score, percentiles). — 100% ✔ Migración (`oms_datos_graficas`, FK cascadeOnDelete) + Modelo (`OmsDatoGrafica.php`, `$table` explícito, `belongsTo`) + relación `hasMany datos()` en `OmsCatalogoGrafica` + Factory (7 puntos LMS reales OMS) + `OmsDatoGraficaDTO` + 4 métodos en `CatalogService`/`CatalogServiceContract` + UI Livewire Volt (`⚡oms-datos.blade.php`) con mount por URL segment + botón "Ver Datos" en `⚡oms-graficas.blade.php` + ruta `catalogs/oms-datos/{graficaId}` + `OmsDatosTest` (feature, 5 tests) + `OmsDatoGraficaServiceTest` (unit, 3 tests). 276 tests PHP pasando · Pint ✔
 
 ### 4.8 Seguridad, policies y auditoría — 0%
 
@@ -204,14 +204,14 @@ Una subtarea se considera terminada solo si cumple todo:
 | 4.4 | Módulo Plantillas | ✅ 100% |
 | 4.5 | Flujo de Consulta (SOAP) | ✅ 100% |
 | 4.6 | Resultados / Snapshots | ✅ 100% |
-| 4.7 | Motor OMS (datos) | 🟡 50% |
+| 4.7 | Motor OMS (datos) | ✅ 100% |
 | 4.8 | Seguridad / Policies | 🔴 0% |
 | 5 | Lógica de Dominio (VO/Services) | 🟡 30% |
 | 6 | Livewire Clínico | 🔴 0% |
 | 7 | Motor Gráfico OMS | 🔴 0% |
 | 8 | Calidad / Cierre Técnico | 🟡 55% |
 | 9 | Despliegue y Capacitación | 🔴 0% |
-| **Total MVP** | **Fase 4 avanzando en OMS** | **~55%** |
+| **Total MVP** | **Fase 4 completa — inicio Fase 4.8** | **~60%** |
 
 > **Evidencia de auditoría**: `git status`, listado de `app/`, `database/migrations/`, `tests/`, `resources/views/`, `app/Livewire/`. Fecha: 24-02-2026.
 
@@ -220,7 +220,9 @@ Una subtarea se considera terminada solo si cumple todo:
 - Pre-commit ejecutado en verde: `./vendor/bin/pint`, `./vendor/bin/phpstan analyse`, `php artisan test`.
 - Estado de calidad posterior al avance: **268 tests pasando** (Unit+Feature) + **9 tests Dusk implementados** y **PHPStan sin errores**.
 - 4.7.1 completado: `OmsCatalogoGrafica` CRUD completo con Livewire Volt, 5 tests feature + 3 tests unit + test_09 Dusk.
-- Siguiente fase activa recomendada: **4.7.2 CRUD OmsDatoGrafica**.
+- 4.7.2 completado: `OmsDatoGrafica` CRUD completo (método LMS, 17 columnas, hard delete), 5 tests feature + 3 tests unit + `test_10` Dusk. Bug resuelto: `$table` explícito en modelo porque Laravel infiere `oms_dato_graficas` en lugar de `oms_datos_graficas`.
+- Estado actual: **276 tests PHP pasando** · **10 tests Dusk implementados** · Pint ✔ · DB Dusk migrada.
+- Siguiente fase activa recomendada: **4.8 Seguridad, policies y auditoría**.
 
 ---
 

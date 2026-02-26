@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class OmsCatalogoGrafica extends Model
@@ -24,4 +25,11 @@ class OmsCatalogoGrafica extends Model
         'minimo_percentil',
         'maximo_percentil',
     ];
+
+    /** @return HasMany<OmsDatoGrafica, $this> */
+    public function datos(): HasMany
+    {
+        return $this->hasMany(OmsDatoGrafica::class, 'oms_catalogo_grafica_id')
+            ->orderBy('x_value');
+    }
 }

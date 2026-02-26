@@ -133,9 +133,9 @@ Una subtarea se considera terminada solo si cumple todo:
 - [x] **4.6.3 CRUD SolicitudLaboratorio**. — 100% ✔ Migración (`laboratory_requests`) + Modelo (`LaboratoryRequest.php`) + Factory + `LaboratoryRequestService` + `LaboratoryRequestServiceContract` + `LaboratoryRequestDTO` + `StoreLaboratoryRequestRequest` + `LaboratoryRequestController` + endpoints (`consultas/{consulta}/laboratorios`) + `LaboratoryRequestServiceTest` (unit) + `LaboratoryRequestControllerTest` (feature) + UI integrada en `consultas/show`.
 - [x] **4.6.4 CRUD DetalleSolicitudLaboratorio** (snapshot + resultado). — 100% ✔ Migración (`laboratory_request_items`) + Modelo (`LaboratoryRequestItem.php`) + Factory + `LaboratoryRequestItemService` + `LaboratoryRequestItemServiceContract` + `LaboratoryRequestItemDTO` + `StoreLaboratoryRequestItemRequest` + `LaboratoryRequestItemController` + endpoints (`consultas/{consulta}/laboratorios/detalles`) + `LaboratoryRequestItemServiceTest` (unit) + `LaboratoryRequestItemControllerTest` (feature) + UI integrada en `consultas/show`.
 
-### 4.7 Motor OMS (catálogo y datos) — 0%
+### 4.7 Motor OMS (catálogo y datos) — 50%
 
-- [ ] **4.7.1 CRUD OmsCatalogoGrafica** (boletas oficiales OMS). — 0%
+- [x] **4.7.1 CRUD OmsCatalogoGrafica** (boletas oficiales OMS). — 100% ✔ Migración (`oms_catalogo_graficas`) + Modelo (`OmsCatalogoGrafica.php`) + Factory + `OmsCatalogoGraficaDTO` + 4 métodos en `CatalogService`/`CatalogServiceContract` + UI Livewire Volt (`⚡oms-graficas.blade.php`) con búsqueda y modal + ruta `catalogs/oms-graficas` + card en índice + `OmsGraficasTest` (feature, 5 tests) + `OmsCatalogoGraficaServiceTest` (unit, 3 tests) + `test_09` Dusk. 268 tests PHP pasando · Pint ✔
 - [ ] **4.7.2 CRUD OmsDatoGrafica** (LMS, Z-Score, percentiles). — 0%
 
 ### 4.8 Seguridad, policies y auditoría — 0%
@@ -204,23 +204,23 @@ Una subtarea se considera terminada solo si cumple todo:
 | 4.4 | Módulo Plantillas | ✅ 100% |
 | 4.5 | Flujo de Consulta (SOAP) | ✅ 100% |
 | 4.6 | Resultados / Snapshots | ✅ 100% |
-| 4.7 | Motor OMS (datos) | 🔴 0% |
+| 4.7 | Motor OMS (datos) | 🟡 50% |
 | 4.8 | Seguridad / Policies | 🔴 0% |
 | 5 | Lógica de Dominio (VO/Services) | 🟡 30% |
 | 6 | Livewire Clínico | 🔴 0% |
 | 7 | Motor Gráfico OMS | 🔴 0% |
 | 8 | Calidad / Cierre Técnico | 🟡 55% |
 | 9 | Despliegue y Capacitación | 🔴 0% |
-| **Total MVP** | **Fase 4 avanzando en snapshots** | **~50%** |
+| **Total MVP** | **Fase 4 avanzando en OMS** | **~55%** |
 
 > **Evidencia de auditoría**: `git status`, listado de `app/`, `database/migrations/`, `tests/`, `resources/views/`, `app/Livewire/`. Fecha: 24-02-2026.
 
 ### ✅ Actualización de ejecución (26-02-2026)
 
 - Pre-commit ejecutado en verde: `./vendor/bin/pint`, `./vendor/bin/phpstan analyse`, `php artisan test`.
-- Estado de calidad posterior al avance: **260 tests pasando** (Unit+Feature) + **8 tests Dusk pasando** y **PHPStan sin errores**.
-- Test_08 (solicitud de laboratorio) corregido: `ElementClickInterceptedException` del sidebar Flux resuelto con JS click (`$browser->script()`); `->script()` no es encadenable en Dusk 8.
-- Siguiente fase activa recomendada: **4.7.1 CRUD OmsCatalogoGrafica**.
+- Estado de calidad posterior al avance: **268 tests pasando** (Unit+Feature) + **9 tests Dusk implementados** y **PHPStan sin errores**.
+- 4.7.1 completado: `OmsCatalogoGrafica` CRUD completo con Livewire Volt, 5 tests feature + 3 tests unit + test_09 Dusk.
+- Siguiente fase activa recomendada: **4.7.2 CRUD OmsDatoGrafica**.
 
 ---
 

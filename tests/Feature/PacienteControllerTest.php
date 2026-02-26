@@ -184,6 +184,44 @@ describe('PacienteController - Store', function () {
             'status' => 'Positive',
         ]);
     });
+
+    test('puede crear paciente con grupo sanguineo valido', function () {
+        $user = User::factory()->create();
+
+        $data = [
+            'full_name' => 'Paciente con Grupo',
+            'date_of_birth' => '2019-10-15',
+            'gender' => 'F',
+            'blood_group' => 'AB-',
+        ];
+
+        $response = $this->actingAs($user)
+            ->post(route('pacientes.store'), $data);
+
+        $response->assertSessionHasNoErrors();
+        $response->assertRedirect();
+
+        $this->assertDatabaseHas('patients', [
+            'full_name' => 'Paciente con Grupo',
+            'blood_group' => 'AB-',
+        ]);
+    });
+
+    test('falla si grupo sanguineo es invalido al crear', function () {
+        $user = User::factory()->create();
+
+        $data = [
+            'full_name' => 'Paciente Grupo Invalido',
+            'date_of_birth' => '2018-05-11',
+            'gender' => 'M',
+            'blood_group' => 'X+',
+        ];
+
+        $response = $this->actingAs($user)
+            ->post(route('pacientes.store'), $data);
+
+        $response->assertSessionHasErrors('blood_group');
+    });
 });
 
 describe('PacienteController - Show', function () {
@@ -223,6 +261,18 @@ describe('PacienteController - Show', function () {
         $response = $this->get(route('pacientes.show', $this->patient->id));
 
         $response->assertRedirect(route('login'));
+    });
+
+    test('dashboard muestra grupo sanguineo del paciente', function () {
+        $patient = Patient::factory()->create([
+            'blood_group' => 'O-',
+        ]);
+
+        $response = $this->actingAs(User::factory()->create())
+            ->get(route('pacientes.show', $patient->id));
+
+        $response->assertStatus(200)
+            ->assertSee('O-');
     });
 
     test('dashboard muestra edad con formato clinico exacto', function () {
@@ -322,6 +372,43 @@ describe('PacienteController - Update', function () {
             'medical_condition_id' => $condition->id,
             'status' => 'Negative',
         ]);
+    });
+
+    test('puede actualizar grupo sanguineo del paciente', function () {
+        $user = User::factory()->create();
+
+        $data = [
+            'full_name' => $this->patient->full_name,
+            'date_of_birth' => $this->patient->date_of_birth->format('Y-m-d'),
+            'gender' => $this->patient->gender->value(),
+            'blood_group' => 'B+',
+        ];
+
+        $response = $this->actingAs($user)
+            ->put(route('pacientes.update', $this->patient->id), $data);
+
+        $response->assertRedirect(route('pacientes.show', $this->patient->id));
+
+        $this->assertDatabaseHas('patients', [
+            'id' => $this->patient->id,
+            'blood_group' => 'B+',
+        ]);
+    });
+
+    test('falla si grupo sanguineo es invalido al actualizar', function () {
+        $user = User::factory()->create();
+
+        $data = [
+            'full_name' => $this->patient->full_name,
+            'date_of_birth' => $this->patient->date_of_birth->format('Y-m-d'),
+            'gender' => $this->patient->gender->value(),
+            'blood_group' => 'ZZ',
+        ];
+
+        $response = $this->actingAs($user)
+            ->put(route('pacientes.update', $this->patient->id), $data);
+
+        $response->assertSessionHasErrors('blood_group');
     });
 });
 

@@ -215,10 +215,11 @@ Una subtarea se considera terminada solo si cumple todo:
 
 > **Evidencia de auditoría**: `git status`, listado de `app/`, `database/migrations/`, `tests/`, `resources/views/`, `app/Livewire/`. Fecha: 24-02-2026.
 
-### ✅ Actualización de ejecución (24-02-2026)
+### ✅ Actualización de ejecución (26-02-2026)
 
 - Pre-commit ejecutado en verde: `./vendor/bin/pint`, `./vendor/bin/phpstan analyse`, `php artisan test`.
-- Estado de calidad posterior al avance: **260 tests pasando** (Unit+Feature) + **8 tests Dusk** y **PHPStan sin errores**.
+- Estado de calidad posterior al avance: **260 tests pasando** (Unit+Feature) + **8 tests Dusk pasando** y **PHPStan sin errores**.
+- Test_08 (solicitud de laboratorio) corregido: `ElementClickInterceptedException` del sidebar Flux resuelto con JS click (`$browser->script()`); `->script()` no es encadenable en Dusk 8.
 - Siguiente fase activa recomendada: **4.7.1 CRUD OmsCatalogoGrafica**.
 
 ---

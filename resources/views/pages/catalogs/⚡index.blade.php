@@ -45,5 +45,16 @@ new class extends Component {}; ?>
                 {{ __('Administrar') }}
             </flux:button>
         </flux:card>
+
+        <flux:card class="flex flex-col gap-4 p-6 hover:shadow-lg transition-shadow">
+            <div class="flex items-center gap-3">
+                <flux:icon name="chart-bar" class="w-8 h-8 text-green-500" />
+                <flux:heading size="lg">{{ __('Gráficas OMS') }}</flux:heading>
+            </div>
+            <flux:text>{{ __('Catálogo de boletas OMS para seguimiento del crecimiento infantil.') }}</flux:text>
+            <flux:button variant="primary" :href="route('catalogs.oms-graficas')" wire:navigate>
+                {{ __('Administrar') }}
+            </flux:button>
+        </flux:card>
     </div>
 </section>

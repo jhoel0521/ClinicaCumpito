@@ -33,6 +33,8 @@ return new class extends Migration
             $table->decimal('p85', 8, 4)->nullable();    // percentil 85
             $table->decimal('p97', 8, 4)->nullable();    // percentil 97
             $table->timestamps();
+
+            $table->unique(['oms_catalogo_grafica_id', 'x_value'], 'oms_datos_graficas_grafica_xvalue_unique');
         });
     }
 

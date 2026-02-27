@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             MedicationCatalogSeeder::class,
             VaccineCatalogSeeder::class,
             DefaultUsersSeeder::class,
+            WhoDataSeeder::class,
         ]);
     }
 }

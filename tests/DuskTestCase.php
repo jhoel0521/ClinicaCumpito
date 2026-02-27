@@ -21,6 +21,11 @@ abstract class DuskTestCase extends BaseTestCase
     private static mixed $duskServer = null;
 
     /**
+     * PID del servidor Dusk iniciado, para poder terminarlo al finalizar.
+     */
+    private static ?int $duskServerPid = null;
+
+    /**
      * Prepare for Dusk test execution.
      * Inicia ChromeDriver y el servidor de la app si no está corriendo.
      */
@@ -59,6 +64,46 @@ abstract class DuskTestCase extends BaseTestCase
             $pipes,
             dirname(__DIR__)
         );
+
+        if (is_resource(self::$duskServer)) {
+            $status = proc_get_status(self::$duskServer);
+            self::$duskServerPid = $status['pid'] ?? null;
+
+            // Red de seguridad: matar el servidor aunque el proceso PHP muera abruptamente
+            register_shutdown_function(static function (): void {
+                static::stopDuskServer();
+            });
+        }
+    }
+
+    /**
+     * Mata el proceso del servidor Dusk (y su árbol de hijos en Windows).
+     */
+    protected static function stopDuskServer(): void
+    {
+        if (self::$duskServerPid !== null) {
+            if (PHP_OS_FAMILY === 'Windows') {
+                exec('taskkill /F /T /PID '.self::$duskServerPid.' 2>NUL');
+            } else {
+                exec('kill -9 '.self::$duskServerPid.' 2>/dev/null');
+            }
+            self::$duskServerPid = null;
+        }
+
+        if (is_resource(self::$duskServer)) {
+            proc_close(self::$duskServer);
+            self::$duskServer = null;
+        }
+    }
+
+    /**
+     * Detiene el servidor Dusk al terminar todos los tests de la clase.
+     * Evita que el proceso quede como huérfano en Windows.
+     */
+    public static function tearDownAfterClass(): void
+    {
+        static::stopDuskServer();
+        parent::tearDownAfterClass();
     }
 
     /**

@@ -767,4 +767,47 @@ class ClinicalWorkflowTest extends DuskTestCase
                 ->assertSee('14 días');
         });
     }
+
+    // =========================================================================
+    // TEST 13: PANEL DE GRÁFICAS DE CRECIMIENTO OMS EN PERFIL DE PACIENTE
+    // =========================================================================
+
+    /**
+     * Verifica que el dashboard del paciente renderiza el panel "Gráficas de
+     * Crecimiento OMS" con las gráficas disponibles según el sexo del paciente.
+     * Prueba la integración del GrowthChartService con la vista.
+     */
+    public function test_13_muestra_panel_graficas_crecimiento_en_paciente(): void
+    {
+        User::factory()->create([
+            'email' => 'graficas@test.com',
+            'password' => bcrypt('password'),
+            'email_verified_at' => now(),
+        ]);
+
+        $patient = Patient::factory()->create([
+            'full_name' => 'Paciente Graficas OMS',
+            'gender' => 'F',
+            'date_of_birth' => now()->subMonths(6)->toDateString(),
+        ]);
+
+        // Gráfica OMS para sexo F → debe aparecer en el panel del paciente
+        OmsCatalogoGrafica::factory()->create([
+            'codigo' => 'DUSK_HC_F_CRECIMIENTO',
+            'nombre' => 'Perímetro Cefálico Niñas',
+            'tipo_grafica' => 'perimetro_cefalico',
+            'sexo' => 'F',
+        ]);
+
+        $this->browse(function (Browser $browser) use ($patient) {
+            $this->loginAs($browser, 'graficas@test.com');
+
+            $browser
+                ->visit('/pacientes/'.$patient->id)
+                ->waitForText('Paciente Graficas OMS', 10)
+                ->assertPresent('[dusk="growth-chart-panel"]')
+                ->assertSee('Gráficas de Crecimiento OMS')
+                ->assertSee('Perímetro Cefálico Niñas');
+        });
+    }
 }

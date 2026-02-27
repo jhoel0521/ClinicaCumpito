@@ -33,7 +33,7 @@ class DefaultUsersSeeder extends Seeder
                 'phone_number' => '000-000-0000',
             ]
         );
-        $admin->syncRoles([$adminRole]);
+        $admin->syncRoles([$adminRole, $doctorRole]);
 
         // ── Doctor 1 ──────────────────────────────────────────────────────────
         $doctor1 = Doctor::firstOrCreate(

@@ -145,13 +145,13 @@ Una subtarea se considera terminada solo si cumple todo:
 
 ---
 
-## 🧠 Fase 5: Lógica de Dominio (Services/Value Objects) — 80%
+## 🧠 Fase 5: Lógica de Dominio (Services/Value Objects) — 100%
 
 - [x] **5.1 AgeValueObject**: cálculo de edad exacta (días/semanas/meses/años). — 100% ✔ `Age.php` implementado con cálculo exacto por `days()/weeks()/months()/years()` y representación clínica `forDisplay()`; integración transversal en `Patient::age()` y uso en `pacientes/show`; pruebas `AgeTest` (unit, 5 tests) + `PacienteControllerTest` (feature) para visualización clínica.
 - [x] **5.2 BloodGroupValueObject**: validación tipológica. — 100% ✔ `BloodGroup.php` completo (8 tipos, validación, Castable, Stringable) + `BloodGroupTest.php` (unit); integración transversal cerrada en módulo Pacientes con pruebas feature de `store/update/show` (creación y actualización con grupos válidos, rechazo de grupos inválidos, render en dashboard). Auditoría 27-02-2026: cobertura de edge cases completada — test de `blood_group: null` (campo nullable), test parametrizado con los 8 grupos sanguíneos OMS (`->with([...])`), test de limpieza de grupo al actualizar.
 - [x] **5.3 ZScoreService/ValueObject**: cálculo clínico OMS. — 100% ✔ `ZScore.php` (ValueObject con categoría clínica, rango normal y redondeo) + `ZScoreServiceContract` + `ZScoreService` con fórmula LMS OMS (`L=0` y `L≠0`) + cálculo por punto OMS más cercano (`x_value`) usando `oms_datos_graficas` + binding DI en `AppServiceProvider`; pruebas `ZScoreTest` (unit), `ZScoreServiceTest` (unit) y `ZScoreServiceFeatureTest` (feature con datos persistidos). Auditoría 27-02-2026: cobertura negativa completada — tests de error para medición ≤0, M/S ≤0, z-score negativo (medición < M), y `ModelNotFoundException` cuando la gráfica no tiene datos OMS asociados.
 - [x] **5.4 ConsultationSnapshotService**: copia inmutable de plantillas a transacciones. — 100% ✔ `ConsultationSnapshotServiceContract` + `ConsultationSnapshotService` con métodos para copiar plantillas a snapshots (receta/laboratorio), bloquear transacciones al finalizar consulta y validar ventana de 3 días para edición de resultados; binding DI en `AppServiceProvider`; pruebas `ConsultationSnapshotServiceTest` (unit, 6 tests) + `ConsultationSnapshotFeatureTest` (feature, 1 test flujo completo).  — 100%
-- [ ] **5.5 GrowthChartService**: preparación de datasets para Chart.js. — 0%
+- [x] **5.5 GrowthChartService**: preparación de datasets para Chart.js. — 100% ✔ `GrowthChartServiceContract` (3 métodos tipados con PHPDoc) + `GrowthChartService` (fórmulas LMS por `tipo_grafica`: talla_edad, peso_edad, peso_talla, perimetro_cefalico, imc) + binding DI en `AppServiceProvider` + sección "Gráficas de Crecimiento OMS" en `pacientes/show.blade.php` (`dusk="growth-chart-panel"`) + `GrowthChartServiceTest` (unit, 5 tests) + `GrowthChartServiceFeatureTest` (feature, 1 test) + `test_13` Dusk.
 
 ---
 
@@ -175,7 +175,7 @@ Una subtarea se considera terminada solo si cumple todo:
 
 ## 🧪 Fase 8: Calidad, Seguridad y Cierre Técnico — 34%
 
-- [~] **8.1 Cobertura**: fortalecer suite de pruebas en módulos críticos. — 60% ✔ Tests unitarios para Value Objects (`BirthType`, `BloodGroup`, `ConsultationStatus`, `ConsultationType`, `Gender`, `LicenseNumber`, `Measurements/*`, `MedicalStatus`, `PhoneNumber`), Factories (`Doctor`, `Patient`, `Consultation`, `VitalSign`, `SoapNote`, `PatientVaccine`, `Prescription`, `PrescriptionItem`, `User`), `PacienteServiceTest`, `TemplateServiceTest`, `ConsultationServiceTest`, `DoctorServiceTest`, `CatalogServiceTest`, `VitalSignServiceTest`, `SoapNoteServiceTest`, `PatientVaccineServiceTest`, `PrescriptionServiceTest`, `PrescriptionItemServiceTest` y feature `ConsultationControllerTest` + `TemplateModuleTest` + `VitalSignControllerTest` + `SoapNoteControllerTest` + `PatientVaccineControllerTest` + `PrescriptionControllerTest` + `PrescriptionItemControllerTest`. Auditoría 27-02-2026: +40 tests de cobertura negativa y edge cases en `ZScoreServiceTest`, `ZScoreServiceFeatureTest` y `PacienteControllerTest` (341 tests total). ✘ Pendiente cobertura en snapshots de laboratorio, OMS, policies con restricción real y flujo clínico completo.
+- [~] **8.1 Cobertura**: fortalecer suite de pruebas en módulos críticos. — 65% ✔ Tests unitarios para Value Objects (`BirthType`, `BloodGroup`, `ConsultationStatus`, `ConsultationType`, `Gender`, `LicenseNumber`, `Measurements/*`, `MedicalStatus`, `PhoneNumber`), Factories (`Doctor`, `Patient`, `Consultation`, `VitalSign`, `SoapNote`, `PatientVaccine`, `Prescription`, `PrescriptionItem`, `User`), `PacienteServiceTest`, `TemplateServiceTest`, `ConsultationServiceTest`, `DoctorServiceTest`, `CatalogServiceTest`, `VitalSignServiceTest`, `SoapNoteServiceTest`, `PatientVaccineServiceTest`, `PrescriptionServiceTest`, `PrescriptionItemServiceTest` y feature `ConsultationControllerTest` + `TemplateModuleTest` + `VitalSignControllerTest` + `SoapNoteControllerTest` + `PatientVaccineControllerTest` + `PrescriptionControllerTest` + `PrescriptionItemControllerTest`. Auditoría 27-02-2026: +40 tests de cobertura negativa y edge cases en `ZScoreServiceTest`, `ZScoreServiceFeatureTest` y `PacienteControllerTest` + `GrowthChartServiceTest` (5 unit) + `GrowthChartServiceFeatureTest` (1 feature) → **347 tests PHP · 13 Dusk**. ✘ Pendiente cobertura en snapshots de laboratorio, OMS, policies con restricción real y flujo clínico completo.
 - [ ] **8.2 Pruebas de autorización**: acceso correcto por rol/propietario. — 0%
 - [ ] **8.3 Pruebas de regresión** del flujo completo de consulta. — 0%
 
@@ -206,7 +206,7 @@ Una subtarea se considera terminada solo si cumple todo:
 | 4.6 | Resultados / Snapshots | ✅ 100% |
 | 4.7 | Motor OMS (datos) | ✅ 100% |
 | 4.8 | Seguridad / Policies | ✅ 100% |
-| 5 | Lógica de Dominio (VO/Services) | 🟡 80% |
+| 5 | Lógica de Dominio (VO/Services) | ✅ 100% |
 | 6 | Livewire Clínico | 🔴 0% |
 | 7 | Motor Gráfico OMS | 🔴 0% |
 | 8 | Calidad / Cierre Técnico | 🟡 60% |
@@ -237,6 +237,13 @@ Una subtarea se considera terminada solo si cumple todo:
 - 5.2 completado: evidencia de integración de `BloodGroup` en `PacienteControllerTest` (store/update/show + validación de rechazo para valores inválidos), manteniendo `BloodGroupTest` como base unitaria.
 - 5.3 completado: implementado motor de cálculo LMS OMS (`ZScoreService` + `ZScore` VO) con pruebas unitarias y feature en verde (`8 tests passing`) + `phpstan` sin errores en los nuevos artefactos.
 - 5.4 completado: motor de snapshots inmutables para consultas. `ConsultationSnapshotService` con métodos para copiar plantillas a receta/laboratorio (snapshot transaccional), bloqueo al finalizar FINALIZED, ventana de 3 días para llenar laboratorios. Unit (`6 tests`) + feature (`1 test flujo`) + `phpstan` sin errores.
+
+### ✅ Actualización de ejecución (27-02-2026) — Fase 5.5 + Correcciones de infraestructura
+
+- **5.5 completado**: `GrowthChartService` implementado con despacho por `tipo_grafica` usando fórmula LMS OMS. Retorna curvas de referencia SD (-3 a +3) y puntos del paciente con z-score y categoría clínica. Sección mínima UI en `pacientes/show.blade.php` con `dusk="growth-chart-panel"` para habilitar test de browser. PHPDoc `@return` con tipos shape (`array{...}`) para satisfacer PHPStan nivel estricto.
+- **`DuskTestCase` corregido**: servidor dusk (`php artisan serve --env=dusk.local`) ahora se mata automáticamente al finalizar los tests via `tearDownAfterClass()` + `register_shutdown_function()` como red de seguridad. Usa `taskkill /F /T /PID` en Windows para matar árbol de procesos completo — evita servidores zombie que dejaban puerto 8000 ocupado con `vitaltrack_dusk` tras `npm run pre-commit`.
+- Estado actual: **347 tests PHP pasando** · **13 tests Dusk** · PHPStan ✔ · Pint ✔.
+- **Fase 5 cerrada al 100%**.
 
 ### ✅ Actualización de ejecución (27-02-2026) — Auditoría Fase 5 + Cobertura negativa
 

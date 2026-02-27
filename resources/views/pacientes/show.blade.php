@@ -269,6 +269,41 @@
                         </div>
                     </div>
                 @endif
+
+                <!-- Gráficas de Crecimiento OMS -->
+                <div
+                    dusk="growth-chart-panel"
+                    class="bg-white dark:bg-zinc-900 rounded-xl shadow-sm border border-gray-100 dark:border-zinc-800 p-6"
+                >
+                    <h2 class="text-lg font-bold text-teal-700 dark:text-teal-400 mb-4 flex items-center gap-2">
+                        <i class="fas fa-chart-line text-teal-600 dark:text-teal-400"></i>
+                        Gráficas de Crecimiento OMS
+                    </h2>
+
+                    @if ($graficas->isNotEmpty())
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">
+                            {{ $graficas->count() }}
+                            {{ $graficas->count() === 1 ? 'gráfica disponible' : 'gráficas disponibles' }} para este
+                            paciente
+                        </p>
+                        <ul class="space-y-2">
+                            @foreach ($graficas as $grafica)
+                                <li
+                                    dusk="grafica-item-{{ $grafica->id }}"
+                                    class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 bg-teal-50 dark:bg-teal-900/20 px-3 py-2 rounded-lg"
+                                >
+                                    <i class="fas fa-chart-area text-teal-500"></i>
+                                    {{ $grafica->nombre }}
+                                    <span class="ml-auto text-xs text-gray-400">{{ $grafica->tipo_grafica }}</span>
+                                </li>
+                            @endforeach
+                        </ul>
+                    @else
+                        <p dusk="no-graficas" class="text-sm text-gray-400 dark:text-gray-500 italic">
+                            No hay gráficas OMS disponibles para este paciente.
+                        </p>
+                    @endif
+                </div>
             </div>
 
             <!-- Sidebar derecho (1 columna) -->

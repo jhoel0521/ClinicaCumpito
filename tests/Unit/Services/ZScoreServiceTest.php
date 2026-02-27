@@ -32,6 +32,29 @@ describe('ZScoreService', function () {
         expect($result->value())->toBeGreaterThan(0.0);
     });
 
+    test('lanza excepción si la medición es cero o negativa', function () {
+        expect(fn () => $this->service->calculateFromLms(0.0, 1.0, 10.0, 0.1))
+            ->toThrow(\InvalidArgumentException::class, 'mayor a 0');
+
+        expect(fn () => $this->service->calculateFromLms(-5.0, 1.0, 10.0, 0.1))
+            ->toThrow(\InvalidArgumentException::class, 'mayor a 0');
+    });
+
+    test('lanza excepción si M o S son cero o negativos', function () {
+        expect(fn () => $this->service->calculateFromLms(10.0, 1.0, 0.0, 0.1))
+            ->toThrow(\InvalidArgumentException::class);
+
+        expect(fn () => $this->service->calculateFromLms(10.0, 1.0, 10.0, 0.0))
+            ->toThrow(\InvalidArgumentException::class);
+    });
+
+    test('retorna z-score negativo cuando medición es menor al valor M', function () {
+        $zscore = $this->service->calculateFromLms(8.0, 1.0, 10.0, 0.1);
+
+        expect($zscore->value())->toBeLessThan(0.0)
+            ->and($zscore->isNormalRange())->toBeTrue();
+    });
+
     test('calculateByGrafica usa el punto OMS más cercano por x_value', function () {
         $grafica = OmsCatalogoGrafica::factory()->create();
 

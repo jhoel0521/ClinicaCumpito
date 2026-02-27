@@ -222,6 +222,43 @@ describe('PacienteController - Store', function () {
 
         $response->assertSessionHasErrors('blood_group');
     });
+
+    test('puede crear paciente sin especificar grupo sanguineo', function () {
+        $user = User::factory()->create();
+
+        $data = [
+            'full_name' => 'Paciente Sin Grupo',
+            'date_of_birth' => '2010-05-15',
+            'gender' => 'M',
+        ];
+
+        $this->actingAs($user)
+            ->post(route('pacientes.store'), $data)
+            ->assertSessionHasNoErrors()
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('patients', [
+            'full_name' => 'Paciente Sin Grupo',
+            'blood_group' => null,
+        ]);
+    });
+
+    test('puede crear paciente con cada grupo sanguineo valido', function (string $group) {
+        $user = User::factory()->create();
+
+        $data = [
+            'full_name' => "Paciente {$group}",
+            'date_of_birth' => '2010-05-15',
+            'gender' => 'M',
+            'blood_group' => $group,
+        ];
+
+        $this->actingAs($user)
+            ->post(route('pacientes.store'), $data)
+            ->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('patients', ['blood_group' => $group]);
+    })->with(['O+', 'O-', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-']);
 });
 
 describe('PacienteController - Show', function () {
@@ -409,6 +446,28 @@ describe('PacienteController - Update', function () {
             ->put(route('pacientes.update', $this->patient->id), $data);
 
         $response->assertSessionHasErrors('blood_group');
+    });
+
+    test('puede limpiar el grupo sanguineo de un paciente al actualizar', function () {
+        $user = User::factory()->create();
+        $patient = Patient::factory()->create([
+            'blood_group' => 'O+',
+            'user_id' => $user->id,
+        ]);
+
+        $this->actingAs($user)
+            ->put(route('pacientes.update', $patient->id), [
+                'full_name' => $patient->full_name,
+                'date_of_birth' => $patient->date_of_birth->format('Y-m-d'),
+                'gender' => $patient->gender->value(),
+                // blood_group omitido → debe quedar null
+            ])
+            ->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('patients', [
+            'id' => $patient->id,
+            'blood_group' => null,
+        ]);
     });
 });
 

@@ -155,12 +155,12 @@ Una subtarea se considera terminada solo si cumple todo:
 
 ---
 
-## 📋 Fase 6: Integración de Flujo Clínico Completo (Livewire) — 0%
+## 📋 Fase 6: Integración de Flujo Clínico Completo (Livewire) — 50%
 
-> **Redefinición 27-02-2026**: Las vistas existentes (consulta 742 líneas, paciente 517 líneas) son páginas monolíticas con formularios HTML que recargan. Se rediseñan como landing-pages con Livewire Volt reactivo.
+> **Redefinición 27-02-2026**: Las vistas existentes (consulta 742 líneas, paciente 517 líneas) eran páginas monolíticas con formularios HTML que recargaban. Rediseñadas como landing-pages con Livewire Volt reactivo.
 
-- [ ] **6.1 Dashboard del Paciente** (landing-page, 6 secciones). — 0% · `pacientes/show.blade.php` reescrito con: (1) Header/Datos Base, (2) Última Consulta (VS+SOAP+Rx+Lab), (3) Gráfica OMS con selector `⚡patient-oms-chart`, (4) Historial Consultas, (5) Historial Recetas, (6) Historial Laboratorios. `PacienteController::show()` con eager loading completo.
-- [ ] **6.2 Vista de Consulta Reactiva** (landing-page + Livewire). — 0% · `consultas/show.blade.php` reescrito con 5 Volt components independientes: `⚡consultation-vital-signs`, `⚡consultation-soap-note`, `⚡consultation-prescription`, `⚡consultation-laboratory`, `⚡consultation-vaccines`. Cada uno guarda sin recargar. Bloqueo si consulta `finalized`.
+- [x] **6.1 Dashboard del Paciente** (landing-page, 6 secciones). — 100% ✔ `pacientes/show.blade.php` reescrito con barra de anclas sticky + 6 secciones: (1) Header/Datos Base (edad exacta, género, grupo sanguíneo, alergias, antecedentes, condiciones), (2) Última Consulta (VS+SOAP+Rx+Lab en modo lectura), (3) Gráfica OMS con selector `⚡patient-oms-chart` (tabla de datapoints + placeholder Chart.js Fase 7), (4) Historial de Consultas (tabla con íconos de estado), (5) Historial de Recetas (agrupado por fecha), (6) Historial de Laboratorios (agrupado por fecha). `PacienteController::show()` con eager loading completo + `$latestConsultation`.
+- [x] **6.2 Vista de Consulta Reactiva** (landing-page + Livewire). — 100% ✔ `consultas/show.blade.php` reescrito como landing-page con header estático + barra ancla + 5 Volt components independientes que guardan sin recargar: `⚡consultation-vital-signs`, `⚡consultation-soap-note`, `⚡consultation-prescription`, `⚡consultation-laboratory`, `⚡consultation-vaccines`. Cada componente: carga desde DB en `mount()`, badge reactivo (Sin datos / Guardado / Finalizada), bloqueo si `finalized`. Tests Dusk `08` actualizado (flash → badges Livewire).
 - [ ] **6.3 Gestión de pacientes** (listado, crear, editar). — 0% · Ajustar UX del listado y formularios de creación/edición si necesario (baja prioridad — funcionalidad ya existe).
 - [ ] **6.4 Módulo híbrido**: subida y visualización de PDF/JPG históricos (consultas manuales escaneadas). — 0%
 
@@ -209,11 +209,11 @@ Una subtarea se considera terminada solo si cumple todo:
 | 4.7 | Motor OMS (datos) | ✅ 100% |
 | 4.8 | Seguridad / Policies | ✅ 100% |
 | 5 | Lógica de Dominio (VO/Services) | ✅ 100% |
-| 6 | Livewire Clínico | 🔴 0% |
+| 6 | Livewire Clínico | 🟡 50% |
 | 7 | Motor Gráfico OMS | 🔴 0% |
 | 8 | Calidad / Cierre Técnico | 🟡 60% |
 | 9 | Despliegue y Capacitación | 🔴 0% |
-| **Total MVP** | **Fase 4 completa** | **~65%** |
+| **Total MVP** | **Fases 1–5 + Fase 6 parcial** | **~70%** |
 
 > **Evidencia de auditoría**: `git status`, listado de `app/`, `database/migrations/`, `tests/`, `resources/views/`, `app/Livewire/`. Fecha: 24-02-2026.
 
@@ -246,6 +246,15 @@ Una subtarea se considera terminada solo si cumple todo:
 - **`DuskTestCase` corregido**: servidor dusk (`php artisan serve --env=dusk.local`) ahora se mata automáticamente al finalizar los tests via `tearDownAfterClass()` + `register_shutdown_function()` como red de seguridad. Usa `taskkill /F /T /PID` en Windows para matar árbol de procesos completo — evita servidores zombie que dejaban puerto 8000 ocupado con `vitaltrack_dusk` tras `npm run pre-commit`.
 - Estado actual: **347 tests PHP pasando** · **13 tests Dusk** · PHPStan ✔ · Pint ✔.
 - **Fase 5 cerrada al 100%**.
+
+### ✅ Actualización de ejecución (27-02-2026) — Fase 6.1 + 6.2 completadas
+
+- **6.1 completado**: `pacientes/show.blade.php` reescrito como landing-page con 6 secciones ancladas. `⚡patient-oms-chart` Volt component carga datos OMS desde DB en `mount()`, muestra tabla de datapoints con categorías z-score y placeholder Chart.js (Fase 7).
+- **6.2 completado**: `consultas/show.blade.php` reescrito con header estático y 5 Volt components reactivos. Patrón clave: datos nunca se pasan como props `Collection` — se cargan desde DB en `mount()` para evitar `TypeError` de Livewire 4 (asigna props a propiedades antes de llamar `mount()`).
+- **Bug crítico resuelto**: `ConsultationControllerTest` usaba `Consultation::factory()->create()` con `randomElement(['draft','saved','finalized'])` → test no determinista. Corregido con `['status' => 'draft']` explícito.
+- **Test Dusk 08 actualizado**: mensajes de flash reemplazados por esperas a badges Livewire (`'Guardado'`) y texto de ítems (`'Hemograma completo'`).
+- Estado actual: **347 tests PHP pasando** · **13 tests Dusk** · PHPStan ✔ · Pint ✔.
+- Siguiente fase recomendada: **6.3** (UX listado/formularios pacientes) o saltar a **Fase 7** (Chart.js OMS).
 
 ### ✅ Actualización de ejecución (27-02-2026) — Auditoría Fase 5 + Cobertura negativa
 

@@ -6,6 +6,7 @@ use App\DTOs\PacienteDTO;
 use App\Http\Requests\StorePacienteRequest;
 use App\Http\Requests\UpdatePacienteRequest;
 use App\Models\MedicalCondition;
+use App\Models\OmsCatalogoGrafica;
 use App\Models\Patient;
 use App\Services\PacienteService;
 use Illuminate\View\View;
@@ -59,7 +60,12 @@ class PacienteController extends Controller
 
         $patient->load(['user', 'medicalConditions', 'consultations']);
 
-        return view('pacientes.show', compact('patient'));
+        $graficas = OmsCatalogoGrafica::query()
+            ->where('sexo', $patient->gender?->value())
+            ->orderBy('nombre')
+            ->get();
+
+        return view('pacientes.show', compact('patient', 'graficas'));
     }
 
     /**

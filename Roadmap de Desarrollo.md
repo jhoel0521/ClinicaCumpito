@@ -166,11 +166,10 @@ Una subtarea se considera terminada solo si cumple todo:
 
 ---
 
-## 📈 Fase 7: Motor Gráfico OMS — 25%
+## 📈 Fase 7: Motor Gráfico OMS — 75%
 
 - [x] **7.1 Seeding masivo OMS**: importación Excel a `oms_datos_graficas`. — 100% ✔ `WhoDataSeeder` lee 50 archivos Excel OMS (`phpoffice/phpspreadsheet ^5.4`) y crea **10 `OmsCatalogoGrafica`** (5 tipos × 2 sexos: M/F) con todos sus `OmsDatoGrafica` (LMS + Z-Scores + percentiles P3/P15/P50/P85/P97). Casos especiales resueltos: (a) columna extra `SD` en lhfa/hcfa detectada por nombre dinámico, (b) merge 0-2 + 2-5 años sin duplicar mes 24 para `talla_edad`/`imc`, (c) merge wfl+wfh por corte a 65 cm para `peso_talla`. Unique index `(oms_catalogo_grafica_id, x_value)` agregado en migración original. Idempotente via `updateOrCreate`. `WhoDataSeeder` registrado en `DatabaseSeeder`. **12 tests feature** en `WhoDataSeederTest` (conteo 10 boletas, 2 por tipo, LMS no nulos, rangos x_value, merge correcto, sin duplicados, idempotencia).
-- [ ] **7.2 Gráficas Chart.js**: boletas, radio buttons y rangos. — 0%
-- [ ] **7.3 Modo dual**: Médico (Z-Score) vs Padres (Percentil). — 0%
+- [x] **7.2 Gráficas Chart.js + 7.3 Modo dual** (implementados conjuntamente): — 100% ✔ `GrowthChartService::getReferenceDatasets()` extendido con `percentile_datasets` (P3/P50/P97) usando la constante `PERCENTILE_DATASETS`; `prepareChartData()` expone la nueva clave. `resources/js/app.js`: import `chart.js/auto` + `Alpine.data('omsChart', ...)` con modo `'padres'` por defecto (3 curvas percentil punteadas) y modo `'medico'` (7 curvas SD semáforo); función `zToPercentile()` (polinomio de Horner) para tooltip `~Percentil N`. `⚡patient-oms-chart.blade.php`: canvas con toggle Padres/Médico Alpine puro (`dusk="btn-modo-padres"` / `dusk="btn-modo-medico"`); listener `@oms-chart-data.window` para re-render tras cambio de gráfica Livewire; `wire:ignore` en wrapper. `npm run build` ✔ (208 KB JS · 264 KB CSS). `GrowthChartServiceTest` ampliado con `it('retorna percentile_datasets con P3, P50 y P97')` — 6 tests · 28 assertions pasando. **360 tests PHP · 13 Dusk · PHPStan ✔ · Pint ✔**.
 - [ ] **7.4 Pruebas de precisión**: coordenadas de pacientes de prueba. — 0%
 
 ---
@@ -210,10 +209,10 @@ Una subtarea se considera terminada solo si cumple todo:
 | 4.8 | Seguridad / Policies | ✅ 100% |
 | 5 | Lógica de Dominio (VO/Services) | ✅ 100% |
 | 6 | Livewire Clínico | 🟡 50% |
-| 7 | Motor Gráfico OMS | 🟡 25% |
+| 7 | Motor Gráfico OMS | 🟡 75% |
 | 8 | Calidad / Cierre Técnico | 🟡 60% |
 | 9 | Despliegue y Capacitación | 🔴 0% |
-| **Total MVP** | **Fases 1–5 + Fase 6 parcial + Fase 7 parcial** | **~73%** |
+| **Total MVP** | **Fases 1–5 + Fase 6 parcial + Fase 7 parcial** | **~78%** |
 
 > **Evidencia de auditoría**: `git status`, listado de `app/`, `database/migrations/`, `tests/`, `resources/views/`, `app/Livewire/`. Fecha: 24-02-2026.
 
@@ -255,6 +254,17 @@ Una subtarea se considera terminada solo si cumple todo:
 - **Test Dusk 08 actualizado**: mensajes de flash reemplazados por esperas a badges Livewire (`'Guardado'`) y texto de ítems (`'Hemograma completo'`).
 - Estado actual: **347 tests PHP pasando** · **13 tests Dusk** · PHPStan ✔ · Pint ✔.
 - Siguiente fase recomendada: **6.3** (UX listado/formularios pacientes) o saltar a **Fase 7** (Chart.js OMS).
+
+### ✅ Actualización de ejecución (27-02-2026) — Fases 7.2 + 7.3 Gráficas Chart.js con modo dual
+
+- **7.2 + 7.3 combinados y completados**: implementación conjunta para evitar retrabajo en el Alpine component y `GrowthChartService`.
+- **`GrowthChartService`**: constante `PERCENTILE_DATASETS` (P3/P50/P97) + `percentile_datasets` expuesto en `getReferenceDatasets()` y `prepareChartData()`. Contract PHPDoc actualizado con el nuevo shape.
+- **`resources/js/app.js`**: import `chart.js/auto` + función `zToPercentile()` (normal CDF polinomio de Horner) + `Alpine.data('omsChart', ...)` con modo `padres` por defecto (3 curvas percentil, tooltips `~Percentil N`) y modo `medico` (7 curvas SD semáforo, tooltips Z-Score + categoría). Re-render Alpine puro sin roundtrip Livewire al cambiar modo.
+- **`⚡patient-oms-chart.blade.php`**: canvas `dusk="chart-canvas"` + toggle Padres/Médico con estilos teal activo / zinc inactivo; listener `@oms-chart-data.window` para re-render al cambiar selector de gráfica; `wire:ignore` en wrapper.
+- **`GrowthChartServiceTest`**: nuevo test `it('retorna percentile_datasets con P3, P50 y P97')` validando count 3, labels, flags `dash`, y conteo de datos por punto OMS.
+- **`npm run build`**: ✔ 208 KB JS · 264 KB CSS · 3.17s.
+- Estado actual: **360 tests PHP pasando** · **13 tests Dusk** · PHPStan ✔ · Pint ✔.
+- Siguiente fase recomendada: **7.4 Pruebas de precisión** (coordenadas de pacientes de prueba con datos OMS reales sembrados).
 
 ### ✅ Actualización de ejecución (27-02-2026) — Fase 7.1 WhoDataSeeder
 

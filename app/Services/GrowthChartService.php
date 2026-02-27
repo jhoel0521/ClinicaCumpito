@@ -23,9 +23,16 @@ class GrowthChartService implements GrowthChartServiceContract
         '+3 DS' => '#dc2626',
     ];
 
+    // Curvas de percentiles para modo Padres (P3/P50/P97)
+    private const PERCENTILE_DATASETS = [
+        ['key' => 'p3',  'label' => 'OMS Mín (P3)',    'color' => 'rgba(239,68,68,0.5)',  'dash' => true],
+        ['key' => 'p50', 'label' => 'OMS Ideal (P50)', 'color' => '#16a34a',              'dash' => false],
+        ['key' => 'p97', 'label' => 'OMS Máx (P97)',   'color' => 'rgba(239,68,68,0.5)',  'dash' => true],
+    ];
+
     public function __construct(private ZScoreServiceContract $zscoreService) {}
 
-    /** @return array{labels: array<int, float>, datasets: array<int, array{label: string, color: string, data: array<int, float|null>}>} */
+    /** @return array{labels: array<int, float>, datasets: array<int, array{label: string, color: string, data: array<int, float|null>}>, percentile_datasets: array<int, array{label: string, color: string, dash: bool, data: array<int, float|null>}>} */
     public function getReferenceDatasets(string $graficaId): array
     {
         $puntos = OmsDatoGrafica::query()
@@ -41,17 +48,28 @@ class GrowthChartService implements GrowthChartServiceContract
 
         $toFloat = fn ($v): ?float => $v !== null ? (float) $v : null;
 
+        $percentileDatasets = array_map(
+            fn (array $pd) => [
+                'label' => $pd['label'],
+                'color' => $pd['color'],
+                'dash' => $pd['dash'],
+                'data' => $puntos->pluck($pd['key'])->map($toFloat)->all(),
+            ],
+            self::PERCENTILE_DATASETS,
+        );
+
         return [
             'labels' => $puntos->pluck('x_value')->map(fn ($v) => (float) $v)->all(),
             'datasets' => [
-                ['label' => '-3 DS',  'color' => self::SD_COLORS['-3 DS'],  'data' => $puntos->pluck('sd3neg')->map($toFloat)->all()],
-                ['label' => '-2 DS',  'color' => self::SD_COLORS['-2 DS'],  'data' => $puntos->pluck('sd2neg')->map($toFloat)->all()],
-                ['label' => '-1 DS',  'color' => self::SD_COLORS['-1 DS'],  'data' => $puntos->pluck('sd1neg')->map($toFloat)->all()],
+                ['label' => '-3 DS',   'color' => self::SD_COLORS['-3 DS'],   'data' => $puntos->pluck('sd3neg')->map($toFloat)->all()],
+                ['label' => '-2 DS',   'color' => self::SD_COLORS['-2 DS'],   'data' => $puntos->pluck('sd2neg')->map($toFloat)->all()],
+                ['label' => '-1 DS',   'color' => self::SD_COLORS['-1 DS'],   'data' => $puntos->pluck('sd1neg')->map($toFloat)->all()],
                 ['label' => 'Mediana', 'color' => self::SD_COLORS['Mediana'], 'data' => $puntos->pluck('sd0')->map($toFloat)->all()],
-                ['label' => '+1 DS',  'color' => self::SD_COLORS['+1 DS'],  'data' => $puntos->pluck('sd1')->map($toFloat)->all()],
-                ['label' => '+2 DS',  'color' => self::SD_COLORS['+2 DS'],  'data' => $puntos->pluck('sd2')->map($toFloat)->all()],
-                ['label' => '+3 DS',  'color' => self::SD_COLORS['+3 DS'],  'data' => $puntos->pluck('sd3')->map($toFloat)->all()],
+                ['label' => '+1 DS',   'color' => self::SD_COLORS['+1 DS'],   'data' => $puntos->pluck('sd1')->map($toFloat)->all()],
+                ['label' => '+2 DS',   'color' => self::SD_COLORS['+2 DS'],   'data' => $puntos->pluck('sd2')->map($toFloat)->all()],
+                ['label' => '+3 DS',   'color' => self::SD_COLORS['+3 DS'],   'data' => $puntos->pluck('sd3')->map($toFloat)->all()],
             ],
+            'percentile_datasets' => $percentileDatasets,
         ];
     }
 
@@ -100,7 +118,7 @@ class GrowthChartService implements GrowthChartServiceContract
         return $datapoints;
     }
 
-    /** @return array{grafica: array{id: string, nombre: string, tipo_grafica: string}, labels: array<int, float>, reference_datasets: array<int, array{label: string, color: string, data: array<int, float|null>}>, patient_datapoints: array<int, array{x: float, y: float, z_score: float, category: string, date: string}>} */
+    /** @return array{grafica: array{id: string, nombre: string, tipo_grafica: string}, labels: array<int, float>, reference_datasets: array<int, array{label: string, color: string, data: array<int, float|null>}>, percentile_datasets: array<int, array{label: string, color: string, dash: bool, data: array<int, float|null>}>, patient_datapoints: array<int, array{x: float, y: float, z_score: float, category: string, date: string}>} */
     public function prepareChartData(string $patientId, string $graficaId): array
     {
         $grafica = OmsCatalogoGrafica::findOrFail($graficaId);
@@ -114,6 +132,7 @@ class GrowthChartService implements GrowthChartServiceContract
             ],
             'labels' => $reference['labels'],
             'reference_datasets' => $reference['datasets'],
+            'percentile_datasets' => $reference['percentile_datasets'],
             'patient_datapoints' => $this->getPatientDatapoints($patientId, $graficaId),
         ];
     }

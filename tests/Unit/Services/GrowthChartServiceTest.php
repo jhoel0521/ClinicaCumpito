@@ -109,4 +109,21 @@ describe('GrowthChartService', function () {
             ->and($result['reference_datasets'])->toHaveCount(7)
             ->and($result['patient_datapoints'])->toBeArray();
     });
+
+    it('retorna percentile_datasets con P3, P50 y P97', function () {
+        $patient = Patient::factory()->create(['gender' => 'M']);
+
+        $data = $this->service->prepareChartData($patient->id, $this->grafica->id);
+
+        expect($data)->toHaveKey('percentile_datasets')
+            ->and($data['percentile_datasets'])->toHaveCount(3)
+            ->and($data['percentile_datasets'][0]['label'])->toContain('P3')
+            ->and($data['percentile_datasets'][1]['label'])->toContain('P50')
+            ->and($data['percentile_datasets'][2]['label'])->toContain('P97')
+            ->and($data['percentile_datasets'][0]['dash'])->toBeTrue()
+            ->and($data['percentile_datasets'][1]['dash'])->toBeFalse()
+            ->and($data['percentile_datasets'][2]['dash'])->toBeTrue()
+            ->and($data['percentile_datasets'][0]['data'])->toHaveCount(2)
+            ->and($data['percentile_datasets'][1]['data'])->toHaveCount(2);
+    });
 });

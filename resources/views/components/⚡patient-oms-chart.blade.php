@@ -65,6 +65,12 @@ new class extends Component {
         try {
             $service = app(GrowthChartServiceContract::class);
             $this->chartData = $service->prepareChartData($this->patientId, $this->selectedGraficaId);
+            $this->dispatch(
+                'oms-chart-data',
+                data: $this->chartData,
+                xLabel: $this->getXLabel(),
+                yLabel: $this->getYLabel(),
+            );
         } catch (\Throwable $e) {
             $this->error = 'No hay datos de referencia OMS para esta gráfica.';
             $this->chartData = null;
@@ -158,24 +164,45 @@ new class extends Component {
     @endif
 
     @if ($chartData !== null)
-        {{-- Placeholder Chart.js (Fase 7) --}}
+        {{-- Gráfica Chart.js interactiva con modo dual Padres / Médico --}}
         <div
-            class="mb-6 rounded-xl border border-dashed border-gray-300 dark:border-zinc-600 bg-gray-50 dark:bg-zinc-800/50 flex items-center justify-center"
-            style="height: 320px"
-            dusk="chart-canvas-placeholder"
+            x-data="omsChart(@js($chartData), @js($this->getXLabel()), @js($this->getYLabel()))"
+            x-init="init()"
+            @oms-chart-data.window="render($event.detail.data, $event.detail.xLabel, $event.detail.yLabel)"
+            wire:ignore
+            class="mb-6"
+            dusk="chart-wrapper"
         >
-            <div class="text-center text-gray-400 dark:text-zinc-500">
-                <svg class="mx-auto h-12 w-12 mb-3 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="1.5"
-                        d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"
-                    />
-                </svg>
-                <p class="text-sm font-medium">Gráfica interactiva</p>
-                <p class="text-xs mt-1">Disponible en Fase 7</p>
+            {{-- Toggle de modo: Padres (default) / Médico --}}
+            <div class="flex items-center gap-2 mb-3">
+                <span class="text-xs text-gray-500 dark:text-gray-400">Vista:</span>
+                <button
+                    @click="setMode('padres')"
+                    :class="mode === 'padres'
+                        ? 'bg-teal-600 text-white shadow'
+                        : 'bg-gray-100 dark:bg-zinc-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-zinc-600'"
+                    class="px-3 py-1 rounded-md text-xs font-medium transition"
+                    dusk="btn-modo-padres"
+                >
+                    Padres
+                </button>
+                <button
+                    @click="setMode('medico')"
+                    :class="mode === 'medico'
+                        ? 'bg-teal-600 text-white shadow'
+                        : 'bg-gray-100 dark:bg-zinc-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-zinc-600'"
+                    class="px-3 py-1 rounded-md text-xs font-medium transition"
+                    dusk="btn-modo-medico"
+                >
+                    Médico
+                </button>
             </div>
+
+            <canvas
+                dusk="chart-canvas"
+                class="rounded-xl border border-gray-200 dark:border-zinc-700"
+                style="height: 360px"
+            ></canvas>
         </div>
 
         {{-- Datos del paciente en tabla --}}

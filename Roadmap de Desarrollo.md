@@ -166,9 +166,9 @@ Una subtarea se considera terminada solo si cumple todo:
 
 ---
 
-## 📈 Fase 7: Motor Gráfico OMS — 0%
+## 📈 Fase 7: Motor Gráfico OMS — 25%
 
-- [ ] **7.1 Seeding masivo OMS**: importación CSV a `oms_datos_graficas`. — 0%
+- [x] **7.1 Seeding masivo OMS**: importación Excel a `oms_datos_graficas`. — 100% ✔ `WhoDataSeeder` lee 50 archivos Excel OMS (`phpoffice/phpspreadsheet ^5.4`) y crea **10 `OmsCatalogoGrafica`** (5 tipos × 2 sexos: M/F) con todos sus `OmsDatoGrafica` (LMS + Z-Scores + percentiles P3/P15/P50/P85/P97). Casos especiales resueltos: (a) columna extra `SD` en lhfa/hcfa detectada por nombre dinámico, (b) merge 0-2 + 2-5 años sin duplicar mes 24 para `talla_edad`/`imc`, (c) merge wfl+wfh por corte a 65 cm para `peso_talla`. Unique index `(oms_catalogo_grafica_id, x_value)` agregado en migración original. Idempotente via `updateOrCreate`. `WhoDataSeeder` registrado en `DatabaseSeeder`. **12 tests feature** en `WhoDataSeederTest` (conteo 10 boletas, 2 por tipo, LMS no nulos, rangos x_value, merge correcto, sin duplicados, idempotencia).
 - [ ] **7.2 Gráficas Chart.js**: boletas, radio buttons y rangos. — 0%
 - [ ] **7.3 Modo dual**: Médico (Z-Score) vs Padres (Percentil). — 0%
 - [ ] **7.4 Pruebas de precisión**: coordenadas de pacientes de prueba. — 0%
@@ -210,10 +210,10 @@ Una subtarea se considera terminada solo si cumple todo:
 | 4.8 | Seguridad / Policies | ✅ 100% |
 | 5 | Lógica de Dominio (VO/Services) | ✅ 100% |
 | 6 | Livewire Clínico | 🟡 50% |
-| 7 | Motor Gráfico OMS | 🔴 0% |
+| 7 | Motor Gráfico OMS | 🟡 25% |
 | 8 | Calidad / Cierre Técnico | 🟡 60% |
 | 9 | Despliegue y Capacitación | 🔴 0% |
-| **Total MVP** | **Fases 1–5 + Fase 6 parcial** | **~70%** |
+| **Total MVP** | **Fases 1–5 + Fase 6 parcial + Fase 7 parcial** | **~73%** |
 
 > **Evidencia de auditoría**: `git status`, listado de `app/`, `database/migrations/`, `tests/`, `resources/views/`, `app/Livewire/`. Fecha: 24-02-2026.
 
@@ -255,6 +255,15 @@ Una subtarea se considera terminada solo si cumple todo:
 - **Test Dusk 08 actualizado**: mensajes de flash reemplazados por esperas a badges Livewire (`'Guardado'`) y texto de ítems (`'Hemograma completo'`).
 - Estado actual: **347 tests PHP pasando** · **13 tests Dusk** · PHPStan ✔ · Pint ✔.
 - Siguiente fase recomendada: **6.3** (UX listado/formularios pacientes) o saltar a **Fase 7** (Chart.js OMS).
+
+### ✅ Actualización de ejecución (27-02-2026) — Fase 7.1 WhoDataSeeder
+
+- **7.1 completado**: `WhoDataSeeder` implementado con `phpoffice/phpspreadsheet ^5.4`. Importa 50 archivos Excel OMS y siembra **10 boletas** (5 tipos × 2 sexos) con datos LMS + SD + percentiles directos desde los estándares oficiales OMS.
+- **Unique index** `(oms_catalogo_grafica_id, x_value)` agregado en la migración original `2026_02_26_000002`. No se creó migración separada — desarrollo activo permite `migrate:fresh`.
+- **Casos especiales**: columna `SD` extra en lhfa/hcfa ignorada con detección dinámica de headers; merge 0-2+2-5 años para `talla_edad`/`imc` (archivo posterior sobreescribe mes 24 compartido); merge wfl+wfh para `peso_talla` cortando a x < 65 cm para wfl y x ≥ 65 cm para wfh → 76 puntos por sexo (45–120 cm en pasos de 1 cm).
+- **12 tests feature** en `tests/Feature/Seeders/WhoDataSeederTest.php` verifican: 10 boletas, 2 por tipo, datos LMS presentes en 100%, meses 0-60 para tipos de edad, rango cm para peso_talla, merge sin duplicados, idempotencia (segunda ejecución sin cambios).
+- Estado actual: **359 tests PHP pasando** · **13 tests Dusk** · PHPStan ✔ · Pint ✔.
+- Siguiente fase recomendada: **7.2 Gráficas Chart.js** (conectar `GrowthChartService` con datos reales OMS ya sembrados).
 
 ### ✅ Actualización de ejecución (27-02-2026) — Auditoría Fase 5 + Cobertura negativa
 

@@ -3,8 +3,19 @@
 use App\Contracts\ZScoreServiceContract;
 use App\Models\OmsCatalogoGrafica;
 use App\Models\OmsDatoGrafica;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 describe('ZScoreServiceFeature', function () {
+    test('lanza ModelNotFoundException si la grafica no tiene datos OMS asociados', function () {
+        $grafica = OmsCatalogoGrafica::factory()->create();
+        // No se crean OmsDatoGrafica para esta gráfica
+
+        $service = app(ZScoreServiceContract::class);
+
+        expect(fn () => $service->calculateByGrafica($grafica->id, 5.0, 10.0))
+            ->toThrow(ModelNotFoundException::class);
+    });
+
     test('calcula z-score usando contrato y datos OMS persistidos', function () {
         $grafica = OmsCatalogoGrafica::factory()->create();
 

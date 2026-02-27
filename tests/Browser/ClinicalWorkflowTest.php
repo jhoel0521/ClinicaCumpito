@@ -520,18 +520,17 @@ class ClinicalWorkflowTest extends DuskTestCase
                 ->select('[dusk="lab-source-template"]', $labTemplate->id)
                 ->type('textarea[dusk="lab-observations"]', 'Ayunas de 8 horas previo al examen.');
             $browser->script("document.querySelector('[dusk=\"lab-save-btn\"]').click()");
-            $browser->waitForText('guardada exitosamente', 10);
+            $browser->waitForText('Guardado', 10);
 
-            // ── 4. Agregar un examen al snapshot ──────────────────────────────
-            // Tras el redirect, la sección de exámenes aparece en el DOM.
-            // assertSee no aplica porque el nombre queda en value="" de un input,
-            // no en texto visible; la verificación final usa assertDatabaseHas.
+            // ── 4. Agregar un examen ───────────────────────────────────────────
+            // La sección de exámenes aparece tras guardar la solicitud ($labRequestId != null).
+            // Tras addItem(), el nombre del examen aparece en la lista con dusk="lab-exam-item".
             $browser
                 ->waitFor('[dusk="lab-exam-name"]', 10)
                 ->type('[dusk="lab-exam-name"]', 'Hemograma completo')
                 ->type('[dusk="lab-indications"]', 'Sin restricciones');
             $browser->script("document.querySelector('[dusk=\"lab-add-exam-btn\"]').click()");
-            $browser->waitForText('guardado exitosamente', 10);
+            $browser->waitForText('Hemograma completo', 10);
         });
 
         $this->assertDatabaseHas('laboratory_requests', [

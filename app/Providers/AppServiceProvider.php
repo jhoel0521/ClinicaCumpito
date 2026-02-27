@@ -76,6 +76,11 @@ class AppServiceProvider extends ServiceProvider
             \App\Contracts\ZScoreServiceContract::class,
             \App\Services\ZScoreService::class
         );
+
+        $this->app->bind(
+            \App\Contracts\ConsultationSnapshotServiceContract::class,
+            \App\Services\ConsultationSnapshotService::class
+        );
     }
 
     /**

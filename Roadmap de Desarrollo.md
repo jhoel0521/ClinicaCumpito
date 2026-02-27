@@ -145,12 +145,12 @@ Una subtarea se considera terminada solo si cumple todo:
 
 ---
 
-## 🧠 Fase 5: Lógica de Dominio (Services/Value Objects) — 60%
+## 🧠 Fase 5: Lógica de Dominio (Services/Value Objects) — 80%
 
 - [x] **5.1 AgeValueObject**: cálculo de edad exacta (días/semanas/meses/años). — 100% ✔ `Age.php` implementado con cálculo exacto por `days()/weeks()/months()/years()` y representación clínica `forDisplay()`; integración transversal en `Patient::age()` y uso en `pacientes/show`; pruebas `AgeTest` (unit, 5 tests) + `PacienteControllerTest` (feature) para visualización clínica.
 - [x] **5.2 BloodGroupValueObject**: validación tipológica. — 100% ✔ `BloodGroup.php` completo (8 tipos, validación, Castable, Stringable) + `BloodGroupTest.php` (unit); integración transversal cerrada en módulo Pacientes con pruebas feature de `store/update/show` (creación y actualización con grupos válidos, rechazo de grupos inválidos, render en dashboard).
 - [x] **5.3 ZScoreService/ValueObject**: cálculo clínico OMS. — 100% ✔ `ZScore.php` (ValueObject con categoría clínica, rango normal y redondeo) + `ZScoreServiceContract` + `ZScoreService` con fórmula LMS OMS (`L=0` y `L≠0`) + cálculo por punto OMS más cercano (`x_value`) usando `oms_datos_graficas` + binding DI en `AppServiceProvider`; pruebas `ZScoreTest` (unit), `ZScoreServiceTest` (unit) y `ZScoreServiceFeatureTest` (feature con datos persistidos).
-- [ ] **5.4 ConsultationSnapshotService**: copia inmutable de plantillas a transacciones. — 0%
+- [x] **5.4 ConsultationSnapshotService**: copia inmutable de plantillas a transacciones. — 100% ✔ `ConsultationSnapshotServiceContract` + `ConsultationSnapshotService` con métodos para copiar plantillas a snapshots (receta/laboratorio), bloquear transacciones al finalizar consulta y validar ventana de 3 días para edición de resultados; binding DI en `AppServiceProvider`; pruebas `ConsultationSnapshotServiceTest` (unit, 6 tests) + `ConsultationSnapshotFeatureTest` (feature, 1 test flujo completo).  — 100%
 - [ ] **5.5 GrowthChartService**: preparación de datasets para Chart.js. — 0%
 
 ---
@@ -206,7 +206,7 @@ Una subtarea se considera terminada solo si cumple todo:
 | 4.6 | Resultados / Snapshots | ✅ 100% |
 | 4.7 | Motor OMS (datos) | ✅ 100% |
 | 4.8 | Seguridad / Policies | ✅ 100% |
-| 5 | Lógica de Dominio (VO/Services) | 🟡 60% |
+| 5 | Lógica de Dominio (VO/Services) | 🟡 80% |
 | 6 | Livewire Clínico | 🔴 0% |
 | 7 | Motor Gráfico OMS | 🔴 0% |
 | 8 | Calidad / Cierre Técnico | 🟡 55% |
@@ -236,7 +236,7 @@ Una subtarea se considera terminada solo si cumple todo:
 - `test_12` Dusk: valida visualización de edad clínica exacta en perfil de paciente (`14 días`) tras integrar `AgeValueObject`.
 - 5.2 completado: evidencia de integración de `BloodGroup` en `PacienteControllerTest` (store/update/show + validación de rechazo para valores inválidos), manteniendo `BloodGroupTest` como base unitaria.
 - 5.3 completado: implementado motor de cálculo LMS OMS (`ZScoreService` + `ZScore` VO) con pruebas unitarias y feature en verde (`8 tests passing`) + `phpstan` sin errores en los nuevos artefactos.
-- Siguiente fase activa recomendada: **5.x Lógica de Dominio (VO/Services)**.
+- 5.4 completado: motor de snapshots inmutables para consultas. `ConsultationSnapshotService` con métodos para copiar plantillas a receta/laboratorio (snapshot transaccional), bloqueo al finalizar FINALIZED, ventana de 3 días para llenar laboratorios. Unit (`6 tests`) + feature (`1 test flujo`) + `phpstan` sin errores.
 
 ### ✅ Actualización de ejecución (26-02-2026) — Fase 5.1
 

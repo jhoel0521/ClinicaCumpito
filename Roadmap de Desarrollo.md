@@ -157,10 +157,12 @@ Una subtarea se considera terminada solo si cumple todo:
 
 ## 📋 Fase 6: Integración de Flujo Clínico Completo (Livewire) — 0%
 
-- [ ] **6.1 Gestión de pacientes**: listado, búsqueda, registro y edición. — 0% (solo existe `Livewire/Actions/Logout.php`; no hay componentes Livewire de dominio)
-- [ ] **6.2 Atención activa**: SOAP + signos + aplicación de plantillas. — 0%
-- [ ] **6.3 Recetas y laboratorios**: creación, edición permitida por estado, cierre final. — 0%
-- [ ] **6.4 Módulo híbrido**: subida y visualización de PDF/JPG históricos. — 0%
+> **Redefinición 27-02-2026**: Las vistas existentes (consulta 742 líneas, paciente 517 líneas) son páginas monolíticas con formularios HTML que recargan. Se rediseñan como landing-pages con Livewire Volt reactivo.
+
+- [ ] **6.1 Dashboard del Paciente** (landing-page, 6 secciones). — 0% · `pacientes/show.blade.php` reescrito con: (1) Header/Datos Base, (2) Última Consulta (VS+SOAP+Rx+Lab), (3) Gráfica OMS con selector `⚡patient-oms-chart`, (4) Historial Consultas, (5) Historial Recetas, (6) Historial Laboratorios. `PacienteController::show()` con eager loading completo.
+- [ ] **6.2 Vista de Consulta Reactiva** (landing-page + Livewire). — 0% · `consultas/show.blade.php` reescrito con 5 Volt components independientes: `⚡consultation-vital-signs`, `⚡consultation-soap-note`, `⚡consultation-prescription`, `⚡consultation-laboratory`, `⚡consultation-vaccines`. Cada uno guarda sin recargar. Bloqueo si consulta `finalized`.
+- [ ] **6.3 Gestión de pacientes** (listado, crear, editar). — 0% · Ajustar UX del listado y formularios de creación/edición si necesario (baja prioridad — funcionalidad ya existe).
+- [ ] **6.4 Módulo híbrido**: subida y visualización de PDF/JPG históricos (consultas manuales escaneadas). — 0%
 
 ---
 

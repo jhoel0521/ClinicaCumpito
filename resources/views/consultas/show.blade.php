@@ -1,741 +1,194 @@
-<x-layouts::app :title="__('Detalle de Consulta')">
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-white dark:bg-zinc-950 min-h-screen transition-colors">
-        <div class="flex justify-between items-center mb-8">
-            <div>
-                <h1 class="text-3xl font-bold text-blue-700 dark:text-blue-400">Detalle de Consulta</h1>
-                <p class="text-gray-500 dark:text-gray-400 mt-2">Vista general del registro clínico</p>
-            </div>
-            <div class="flex gap-2">
-                <x-ui.button :href="route('consultas.edit', $consultation->id)" variant="secondary">
-                    Editar
-                </x-ui.button>
-                <x-ui.button :href="route('consultas.index')" variant="ghost">Volver</x-ui.button>
-            </div>
-        </div>
-
+<x-layouts::app :title="'Consulta — ' . $consultation->patient->full_name">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {{-- Flash --}}
         @if (session('success'))
-            <x-ui.alert type="success" class="mb-4">
+            <div
+                class="mb-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 px-4 py-3 text-sm text-green-700 dark:text-green-300"
+            >
                 {{ session('success') }}
-            </x-ui.alert>
+            </div>
         @endif
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl p-4">
-                <p class="text-xs uppercase text-gray-500 dark:text-gray-400">Paciente</p>
-                <p class="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                    {{ $consultation->patient->full_name }}
-                </p>
+        {{--
+            ══════════════════════════════════════════
+            HEADER ESTÁTICO: Información de la consulta
+            ══════════════════════════════════════════
+        --}}
+        <div
+            class="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-2xl shadow-sm mb-6 overflow-hidden"
+        >
+            {{-- Banner superior --}}
+            <div class="bg-gradient-to-r from-blue-600 to-blue-800 dark:from-blue-800 dark:to-blue-950 px-6 py-5">
+                <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                    <div>
+                        <a
+                            href="{{ route('pacientes.show', $consultation->patient->id) }}"
+                            class="text-blue-200 hover:text-white text-sm transition mb-1 inline-flex items-center gap-1"
+                        >
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                                />
+                            </svg>
+                            {{ $consultation->patient->full_name }}
+                        </a>
+                        <h1 class="text-xl font-bold text-white">Consulta Médica</h1>
+                        <p class="text-blue-200 text-sm mt-0.5">
+                            {{ optional($consultation->consultation_date)->format('d/m/Y H:i') }}
+                        </p>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-2">
+                        @php
+                            $status = is_object($consultation->status) ? $consultation->status->value() : $consultation->status;
+                            $statusColors = [
+                                'draft' => 'bg-gray-400',
+                                'saved' => 'bg-yellow-400',
+                                'finalized' => 'bg-green-400',
+                            ];
+                            $statusLabels = [
+                                'draft' => 'Borrador',
+                                'saved' => 'Guardada',
+                                'finalized' => 'Finalizada',
+                            ];
+                        @endphp
+
+                        <span
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-white/20 text-white border border-white/30"
+                        >
+                            <span class="w-2 h-2 rounded-full {{ $statusColors[$status] ?? 'bg-gray-400' }}"></span>
+                            {{ $statusLabels[$status] ?? $status }}
+                        </span>
+
+                        @if ($status !== 'finalized')
+                            <a
+                                href="{{ route('consultas.edit', $consultation->id) }}"
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-white/20 hover:bg-white/30 text-white border border-white/30 transition"
+                            >
+                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                                    />
+                                </svg>
+                                Editar consulta
+                            </a>
+                        @endif
+
+                        <a
+                            href="{{ route('consultas.index') }}"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-white/10 hover:bg-white/20 text-blue-200 border border-white/20 transition"
+                        >
+                            Todas las consultas
+                        </a>
+                    </div>
+                </div>
             </div>
 
-            <div class="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl p-4">
-                <p class="text-xs uppercase text-gray-500 dark:text-gray-400">Doctor</p>
-                <p class="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                    {{ $consultation->doctor->full_name }}
-                </p>
-            </div>
-
-            <div class="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl p-4">
-                <p class="text-xs uppercase text-gray-500 dark:text-gray-400">Tipo</p>
-                <p class="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                    {{ is_object($consultation->type) ? $consultation->type->value() : $consultation->type }}
-                </p>
-            </div>
-
-            <div class="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl p-4">
-                <p class="text-xs uppercase text-gray-500 dark:text-gray-400">Estado</p>
-                <p class="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                    {{ is_object($consultation->status) ? $consultation->status->value() : $consultation->status }}
-                </p>
-            </div>
-
+            {{-- Meta info --}}
             <div
-                class="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl p-4 md:col-span-2"
+                class="grid grid-cols-2 md:grid-cols-4 divide-x divide-y md:divide-y-0 divide-gray-100 dark:divide-zinc-800"
             >
-                <p class="text-xs uppercase text-gray-500 dark:text-gray-400">Fecha y hora</p>
-                <p class="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                    {{ optional($consultation->consultation_date)->format('d/m/Y H:i') }}
-                </p>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
-            <div class="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl p-6">
-                <h2 class="text-xl font-semibold text-blue-700 dark:text-blue-400 mb-4">Signos Vitales</h2>
-
-                <form
-                    action="{{ $consultation->vitalSigns ? route('consultas.vital-signs.update', $consultation->id) : route('consultas.vital-signs.store', $consultation->id) }}"
-                    method="POST"
-                    class="space-y-4"
-                >
-                    @csrf
-                    @if ($consultation->vitalSigns)
-                        @method('PUT')
-                    @endif
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                Peso (kg)
-                            </label>
-                            <input
-                                type="number"
-                                step="0.01"
-                                name="weight"
-                                value="{{ old('weight', $consultation->vitalSigns?->weight?->value()) }}"
-                                class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100"
-                            />
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                Talla (cm)
-                            </label>
-                            <input
-                                type="number"
-                                step="0.01"
-                                name="height"
-                                value="{{ old('height', $consultation->vitalSigns?->height?->value()) }}"
-                                class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100"
-                            />
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                Perímetro cefálico (cm)
-                            </label>
-                            <input
-                                type="number"
-                                step="0.01"
-                                name="head_circumference"
-                                value="{{ old('head_circumference', $consultation->vitalSigns?->head_circumference?->value()) }}"
-                                class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100"
-                            />
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                Temperatura (°C)
-                            </label>
-                            <input
-                                type="number"
-                                step="0.01"
-                                name="temperature"
-                                value="{{ old('temperature', $consultation->vitalSigns?->temperature?->value()) }}"
-                                class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100"
-                            />
-                        </div>
-                    </div>
-
-                    <div class="flex justify-end gap-2">
-                        <x-ui.button type="submit" variant="primary">
-                            {{ $consultation->vitalSigns ? 'Actualizar Signos' : 'Guardar Signos' }}
-                        </x-ui.button>
-                    </div>
-                </form>
-            </div>
-
-            <div class="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl p-6">
-                <h2 class="text-xl font-semibold text-blue-700 dark:text-blue-400 mb-4">Nota SOAP</h2>
-
-                <form
-                    action="{{ $consultation->soapNote ? route('consultas.soap-notes.update', $consultation->id) : route('consultas.soap-notes.store', $consultation->id) }}"
-                    method="POST"
-                    class="space-y-4"
-                >
-                    @csrf
-                    @if ($consultation->soapNote)
-                        @method('PUT')
-                    @endif
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Subjetivo</label>
-                        <textarea
-                            name="subjective"
-                            rows="2"
-                            class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100"
-                        >
-{{ old('subjective', $consultation->soapNote?->subjective) }}</textarea
-                        >
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Objetivo</label>
-                        <textarea
-                            name="objective"
-                            rows="2"
-                            class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100"
-                        >
-{{ old('objective', $consultation->soapNote?->objective) }}</textarea
-                        >
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Análisis</label>
-                        <textarea
-                            name="assessment"
-                            rows="2"
-                            class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100"
-                        >
-{{ old('assessment', $consultation->soapNote?->assessment) }}</textarea
-                        >
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Plan</label>
-                        <textarea
-                            name="plan"
-                            rows="2"
-                            class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100"
-                        >
-{{ old('plan', $consultation->soapNote?->plan) }}</textarea
-                        >
-                    </div>
-
-                    <div class="flex justify-end gap-2">
-                        <x-ui.button type="submit" variant="primary">
-                            {{ $consultation->soapNote ? 'Actualizar SOAP' : 'Guardar SOAP' }}
-                        </x-ui.button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <div class="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl p-6 mt-6">
-            <h2 class="text-xl font-semibold text-blue-700 dark:text-blue-400 mb-4">Receta</h2>
-
-            <form
-                action="{{ $consultation->prescription ? route('consultas.prescriptions.update', $consultation->id) : route('consultas.prescriptions.store', $consultation->id) }}"
-                method="POST"
-                class="space-y-4"
-            >
-                @csrf
-                @if ($consultation->prescription)
-                    @method('PUT')
-                @endif
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Plantilla origen (opcional)
-                    </label>
-                    <select
-                        name="source_template_id"
-                        class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100"
-                    >
-                        <option value="">Sin plantilla</option>
-                        @foreach ($prescriptionTemplates as $template)
-                            <option
-                                value="{{ $template->id }}"
-                                @selected(old('source_template_id', $consultation->prescription?->source_template_id) === $template->id)
-                            >
-                                {{ $template->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Observaciones</label>
-                    <textarea
-                        name="observations"
-                        rows="3"
-                        class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100"
-                    >
-{{ old('observations', $consultation->prescription?->observations) }}</textarea
-                    >
-                </div>
-
-                <div class="flex justify-end gap-2">
-                    <x-ui.button type="submit" variant="primary">
-                        {{ $consultation->prescription ? 'Actualizar Receta' : 'Guardar Receta' }}
-                    </x-ui.button>
-                </div>
-            </form>
-
-            @if ($consultation->prescription)
-                <form
-                    action="{{ route('consultas.prescriptions.destroy', $consultation->id) }}"
-                    method="POST"
-                    class="mt-3 flex justify-end"
-                >
-                    @csrf
-                    @method('DELETE')
-                    <x-ui.button type="submit" variant="ghost">Eliminar Receta</x-ui.button>
-                </form>
-
-                <div class="mt-6 border-t border-gray-200 dark:border-zinc-800 pt-4">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
-                        Detalles de receta (snapshot)
-                    </h3>
-
-                    <form
-                        action="{{ route('consultas.prescription-items.store', $consultation->id) }}"
-                        method="POST"
-                        class="space-y-3"
-                    >
-                        @csrf
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    Medicamento
-                                </label>
-                                <input
-                                    type="text"
-                                    name="medication_name"
-                                    value="{{ old('medication_name') }}"
-                                    class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100"
-                                    required
-                                />
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    Dosis
-                                </label>
-                                <input
-                                    type="text"
-                                    name="dose"
-                                    value="{{ old('dose') }}"
-                                    class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100"
-                                    required
-                                />
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    Frecuencia
-                                </label>
-                                <input
-                                    type="text"
-                                    name="frequency"
-                                    value="{{ old('frequency') }}"
-                                    class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100"
-                                    required
-                                />
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    Duración
-                                </label>
-                                <input
-                                    type="text"
-                                    name="duration"
-                                    value="{{ old('duration') }}"
-                                    class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100"
-                                    required
-                                />
-                            </div>
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                Instrucciones
-                            </label>
-                            <textarea
-                                name="instructions"
-                                rows="2"
-                                class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100"
-                            >
-{{ old('instructions') }}</textarea
-                            >
-                        </div>
-
-                        <div class="flex justify-end">
-                            <x-ui.button type="submit" variant="secondary">Agregar Detalle</x-ui.button>
-                        </div>
-                    </form>
-
-                    <div class="mt-4 space-y-3">
-                        @forelse ($consultation->prescription->items as $item)
-                            <div class="border border-gray-200 dark:border-zinc-800 rounded-lg p-4">
-                                <form
-                                    action="{{ route('consultas.prescription-items.update', [$consultation->id, $item->id]) }}"
-                                    method="POST"
-                                    class="space-y-3"
-                                >
-                                    @csrf
-                                    @method('PUT')
-
-                                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-                                        <input
-                                            type="text"
-                                            name="medication_name"
-                                            value="{{ $item->medication_name }}"
-                                            class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100"
-                                            required
-                                        />
-                                        <input
-                                            type="text"
-                                            name="dose"
-                                            value="{{ $item->dose }}"
-                                            class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100"
-                                            required
-                                        />
-                                        <input
-                                            type="text"
-                                            name="frequency"
-                                            value="{{ $item->frequency }}"
-                                            class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100"
-                                            required
-                                        />
-                                        <input
-                                            type="text"
-                                            name="duration"
-                                            value="{{ $item->duration }}"
-                                            class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100"
-                                            required
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <textarea
-                                            name="instructions"
-                                            rows="2"
-                                            class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100"
-                                        >
-{{ $item->instructions }}</textarea
-                                        >
-                                    </div>
-
-                                    <div class="flex justify-end">
-                                        <x-ui.button type="submit" variant="secondary">Actualizar Detalle</x-ui.button>
-                                    </div>
-                                </form>
-
-                                <form
-                                    action="{{ route('consultas.prescription-items.destroy', [$consultation->id, $item->id]) }}"
-                                    method="POST"
-                                    class="mt-2 flex justify-end"
-                                >
-                                    @csrf
-                                    @method('DELETE')
-                                    <x-ui.button type="submit" variant="ghost">Eliminar</x-ui.button>
-                                </form>
-                            </div>
-                        @empty
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Sin detalles de receta registrados.</p>
-                        @endforelse
-                    </div>
-                </div>
-            @endif
-        </div>
-
-        <div class="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl p-6 mt-6">
-            <h2 class="text-xl font-semibold text-blue-700 dark:text-blue-400 mb-4">Solicitud de Laboratorio</h2>
-
-            <form
-                action="{{ $consultation->laboratoryRequest ? route('consultas.laboratory-requests.update', $consultation->id) : route('consultas.laboratory-requests.store', $consultation->id) }}"
-                method="POST"
-                class="space-y-4"
-            >
-                @csrf
-                @if ($consultation->laboratoryRequest)
-                    @method('PUT')
-                @endif
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Plantilla origen (opcional)
-                    </label>
-                    <select
-                        name="source_template_id"
-                        dusk="lab-source-template"
-                        class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100"
-                    >
-                        <option value="">Sin plantilla</option>
-                        @foreach ($laboratoryTemplates as $template)
-                            <option
-                                value="{{ $template->id }}"
-                                @selected(old('source_template_id', $consultation->laboratoryRequest?->source_template_id) === $template->id)
-                            >
-                                {{ $template->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Observaciones</label>
-                    <textarea
-                        name="observations"
-                        dusk="lab-observations"
-                        rows="3"
-                        class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100"
-                    >
-{{ old('observations', $consultation->laboratoryRequest?->observations) }}</textarea
-                    >
-                </div>
-
-                <div class="flex justify-end gap-2">
-                    <x-ui.button type="submit" variant="primary" dusk="lab-save-btn">
-                        {{ $consultation->laboratoryRequest ? 'Actualizar Solicitud' : 'Guardar Solicitud' }}
-                    </x-ui.button>
-                </div>
-            </form>
-
-            @if ($consultation->laboratoryRequest)
-                <form
-                    action="{{ route('consultas.laboratory-requests.destroy', $consultation->id) }}"
-                    method="POST"
-                    class="mt-3 flex justify-end"
-                >
-                    @csrf
-                    @method('DELETE')
-                    <x-ui.button type="submit" variant="ghost">Eliminar Solicitud</x-ui.button>
-                </form>
-
-                <div class="mt-6 border-t border-gray-200 dark:border-zinc-800 pt-4">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
-                        Exámenes solicitados (snapshot)
-                    </h3>
-
-                    <form
-                        action="{{ route('consultas.laboratory-request-items.store', $consultation->id) }}"
-                        method="POST"
-                        class="space-y-3"
-                    >
-                        @csrf
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    Nombre del examen
-                                </label>
-                                <input
-                                    type="text"
-                                    name="exam_name"
-                                    dusk="lab-exam-name"
-                                    value="{{ old('exam_name') }}"
-                                    class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100"
-                                    required
-                                />
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    Indicaciones
-                                </label>
-                                <input
-                                    type="text"
-                                    name="indications"
-                                    dusk="lab-indications"
-                                    value="{{ old('indications') }}"
-                                    class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100"
-                                />
-                            </div>
-                        </div>
-
-                        <div class="flex justify-end">
-                            <x-ui.button type="submit" variant="secondary" dusk="lab-add-exam-btn">
-                                Agregar Examen
-                            </x-ui.button>
-                        </div>
-                    </form>
-
-                    <div class="mt-4 space-y-3">
-                        @forelse ($consultation->laboratoryRequest->items as $item)
-                            <div class="border border-gray-200 dark:border-zinc-800 rounded-lg p-4">
-                                <form
-                                    action="{{ route('consultas.laboratory-request-items.update', [$consultation->id, $item->id]) }}"
-                                    method="POST"
-                                    class="space-y-3"
-                                >
-                                    @csrf
-                                    @method('PUT')
-
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                        <input
-                                            type="text"
-                                            name="exam_name"
-                                            value="{{ $item->exam_name }}"
-                                            class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100"
-                                            required
-                                        />
-                                        <input
-                                            type="text"
-                                            name="indications"
-                                            value="{{ $item->indications }}"
-                                            class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100"
-                                        />
-                                    </div>
-
-                                    <div class="flex justify-end">
-                                        <x-ui.button type="submit" variant="secondary">Actualizar Examen</x-ui.button>
-                                    </div>
-                                </form>
-
-                                <form
-                                    action="{{ route('consultas.laboratory-request-items.destroy', [$consultation->id, $item->id]) }}"
-                                    method="POST"
-                                    class="mt-2 flex justify-end"
-                                >
-                                    @csrf
-                                    @method('DELETE')
-                                    <x-ui.button type="submit" variant="ghost">Eliminar</x-ui.button>
-                                </form>
-                            </div>
-                        @empty
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Sin exámenes registrados.</p>
-                        @endforelse
-                    </div>
-                </div>
-            @endif
-        </div>
-
-        <div class="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl p-6 mt-6">
-            <h2 class="text-xl font-semibold text-blue-700 dark:text-blue-400 mb-4">Vacunas Aplicadas</h2>
-
-            <form
-                action="{{ route('consultas.patient-vaccines.store', $consultation->id) }}"
-                method="POST"
-                class="space-y-4"
-            >
-                @csrf
-
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div class="lg:col-span-2">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Vacuna</label>
-                        <select
-                            name="vaccine_id"
-                            class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100"
-                            required
-                        >
-                            <option value="">Selecciona una vacuna</option>
-                            @foreach ($vaccines as $vaccine)
-                                <option value="{{ $vaccine->id }}" @selected(old('vaccine_id') === $vaccine->id)>
-                                    {{ $vaccine->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            Fecha de aplicación
-                        </label>
-                        <input
-                            type="datetime-local"
-                            name="applied_at"
-                            value="{{ old('applied_at', now()->format('Y-m-d\\TH:i')) }}"
-                            class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100"
-                            required
-                        />
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Dosis #</label>
-                        <input
-                            type="number"
-                            name="dose_number"
-                            min="1"
-                            max="20"
-                            value="{{ old('dose_number') }}"
-                            class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100"
-                        />
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Notas</label>
-                    <textarea
-                        name="notes"
-                        rows="2"
-                        class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100"
-                    >
-{{ old('notes') }}</textarea
-                    >
-                </div>
-
-                <div class="flex justify-end">
-                    <x-ui.button type="submit" variant="primary">Guardar Vacuna</x-ui.button>
-                </div>
-            </form>
-
-            <div class="mt-6 space-y-3">
-                @forelse ($consultation->patientVaccines as $patientVaccine)
-                    <div class="border border-gray-200 dark:border-zinc-800 rounded-lg p-4">
-                        <form
-                            action="{{ route('consultas.patient-vaccines.update', [$consultation->id, $patientVaccine->id]) }}"
-                            method="POST"
-                            class="space-y-3"
-                        >
-                            @csrf
-                            @method('PUT')
-
-                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-                                <div class="lg:col-span-2">
-                                    <label class="block text-xs uppercase text-gray-500 dark:text-gray-400 mb-1">
-                                        Vacuna
-                                    </label>
-                                    <select
-                                        name="vaccine_id"
-                                        class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100"
-                                        required
-                                    >
-                                        @foreach ($vaccines as $vaccine)
-                                            <option
-                                                value="{{ $vaccine->id }}"
-                                                @selected($patientVaccine->vaccine_id === $vaccine->id)
-                                            >
-                                                {{ $vaccine->name }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-
-                                <div>
-                                    <label class="block text-xs uppercase text-gray-500 dark:text-gray-400 mb-1">
-                                        Aplicada
-                                    </label>
-                                    <input
-                                        type="datetime-local"
-                                        name="applied_at"
-                                        value="{{ optional($patientVaccine->applied_at)->format('Y-m-d\\TH:i') }}"
-                                        class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100"
-                                        required
-                                    />
-                                </div>
-
-                                <div>
-                                    <label class="block text-xs uppercase text-gray-500 dark:text-gray-400 mb-1">
-                                        Dosis
-                                    </label>
-                                    <input
-                                        type="number"
-                                        name="dose_number"
-                                        min="1"
-                                        max="20"
-                                        value="{{ $patientVaccine->dose_number }}"
-                                        class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100"
-                                    />
-                                </div>
-                            </div>
-
-                            <div>
-                                <label class="block text-xs uppercase text-gray-500 dark:text-gray-400 mb-1">
-                                    Notas
-                                </label>
-                                <textarea
-                                    name="notes"
-                                    rows="2"
-                                    class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100"
-                                >
-{{ $patientVaccine->notes }}</textarea
-                                >
-                            </div>
-
-                            <div class="flex justify-end">
-                                <x-ui.button type="submit" variant="secondary">Actualizar Vacuna</x-ui.button>
-                            </div>
-                        </form>
-
-                        <form
-                            action="{{ route('consultas.patient-vaccines.destroy', [$consultation->id, $patientVaccine->id]) }}"
-                            method="POST"
-                            class="mt-2 flex justify-end"
-                        >
-                            @csrf
-                            @method('DELETE')
-                            <x-ui.button type="submit" variant="ghost">Eliminar</x-ui.button>
-                        </form>
-                    </div>
-                @empty
-                    <p class="text-sm text-gray-500 dark:text-gray-400">
-                        Sin vacunas aplicadas registradas para esta consulta.
+                <div class="px-5 py-4">
+                    <p class="text-xs font-medium text-gray-400 dark:text-zinc-500 uppercase tracking-wide mb-1">
+                        Doctor
                     </p>
-                @endforelse
+                    <p class="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
+                        {{ $consultation->doctor->full_name }}
+                    </p>
+                </div>
+                <div class="px-5 py-4">
+                    <p class="text-xs font-medium text-gray-400 dark:text-zinc-500 uppercase tracking-wide mb-1">
+                        Tipo
+                    </p>
+                    <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                        {{ is_object($consultation->type) ? $consultation->type->value() : $consultation->type }}
+                    </p>
+                </div>
+                <div class="px-5 py-4">
+                    <p class="text-xs font-medium text-gray-400 dark:text-zinc-500 uppercase tracking-wide mb-1">
+                        Paciente
+                    </p>
+                    <p class="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
+                        {{ $consultation->patient->full_name }}
+                    </p>
+                </div>
+                <div class="px-5 py-4">
+                    <p class="text-xs font-medium text-gray-400 dark:text-zinc-500 uppercase tracking-wide mb-1">
+                        Fecha
+                    </p>
+                    <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                        {{ optional($consultation->consultation_date)->format('d/m/Y') }}
+                    </p>
+                </div>
             </div>
+        </div>
+
+        {{--
+            ══════════════════════════════════
+            BARRA DE ANCLAJE (scroll navigation)
+            ══════════════════════════════════
+        --}}
+        <nav
+            class="sticky top-0 z-20 bg-white/95 dark:bg-zinc-950/95 backdrop-blur border-b border-gray-200 dark:border-zinc-800 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 mb-6"
+        >
+            <div class="flex items-center gap-1 overflow-x-auto py-2 scrollbar-none">
+                @foreach ([
+                        ['href' => '#signos-vitales', 'label' => 'Signos Vitales'],
+                        ['href' => '#soap', 'label' => 'SOAP'],
+                        ['href' => '#receta', 'label' => 'Receta'],
+                        ['href' => '#laboratorio', 'label' => 'Laboratorio'],
+                        ['href' => '#vacunas', 'label' => 'Vacunas']
+                    ]
+                    as $link)
+                    <a
+                        href="{{ $link['href'] }}"
+                        class="flex-shrink-0 px-3 py-1.5 rounded-lg text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 font-medium transition whitespace-nowrap"
+                    >
+                        {{ $link['label'] }}
+                    </a>
+                @endforeach
+            </div>
+        </nav>
+
+        {{--
+            ══════════════════════════════════
+            SECCIONES LIVEWIRE REACTIVAS
+            ══════════════════════════════════
+        --}}
+        <div class="space-y-6">
+            {{-- 1. Signos Vitales --}}
+            <livewire:consultation-vital-signs :consultationId="$consultation->id" />
+
+            {{-- 2. Nota SOAP --}}
+            <livewire:consultation-soap-note :consultationId="$consultation->id" />
+
+            {{-- 3. Receta --}}
+            <livewire:consultation-prescription :consultationId="$consultation->id" />
+
+            {{-- 4. Laboratorio --}}
+            <livewire:consultation-laboratory :consultationId="$consultation->id" />
+
+            {{-- 5. Vacunas --}}
+            <livewire:consultation-vaccines :consultationId="$consultation->id" />
+        </div>
+
+        {{-- Pie de página --}}
+        <div
+            class="mt-8 pt-4 border-t border-gray-100 dark:border-zinc-800 flex justify-between items-center text-xs text-gray-400 dark:text-zinc-600"
+        >
+            <span>Consulta #{{ substr($consultation->id, 0, 8) }}</span>
+            <a
+                href="{{ route('pacientes.show', $consultation->patient->id) }}"
+                class="text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 transition"
+            >
+                Ver dashboard del paciente →
+            </a>
         </div>
     </div>
 </x-layouts::app>

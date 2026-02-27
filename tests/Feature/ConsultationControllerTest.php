@@ -119,7 +119,7 @@ describe('ConsultationController', function () {
 
     test('vista show integra secciones de signos vitales, nota soap y vacunas aplicadas', function () {
         $user = User::factory()->create();
-        $consultation = Consultation::factory()->create();
+        $consultation = Consultation::factory()->create(['status' => 'draft']);
         $vaccine = Vaccine::factory()->create();
 
         VitalSign::factory()->create([
@@ -146,8 +146,7 @@ describe('ConsultationController', function () {
             ->assertSee('Signos Vitales')
             ->assertSee('Nota SOAP')
             ->assertSee('Receta')
-            ->assertSee('Detalles de receta (snapshot)')
             ->assertSee('Vacunas Aplicadas')
-            ->assertSee('Actualizar SOAP', false);
+            ->assertSee('Guardar SOAP', false);
     });
 });

@@ -6,7 +6,6 @@ use App\DTOs\PacienteDTO;
 use App\Http\Requests\StorePacienteRequest;
 use App\Http\Requests\UpdatePacienteRequest;
 use App\Models\MedicalCondition;
-use App\Models\OmsCatalogoGrafica;
 use App\Models\Patient;
 use App\Services\PacienteService;
 use Illuminate\View\View;
@@ -58,14 +57,15 @@ class PacienteController extends Controller
     {
         $this->authorize('view', $patient);
 
-        $patient->load(['user', 'medicalConditions', 'consultations']);
+        $patient->load([
+            'medicalConditions',
+            'consultations' => fn ($q) => $q->orderByDesc('consultation_date')
+                ->with(['vitalSigns', 'soapNote', 'prescription.items', 'laboratoryRequest.items', 'doctor']),
+        ]);
 
-        $graficas = OmsCatalogoGrafica::query()
-            ->where('sexo', $patient->gender?->value())
-            ->orderBy('nombre')
-            ->get();
+        $latestConsultation = $patient->consultations->first();
 
-        return view('pacientes.show', compact('patient', 'graficas'));
+        return view('pacientes.show', compact('patient', 'latestConsultation'));
     }
 
     /**

@@ -12,6 +12,8 @@ use App\Models\LaboratoryTemplate;
 use App\Models\Patient;
 use App\Models\PrescriptionTemplate;
 use App\Models\Vaccine;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class ConsultationController extends Controller
@@ -27,9 +29,19 @@ class ConsultationController extends Controller
         return view('consultas.index', compact('consultations'));
     }
 
-    public function create(): View
+    public function create(Request $request): View|RedirectResponse
     {
         $this->authorize('create', Consultation::class);
+
+        if ($patientId = $request->query('patient_id')) {
+            /** @var Patient|null $patient */
+            $patient = Patient::find($patientId);
+            if ($patient && ! $patient->hasCompleteBasicData()) {
+                return redirect()
+                    ->route('pacientes.edit', $patientId)
+                    ->with('require_complete', true);
+            }
+        }
 
         $patients = Patient::query()->orderBy('full_name')->get(['id', 'full_name']);
         $doctors = Doctor::query()->orderBy('full_name')->get(['id', 'full_name']);
@@ -37,9 +49,20 @@ class ConsultationController extends Controller
         return view('consultas.create', compact('patients', 'doctors'));
     }
 
-    public function store(StoreConsultationRequest $request): \Illuminate\Http\RedirectResponse
+    public function store(StoreConsultationRequest $request): RedirectResponse
     {
         $this->authorize('create', Consultation::class);
+
+        /** @var Patient $patient */
+        $patient = Patient::findOrFail($request->patient_id);
+
+        if (! $patient->hasCompleteBasicData()) {
+            return redirect()
+                ->route('pacientes.edit', $patient->id)
+                ->with('require_complete', true)
+                ->withErrors(['patient_id' => 'Completa la fecha de nacimiento y el sexo del paciente antes de crear una consulta.',
+                ]);
+        }
 
         $dto = ConsultationDTO::fromArray($request->validated());
         $consultation = $this->service->create($dto);

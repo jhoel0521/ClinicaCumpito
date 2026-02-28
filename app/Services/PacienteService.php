@@ -107,8 +107,11 @@ class PacienteService implements PacienteServiceContract
     {
         $syncData = [];
         foreach ($conditions as $condition) {
+            if (empty($condition['status'])) {
+                continue; // "No evaluado" — no se sincroniza
+            }
             $syncData[$condition['condition_id']] = [
-                'status' => $condition['status'] ?? 'Not tested',
+                'status' => $condition['status'],
                 'notes' => $condition['notes'] ?? null,
             ];
         }

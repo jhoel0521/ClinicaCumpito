@@ -13,8 +13,8 @@ return new class extends Migration
             $table->uuid('responsible_doctor_id')->nullable();
             $table->uuid('user_id')->nullable();
             $table->string('full_name');
-            $table->date('date_of_birth');
-            $table->enum('gender', ['M', 'F']);
+            $table->date('date_of_birth')->nullable();
+            $table->enum('gender', ['M', 'F'])->nullable();
 
             // Birth data
             $table->decimal('birth_weight', 5, 2)->nullable();

@@ -13,10 +13,8 @@ new class extends Component {
 
     public string $selectedGraficaId = '';
 
-    /** @var array{grafica: array{id: string, nombre: string, tipo_grafica: string}, labels: array<int, float>, reference_datasets: array<int, array{label: string, color: string, data: array<int, float|null>}>, patient_datapoints: array<int, array{x: float, y: float, z_score: float, category: string, date: string}>}|null */
+    /** @var array{grafica: array{id: string, nombre: string, tipo_grafica: string}, labels: array<int, float>, reference_datasets: array<int, array{label: string, color: string, data: array<int, float|null>}>, percentile_datasets: array<int, array{label: string, color: string, dash: bool, data: array<int, float|null>}>, patient_datapoints: array<int, array{x: float, y: float, z_score: float, category: string, date: string}>}|null */
     public ?array $chartData = null;
-
-    public bool $loading = false;
 
     public string $error = '';
 
@@ -75,17 +73,6 @@ new class extends Component {
             $this->error = 'No hay datos de referencia OMS para esta gráfica.';
             $this->chartData = null;
         }
-    }
-
-    /** @return array<string, string> */
-    private function categoryColors(): array
-    {
-        return [
-            'Normal' => 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300',
-            'Riesgo' => 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300',
-            'Alerta' => 'bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-300',
-            'Crítico' => 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300',
-        ];
     }
 
     public function getXLabel(): string

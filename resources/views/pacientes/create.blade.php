@@ -194,31 +194,42 @@
                     <div class="space-y-2">
                         @foreach ($conditions as $condition)
                             <div
-                                class="flex items-center p-3 border border-gray-200 dark:border-zinc-700 rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-800 bg-white dark:bg-zinc-900"
+                                class="flex items-center justify-between p-3 border border-gray-200 dark:border-zinc-700 rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-800 bg-white dark:bg-zinc-900"
                             >
-                                <input
-                                    type="checkbox"
-                                    id="condition_{{ $condition->id }}"
-                                    value="{{ $condition->id }}"
-                                    class="h-4 w-4 text-teal-600 focus:ring-teal-500 border-gray-300 dark:border-zinc-700 rounded dark:bg-zinc-800"
-                                    onchange="toggleConditionStatus(this, '{{ $condition->id }}')"
-                                />
-                                <label
-                                    for="condition_{{ $condition->id }}"
-                                    class="ml-2 block text-sm text-gray-900 dark:text-gray-100 font-medium flex-grow"
-                                >
+                                <span class="text-sm text-gray-900 dark:text-gray-100 font-medium">
                                     {{ $condition->name }}
-                                </label>
-                                <select
-                                    name="medical_conditions[{{ $condition->id }}][status]"
-                                    id="status_{{ $condition->id }}"
-                                    style="display: none"
-                                    class="px-2 py-1 border border-gray-300 dark:border-zinc-700 rounded text-sm bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100"
-                                >
-                                    <option value="Positive">Positivo</option>
-                                    <option value="Negative">Negativo</option>
-                                    <option value="Not tested">No testado</option>
-                                </select>
+                                </span>
+                                <div class="flex items-center gap-2">
+                                    <input
+                                        type="hidden"
+                                        name="medical_conditions[{{ $condition->id }}][condition_id]"
+                                        value="{{ $condition->id }}"
+                                    />
+                                    <select
+                                        name="medical_conditions[{{ $condition->id }}][status]"
+                                        class="px-2 py-1 border border-gray-300 dark:border-zinc-700 rounded text-sm bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100 focus:ring-teal-500 focus:border-teal-500"
+                                    >
+                                        <option value="">— No evaluado —</option>
+                                        <option
+                                            value="Positive"
+                                            @selected(old('medical_conditions.' . $condition->id . '.status') === 'Positive')
+                                        >
+                                            Positivo
+                                        </option>
+                                        <option
+                                            value="Negative"
+                                            @selected(old('medical_conditions.' . $condition->id . '.status') === 'Negative')
+                                        >
+                                            Negativo
+                                        </option>
+                                        <option
+                                            value="Not tested"
+                                            @selected(old('medical_conditions.' . $condition->id . '.status') === 'Not tested')
+                                        >
+                                            No se hizo
+                                        </option>
+                                    </select>
+                                </div>
                             </div>
                         @endforeach
                     </div>
@@ -286,26 +297,4 @@
             </div>
         </form>
     </div>
-
-    <script>
-        function toggleConditionStatus(checkbox, conditionId) {
-            const statusSelect = document.getElementById(`status_${conditionId}`);
-            const hiddenInput = document.querySelector(
-                `input[name="medical_conditions[${conditionId}][condition_id]"]`,
-            );
-
-            if (checkbox.checked) {
-                statusSelect.style.display = 'inline-block';
-                // Crear hidden input para condition_id
-                const input = document.createElement('input');
-                input.type = 'hidden';
-                input.name = `medical_conditions[${conditionId}][condition_id]`;
-                input.value = conditionId;
-                checkbox.parentElement.appendChild(input);
-            } else {
-                statusSelect.style.display = 'none';
-                if (hiddenInput) hiddenInput.remove();
-            }
-        }
-    </script>
 </x-layouts::app>

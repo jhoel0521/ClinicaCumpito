@@ -6,10 +6,19 @@
                 <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Pacientes</h1>
                 <p class="text-gray-500 dark:text-gray-400 mt-2">Gestión de pacientes del sistema</p>
             </div>
-            <x-ui.button :href="route('pacientes.create')" variant="primary">
-                <i class="fas fa-plus"></i>
-                Nuevo Paciente
-            </x-ui.button>
+            <div class="flex gap-2">
+                <a
+                    href="{{ route('pacientes.create-old') }}"
+                    class="inline-flex items-center gap-1.5 bg-amber-500 hover:bg-amber-600 text-white font-semibold px-4 py-2 rounded-lg text-sm transition"
+                >
+                    <i class="fas fa-file-upload"></i>
+                    Cargar Historia Antigua
+                </a>
+                <x-ui.button :href="route('pacientes.create')" variant="primary">
+                    <i class="fas fa-plus"></i>
+                    Nuevo Paciente
+                </x-ui.button>
+            </div>
         </div>
 
         <!-- Mensajes Flash -->

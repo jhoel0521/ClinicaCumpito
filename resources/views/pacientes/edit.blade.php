@@ -15,6 +15,16 @@
             </a>
         </div>
 
+        @if (request('require_complete') || session('require_complete'))
+            <div
+                class="mb-6 rounded-lg border border-amber-300 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-700 p-4 text-sm text-amber-800 dark:text-amber-300"
+            >
+                <strong>Datos incompletos.</strong>
+                Completa la fecha de nacimiento y el sexo del paciente para poder crear consultas digitales y usar las
+                gráficas OMS.
+            </div>
+        @endif
+
         <!-- Formulario -->
         <form action="{{ route('pacientes.update', $patient->id) }}" method="POST" class="space-y-6">
             @csrf
@@ -50,7 +60,7 @@
                             type="date"
                             name="date_of_birth"
                             class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg shadow-sm bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100 focus:ring-teal-500 focus:border-teal-500 @error('date_of_birth') border-red-500 dark:border-red-600 @enderror"
-                            value="{{ old('date_of_birth', $patient->date_of_birth->format('Y-m-d')) }}"
+                            value="{{ old('date_of_birth', $patient->date_of_birth?->format('Y-m-d')) }}"
                         />
                         @error('date_of_birth')
                             <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
@@ -62,8 +72,9 @@
                             name="gender"
                             class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg shadow-sm bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100 focus:ring-teal-500 focus:border-teal-500"
                         >
-                            <option value="F" @selected($patient->gender->value() === 'F')>Femenino</option>
-                            <option value="M" @selected($patient->gender->value() === 'M')>Masculino</option>
+                            <option value="">-- Seleccione --</option>
+                            <option value="F" @selected($patient->gender?->value() === 'F')>Femenino</option>
+                            <option value="M" @selected($patient->gender?->value() === 'M')>Masculino</option>
                         </select>
                     </div>
                 </div>
@@ -191,60 +202,53 @@
                     <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">
                         Condiciones Médicas
                     </label>
+                    @php
+                        $medCondMap = $patient->medicalConditions->pluck('pivot.status', 'id')->all();
+                    @endphp
+
                     <div class="space-y-2">
-                        @php
-                            $patientConditions = $patient
-                                ->medicalConditions()
-                                ->pluck('medical_condition_id')
-                                ->toArray();
-                        @endphp
-
                         @foreach ($conditions as $condition)
-                            <div
-                                class="flex items-center p-3 border border-gray-200 dark:border-zinc-700 rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-800"
-                            >
-                                <input
-                                    type="checkbox"
-                                    id="condition_{{ $condition->id }}"
-                                    value="{{ $condition->id }}"
-                                    @checked(in_array($condition->id, $patientConditions))
-                                    class="h-4 w-4 text-teal-600 border-gray-300 dark:border-zinc-600 rounded"
-                                    onchange="toggleConditionStatus(this, '{{ $condition->id }}')"
-                                />
-                                <label
-                                    for="condition_{{ $condition->id }}"
-                                    class="ml-2 block text-sm text-gray-900 dark:text-gray-100 font-medium flex-grow"
-                                >
-                                    {{ $condition->name }}
-                                </label>
-                                @php
-                                    $pivotStatus = $patient
-                                        ->medicalConditions()
-                                        ->where('medical_condition_id', $condition->id)
-                                        ->first()?->pivot?->status;
-                                @endphp
+                            @php
+                                $currentStatus = $medCondMap[$condition->id] ?? '';
+                            @endphp
 
-                                <select
-                                    name="medical_conditions[{{ $condition->id }}][status]"
-                                    id="status_{{ $condition->id }}"
-                                    style="
-                                        display: {{ in_array($condition->id, $patientConditions) ? 'inline-block' : 'none' }};
-                                    "
-                                    class="px-2 py-1 border border-gray-300 dark:border-zinc-600 rounded text-sm bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100"
-                                >
-                                    <option value="Positive" @selected($pivotStatus === 'Positive')>Positivo</option>
-                                    <option value="Negative" @selected($pivotStatus === 'Negative')>Negativo</option>
-                                    <option value="Not tested" @selected($pivotStatus === 'Not tested')>
-                                        No testado
-                                    </option>
-                                </select>
-                                @if (in_array($condition->id, $patientConditions))
+                            <div
+                                class="flex items-center justify-between p-3 border border-gray-200 dark:border-zinc-700 rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-800"
+                            >
+                                <span class="text-sm text-gray-900 dark:text-gray-100 font-medium">
+                                    {{ $condition->name }}
+                                </span>
+                                <div class="flex items-center gap-2">
                                     <input
                                         type="hidden"
                                         name="medical_conditions[{{ $condition->id }}][condition_id]"
                                         value="{{ $condition->id }}"
                                     />
-                                @endif
+                                    <select
+                                        name="medical_conditions[{{ $condition->id }}][status]"
+                                        class="px-2 py-1 border border-gray-300 dark:border-zinc-600 rounded text-sm bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100 focus:ring-teal-500 focus:border-teal-500"
+                                    >
+                                        <option value="">— No evaluado —</option>
+                                        <option
+                                            value="Positive"
+                                            @selected(old('medical_conditions.' . $condition->id . '.status', $currentStatus) === 'Positive')
+                                        >
+                                            Positivo
+                                        </option>
+                                        <option
+                                            value="Negative"
+                                            @selected(old('medical_conditions.' . $condition->id . '.status', $currentStatus) === 'Negative')
+                                        >
+                                            Negativo
+                                        </option>
+                                        <option
+                                            value="Not tested"
+                                            @selected(old('medical_conditions.' . $condition->id . '.status', $currentStatus) === 'Not tested')
+                                        >
+                                            No se hizo
+                                        </option>
+                                    </select>
+                                </div>
                             </div>
                         @endforeach
                     </div>
@@ -311,25 +315,4 @@
             </div>
         </form>
     </div>
-
-    <script>
-        function toggleConditionStatus(checkbox, conditionId) {
-            const statusSelect = document.getElementById(`status_${conditionId}`);
-            let hiddenInput = document.querySelector(`input[name="medical_conditions[${conditionId}][condition_id]"]`);
-
-            if (checkbox.checked) {
-                statusSelect.style.display = 'inline-block';
-                if (!hiddenInput) {
-                    const input = document.createElement('input');
-                    input.type = 'hidden';
-                    input.name = `medical_conditions[${conditionId}][condition_id]`;
-                    input.value = conditionId;
-                    checkbox.parentElement.appendChild(input);
-                }
-            } else {
-                statusSelect.style.display = 'none';
-                if (hiddenInput) hiddenInput.remove();
-            }
-        }
-    </script>
 </x-layouts::app>

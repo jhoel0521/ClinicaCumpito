@@ -71,8 +71,17 @@ class Patient extends Model
             ->withTimestamps();
     }
 
-    public function age(): Age
+    public function age(): ?Age
     {
+        if ($this->date_of_birth === null) {
+            return null;
+        }
+
         return Age::fromDates($this->date_of_birth);
+    }
+
+    public function hasCompleteBasicData(): bool
+    {
+        return $this->date_of_birth !== null && $this->gender !== null;
     }
 }

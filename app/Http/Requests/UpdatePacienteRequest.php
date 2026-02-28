@@ -30,8 +30,8 @@ class UpdatePacienteRequest extends FormRequest
             'pathologies' => ['nullable', 'string', 'max:1000'],
             'surgeries' => ['nullable', 'string', 'max:1000'],
             'medical_conditions' => ['nullable', 'array'],
-            'medical_conditions.*.condition_id' => ['required_with:medical_conditions', 'uuid', 'exists:medical_conditions,id'],
-            'medical_conditions.*.status' => ['required_with:medical_conditions', 'in:Positive,Negative,Not tested'],
+            'medical_conditions.*.condition_id' => ['required', 'uuid', 'exists:medical_conditions,id'],
+            'medical_conditions.*.status' => ['nullable', 'in:Positive,Negative,Not tested'],
             'medical_conditions.*.notes' => ['nullable', 'string', 'max:500'],
         ];
     }
@@ -62,10 +62,9 @@ class UpdatePacienteRequest extends FormRequest
             'pathologies.max' => 'Los antecedentes patológicos no deben exceder 1000 caracteres.',
             'surgeries.max' => 'Los antecedentes quirúrgicos no deben exceder 1000 caracteres.',
             'medical_conditions.array' => 'Las condiciones médicas deben ser un array válido.',
-            'medical_conditions.*.condition_id.required_with' => 'El ID de la condición es obligatorio cuando hay condiciones médicas.',
+            'medical_conditions.*.condition_id.required' => 'El ID de la condición es obligatorio.',
             'medical_conditions.*.condition_id.uuid' => 'El ID de la condición debe ser un UUID válido.',
             'medical_conditions.*.condition_id.exists' => 'La condición médica seleccionada no existe.',
-            'medical_conditions.*.status.required_with' => 'El estado es obligatorio cuando hay condiciones médicas.',
             'medical_conditions.*.status.in' => 'El estado debe ser Positive, Negative o Not tested.',
             'medical_conditions.*.notes.max' => 'Las notas no deben exceder 500 caracteres.',
         ];

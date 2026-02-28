@@ -45,10 +45,10 @@
                         <h1 class="text-3xl font-bold">{{ $patient->full_name }}</h1>
                         <div class="flex flex-wrap gap-3 mt-3">
                             <span class="bg-white/20 px-3 py-1 rounded-full text-sm font-medium">
-                                {{ $patient->age()->forDisplay() }}
+                                {{ $patient->age()?->forDisplay() ?? '—' }}
                             </span>
                             <span class="bg-white/20 px-3 py-1 rounded-full text-sm font-medium">
-                                {{ $patient->gender->value() === 'M' ? 'Masculino' : 'Femenino' }}
+                                {{ $patient->gender ? ($patient->gender->value() === 'M' ? 'Masculino' : 'Femenino') : '—' }}
                             </span>
                             @if ($patient->blood_group)
                                 <span class="bg-red-500/80 px-3 py-1 rounded-full text-sm font-medium">
@@ -57,17 +57,27 @@
                             @endif
 
                             <span class="bg-white/10 px-3 py-1 rounded-full text-xs text-teal-100">
-                                Nac. {{ $patient->date_of_birth->format('d/m/Y') }}
+                                Nac. {{ $patient->date_of_birth?->format('d/m/Y') ?? '—' }}
                             </span>
                         </div>
                     </div>
                     <div class="flex gap-2 flex-shrink-0">
-                        <a
-                            href="{{ route('consultas.create') }}"
-                            class="inline-flex items-center gap-1.5 bg-white text-teal-700 hover:bg-teal-50 font-semibold px-4 py-2 rounded-lg text-sm transition"
-                        >
-                            + Nueva Consulta
-                        </a>
+                        @if ($patient->hasCompleteBasicData())
+                            <a
+                                href="{{ route('consultas.create') }}"
+                                class="inline-flex items-center gap-1.5 bg-white text-teal-700 hover:bg-teal-50 font-semibold px-4 py-2 rounded-lg text-sm transition"
+                            >
+                                + Nueva Consulta
+                            </a>
+                        @else
+                            <a
+                                href="{{ route('pacientes.edit', $patient->id) }}?require_complete=1"
+                                class="inline-flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-white font-semibold px-4 py-2 rounded-lg text-sm transition"
+                                title="Completa los datos básicos del paciente antes de crear una consulta"
+                            >
+                                ⚠ Completar datos del paciente
+                            </a>
+                        @endif
                         <a
                             href="{{ route('pacientes.edit', $patient->id) }}"
                             class="inline-flex items-center gap-1.5 bg-white/20 hover:bg-white/30 font-medium px-4 py-2 rounded-lg text-sm transition"
@@ -410,7 +420,10 @@
         {{-- SECCIÓN 4: HISTORIAL DE CONSULTAS --}}
         {{-- ═══════════════════════════════════════════════════════════════════ --}}
         <section id="historial-consultas" dusk="section-historial-consultas" class="scroll-mt-16">
-            <h2 class="text-xl font-bold text-zinc-800 dark:text-zinc-100 mb-4">Historial de Consultas</h2>
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-bold text-zinc-800 dark:text-zinc-100">Historial de Consultas</h2>
+                <livewire:patient-upload-scan :patientId="$patient->id" />
+            </div>
 
             @if ($patient->consultations->isNotEmpty())
                 <div
@@ -451,7 +464,16 @@
                                         </span>
                                     </td>
                                     <td class="px-4 py-3">
-                                        <div class="flex gap-1.5">
+                                        <div class="flex gap-1.5 flex-wrap">
+                                            @if ($consultation->scanned_file_path)
+                                                <span
+                                                    title="Consulta escaneada pendiente de digitalizar"
+                                                    class="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300"
+                                                >
+                                                    Digitalizar
+                                                </span>
+                                            @endif
+
                                             @if ($consultation->vitalSigns)
                                                 <span title="Signos Vitales" class="text-blue-400 text-xs">VS</span>
                                             @endif

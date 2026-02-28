@@ -156,7 +156,9 @@ class GrowthChartService implements GrowthChartServiceContract
         Patient $patient,
         \Carbon\CarbonInterface $consultDate,
     ): array {
-        $ageMonths = Age::fromDates($patient->date_of_birth, $consultDate)->months();
+        $ageMonths = $patient->date_of_birth
+            ? Age::fromDates($patient->date_of_birth, $consultDate)->months()
+            : 0;
         $weight = $vitalSign->weight?->value();
         $height = $vitalSign->height?->value();
         $hc = $vitalSign->head_circumference?->value();

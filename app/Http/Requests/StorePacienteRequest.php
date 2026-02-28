@@ -30,8 +30,8 @@ class StorePacienteRequest extends FormRequest
             'pathologies' => ['nullable', 'string', 'max:1000'],
             'surgeries' => ['nullable', 'string', 'max:1000'],
             'medical_conditions' => ['nullable', 'array'],
-            'medical_conditions.*.condition_id' => ['required_with:medical_conditions', 'uuid', 'exists:medical_conditions,id'],
-            'medical_conditions.*.status' => ['required_with:medical_conditions', 'in:Positive,Negative,Not tested'],
+            'medical_conditions.*.condition_id' => ['required', 'uuid', 'exists:medical_conditions,id'],
+            'medical_conditions.*.status' => ['nullable', 'in:Positive,Negative,Not tested'],
             'medical_conditions.*.notes' => ['nullable', 'string', 'max:500'],
         ];
     }

@@ -11,7 +11,8 @@
         "test": "php artisan test --testsuite=Unit,Feature",
         "test:browser": "php artisan dusk",
         "test:browser:filter": "php artisan dusk --filter",
-        "pre-commit": "php vendor/bin/pint && npm run blade:fix && php vendor/bin/phpstan analyse && npm run test && npm run test:browser"
+        "pre-commit:fast": "php vendor/bin/pint && npm run blade:fix && php vendor/bin/phpstan analyse",
+        "pre-commit": "npm run pre-commit:fast && npm run test && npm run test:browser"
     },
     "dependencies": {
         "@tailwindcss/vite": "^4.1.11",

@@ -34,8 +34,20 @@ class Consultation extends Model
         'status',
         'consultation_date',
         'scanned_file_path',
+        'scanned_file_name',
         'pending_transcription',
     ];
+
+    public function hasScannedFile(): bool
+    {
+        return $this->scanned_file_path !== null;
+    }
+
+    public function isScannedPdf(): bool
+    {
+        return $this->scanned_file_name !== null
+            && str_ends_with(strtolower($this->scanned_file_name), '.pdf');
+    }
 
     /** @return BelongsTo<Patient, $this> */
     public function patient(): BelongsTo

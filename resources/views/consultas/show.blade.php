@@ -129,6 +129,41 @@
             </div>
         </div>
 
+        {{-- Visor de consulta escaneada (si existe) --}}
+        @if ($consultation->hasScannedFile())
+            <div class="mb-6 rounded-xl border border-amber-200 dark:border-amber-800 overflow-hidden">
+                <div class="bg-amber-50 dark:bg-amber-900/20 px-4 py-2 flex items-center justify-between">
+                    <span class="text-sm font-medium text-amber-700 dark:text-amber-300">
+                        Documento escaneado: {{ $consultation->scanned_file_name }}
+                    </span>
+                    <a
+                        href="{{ route('consultas.archivo.serve', $consultation->id) }}"
+                        target="_blank"
+                        class="text-xs text-amber-600 dark:text-amber-400 hover:underline"
+                    >
+                        Abrir en nueva pestaña →
+                    </a>
+                </div>
+
+                @if ($consultation->isScannedPdf())
+                    <embed
+                        src="{{ route('consultas.archivo.serve', $consultation->id) }}"
+                        type="application/pdf"
+                        class="w-full"
+                        style="height: 420px"
+                    />
+                @else
+                    <div class="p-4 bg-white dark:bg-zinc-900 text-center">
+                        <img
+                            src="{{ route('consultas.archivo.serve', $consultation->id) }}"
+                            alt="Consulta escaneada"
+                            class="max-h-96 mx-auto rounded"
+                        />
+                    </div>
+                @endif
+            </div>
+        @endif
+
         {{--
             ══════════════════════════════════
             BARRA DE ANCLAJE (scroll navigation)

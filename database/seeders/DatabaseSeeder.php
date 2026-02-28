@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             VaccineCatalogSeeder::class,
             DefaultUsersSeeder::class,
             WhoDataSeeder::class,
+            GrowthChartTestDataSeeder::class,
         ]);
     }
 }

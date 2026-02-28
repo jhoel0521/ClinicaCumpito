@@ -11,11 +11,12 @@ return new class extends Migration
         Schema::create('consultations', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('patient_id');
-            $table->uuid('doctor_id');
+            $table->uuid('doctor_id')->nullable();
             $table->enum('type', ['digital', 'manual']);
             $table->enum('status', ['draft', 'saved', 'finalized'])->default('saved');
             $table->dateTime('consultation_date');
             $table->string('scanned_file_path')->nullable();
+            $table->string('scanned_file_name')->nullable();
             $table->boolean('pending_transcription')->default(false);
             $table->softDeletes();
             $table->timestamps();
@@ -28,7 +29,7 @@ return new class extends Migration
             $table->foreign('doctor_id')
                 ->references('id')
                 ->on('doctors')
-                ->onDelete('restrict');
+                ->onDelete('set null');
         });
     }
 

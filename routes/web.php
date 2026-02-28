@@ -14,6 +14,8 @@ Route::view('dashboard', 'dashboard')
 
 // Rutas de Pacientes
 Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('pacientes/create-old', [PacienteController::class, 'createOld'])
+        ->name('pacientes.create-old');
     Route::resource('pacientes', PacienteController::class);
     Route::model('paciente', Patient::class);
 });

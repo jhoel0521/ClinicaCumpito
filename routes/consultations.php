@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ConsultationController;
+use App\Http\Controllers\ConsultationFileController;
 use App\Http\Controllers\LaboratoryRequestController;
 use App\Http\Controllers\LaboratoryRequestItemController;
 use App\Http\Controllers\PatientVaccineController;
@@ -14,6 +15,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('consultas', ConsultationController::class)->parameters([
         'consultas' => 'consulta',
     ]);
+
+    Route::get('consultas/{consulta}/archivo', [ConsultationFileController::class, 'serve'])
+        ->name('consultas.archivo.serve');
 
     Route::post('consultas/{consulta}/signos-vitales', [VitalSignController::class, 'store'])
         ->name('consultas.vital-signs.store');

@@ -22,7 +22,8 @@ class ConsultationFactory extends Factory
             'type' => $this->faker->randomElement(['digital', 'manual']),
             'status' => $this->faker->randomElement(['draft', 'saved', 'finalized']),
             'consultation_date' => $this->faker->dateTimeBetween('-6 months', 'now'),
-            'scanned_file_path' => $this->faker->optional()->filePath(),
+            'scanned_file_path' => null,
+            'scanned_file_name' => null,
             'pending_transcription' => false,
         ];
     }
@@ -41,6 +42,20 @@ class ConsultationFactory extends Factory
         return $this->state(function (array $attributes) {
             return [
                 'status' => 'finalized',
+            ];
+        });
+    }
+
+    public function scanned(): self
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'type' => 'manual',
+                'status' => 'draft',
+                'doctor_id' => null,
+                'scanned_file_path' => 'consultations/fake/scan.pdf',
+                'scanned_file_name' => 'scan.pdf',
+                'pending_transcription' => true,
             ];
         });
     }

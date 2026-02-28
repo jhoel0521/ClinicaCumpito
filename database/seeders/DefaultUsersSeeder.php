@@ -22,6 +22,7 @@ class DefaultUsersSeeder extends Seeder
     {
         $adminRole = Role::firstOrCreate(['name' => 'Admin', 'guard_name' => 'web']);
         $doctorRole = Role::firstOrCreate(['name' => 'Doctor', 'guard_name' => 'web']);
+        $tecnicoRole = Role::firstOrCreate(['name' => 'Tecnico', 'guard_name' => 'web']);
 
         // ── Admin ─────────────────────────────────────────────────────────────
         $admin = User::firstOrCreate(
@@ -33,7 +34,7 @@ class DefaultUsersSeeder extends Seeder
                 'phone_number' => '000-000-0000',
             ]
         );
-        $admin->syncRoles([$adminRole, $doctorRole]);
+        $admin->syncRoles([$adminRole, $doctorRole, $tecnicoRole]);
 
         // ── Doctor 1 ──────────────────────────────────────────────────────────
         $doctor1 = Doctor::firstOrCreate(
@@ -79,6 +80,21 @@ class DefaultUsersSeeder extends Seeder
         );
         $user2->syncRoles([$doctorRole]);
 
+        // ── Técnico (carga de historias antiguas) ─────────────────────────────
+        $tecnicoRole = Role::firstOrCreate(['name' => 'Tecnico', 'guard_name' => 'web']);
+
+        $tecnico = User::firstOrCreate(
+            ['email' => 'tecnico@clinica.com'],
+            [
+                'name' => 'Técnico de Archivo',
+                'password' => Hash::make('password'),
+                'email_verified_at' => now(),
+                'phone_number' => '555-100-0003',
+                'doctor_id' => null,
+            ]
+        );
+        $tecnico->syncRoles([$tecnicoRole]);
+
         $this->command->info('✔ Usuarios por defecto creados:');
         $this->command->table(
             ['Email', 'Rol', 'Contraseña'],
@@ -86,6 +102,7 @@ class DefaultUsersSeeder extends Seeder
                 ['admin@clinica.com', 'Admin', 'password'],
                 ['doctor@clinica.com', 'Doctor (Dr. Carlos García)', 'password'],
                 ['doctora@clinica.com', 'Doctor (Dra. Ana López)', 'password'],
+                ['tecnico@clinica.com', 'Técnico de Archivo', 'password'],
             ]
         );
     }

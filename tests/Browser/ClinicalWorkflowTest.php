@@ -809,4 +809,117 @@ class ClinicalWorkflowTest extends DuskTestCase
                 ->assertSee('Perímetro Cefálico Niñas');
         });
     }
+
+    // =========================================================================
+    // TEST 14: CARGA INICIAL VÍA /pacientes/create-old + SCANS
+    // =========================================================================
+
+    /**
+     * Flujo técnico de carga inicial de historia clínica antigua:
+     *  1. El técnico ingresa a /pacientes/create-old y escribe solo el nombre.
+     *  2. Hace clic en "Continuar" → aparece el paso 2 (scans).
+     *  3. Sube N scans (PDF mínimo válido) uno por uno, verificando el contador.
+     *  4. Hace clic en "Finalizar → ver paciente" → llega a pacientes.show.
+     *  5. El historial muestra N filas con badge "Digitalizar".
+     */
+    public function test_14_carga_inicial_via_create_old_con_n_scans(): void
+    {
+        User::factory()->create([
+            'email' => 'tecnico@clinica.com',
+            'password' => bcrypt('password'),
+            'doctor_id' => null,
+        ]);
+
+        $n = 3; // número de scans a subir
+
+        // Crear N archivos PDF mínimos válidos en el directorio temporal del sistema
+        $tmpFiles = [];
+        for ($i = 1; $i <= $n; $i++) {
+            $path = sys_get_temp_dir()."/scan_{$i}_".uniqid().'.pdf';
+            file_put_contents($path, "%PDF-1.4\n1 0 obj<</Type/Catalog>>endobj\nxref\n0 1\n0000000000 65535 f\ntrailer<</Size 1/Root 1 0 R>>\nstartxref\n9\n%%EOF");
+            $tmpFiles[] = $path;
+        }
+
+        // Nombre ASCII puro para evitar problemas de encoding con sendKeys()
+        $patientName = 'Lorenzo Mendez Rojas';
+
+        try {
+            $this->browse(function (Browser $browser) use ($n, $tmpFiles, $patientName) {
+                // ── 1. Login como técnico ─────────────────────────────────────
+                $this->loginAs($browser, 'tecnico@clinica.com');
+
+                // ── 2. Navegar a create-old y escribir nombre ─────────────────
+                $browser
+                    ->visit('/pacientes/create-old')
+                    ->waitFor('[dusk="input-full-name-old"]', 10)
+                    ->pause(500) // dejar que Alpine/Livewire se inicialice
+                    ->type('[dusk="input-full-name-old"]', $patientName)
+                    ->pause(300); // dejar que wire:model sincronice el valor
+
+                // ── 3. Hacer clic en "Continuar" y esperar el paso de scans ───
+                // JS click para evitar ElementClickInterceptedException del sidebar Flux
+                $browser->script("document.querySelector('[dusk=\"btn-continuar-old\"]').click()");
+
+                // Esperar el input de fecha que solo existe en el paso 2
+                $browser->waitFor('[dusk="input-scan-date-old"]', 15);
+
+                // ── 4. Subir N scans uno por uno ──────────────────────────────
+                foreach ($tmpFiles as $index => $tmpFile) {
+                    $scanDate = now()->subDays($n - $index)->format('Y-m-d');
+
+                    // Esperar a que el formulario esté disponible (Livewire re-render)
+                    $browser->waitFor('[dusk="input-scan-date-old"]', 10);
+                    $browser->pause(500);
+
+                    // Setear la fecha via JS nativo (->type() no funciona bien con input[date] tras reset Livewire)
+                    $browser->script("
+                        const dateInput = document.querySelector('[dusk=\"input-scan-date-old\"]');
+                        const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+                        nativeInputValueSetter.call(dateInput, '{$scanDate}');
+                        dateInput.dispatchEvent(new Event('input', { bubbles: true }));
+                        dateInput.dispatchEvent(new Event('change', { bubbles: true }));
+                    ");
+                    $browser->pause(300);
+
+                    // Adjuntar el archivo — Livewire WithFileUploads lo sube al temp del servidor
+                    $browser->attach('[dusk="input-scan-file-old"]', $tmpFile);
+
+                    // Esperar a que desaparezca el indicador de carga del archivo
+                    $browser->waitUntilMissingText('Subiendo archivo...', 20);
+                    $browser->pause(500);
+
+                    // Hacer clic en "Subir este scan"
+                    $browser->script("document.querySelector('[dusk=\"btn-subir-scan-old\"]').click()");
+
+                    // Esperar confirmación del contador de scans subidos
+                    $uploaded = $index + 1;
+                    $browser->waitForText("Consultas cargadas ({$uploaded})", 25);
+                    $browser->pause(500);
+                }
+
+                // ── 5. Hacer clic en "Finalizar → ver paciente" ───────────────
+                $browser->script("document.querySelector('[dusk=\"btn-finalizar-old\"]').click()");
+                $browser->waitForText($patientName, 15);
+
+                // ── 6. Verificar nombre y N filas en el historial ─────────────
+                $browser
+                    ->waitFor('[dusk="section-historial-consultas"]', 10)
+                    ->assertSee($patientName)
+                    ->assertSee('Historial de Consultas');
+
+                $rows = $browser->elements('[dusk="section-historial-consultas"] tbody tr');
+                $this->assertCount($n, $rows);
+            });
+        } finally {
+            // Limpiar archivos temporales independientemente del resultado
+            foreach ($tmpFiles as $path) {
+                if (file_exists($path)) {
+                    unlink($path);
+                }
+            }
+        }
+
+        $this->assertDatabaseHas('patients', ['full_name' => $patientName]);
+        $this->assertDatabaseCount('consultations', $n);
+    }
 }

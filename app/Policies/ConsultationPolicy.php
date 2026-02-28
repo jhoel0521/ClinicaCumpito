@@ -19,11 +19,24 @@ class ConsultationPolicy
 
     public function create(User $user): bool
     {
-        return $user->doctor_id !== null || $user->hasRole('Admin');
+        return $user->doctor_id !== null
+            || $user->hasRole('Admin')
+            || $user->hasRole('Tecnico');
     }
 
     public function update(User $user, Consultation $consultation): bool
     {
+        // Admin puede editar cualquier consulta
+        if ($user->hasRole('Admin')) {
+            return true;
+        }
+
+        // Técnico pode editar consultas manuales sin doctor asignado
+        if ($user->hasRole('Tecnico') && $consultation->doctor_id === null) {
+            return true;
+        }
+
+        // Doctor solo edita sus propias consultas
         return $user->doctor_id !== null
             && $user->doctor_id === $consultation->doctor_id;
     }

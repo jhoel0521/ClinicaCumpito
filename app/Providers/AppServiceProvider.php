@@ -86,6 +86,11 @@ class AppServiceProvider extends ServiceProvider
             \App\Contracts\GrowthChartServiceContract::class,
             \App\Services\GrowthChartService::class
         );
+
+        $this->app->bind(
+            \App\Contracts\ScannedConsultationServiceContract::class,
+            \App\Services\ScannedConsultationService::class
+        );
     }
 
     /**

@@ -96,6 +96,16 @@ class PacienteController extends Controller
     }
 
     /**
+     * Show the quick form for loading old (historical) patient records.
+     */
+    public function createOld(): View
+    {
+        $this->authorize('create', Patient::class);
+
+        return view('pacientes.create-old');
+    }
+
+    /**
      * Remove the specified patient from database.
      */
     public function destroy(Patient $patient): \Illuminate\Http\RedirectResponse

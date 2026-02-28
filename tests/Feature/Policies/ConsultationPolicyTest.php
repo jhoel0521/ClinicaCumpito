@@ -9,6 +9,7 @@ use Spatie\Permission\Models\Role;
 
 beforeEach(function (): void {
     Role::firstOrCreate(['name' => 'Admin', 'guard_name' => 'web']);
+    Role::firstOrCreate(['name' => 'Tecnico', 'guard_name' => 'web']);
 });
 
 describe('ConsultationPolicy', function (): void {
@@ -85,5 +86,45 @@ describe('ConsultationPolicy', function (): void {
         $this->actingAs($user)
             ->delete(route('consultas.destroy', $consultation->id))
             ->assertRedirect(route('consultas.index'));
+    });
+
+    test('tecnico puede acceder al formulario de creación', function (): void {
+        $user = User::factory()->create(['doctor_id' => null]);
+        $user->assignRole('Tecnico');
+
+        $this->actingAs($user)
+            ->get(route('consultas.create'))
+            ->assertOk();
+    });
+
+    test('tecnico puede editar consulta manual sin doctor asignado', function (): void {
+        $user = User::factory()->create(['doctor_id' => null]);
+        $user->assignRole('Tecnico');
+        $consultation = Consultation::factory()->scanned()->create();
+
+        $this->actingAs($user)
+            ->get(route('consultas.edit', $consultation->id))
+            ->assertOk();
+    });
+
+    test('tecnico no puede editar consulta de un doctor', function (): void {
+        $user = User::factory()->create(['doctor_id' => null]);
+        $user->assignRole('Tecnico');
+        $doctor = Doctor::factory()->create();
+        $consultation = Consultation::factory()->create(['doctor_id' => $doctor->id]);
+
+        $this->actingAs($user)
+            ->get(route('consultas.edit', $consultation->id))
+            ->assertForbidden();
+    });
+
+    test('admin puede editar cualquier consulta', function (): void {
+        $user = User::factory()->create(['doctor_id' => null]);
+        $user->assignRole('Admin');
+        $consultation = Consultation::factory()->create(['status' => 'saved']);
+
+        $this->actingAs($user)
+            ->get(route('consultas.edit', $consultation->id))
+            ->assertOk();
     });
 });

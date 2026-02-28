@@ -155,14 +155,14 @@ Una subtarea se considera terminada solo si cumple todo:
 
 ---
 
-## 📋 Fase 6: Integración de Flujo Clínico Completo (Livewire) — 50%
+## 📋 Fase 6: Integración de Flujo Clínico Completo (Livewire) — 100%
 
 > **Redefinición 27-02-2026**: Las vistas existentes (consulta 742 líneas, paciente 517 líneas) eran páginas monolíticas con formularios HTML que recargaban. Rediseñadas como landing-pages con Livewire Volt reactivo.
 
 - [x] **6.1 Dashboard del Paciente** (landing-page, 6 secciones). — 100% ✔ `pacientes/show.blade.php` reescrito con barra de anclas sticky + 6 secciones: (1) Header/Datos Base (edad exacta, género, grupo sanguíneo, alergias, antecedentes, condiciones), (2) Última Consulta (VS+SOAP+Rx+Lab en modo lectura), (3) Gráfica OMS con selector `⚡patient-oms-chart` (tabla de datapoints + placeholder Chart.js Fase 7), (4) Historial de Consultas (tabla con íconos de estado), (5) Historial de Recetas (agrupado por fecha), (6) Historial de Laboratorios (agrupado por fecha). `PacienteController::show()` con eager loading completo + `$latestConsultation`.
 - [x] **6.2 Vista de Consulta Reactiva** (landing-page + Livewire). — 100% ✔ `consultas/show.blade.php` reescrito como landing-page con header estático + barra ancla + 5 Volt components independientes que guardan sin recargar: `⚡consultation-vital-signs`, `⚡consultation-soap-note`, `⚡consultation-prescription`, `⚡consultation-laboratory`, `⚡consultation-vaccines`. Cada componente: carga desde DB en `mount()`, badge reactivo (Sin datos / Guardado / Finalizada), bloqueo si `finalized`. Tests Dusk `08` actualizado (flash → badges Livewire).
-- [ ] **6.3 Gestión de pacientes** (listado, crear, editar). — 0% · Ajustar UX del listado y formularios de creación/edición si necesario (baja prioridad — funcionalidad ya existe).
-- [ ] **6.4 Módulo híbrido**: subida y visualización de PDF/JPG históricos (consultas manuales escaneadas). — 0%
+- [x] **6.3 Gestión de pacientes** (listado, crear, editar). — 100% ✔ `⚡patient-list.blade.php` reescrito: búsqueda live + filtros (Todos / Datos incompletos / Pendientes digitalizar) + conteo de consultas `withCount('consultations')` + badge estado (Completo/Incompleto con link a edición) + nombre clickeable al dashboard + badge grupo sanguíneo + edad clínica en celda. Vistas `edit.blade.php` e `index.blade.php` adaptadas para campos nullable (pacientes creados solo con nombre). Alerta `require_complete` en edición. `PatientListTest` (feature, 5 tests). **378 tests PHP · 14 Dusk**.
+- [x] **6.4 Módulo híbrido**: subida y visualización de PDF/JPG históricos (consultas manuales escaneadas). — 100% ✔ Infraestructura completa: `ScannedConsultationService` + `ScannedConsultationServiceContract` (crear consulta tipo `manual` con archivo adjunto en storage privado, eliminar archivo). Componentes Livewire Volt: `⚡patient-create-old` (flujo 2 pasos: crear paciente solo con nombre → subir N scans uno por uno con contador reactivo → finalizar y ver dashboard), `⚡patient-upload-scan` (botón + modal Flux para subir scan desde el dashboard del paciente). `ConsultationFileController` sirve archivos autenticados (PDF embebido / imagen inline en `consultas/show`). Migración `consultations.doctor_id` nullable + FK `onDelete('set null')` para consultas sin médico asignado. Rol `Tecnico` agregado en `RolesAndPermissionsSeeder` + usuario `tecnico@clinica.com` en `DefaultUsersSeeder`. `ConsultationPolicy` actualizada: Técnico puede crear consultas y editar consultas manuales sin doctor; Admin puede editar cualquier consulta. `ConsultationFactory::scanned()` state. Tests: `ScannedConsultationServiceTest` (unit, 3 tests) + `ScannedConsultationTest` (feature, 5 tests) + `ConsultationPolicyTest` ampliado (+4 tests Técnico/Admin) + `test_14` Dusk (flujo completo create-old con N scans). **378 tests PHP · 14 Dusk · PHPStan ✔ · Pint ✔**.
 
 ---
 
@@ -208,11 +208,11 @@ Una subtarea se considera terminada solo si cumple todo:
 | 4.7 | Motor OMS (datos) | ✅ 100% |
 | 4.8 | Seguridad / Policies | ✅ 100% |
 | 5 | Lógica de Dominio (VO/Services) | ✅ 100% |
-| 6 | Livewire Clínico | 🟡 50% |
+| 6 | Livewire Clínico | ✅ 100% |
 | 7 | Motor Gráfico OMS | 🟡 75% |
 | 8 | Calidad / Cierre Técnico | 🟡 60% |
 | 9 | Despliegue y Capacitación | 🔴 0% |
-| **Total MVP** | **Fases 1–5 + Fase 6 parcial + Fase 7 parcial** | **~78%** |
+| **Total MVP** | **Fases 1–5 + Fase 6 + Fase 7 parcial** | **~85%** |
 
 > **Evidencia de auditoría**: `git status`, listado de `app/`, `database/migrations/`, `tests/`, `resources/views/`, `app/Livewire/`. Fecha: 24-02-2026.
 
@@ -289,6 +289,34 @@ Una subtarea se considera terminada solo si cumple todo:
 - 5.1 completado: `Age` Value Object con cálculo exacto de edad clínica por días/semanas/meses/años y formato legible.
 - Integración de dominio: agregado `age()` en `Patient` y reemplazo de cálculo directo en vista de paciente por `forDisplay()`.
 - Pruebas añadidas: `tests/Unit/ValueObjects/AgeTest.php` (5 tests) y caso feature en `PacienteControllerTest` para validar render de edad exacta.
+
+### ✅ Actualización de ejecución (28-02-2026) — Fase 6.3 + 6.4 completadas
+
+- **Pre-commit ejecutado en verde**: `./vendor/bin/pint` (300 files, 0 issues), `./vendor/bin/phpstan analyse` (sin errores), `php artisan test --parallel` (378 tests pasando, 884 assertions), `php artisan dusk` (14 tests, 40 assertions).
+- **6.3 completado** (`c17dd9f`, 13 archivos): Gestión de pacientes UX.
+  - Migración `patients`: `date_of_birth` + `gender` nullable (pacientes creados solo con nombre).
+  - `Patient` model: `age()` retorna `?Age`, `hasCompleteBasicData()` helper.
+  - `⚡patient-list.blade.php` reescrito: búsqueda live + 3 filtros (Todos / Datos incompletos / Pendientes digitalizar) + `withCount('consultations')` + badge estado (Completo/Incompleto con link a edición) + nombre clickeable al dashboard + edad clínica + badge grupo sanguíneo.
+  - Vistas `edit/create/index/show` adaptadas para nullable (`?->` operator).
+  - `ConsultationController::create()/store()`: guarda `hasCompleteBasicData()` con redirect a edición.
+  - `PacienteService::syncMedicalConditions()`: ignora status vacío.
+  - `GrowthChartService`: null-safe para `date_of_birth`.
+  - `PatientListTest` (feature, 5 tests).
+- **6.4 completado** (`2fa6106`, 21 archivos): Módulo híbrido de consultas escaneadas.
+  - Migración `consultations`: `doctor_id` nullable + FK `onDelete('set null')`.
+  - `Consultation` model: `hasScannedFile()`, `isScannedPdf()`, `scanned_file_name` fillable.
+  - `ScannedConsultationService` + `ScannedConsultationServiceContract`: crear consulta tipo `manual` con archivo en storage privado.
+  - `ConsultationFileController`: sirve archivos autenticados (PDF embebido / imagen inline).
+  - Rol `Tecnico` en `RolesAndPermissionsSeeder` + `tecnico@clinica.com` en `DefaultUsersSeeder` (4 usuarios: admin, doctor, doctora, tecnico).
+  - `ConsultationPolicy`: Técnico crea consultas y edita manuales sin doctor; Admin edita cualquiera.
+  - `⚡patient-create-old`: flujo 2 pasos (nombre → N scans con contador → dashboard).
+  - `⚡patient-upload-scan`: modal para subir scan desde dashboard.
+  - `consultas/show`: visualización inline de PDF/imagen escaneada.
+  - `ConsultationFactory::scanned()` state.
+  - Tests: `ScannedConsultationServiceTest` (unit, 3) + `ScannedConsultationTest` (feature, 5) + `ConsultationPolicyTest` (+4 Técnico/Admin) + `test_14` Dusk.
+- **Fase 6 cerrada al 100%**. Estado actual: **378 tests PHP pasando** · **14 tests Dusk** · PHPStan ✔ · Pint ✔.
+- Bug resuelto en Dusk test 14: `->type()` en `input[type="date"]` no funciona tras re-render Livewire → reemplazado con `nativeInputValueSetter` (JS prototype) + `dispatchEvent('input'/'change')`.
+- Siguiente fase recomendada: **7.4 Pruebas de precisión OMS** o **Fase 8 Calidad/Cierre Técnico**.
 
 ---
 

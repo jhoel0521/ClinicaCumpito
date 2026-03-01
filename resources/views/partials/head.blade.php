@@ -11,4 +11,15 @@
 <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
 
 @vite(['resources/css/app.css', 'resources/js/app.js'])
+<script>
+    (function () {
+        var old = localStorage.getItem('theme');
+        if (old) {
+            if (!localStorage.getItem('flux.appearance')) {
+                localStorage.setItem('flux.appearance', old);
+            }
+            localStorage.removeItem('theme');
+        }
+    })();
+</script>
 @fluxAppearance

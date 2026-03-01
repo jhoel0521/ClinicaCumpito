@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
         @include('partials.head')
     </head>
@@ -78,7 +78,8 @@
                         Tema
                     </label>
                     <select
-                        id="themeSelect"
+                        x-data
+                        x-model="$flux.appearance"
                         class="w-full px-3 py-2 rounded-lg text-sm bg-white dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
                     >
                         <option value="system">Sistema</option>
@@ -201,66 +202,6 @@
         </flux:header>
 
         {{ $slot }}
-
-        <script>
-            function applyTheme(theme) {
-                const html = document.documentElement;
-
-                if (theme === 'system') {
-                    localStorage.removeItem('theme');
-                    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                    if (prefersDark) {
-                        html.classList.add('dark');
-                    } else {
-                        html.classList.remove('dark');
-                    }
-                } else if (theme === 'dark') {
-                    html.classList.add('dark');
-                } else if (theme === 'light') {
-                    html.classList.remove('dark');
-                }
-            }
-
-            function updateThemeSelect(theme) {
-                const themeSelect = document.getElementById('themeSelect');
-                if (themeSelect) {
-                    themeSelect.value = theme;
-                }
-            }
-
-            function handleThemeChange(newTheme) {
-                if (newTheme === 'system') {
-                    localStorage.removeItem('theme');
-                } else {
-                    localStorage.setItem('theme', newTheme);
-                }
-
-                applyTheme(newTheme);
-                updateThemeSelect(newTheme);
-            }
-
-            // Inicializar evento del select
-            document.addEventListener('DOMContentLoaded', function () {
-                const themeSelect = document.getElementById('themeSelect');
-                if (themeSelect) {
-                    themeSelect.addEventListener('change', function (e) {
-                        handleThemeChange(e.target.value);
-                    });
-                }
-
-                const savedTheme = localStorage.getItem('theme') || 'system';
-                applyTheme(savedTheme);
-                updateThemeSelect(savedTheme);
-            });
-
-            // Detectar cambios en la preferencia del sistema
-            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function () {
-                if (!localStorage.getItem('theme')) {
-                    applyTheme('system');
-                    updateThemeSelect('system');
-                }
-            });
-        </script>
 
         @fluxScripts
     </body>

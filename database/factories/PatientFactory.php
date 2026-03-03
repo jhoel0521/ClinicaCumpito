@@ -42,4 +42,15 @@ class PatientFactory extends Factory
             ];
         });
     }
+
+    public function withCompleteData(): self
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'allergies' => $this->faker->sentence(),
+                'pathologies' => $this->faker->sentence(),
+                'surgeries' => $this->faker->sentence(),
+            ];
+        });
+    }
 }

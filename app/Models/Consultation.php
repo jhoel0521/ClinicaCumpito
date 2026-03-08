@@ -1,0 +1,93 @@
+<?php
+
+namespace App\Models;
+
+use App\Traits\Auditable;
+use App\ValueObjects\ConsultationStatus;
+use App\ValueObjects\ConsultationType;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\SoftDeletes;
+
+class Consultation extends Model
+{
+    /** @use HasFactory<\Database\Factories\ConsultationFactory> */
+    use Auditable, HasFactory, HasUuids, SoftDeletes;
+
+    protected $table = 'consultations';
+
+    protected $casts = [
+        'consultation_date' => 'datetime',
+        'pending_transcription' => 'boolean',
+        'type' => ConsultationType::class,
+        'status' => ConsultationStatus::class,
+    ];
+
+    protected $fillable = [
+        'patient_id',
+        'doctor_id',
+        'type',
+        'status',
+        'consultation_date',
+        'scanned_file_path',
+        'scanned_file_name',
+        'pending_transcription',
+    ];
+
+    public function hasScannedFile(): bool
+    {
+        return $this->scanned_file_path !== null;
+    }
+
+    public function isScannedPdf(): bool
+    {
+        return $this->scanned_file_name !== null
+            && str_ends_with(strtolower($this->scanned_file_name), '.pdf');
+    }
+
+    /** @return BelongsTo<Patient, $this> */
+    public function patient(): BelongsTo
+    {
+        return $this->belongsTo(Patient::class);
+    }
+
+    /** @return BelongsTo<Doctor, $this> */
+    public function doctor(): BelongsTo
+    {
+        return $this->belongsTo(Doctor::class);
+    }
+
+    /** @return HasOne<VitalSign, $this> */
+    public function vitalSigns(): HasOne
+    {
+        return $this->hasOne(VitalSign::class, 'consultation_id');
+    }
+
+    /** @return HasOne<SoapNote, $this> */
+    public function soapNote(): HasOne
+    {
+        return $this->hasOne(SoapNote::class, 'consultation_id');
+    }
+
+    /** @return HasOne<Prescription, $this> */
+    public function prescription(): HasOne
+    {
+        return $this->hasOne(Prescription::class, 'consultation_id');
+    }
+
+    /** @return HasOne<LaboratoryRequest, $this> */
+    public function laboratoryRequest(): HasOne
+    {
+        return $this->hasOne(LaboratoryRequest::class, 'consultation_id');
+    }
+
+    /** @return HasMany<PatientVaccine, $this> */
+    public function patientVaccines(): HasMany
+    {
+        return $this->hasMany(PatientVaccine::class, 'consultation_id');
+    }
+}

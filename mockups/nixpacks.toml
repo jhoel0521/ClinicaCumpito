@@ -1,0 +1,16 @@
+# Nixpacks Configuration for Static HTML Site
+
+# 1. Fase de Instalación: Instalamos Caddy (Servidor Web)
+[phases.setup]
+nixPkgs = ["caddy"]
+
+# 2. Fase de Construcción: No necesitamos compilar nada porque es HTML estático
+[phases.build]
+cmds = []
+
+# 3. Fase de Inicio: Servimos los archivos en el puerto 80 (o el que asigne la plataforma con $PORT)
+# 'file-server' activa el modo estático.
+# '--root .' indica que sirva la carpeta actual.
+# '--listen :${PORT:-80}' escucha en el puerto indicado por $PORT (o 80 por defecto).
+[start]
+cmd = "caddy file-server --root . --listen :${PORT:-80}"

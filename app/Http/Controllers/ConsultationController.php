@@ -1,0 +1,150 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Contracts\ConsultationServiceContract;
+use App\DTOs\ConsultationDTO;
+use App\Http\Requests\StoreConsultationRequest;
+use App\Http\Requests\UpdateConsultationRequest;
+use App\Models\Consultation;
+use App\Models\Doctor;
+use App\Models\LaboratoryTemplate;
+use App\Models\Patient;
+use App\Models\PrescriptionTemplate;
+use App\Models\Vaccine;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\View\View;
+
+class ConsultationController extends Controller
+{
+    public function __construct(private ConsultationServiceContract $service) {}
+
+    public function index(): View
+    {
+        $this->authorize('viewAny', Consultation::class);
+
+        $consultations = $this->service->paginate();
+
+        return view('consultas.index', compact('consultations'));
+    }
+
+    public function create(Request $request): View|RedirectResponse
+    {
+        $this->authorize('create', Consultation::class);
+
+        if ($patientId = $request->query('patient_id')) {
+            /** @var Patient|null $patient */
+            $patient = Patient::find($patientId);
+            if ($patient && ! $patient->hasCompleteBasicData()) {
+                return redirect()
+                    ->route('pacientes.edit', $patientId)
+                    ->with('require_complete', true);
+            }
+        }
+
+        $patients = Patient::query()->orderBy('full_name')->get(['id', 'full_name']);
+        $doctors = Doctor::query()->orderBy('full_name')->get(['id', 'full_name']);
+
+        return view('consultas.create', compact('patients', 'doctors'));
+    }
+
+    public function store(StoreConsultationRequest $request): RedirectResponse
+    {
+        $this->authorize('create', Consultation::class);
+
+        /** @var Patient $patient */
+        $patient = Patient::findOrFail($request->patient_id);
+
+        if (! $patient->hasCompleteBasicData()) {
+            return redirect()
+                ->route('pacientes.edit', $patient->id)
+                ->with('require_complete', true)
+                ->withErrors(['patient_id' => 'Completa la fecha de nacimiento y el sexo del paciente antes de crear una consulta.',
+                ]);
+        }
+
+        $dto = ConsultationDTO::fromArray($request->validated());
+        $consultation = $this->service->create($dto);
+
+        return redirect()->route('consultas.show', $consultation->id)
+            ->with('success', 'Consulta creada exitosamente.');
+    }
+
+    public function show(Consultation $consulta): View
+    {
+        $this->authorize('view', $consulta);
+
+        $consulta->load([
+            'patient', 'doctor', 'vitalSigns', 'soapNote',
+            'prescription.sourceTemplate', 'prescription.items',
+            'laboratoryRequest.sourceTemplate', 'laboratoryRequest.items',
+            'patientVaccines.vaccine',
+        ]);
+        $vaccines = Vaccine::query()->orderBy('name')->get(['id', 'name']);
+        $prescriptionTemplates = PrescriptionTemplate::query()
+            ->where('doctor_id', $consulta->doctor_id)
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get(['id', 'name']);
+        $laboratoryTemplates = LaboratoryTemplate::query()
+            ->where('doctor_id', $consulta->doctor_id)
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get(['id', 'name']);
+
+        return view('consultas.show', [
+            'consultation' => $consulta,
+            'vaccines' => $vaccines,
+            'prescriptionTemplates' => $prescriptionTemplates,
+            'laboratoryTemplates' => $laboratoryTemplates,
+        ]);
+    }
+
+    public function edit(Consultation $consulta): View
+    {
+        $this->authorize('update', $consulta);
+
+        $patients = Patient::query()->orderBy('full_name')->get(['id', 'full_name']);
+        $doctors = Doctor::query()->orderBy('full_name')->get(['id', 'full_name']);
+
+        return view('consultas.edit', [
+            'consultation' => $consulta,
+            'patients' => $patients,
+            'doctors' => $doctors,
+        ]);
+    }
+
+    public function update(UpdateConsultationRequest $request, Consultation $consulta): \Illuminate\Http\RedirectResponse
+    {
+        $this->authorize('update', $consulta);
+
+        try {
+            $dto = ConsultationDTO::fromArray($request->validated());
+            $consultation = $this->service->update($consulta->id, $dto);
+
+            return redirect()->route('consultas.show', $consultation->id)
+                ->with('success', 'Consulta actualizada exitosamente.');
+        } catch (\DomainException $exception) {
+            return back()->withInput()->withErrors([
+                'status' => $exception->getMessage(),
+            ]);
+        }
+    }
+
+    public function destroy(Consultation $consulta): \Illuminate\Http\RedirectResponse
+    {
+        $this->authorize('delete', $consulta);
+
+        try {
+            $this->service->delete($consulta->id);
+
+            return redirect()->route('consultas.index')
+                ->with('success', 'Consulta eliminada exitosamente.');
+        } catch (\DomainException $exception) {
+            return back()->withErrors([
+                'status' => $exception->getMessage(),
+            ]);
+        }
+    }
+}

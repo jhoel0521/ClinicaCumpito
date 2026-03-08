@@ -47,7 +47,7 @@ class VaccineCatalogSeeder extends Seeder
             ['name' => 'Varicela',         'disease_prevented' => 'Varicela (Chickenpox)',                                'recommended_age' => '18 meses',       'dose_sequence' => 1],
 
             // Anual
-            ['name' => 'Influenza',        'disease_prevented' => 'Influenza estacional',                                 'recommended_age' => 'Anual (≥ 2 años)','dose_sequence' => 3],
+            ['name' => 'Influenza',        'disease_prevented' => 'Influenza estacional',                                 'recommended_age' => 'Anual (≥ 2 años)', 'dose_sequence' => 3],
 
             // 4 - 5 años
             ['name' => 'SRP (Refuerzo)',   'disease_prevented' => 'Sarampión, Rubéola, Parotiditis',                     'recommended_age' => '4 - 5 años',     'dose_sequence' => 2],
@@ -62,7 +62,7 @@ class VaccineCatalogSeeder extends Seeder
         foreach ($vaccines as $vaccine) {
             Vaccine::firstOrCreate(
                 [
-                    'name'          => $vaccine['name'],
+                    'name' => $vaccine['name'],
                     'recommended_age' => $vaccine['recommended_age'],
                     'dose_sequence' => $vaccine['dose_sequence'],
                 ],
@@ -70,6 +70,6 @@ class VaccineCatalogSeeder extends Seeder
             );
         }
 
-        $this->command->info('✔ Vacunas PAI Bolivia: ' . count($vaccines) . ' registros cargados.');
+        $this->command->info('✔ Vacunas PAI Bolivia: '.count($vaccines).' registros cargados.');
     }
 }

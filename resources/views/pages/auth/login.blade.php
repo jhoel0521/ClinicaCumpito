@@ -57,16 +57,5 @@
                 {{ __('Iniciar Sesión') }}
             </button>
         </form>
-
-        <!-- Divider -->
-        <div data-auth-divider><span>{{ __('o') }}</span></div>
-
-        <!-- Register Link -->
-        @if (Route::has('register'))
-            <p data-auth-footer>
-                {{ __('¿No tienes cuenta?') }}
-                <a href="{{ route('register') }}" wire:navigate>{{ __('Registrarse') }}</a>
-            </p>
-        @endif
     </div>
 </x-layouts::auth>

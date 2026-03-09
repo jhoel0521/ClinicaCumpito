@@ -94,14 +94,6 @@
                         >
                             {{ __('Iniciar Sesión') }}
                         </a>
-                        @if (Route::has('register'))
-                            <a
-                                href="{{ route('register') }}"
-                                class="bg-teal-600 text-white px-4 py-2 rounded-lg hover:bg-teal-700 transition font-medium text-sm shadow-md"
-                            >
-                                {{ __('Registrarse') }}
-                            </a>
-                        @endif
                     @endauth
                 </div>
             </div>

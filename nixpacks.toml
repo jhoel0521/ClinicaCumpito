@@ -4,7 +4,7 @@ cmds = ["curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/
 
 [phases.install]
 cmds = [
-    "composer install --no-dev --optimize-autoloader --no-interaction",
+    "/usr/local/bin/composer install --no-dev --optimize-autoloader --no-interaction",
     "npm ci",
     "npm run build"
 ]

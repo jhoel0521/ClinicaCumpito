@@ -130,7 +130,7 @@
                                         {{ $condition->name }}
                                     </span>
                                     @php
-                                        $status = $condition->pivot->status ?? 'not_tested';
+                                        $status = strtolower(str_replace(' ', '_', $condition->pivot->status ?? ''));
                                     @endphp
 
                                     <span
@@ -138,10 +138,10 @@
                                             'inline-block px-2 py-0.5 rounded-full text-xs font-medium flex-shrink-0',
                                             'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300' => $status === 'negative',
                                             'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300' => $status === 'positive',
-                                            'bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400' => $status === 'not_tested',
+                                            'bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400' => ! in_array($status, ['positive', 'negative']),
                                         ])
                                     >
-                                        {{ match ($status) {'positive' => '+','negative' => '−', default => '?',} }}
+                                        {{ match ($status) {'positive' => 'Positivo','negative' => 'Negativo', default => '?',} }}
                                     </span>
                                 </li>
                             @endforeach

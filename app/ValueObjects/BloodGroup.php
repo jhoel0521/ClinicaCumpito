@@ -23,25 +23,7 @@ class BloodGroup implements Castable, Stringable
 
     public const AB_NEGATIVE = 'AB-';
 
-    private const VALID_VALUES = [
-        self::O_POSITIVE,
-        self::O_NEGATIVE,
-        self::A_POSITIVE,
-        self::A_NEGATIVE,
-        self::B_POSITIVE,
-        self::B_NEGATIVE,
-        self::AB_POSITIVE,
-        self::AB_NEGATIVE,
-    ];
-
-    private function __construct(private string $value)
-    {
-        if (! in_array($value, self::VALID_VALUES, strict: true)) {
-            throw new \InvalidArgumentException(
-                'El grupo sanguíneo debe ser uno de: '.implode(', ', self::VALID_VALUES)
-            );
-        }
-    }
+    private function __construct(private string $value) {}
 
     public static function make(string $value): self
     {

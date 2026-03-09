@@ -6,18 +6,16 @@ use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
         $this->call([
-            RolesAndPermissionsSeeder::class,
-            MedicalConditionSeeder::class,
-            LaboratoryCatalogSeeder::class,
-            MedicationCatalogSeeder::class,
-            VaccineCatalogSeeder::class,
-            DefaultUsersSeeder::class,
+            RolesAndPermissionsSeeder::class,   // roles: Admin, Doctor, Tecnico
+            MedicalConditionSeeder::class,       // condiciones médicas pediátricas
+            LaboratoryCatalogSeeder::class,      // categorías y exámenes de laboratorio
+            MedicationCatalogSeeder::class,      // catálogo de medicamentos pediátricos
+            VaccineCatalogSeeder::class,         // esquema PAI Bolivia
+            DefaultUsersSeeder::class,           // 1 usuario con todos los roles
+            PrescriptionTemplateSeeder::class,   // plantillas: resfriado, vómitos, dengue, vitaminas
             WhoDataSeeder::class,
             GrowthChartTestDataSeeder::class,
         ]);

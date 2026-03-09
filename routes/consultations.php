@@ -12,9 +12,13 @@ use App\Http\Controllers\VitalSignController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::resource('consultas', ConsultationController::class)->parameters([
-        'consultas' => 'consulta',
-    ]);
+    // create con paciente pre-seleccionado opcional: /consultas/create  o  /consultas/create/{patient}
+    Route::get('consultas/create/{patient?}', [ConsultationController::class, 'create'])
+        ->name('consultas.create');
+
+    Route::resource('consultas', ConsultationController::class)
+        ->parameters(['consultas' => 'consulta'])
+        ->except(['create']);
 
     Route::get('consultas/{consulta}/archivo', [ConsultationFileController::class, 'serve'])
         ->name('consultas.archivo.serve');

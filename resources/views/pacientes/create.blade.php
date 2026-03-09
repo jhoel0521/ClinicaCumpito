@@ -39,10 +39,14 @@
                         />
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        <label
+                            for="date_of_birth"
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                        >
                             Fecha de Nacimiento
                         </label>
                         <input
+                            id="date_of_birth"
                             type="date"
                             name="date_of_birth"
                             class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg shadow-sm bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100 focus:ring-teal-500 focus:border-teal-500 @error('date_of_birth') border-red-500 dark:border-red-600 @enderror"
@@ -53,15 +57,41 @@
                         @enderror
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Género</label>
-                        <select
-                            name="gender"
-                            class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg shadow-sm bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100 focus:ring-teal-500 focus:border-teal-500 @error('gender') border-red-500 dark:border-red-600 @enderror"
-                        >
-                            <option value="">-- Seleccione --</option>
-                            <option value="F" @selected(old('gender') === 'F')>Femenino</option>
-                            <option value="M" @selected(old('gender') === 'M')>Masculino</option>
-                        </select>
+                        <span class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Género</span>
+                        <div class="flex gap-2">
+                            <label for="gender-f" class="relative flex-1 cursor-pointer">
+                                <input
+                                    type="radio"
+                                    id="gender-f"
+                                    name="gender"
+                                    value="F"
+                                    class="peer sr-only"
+                                    {{ old('gender') === 'F' ? 'checked' : '' }}
+                                />
+                                <span
+                                    class="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border-2 text-sm font-medium transition-all border-gray-200 dark:border-zinc-700 text-gray-500 dark:text-zinc-400 bg-white dark:bg-zinc-800 peer-checked:border-pink-500 peer-checked:bg-pink-50 dark:peer-checked:bg-pink-900/30 peer-checked:text-pink-700 dark:peer-checked:text-pink-300 hover:border-pink-300 hover:bg-pink-50 dark:hover:bg-zinc-700"
+                                >
+                                    <i class="fas fa-venus"></i>
+                                    Femenino
+                                </span>
+                            </label>
+                            <label for="gender-m" class="relative flex-1 cursor-pointer">
+                                <input
+                                    type="radio"
+                                    id="gender-m"
+                                    name="gender"
+                                    value="M"
+                                    class="peer sr-only"
+                                    {{ old('gender') === 'M' ? 'checked' : '' }}
+                                />
+                                <span
+                                    class="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border-2 text-sm font-medium transition-all border-gray-200 dark:border-zinc-700 text-gray-500 dark:text-zinc-400 bg-white dark:bg-zinc-800 peer-checked:border-sky-500 peer-checked:bg-sky-50 dark:peer-checked:bg-sky-900/30 peer-checked:text-sky-700 dark:peer-checked:text-sky-300 hover:border-sky-300 hover:bg-sky-50 dark:hover:bg-zinc-700"
+                                >
+                                    <i class="fas fa-mars"></i>
+                                    Masculino
+                                </span>
+                            </label>
+                        </div>
                         @error('gender')
                             <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
                         @enderror
@@ -79,10 +109,14 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        <label
+                            for="birth_weight"
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                        >
                             Peso al nacer (kg)
                         </label>
                         <input
+                            id="birth_weight"
                             type="number"
                             step="0.01"
                             name="birth_weight"
@@ -95,10 +129,14 @@
                         @enderror
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        <label
+                            for="birth_height"
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                        >
                             Talla al nacer (cm)
                         </label>
                         <input
+                            id="birth_height"
                             type="number"
                             step="0.1"
                             name="birth_height"
@@ -111,10 +149,14 @@
                         @enderror
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        <label
+                            for="birth_head_circumference"
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                        >
                             Perímetro Cefálico (cm)
                         </label>
                         <input
+                            id="birth_head_circumference"
                             type="number"
                             step="0.1"
                             name="birth_head_circumference"
@@ -130,23 +172,53 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        <span class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             Tipo de Parto
-                        </label>
-                        <select
-                            name="birth_type"
-                            class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg shadow-sm bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100 focus:ring-teal-500 focus:border-teal-500"
-                        >
-                            <option value="">-- Seleccione --</option>
-                            <option value="Normal" @selected(old('birth_type') === 'Normal')>Parto Normal</option>
-                            <option value="Cesarean" @selected(old('birth_type') === 'Cesarean')>Cesárea</option>
-                        </select>
+                        </span>
+                        <div class="flex gap-2">
+                            <label for="birth-type-normal" class="relative flex-1 cursor-pointer">
+                                <input
+                                    type="radio"
+                                    id="birth-type-normal"
+                                    name="birth_type"
+                                    value="Normal"
+                                    class="peer sr-only"
+                                    {{ old('birth_type') === 'Normal' ? 'checked' : '' }}
+                                />
+                                <span
+                                    class="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border-2 text-sm font-medium transition-all border-gray-200 dark:border-zinc-700 text-gray-500 dark:text-zinc-400 bg-white dark:bg-zinc-800 peer-checked:border-teal-500 peer-checked:bg-teal-50 dark:peer-checked:bg-teal-900/30 peer-checked:text-teal-700 dark:peer-checked:text-teal-300 hover:border-teal-300 hover:bg-teal-50 dark:hover:bg-zinc-700"
+                                >
+                                    <i class="fas fa-baby"></i>
+                                    Parto Normal
+                                </span>
+                            </label>
+                            <label for="birth-type-cesarean" class="relative flex-1 cursor-pointer">
+                                <input
+                                    type="radio"
+                                    id="birth-type-cesarean"
+                                    name="birth_type"
+                                    value="Cesarean"
+                                    class="peer sr-only"
+                                    {{ old('birth_type') === 'Cesarean' ? 'checked' : '' }}
+                                />
+                                <span
+                                    class="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border-2 text-sm font-medium transition-all border-gray-200 dark:border-zinc-700 text-gray-500 dark:text-zinc-400 bg-white dark:bg-zinc-800 peer-checked:border-teal-500 peer-checked:bg-teal-50 dark:peer-checked:bg-teal-900/30 peer-checked:text-teal-700 dark:peer-checked:text-teal-300 hover:border-teal-300 hover:bg-teal-50 dark:hover:bg-zinc-700"
+                                >
+                                    <i class="fas fa-procedures"></i>
+                                    Cesárea
+                                </span>
+                            </label>
+                        </div>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        <label
+                            for="birth_place"
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                        >
                             Lugar de Nacimiento
                         </label>
                         <input
+                            id="birth_place"
                             type="text"
                             name="birth_place"
                             placeholder="Clínica / Hospital"
@@ -165,25 +237,49 @@
                     3. Antecedentes y Screening
                 </h2>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                    <div
-                        class="bg-teal-50 dark:bg-teal-900/30 p-3 rounded-lg border border-teal-100 dark:border-teal-800"
-                    >
-                        <label class="block text-xs font-bold text-teal-800 dark:text-teal-400 uppercase mb-2">
-                            Grupo Sanguíneo
-                        </label>
-                        <select
-                            name="blood_group"
-                            class="w-full bg-white dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded shadow-sm text-sm px-2 py-1 text-gray-900 dark:text-gray-100 focus:ring-teal-500 focus:border-teal-500"
-                        >
-                            <option value="">-- Seleccione --</option>
-                            @foreach (['O+', 'O-', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-'] as $group)
-                                <option value="{{ $group }}" @selected(old('blood_group') === $group)>
+                <div class="mb-6">
+                    <span class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Grupo Sanguíneo
+                        <span class="text-gray-400 dark:text-zinc-500 font-normal">(opcional)</span>
+                    </span>
+                    <div class="flex flex-wrap gap-2" id="blood-group-pills">
+                        @foreach (['O+', 'O-', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'Otro'] as $group)
+                            @php
+                                $bgId = 'blood-group-' . $loop->index;
+                            @endphp
+
+                            <label for="{{ $bgId }}" class="cursor-pointer">
+                                <input
+                                    type="radio"
+                                    id="{{ $bgId }}"
+                                    name="blood_group_option"
+                                    value="{{ $group }}"
+                                    class="peer sr-only"
+                                    {{ old('blood_group', old('blood_group_option')) === $group ? 'checked' : '' }}
+                                />
+                                <span
+                                    class="inline-flex items-center px-3 py-1.5 rounded-full border-2 text-sm font-semibold transition-all border-gray-200 dark:border-zinc-700 text-gray-500 dark:text-zinc-400 bg-white dark:bg-zinc-800 peer-checked:border-teal-500 peer-checked:bg-teal-50 dark:peer-checked:bg-teal-900/30 peer-checked:text-teal-700 dark:peer-checked:text-teal-300 hover:border-teal-300 dark:hover:border-teal-600"
+                                >
                                     {{ $group }}
-                                </option>
-                            @endforeach
-                        </select>
+                                </span>
+                            </label>
+                        @endforeach
                     </div>
+                    <!-- Campo Otro (oculto por defecto) -->
+                    <div
+                        id="blood-group-otro-field"
+                        class="{{ old('blood_group_option') === 'Otro' ? '' : 'hidden' }} mt-3"
+                    >
+                        <input
+                            type="text"
+                            name="blood_group_other"
+                            placeholder="Especificar grupo sanguíneo..."
+                            value="{{ old('blood_group_other') }}"
+                            class="w-full sm:w-64 px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg shadow-sm bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100 text-sm focus:ring-teal-500 focus:border-teal-500"
+                        />
+                    </div>
+                    <!-- Input hidden que se envía al backend -->
+                    <input type="hidden" name="blood_group" id="blood-group-value" value="{{ old('blood_group') }}" />
                 </div>
 
                 <!-- Condiciones Médicas -->
@@ -297,4 +393,32 @@
             </div>
         </form>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const pills = document.querySelectorAll('input[name="blood_group_option"]');
+            const otroField = document.getElementById('blood-group-otro-field');
+            const otroInput = otroField ? otroField.querySelector('input[name="blood_group_other"]') : null;
+            const hiddenInput = document.getElementById('blood-group-value');
+
+            function syncValue() {
+                const checked = document.querySelector('input[name="blood_group_option"]:checked');
+                if (!checked) {
+                    hiddenInput.value = '';
+                    return;
+                }
+                if (checked.value === 'Otro') {
+                    otroField.classList.remove('hidden');
+                    hiddenInput.value = otroInput ? otroInput.value : '';
+                } else {
+                    otroField.classList.add('hidden');
+                    hiddenInput.value = checked.value;
+                }
+            }
+
+            pills.forEach((p) => p.addEventListener('change', syncValue));
+            if (otroInput) otroInput.addEventListener('input', syncValue);
+            syncValue();
+        });
+    </script>
 </x-layouts::app>

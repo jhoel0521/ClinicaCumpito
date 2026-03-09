@@ -63,12 +63,15 @@
                     </div>
                     <div class="flex gap-2 flex-shrink-0">
                         @if ($patient->hasCompleteBasicData())
-                            <a
-                                href="{{ route('consultas.create', $patient->id) }}"
-                                class="inline-flex items-center gap-1.5 bg-white text-teal-700 hover:bg-teal-50 font-semibold px-4 py-2 rounded-lg text-sm transition"
-                            >
-                                + Nueva Consulta
-                            </a>
+                            <form action="{{ route('consultas.quick-store', $patient->id) }}" method="POST">
+                                @csrf
+                                <button
+                                    type="submit"
+                                    class="inline-flex items-center gap-1.5 bg-white text-teal-700 hover:bg-teal-50 font-semibold px-4 py-2 rounded-lg text-sm transition"
+                                >
+                                    + Nueva Consulta
+                                </button>
+                            </form>
                         @else
                             <a
                                 href="{{ route('pacientes.edit', $patient->id) }}?require_complete=1"

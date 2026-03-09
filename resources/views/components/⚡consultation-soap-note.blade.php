@@ -141,25 +141,33 @@ new class extends Component {
                 @foreach ([
                         [
                             'key' => 'subjective',
-                            'label' => 'S — Subjetivo',
+                            'initial' => 'S',
+                            'name' => 'Subjetivo',
+                            'placeholder' => 'subjetivo',
                             'badge' => 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
                             'dusk' => 'soap-subjective'
                         ],
                         [
                             'key' => 'objective',
-                            'label' => 'O — Objetivo',
+                            'initial' => 'O',
+                            'name' => 'Objetivo',
+                            'placeholder' => 'objetivo',
                             'badge' => 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300',
                             'dusk' => 'soap-objective'
                         ],
                         [
                             'key' => 'assessment',
-                            'label' => 'A — Análisis',
+                            'initial' => 'A',
+                            'name' => 'Análisis',
+                            'placeholder' => 'análisis',
                             'badge' => 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300',
                             'dusk' => 'soap-assessment'
                         ],
                         [
                             'key' => 'plan',
-                            'label' => 'P — Plan',
+                            'initial' => 'P',
+                            'name' => 'Plan',
+                            'placeholder' => 'plan',
                             'badge' => 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300',
                             'dusk' => 'soap-plan'
                         ]
@@ -168,10 +176,10 @@ new class extends Component {
                     <div>
                         <label class="flex items-center gap-2 text-xs font-semibold mb-1.5">
                             <span class="px-2 py-0.5 rounded text-xs font-bold {{ $field['badge'] }}">
-                                {{ $field['label'][0] }}
+                                {{ $field['initial'] }}
                             </span>
                             <span class="text-gray-600 dark:text-gray-400 uppercase tracking-wide">
-                                {{ substr($field['label'], 4) }}
+                                {{ $field['name'] }}
                             </span>
                         </label>
                         <textarea
@@ -180,7 +188,7 @@ new class extends Component {
                             rows="3"
                             dusk="{{ $field['dusk'] }}"
                             @disabled($finalized)
-                            placeholder="Ingrese {{ strtolower(substr($field['label'], 4)) }}..."
+                            placeholder="Ingrese {{ $field['placeholder'] }}..."
                             class="w-full px-3 py-2.5 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100 text-sm resize-y focus:ring-2 focus:ring-purple-500 focus:border-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition"
                         ></textarea>
                         @error($field['key'])

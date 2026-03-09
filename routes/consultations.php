@@ -12,6 +12,10 @@ use App\Http\Controllers\VitalSignController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'verified'])->group(function () {
+    // Creación rápida desde el perfil del paciente (POST directo, sin formulario intermedio)
+    Route::post('consultas/iniciar/{patient}', [ConsultationController::class, 'quickStore'])
+        ->name('consultas.quick-store');
+
     // create con paciente pre-seleccionado opcional: /consultas/create  o  /consultas/create/{patient}
     Route::get('consultas/create/{patient?}', [ConsultationController::class, 'create'])
         ->name('consultas.create');

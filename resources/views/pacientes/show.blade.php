@@ -64,7 +64,7 @@
                     <div class="flex gap-2 flex-shrink-0">
                         @if ($patient->hasCompleteBasicData())
                             <a
-                                href="{{ route('consultas.create') }}"
+                                href="{{ route('consultas.create', $patient->id) }}"
                                 class="inline-flex items-center gap-1.5 bg-white text-teal-700 hover:bg-teal-50 font-semibold px-4 py-2 rounded-lg text-sm transition"
                             >
                                 + Nueva Consulta
@@ -395,7 +395,7 @@
                         Este paciente aún no tiene consultas registradas.
                     </p>
                     <a
-                        href="{{ route('consultas.create') }}"
+                        href="{{ route('consultas.create', $patient->id) }}"
                         class="mt-3 inline-block text-teal-600 dark:text-teal-400 hover:underline text-sm font-medium"
                     >
                         Crear primera consulta →

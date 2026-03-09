@@ -29,24 +29,20 @@ class ConsultationController extends Controller
         return view('consultas.index', compact('consultations'));
     }
 
-    public function create(Request $request): View|RedirectResponse
+    public function create(Request $request, ?Patient $patient = null): View|RedirectResponse
     {
         $this->authorize('create', Consultation::class);
 
-        if ($patientId = $request->query('patient_id')) {
-            /** @var Patient|null $patient */
-            $patient = Patient::find($patientId);
-            if ($patient && ! $patient->hasCompleteBasicData()) {
-                return redirect()
-                    ->route('pacientes.edit', $patientId)
-                    ->with('require_complete', true);
-            }
+        if ($patient && ! $patient->hasCompleteBasicData()) {
+            return redirect()
+                ->route('pacientes.edit', $patient->id)
+                ->with('require_complete', true);
         }
 
         $patients = Patient::query()->orderBy('full_name')->get(['id', 'full_name']);
         $doctors = Doctor::query()->orderBy('full_name')->get(['id', 'full_name']);
 
-        return view('consultas.create', compact('patients', 'doctors'));
+        return view('consultas.create', compact('patients', 'doctors', 'patient'));
     }
 
     public function store(StoreConsultationRequest $request): RedirectResponse

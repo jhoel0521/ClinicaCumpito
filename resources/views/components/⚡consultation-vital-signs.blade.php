@@ -23,6 +23,13 @@ new class extends Component {
 
     public string $errorMessage = '';
 
+    private function rawNullableFloat(Consultation $consultation, string $field): ?float
+    {
+        $raw = $consultation->vitalSigns?->getRawOriginal($field);
+
+        return is_numeric($raw) ? (float) $raw : null;
+    }
+
     public function mount(string $consultationId): void
     {
         $this->consultationId = $consultationId;
@@ -33,12 +40,12 @@ new class extends Component {
                 ? $consultation->status->isFinalized()
                 : (string) $consultation->status === ConsultationStatus::FINALIZED;
 
-        $vs = $consultation->vitalSigns;
-        if ($vs) {
-            $this->weight = $vs->weight?->value();
-            $this->height = $vs->height?->value();
-            $this->head_circumference = $vs->head_circumference?->value();
-            $this->temperature = $vs->temperature?->value();
+        if ($consultation->vitalSigns) {
+            // Use raw values to avoid ValueObject cast exceptions if legacy invalid data exists.
+            $this->weight = $this->rawNullableFloat($consultation, 'weight');
+            $this->height = $this->rawNullableFloat($consultation, 'height');
+            $this->head_circumference = $this->rawNullableFloat($consultation, 'head_circumference');
+            $this->temperature = $this->rawNullableFloat($consultation, 'temperature');
             $this->saved = true;
         }
     }
@@ -53,18 +60,24 @@ new class extends Component {
 
         $this->validate(
             [
-                'weight' => ['nullable', 'numeric', 'min:0', 'max:300'],
-                'height' => ['nullable', 'numeric', 'min:0', 'max:250'],
-                'head_circumference' => ['nullable', 'numeric', 'min:0', 'max:100'],
-                'temperature' => ['nullable', 'numeric', 'min:30', 'max:45'],
+                'weight' => ['nullable', 'numeric', 'min:0.1', 'max:300'],
+                'height' => ['nullable', 'numeric', 'min:0.1', 'max:250'],
+                'head_circumference' => ['nullable', 'numeric', 'min:20', 'max:80'],
+                'temperature' => ['nullable', 'numeric', 'min:35', 'max:42'],
             ],
             [
                 'weight.numeric' => 'El peso debe ser un número.',
+                'weight.min' => 'El peso mínimo es 0.1 kg.',
+                'weight.max' => 'El peso máximo es 300 kg.',
                 'height.numeric' => 'La talla debe ser un número.',
+                'height.min' => 'La talla mínima es 0.1 cm.',
+                'height.max' => 'La talla máxima es 250 cm.',
                 'head_circumference.numeric' => 'El perímetro cefálico debe ser un número.',
+                'head_circumference.min' => 'El perímetro cefálico mínimo es 20 cm.',
+                'head_circumference.max' => 'El perímetro cefálico máximo es 80 cm.',
                 'temperature.numeric' => 'La temperatura debe ser un número.',
-                'temperature.min' => 'La temperatura mínima es 30°C.',
-                'temperature.max' => 'La temperatura máxima es 45°C.',
+                'temperature.min' => 'La temperatura mínima es 35°C.',
+                'temperature.max' => 'La temperatura máxima es 42°C.',
             ],
         );
 
@@ -165,7 +178,7 @@ new class extends Component {
                         wire:change="save"
                         type="number"
                         step="0.01"
-                        min="0"
+                        min="0.1"
                         max="300"
                         placeholder="—"
                         dusk="vs-weight"
@@ -188,7 +201,7 @@ new class extends Component {
                         wire:change="save"
                         type="number"
                         step="0.01"
-                        min="0"
+                        min="0.1"
                         max="250"
                         placeholder="—"
                         dusk="vs-height"
@@ -211,8 +224,8 @@ new class extends Component {
                         wire:change="save"
                         type="number"
                         step="0.01"
-                        min="0"
-                        max="100"
+                        min="20"
+                        max="80"
                         placeholder="—"
                         dusk="vs-head-circumference"
                         @disabled($finalized)
@@ -234,8 +247,8 @@ new class extends Component {
                         wire:change="save"
                         type="number"
                         step="0.01"
-                        min="30"
-                        max="45"
+                        min="35"
+                        max="42"
                         placeholder="—"
                         dusk="vs-temperature"
                         @disabled($finalized)

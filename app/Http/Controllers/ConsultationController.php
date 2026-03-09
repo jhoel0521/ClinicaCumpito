@@ -7,7 +7,6 @@ use App\DTOs\ConsultationDTO;
 use App\Http\Requests\StoreConsultationRequest;
 use App\Http\Requests\UpdateConsultationRequest;
 use App\Models\Consultation;
-use App\Models\Doctor;
 use App\Models\LaboratoryTemplate;
 use App\Models\Patient;
 use App\Models\PrescriptionTemplate;
@@ -40,9 +39,34 @@ class ConsultationController extends Controller
         }
 
         $patients = Patient::query()->orderBy('full_name')->get(['id', 'full_name']);
-        $doctors = Doctor::query()->orderBy('full_name')->get(['id', 'full_name']);
 
-        return view('consultas.create', compact('patients', 'doctors', 'patient'));
+        return view('consultas.create', compact('patients', 'patient'));
+    }
+
+    public function quickStore(Patient $patient): RedirectResponse
+    {
+        $this->authorize('create', Consultation::class);
+
+        if (! $patient->hasCompleteBasicData()) {
+            return redirect()
+                ->route('pacientes.edit', $patient->id)
+                ->with('require_complete', true);
+        }
+
+        /** @var \App\Models\User $user */
+        $user = auth()->user();
+
+        $dto = ConsultationDTO::fromArray([
+            'patient_id' => $patient->id,
+            'doctor_id' => $user->doctor_id,
+            'type' => 'digital',
+            'status' => 'draft',
+            'consultation_date' => now()->format('Y-m-d H:i:s'),
+        ]);
+
+        $consultation = $this->service->create($dto);
+
+        return redirect()->route('consultas.show', $consultation->id);
     }
 
     public function store(StoreConsultationRequest $request): RedirectResponse
@@ -60,7 +84,14 @@ class ConsultationController extends Controller
                 ]);
         }
 
-        $dto = ConsultationDTO::fromArray($request->validated());
+        /** @var \App\Models\User $user */
+        $user = auth()->user();
+
+        $dto = ConsultationDTO::fromArray(array_merge($request->validated(), [
+            'doctor_id' => $user->doctor_id,
+            'type' => 'digital',
+            'status' => 'draft',
+        ]));
         $consultation = $this->service->create($dto);
 
         return redirect()->route('consultas.show', $consultation->id)
@@ -97,18 +128,9 @@ class ConsultationController extends Controller
         ]);
     }
 
-    public function edit(Consultation $consulta): View
+    public function edit(Consultation $consulta): RedirectResponse
     {
-        $this->authorize('update', $consulta);
-
-        $patients = Patient::query()->orderBy('full_name')->get(['id', 'full_name']);
-        $doctors = Doctor::query()->orderBy('full_name')->get(['id', 'full_name']);
-
-        return view('consultas.edit', [
-            'consultation' => $consulta,
-            'patients' => $patients,
-            'doctors' => $doctors,
-        ]);
+        return redirect()->route('consultas.show', $consulta->id);
     }
 
     public function update(UpdateConsultationRequest $request, Consultation $consulta): \Illuminate\Http\RedirectResponse

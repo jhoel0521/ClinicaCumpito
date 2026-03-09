@@ -186,7 +186,7 @@ new class extends Component {
                 </div>
                 <h2 class="text-base font-semibold text-gray-900 dark:text-gray-100">Solicitud de Laboratorio</h2>
             </div>
-            <div>
+            <div class="flex items-center gap-2">
                 @if ($finalized)
                     <span
                         class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-zinc-700 text-gray-500 dark:text-gray-400"
@@ -209,6 +209,7 @@ new class extends Component {
                         Sin datos
                     </span>
                 @endif
+                <span wire:loading wire:target="saveLabRequest" class="text-xs text-blue-400">Guardando…</span>
             </div>
         </div>
 
@@ -231,6 +232,7 @@ new class extends Component {
                     </label>
                     <select
                         wire:model="sourceTemplateId"
+                        wire:change="saveLabRequest"
                         dusk="lab-source-template"
                         @disabled($finalized)
                         class="w-full px-3 py-2.5 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -249,6 +251,7 @@ new class extends Component {
                     </label>
                     <textarea
                         wire:model="observations"
+                        wire:change="saveLabRequest"
                         rows="2"
                         dusk="lab-observations"
                         @disabled($finalized)
@@ -257,22 +260,6 @@ new class extends Component {
                     ></textarea>
                 </div>
             </div>
-
-            @if (! $finalized)
-                <div class="flex justify-end">
-                    <button
-                        wire:click="saveLabRequest"
-                        wire:loading.attr="disabled"
-                        dusk="lab-save-btn"
-                        class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-orange-600 hover:bg-orange-700 text-white text-sm font-medium transition disabled:opacity-50"
-                    >
-                        <span wire:loading.remove wire:target="saveLabRequest">
-                            {{ $saved ? 'Actualizar Solicitud' : 'Crear Solicitud' }}
-                        </span>
-                        <span wire:loading wire:target="saveLabRequest">Guardando...</span>
-                    </button>
-                </div>
-            @endif
 
             {{-- Exámenes --}}
             @if ($labRequestId)

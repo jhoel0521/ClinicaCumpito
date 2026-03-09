@@ -121,6 +121,9 @@ new class extends Component {
                         Sin datos
                     </span>
                 @endif
+                <span wire:loading wire:target="save" class="text-xs text-purple-400 dark:text-purple-500">
+                    Guardando…
+                </span>
             </div>
         </div>
 
@@ -173,6 +176,7 @@ new class extends Component {
                         </label>
                         <textarea
                             wire:model="{{ $field['key'] }}"
+                            wire:change="save"
                             rows="3"
                             dusk="{{ $field['dusk'] }}"
                             @disabled($finalized)
@@ -185,20 +189,6 @@ new class extends Component {
                     </div>
                 @endforeach
             </div>
-
-            @if (! $finalized)
-                <div class="mt-4 flex justify-end">
-                    <button
-                        wire:click="save"
-                        wire:loading.attr="disabled"
-                        dusk="soap-save-btn"
-                        class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium transition disabled:opacity-50"
-                    >
-                        <span wire:loading.remove wire:target="save">Guardar SOAP</span>
-                        <span wire:loading wire:target="save">Guardando...</span>
-                    </button>
-                </div>
-            @endif
         </div>
     </div>
 </section>

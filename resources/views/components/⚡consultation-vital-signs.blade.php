@@ -139,6 +139,7 @@ new class extends Component {
                         Sin datos
                     </span>
                 @endif
+                <span wire:loading wire:target="save" class="text-xs text-blue-400 dark:text-blue-500">Guardando…</span>
             </div>
         </div>
 
@@ -161,6 +162,7 @@ new class extends Component {
                     </label>
                     <input
                         wire:model="weight"
+                        wire:change="save"
                         type="number"
                         step="0.01"
                         min="0"
@@ -183,6 +185,7 @@ new class extends Component {
                     </label>
                     <input
                         wire:model="height"
+                        wire:change="save"
                         type="number"
                         step="0.01"
                         min="0"
@@ -205,6 +208,7 @@ new class extends Component {
                     </label>
                     <input
                         wire:model="head_circumference"
+                        wire:change="save"
                         type="number"
                         step="0.01"
                         min="0"
@@ -227,6 +231,7 @@ new class extends Component {
                     </label>
                     <input
                         wire:model="temperature"
+                        wire:change="save"
                         type="number"
                         step="0.01"
                         min="30"
@@ -241,20 +246,6 @@ new class extends Component {
                     @enderror
                 </div>
             </div>
-
-            @if (! $finalized)
-                <div class="mt-4 flex justify-end">
-                    <button
-                        wire:click="save"
-                        wire:loading.attr="disabled"
-                        dusk="vs-save-btn"
-                        class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium transition disabled:opacity-50"
-                    >
-                        <span wire:loading.remove wire:target="save">Guardar Signos</span>
-                        <span wire:loading wire:target="save">Guardando...</span>
-                    </button>
-                </div>
-            @endif
         </div>
     </div>
 </section>

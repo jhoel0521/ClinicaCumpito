@@ -87,7 +87,7 @@ describe('8.2 — ConsultationPolicy::update (propietario)', function (): void {
 
         $this->actingAs($user)
             ->get(route('consultas.edit', $consultation->id))
-            ->assertOk();
+            ->assertRedirect(route('consultas.show', $consultation->id));
     });
 
     test('doctor recibe 403 al intentar editar consulta de otro doctor', function (): void {
@@ -115,7 +115,7 @@ describe('8.2 — ConsultationPolicy::update (propietario)', function (): void {
 
         $this->actingAs($admin)
             ->get(route('consultas.edit', $consultation->id))
-            ->assertOk();
+            ->assertRedirect(route('consultas.show', $consultation->id));
     });
 
     test('tecnico puede editar consulta manual sin doctor asignado', function (): void {
@@ -129,7 +129,7 @@ describe('8.2 — ConsultationPolicy::update (propietario)', function (): void {
 
         $this->actingAs($tecnico)
             ->get(route('consultas.edit', $consultation->id))
-            ->assertOk();
+            ->assertRedirect(route('consultas.show', $consultation->id));
     });
 
     test('tecnico recibe 403 al intentar editar consulta digital de un doctor', function (): void {

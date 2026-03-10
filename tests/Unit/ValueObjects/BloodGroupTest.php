@@ -16,9 +16,12 @@ describe('BloodGroup', function () {
         }
     });
 
-    test('throws on invalid blood group', function () {
-        BloodGroup::make('C+');
-    })->throws(\InvalidArgumentException::class);
+    test('acepta cualquier cadena como grupo sanguineo (incluye tipos raros)', function () {
+        // BloodGroup no valida contra una lista fija para permitir tipos raros
+        expect(BloodGroup::make('Bombay')->value())->toBe('Bombay');
+        expect(BloodGroup::make('AB-')->value())->toBe('AB-');
+        expect(BloodGroup::make('C+')->value())->toBe('C+');
+    });
 
     test('can compare blood groups', function () {
         $group1 = BloodGroup::make('O+');

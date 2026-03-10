@@ -130,6 +130,8 @@ class ConsultationController extends Controller
 
     public function edit(Consultation $consulta): RedirectResponse
     {
+        $this->authorize('update', $consulta);
+
         return redirect()->route('consultas.show', $consulta->id);
     }
 
@@ -141,7 +143,7 @@ class ConsultationController extends Controller
             $dto = ConsultationDTO::fromArray(array_merge([
                 'patient_id' => $consulta->patient_id,
                 'doctor_id' => $consulta->doctor_id,
-                'type' => $consulta->type,
+                'type' => $consulta->getRawOriginal('type'),
             ], $request->validated()));
             $consultation = $this->service->update($consulta->id, $dto);
 

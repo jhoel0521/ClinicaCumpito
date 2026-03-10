@@ -54,7 +54,7 @@ describe('ConsultationPolicy', function (): void {
 
         $this->actingAs($user)
             ->get(route('consultas.edit', $consultation->id))
-            ->assertOk();
+            ->assertRedirect(route('consultas.show', $consultation->id));
     });
 
     test('doctor no puede editar consulta de otro doctor', function (): void {
@@ -104,7 +104,7 @@ describe('ConsultationPolicy', function (): void {
 
         $this->actingAs($user)
             ->get(route('consultas.edit', $consultation->id))
-            ->assertOk();
+            ->assertRedirect(route('consultas.show', $consultation->id));
     });
 
     test('tecnico no puede editar consulta de un doctor', function (): void {
@@ -125,6 +125,6 @@ describe('ConsultationPolicy', function (): void {
 
         $this->actingAs($user)
             ->get(route('consultas.edit', $consultation->id))
-            ->assertOk();
+            ->assertRedirect(route('consultas.show', $consultation->id));
     });
 });

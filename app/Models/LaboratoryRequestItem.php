@@ -18,6 +18,15 @@ class LaboratoryRequestItem extends Model
         'laboratory_request_id',
         'exam_name',
         'indications',
+        'result_value',
+        'is_abnormal',
+        'result_notes',
+        'result_received_at',
+    ];
+
+    protected $casts = [
+        'is_abnormal' => 'boolean',
+        'result_received_at' => 'datetime',
     ];
 
     /** @return BelongsTo<LaboratoryRequest, $this> */

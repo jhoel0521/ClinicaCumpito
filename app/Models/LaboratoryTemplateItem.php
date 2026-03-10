@@ -16,8 +16,18 @@ class LaboratoryTemplateItem extends Model
     protected $fillable = [
         'template_id',
         'laboratory_exam_id',
+        'custom_exam_name',
         'indications',
     ];
+
+    public function getExamNameAttribute(): string
+    {
+        if ($this->custom_exam_name !== null) {
+            return $this->custom_exam_name;
+        }
+
+        return $this->exam !== null ? $this->exam->name : '';
+    }
 
     /**
      * @return BelongsTo<LaboratoryTemplate, $this>

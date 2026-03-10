@@ -18,8 +18,8 @@ class LaboratoryRequest extends Model
 
     protected $fillable = [
         'consultation_id',
-        'source_template_id',
         'observations',
+        'status',
     ];
 
     /** @return BelongsTo<Consultation, $this> */
@@ -28,15 +28,25 @@ class LaboratoryRequest extends Model
         return $this->belongsTo(Consultation::class);
     }
 
-    /** @return BelongsTo<LaboratoryTemplate, $this> */
-    public function sourceTemplate(): BelongsTo
-    {
-        return $this->belongsTo(LaboratoryTemplate::class, 'source_template_id');
-    }
-
     /** @return HasMany<LaboratoryRequestItem, $this> */
     public function items(): HasMany
     {
         return $this->hasMany(LaboratoryRequestItem::class, 'laboratory_request_id');
+    }
+
+    /** @return HasMany<LaboratoryAppliedTemplate, $this> */
+    public function appliedTemplates(): HasMany
+    {
+        return $this->hasMany(LaboratoryAppliedTemplate::class, 'laboratory_request_id')->orderBy('applied_at');
+    }
+
+    public function isPending(): bool
+    {
+        return $this->status === 'pending';
+    }
+
+    public function isReceived(): bool
+    {
+        return $this->status === 'received';
     }
 }

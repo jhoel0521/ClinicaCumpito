@@ -535,7 +535,6 @@ class ClinicalWorkflowTest extends DuskTestCase
 
         $this->assertDatabaseHas('laboratory_requests', [
             'consultation_id' => $consultation->id,
-            'source_template_id' => $labTemplate->id,
         ]);
 
         $this->assertDatabaseHas('laboratory_request_items', [

@@ -138,7 +138,11 @@ class ConsultationController extends Controller
         $this->authorize('update', $consulta);
 
         try {
-            $dto = ConsultationDTO::fromArray($request->validated());
+            $dto = ConsultationDTO::fromArray(array_merge([
+                'patient_id' => $consulta->patient_id,
+                'doctor_id' => $consulta->doctor_id,
+                'type' => $consulta->type,
+            ], $request->validated()));
             $consultation = $this->service->update($consulta->id, $dto);
 
             return redirect()->route('consultas.show', $consultation->id)

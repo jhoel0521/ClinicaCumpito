@@ -17,8 +17,8 @@ class StoreLaboratoryRequestRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'source_template_id' => ['nullable', 'uuid', 'exists:laboratory_templates,id'],
             'observations' => ['nullable', 'string', 'max:5000'],
+            'status' => ['nullable', 'in:pending,received'],
         ];
     }
 }

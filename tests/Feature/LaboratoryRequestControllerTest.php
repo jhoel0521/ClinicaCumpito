@@ -2,7 +2,6 @@
 
 use App\Models\Consultation;
 use App\Models\LaboratoryRequest;
-use App\Models\LaboratoryTemplate;
 use App\Models\User;
 
 describe('LaboratoryRequestController', function () {
@@ -11,13 +10,9 @@ describe('LaboratoryRequestController', function () {
         $consultation = Consultation::factory()->create([
             'status' => 'saved',
         ]);
-        $template = LaboratoryTemplate::factory()->create([
-            'doctor_id' => $consultation->doctor_id,
-        ]);
 
         $response = $this->actingAs($user)
             ->post(route('consultas.laboratory-requests.store', $consultation->id), [
-                'source_template_id' => $template->id,
                 'observations' => 'Ayunas mínimo 8 horas.',
             ]);
 
@@ -25,7 +20,7 @@ describe('LaboratoryRequestController', function () {
 
         $this->assertDatabaseHas('laboratory_requests', [
             'consultation_id' => $consultation->id,
-            'source_template_id' => $template->id,
+            'observations' => 'Ayunas mínimo 8 horas.',
         ]);
     });
 

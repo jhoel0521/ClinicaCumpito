@@ -43,10 +43,10 @@ class PrescriptionTemplate extends Model
     }
 
     /**
-     * @return HasMany<Prescription, $this>
+     * @return HasMany<PrescriptionAppliedTemplate, $this>
      */
-    public function prescriptions(): HasMany
+    public function appliedIn(): HasMany
     {
-        return $this->hasMany(Prescription::class, 'source_template_id');
+        return $this->hasMany(PrescriptionAppliedTemplate::class, 'template_id');
     }
 }

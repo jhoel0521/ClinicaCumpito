@@ -18,7 +18,6 @@ class Prescription extends Model
 
     protected $fillable = [
         'consultation_id',
-        'source_template_id',
         'observations',
     ];
 
@@ -28,15 +27,15 @@ class Prescription extends Model
         return $this->belongsTo(Consultation::class);
     }
 
-    /** @return BelongsTo<PrescriptionTemplate, $this> */
-    public function sourceTemplate(): BelongsTo
-    {
-        return $this->belongsTo(PrescriptionTemplate::class, 'source_template_id');
-    }
-
     /** @return HasMany<PrescriptionItem, $this> */
     public function items(): HasMany
     {
         return $this->hasMany(PrescriptionItem::class, 'prescription_id');
+    }
+
+    /** @return HasMany<PrescriptionAppliedTemplate, $this> */
+    public function appliedTemplates(): HasMany
+    {
+        return $this->hasMany(PrescriptionAppliedTemplate::class, 'prescription_id')->orderBy('applied_at');
     }
 }

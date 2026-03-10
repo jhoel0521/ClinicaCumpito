@@ -104,8 +104,8 @@ class ConsultationController extends Controller
 
         $consulta->load([
             'patient', 'doctor', 'vitalSigns', 'soapNote',
-            'prescription.sourceTemplate', 'prescription.items',
-            'laboratoryRequest.sourceTemplate', 'laboratoryRequest.items',
+            'prescription.appliedTemplates', 'prescription.items',
+            'laboratoryRequest.appliedTemplates', 'laboratoryRequest.items',
             'patientVaccines.vaccine',
         ]);
         $vaccines = Vaccine::query()->orderBy('name')->get(['id', 'name']);

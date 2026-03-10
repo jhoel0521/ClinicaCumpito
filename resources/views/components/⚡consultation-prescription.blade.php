@@ -12,47 +12,44 @@ use Livewire\Component;
 new class extends Component {
     public string $consultationId;
 
-    /** @var array<int, array{id: string, name: string}> */
+    /** @var array<int, array{id: string, name: string, description: string|null}> */
     public array $templates = [];
 
     public ?string $prescriptionId = null;
-
-    public ?string $sourceTemplateId = null;
-
     public ?string $observations = null;
 
-    /** @var array<int, array{id: string, medication_name: string, dose: string, frequency: string, duration: string, instructions: string|null}> */
+    /** @var array<int, array{id: string, medication_name: string, dose: string, frequency: string, duration: string, instructions: string|null, editing: bool}> */
     public array $items = [];
 
+    /** @var array<int, array{template_name: string, applied_at: string}> */
+    public array $appliedTemplates = [];
+
     public string $newMedicationName = '';
-
     public string $newDose = '';
-
     public string $newFrequency = '';
-
     public string $newDuration = '';
-
     public string $newInstructions = '';
 
     public bool $finalized = false;
-
     public bool $saved = false;
-
     public string $errorMessage = '';
 
     public function mount(string $consultationId): void
     {
         $this->consultationId = $consultationId;
 
-        $consultation = Consultation::with('prescription.items')->findOrFail($consultationId);
+        $consultation = Consultation::with('prescription.items', 'prescription.appliedTemplates')->findOrFail(
+            $consultationId,
+        );
 
         $this->templates = PrescriptionTemplate::query()
             ->where('doctor_id', $consultation->doctor_id)
             ->where('is_active', true)
             ->orderBy('name')
-            ->get(['id', 'name'])
-            ->map(fn ($t) => ['id' => $t->id, 'name' => $t->name])
+            ->get(['id', 'name', 'description'])
+            ->map(fn ($t) => ['id' => $t->id, 'name' => $t->name, 'description' => $t->description])
             ->all();
+
         $this->finalized =
             $consultation->status instanceof ConsultationStatus
                 ? $consultation->status->isFinalized()
@@ -61,10 +58,10 @@ new class extends Component {
         $prescription = $consultation->prescription;
         if ($prescription) {
             $this->prescriptionId = $prescription->id;
-            $this->sourceTemplateId = $prescription->source_template_id;
             $this->observations = $prescription->observations;
             $this->saved = true;
             $this->loadItems($prescription->items);
+            $this->loadAppliedTemplates($prescription->appliedTemplates);
         }
     }
 
@@ -80,6 +77,21 @@ new class extends Component {
                     'frequency' => $item->frequency,
                     'duration' => $item->duration,
                     'instructions' => $item->instructions,
+                    'editing' => false,
+                ],
+            )
+            ->values()
+            ->all();
+    }
+
+    /** @param \Illuminate\Support\Collection<int, \App\Models\PrescriptionAppliedTemplate> $applied */
+    private function loadAppliedTemplates(\Illuminate\Support\Collection $applied): void
+    {
+        $this->appliedTemplates = $applied
+            ->map(
+                fn ($a) => [
+                    'template_name' => $a->template_name,
+                    'applied_at' => $a->applied_at?->format('H:i'),
                 ],
             )
             ->values()
@@ -95,24 +107,81 @@ new class extends Component {
         $this->errorMessage = '';
 
         $this->validate([
-            'sourceTemplateId' => ['nullable', 'string'],
             'observations' => ['nullable', 'string', 'max:2000'],
         ]);
 
         try {
-            $dto = new PrescriptionDTO(
-                source_template_id: $this->sourceTemplateId ?: null,
-                observations: $this->observations ?: null,
-            );
+            $dto = new PrescriptionDTO(observations: $this->observations ?: null);
             $prescription = app(PrescriptionServiceContract::class)->upsert($this->consultationId, $dto);
             $this->prescriptionId = $prescription->id;
             $this->saved = true;
-
-            $fresh = $prescription->loadMissing('items');
-            $this->loadItems($fresh->items);
         } catch (\Throwable $e) {
             $this->errorMessage = 'Error al guardar la receta: ' . $e->getMessage();
         }
+    }
+
+    public function applyTemplate(string $templateId): void
+    {
+        if ($this->finalized) {
+            return;
+        }
+
+        $this->errorMessage = '';
+
+        if (! $this->prescriptionId) {
+            $this->savePrescription();
+            if (! $this->prescriptionId) {
+                return;
+            }
+        }
+
+        try {
+            $prescription = app(PrescriptionServiceContract::class)->applyTemplate($this->prescriptionId, $templateId);
+            $this->loadItems($prescription->items);
+            $this->loadAppliedTemplates($prescription->appliedTemplates);
+        } catch (\Throwable $e) {
+            $this->errorMessage = 'Error al aplicar plantilla: ' . $e->getMessage();
+        }
+    }
+
+    public function startEditing(string $itemId): void
+    {
+        $this->items = array_map(fn ($item) => array_merge($item, ['editing' => $item['id'] === $itemId]), $this->items);
+    }
+
+    public function saveItem(string $itemId): void
+    {
+        if ($this->finalized) {
+            return;
+        }
+
+        $this->errorMessage = '';
+
+        $index = array_search($itemId, array_column($this->items, 'id'));
+        if ($index === false) {
+            return;
+        }
+
+        $item = $this->items[$index];
+
+        try {
+            $dto = new PrescriptionItemDTO(
+                medication_name: $item['medication_name'],
+                dose: $item['dose'],
+                frequency: $item['frequency'],
+                duration: $item['duration'],
+                instructions: $item['instructions'] ?: null,
+            );
+            app(PrescriptionItemServiceContract::class)->update($itemId, $dto);
+            $this->items[$index]['editing'] = false;
+        } catch (\Throwable $e) {
+            $this->errorMessage = 'Error al guardar cambios: ' . $e->getMessage();
+        }
+    }
+
+    public function cancelEditing(string $itemId): void
+    {
+        $this->items = array_map(fn ($item) => array_merge($item, ['editing' => false]), $this->items);
     }
 
     public function addItem(): void
@@ -157,6 +226,7 @@ new class extends Component {
                 'frequency' => $item->frequency,
                 'duration' => $item->duration,
                 'instructions' => $item->instructions,
+                'editing' => false,
             ];
 
             $this->newMedicationName = '';
@@ -233,7 +303,13 @@ new class extends Component {
                         Sin datos
                     </span>
                 @endif
-                <span wire:loading wire:target="savePrescription" class="text-xs text-emerald-400">Guardando…</span>
+                <span
+                    wire:loading
+                    wire:target="savePrescription,applyTemplate,saveItem"
+                    class="text-xs text-emerald-400"
+                >
+                    Guardando…
+                </span>
             </div>
         </div>
 
@@ -246,105 +322,222 @@ new class extends Component {
                 </div>
             @endif
 
-            {{-- Cabecera de receta --}}
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label
-                        class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5 uppercase tracking-wide"
-                    >
-                        Plantilla origen
-                    </label>
-                    <select
-                        wire:model="sourceTemplateId"
-                        wire:change="savePrescription"
-                        dusk="rx-template-select"
-                        @disabled($finalized)
-                        class="w-full px-3 py-2.5 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                        <option value="">Sin plantilla</option>
-                        @foreach ($templates as $t)
-                            <option value="{{ $t['id'] }}">{{ $t['name'] }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div>
-                    <label
-                        class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5 uppercase tracking-wide"
-                    >
-                        Observaciones
-                    </label>
-                    <textarea
-                        wire:model="observations"
-                        wire:change="savePrescription"
-                        rows="2"
-                        dusk="rx-observations"
-                        @disabled($finalized)
-                        placeholder="Instrucciones generales..."
-                        class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100 text-sm resize-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                    ></textarea>
-                </div>
+            {{-- Observaciones generales --}}
+            <div>
+                <label
+                    class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5 uppercase tracking-wide"
+                >
+                    Observaciones generales
+                </label>
+                <textarea
+                    wire:model="observations"
+                    wire:change="savePrescription"
+                    rows="2"
+                    dusk="rx-observations"
+                    @disabled($finalized)
+                    placeholder="Instrucciones generales para el paciente..."
+                    class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100 text-sm resize-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                ></textarea>
             </div>
 
-            {{-- Medicamentos --}}
-            @if ($prescriptionId)
-                <div class="border-t border-gray-100 dark:border-zinc-800 pt-5">
-                    <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">Medicamentos</h3>
-
-                    {{-- Lista de ítems --}}
-                    @if (count($items) > 0)
-                        <div class="space-y-2 mb-4">
-                            @foreach ($items as $item)
-                                <div
-                                    class="flex items-start justify-between bg-gray-50 dark:bg-zinc-800 rounded-lg px-4 py-3 gap-3"
-                                    dusk="rx-item"
+            {{-- Plantillas disponibles --}}
+            @if (! $finalized && count($templates) > 0)
+                <div>
+                    <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
+                        Plantillas — click para aplicar
+                    </p>
+                    @if (count($appliedTemplates) > 0)
+                        <p class="text-xs text-gray-400 dark:text-zinc-500 mb-3">
+                            Aplicadas:
+                            @foreach ($appliedTemplates as $applied)
+                                <span
+                                    class="inline-flex items-center gap-1 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 rounded px-1.5 py-0.5 text-xs mr-1"
                                 >
-                                    <div class="flex-1 min-w-0">
-                                        <p class="text-sm font-medium text-gray-900 dark:text-gray-100">
-                                            {{ $item['medication_name'] }}
-                                        </p>
-                                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                                            {{ $item['dose'] }} · {{ $item['frequency'] }} · {{ $item['duration'] }}
-                                        </p>
-                                        @if ($item['instructions'])
-                                            <p class="text-xs text-gray-400 dark:text-zinc-500 mt-0.5 italic">
-                                                {{ $item['instructions'] }}
-                                            </p>
-                                        @endif
-                                    </div>
-                                    @if (! $finalized)
-                                        <button
-                                            wire:click="removeItem('{{ $item['id'] }}')"
-                                            wire:loading.attr="disabled"
-                                            dusk="rx-remove-item"
-                                            class="flex-shrink-0 text-red-400 hover:text-red-600 dark:hover:text-red-300 transition p-1"
-                                            title="Eliminar"
-                                        >
-                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    stroke-width="2"
-                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                                />
-                                            </svg>
-                                        </button>
-                                    @endif
-                                </div>
+                                    {{ $applied['template_name'] }}
+                                    <span class="opacity-60">{{ $applied['applied_at'] }}</span>
+                                </span>
                             @endforeach
-                        </div>
-                    @else
-                        <p class="text-sm text-gray-400 dark:text-zinc-500 mb-4">Sin medicamentos aún.</p>
+                        </p>
                     @endif
 
-                    {{-- Formulario agregar --}}
-                    @if (! $finalized)
+                    <div class="flex flex-wrap gap-2" dusk="rx-templates-panel">
+                        @foreach ($templates as $t)
+                            <button
+                                wire:click="applyTemplate('{{ $t['id'] }}')"
+                                wire:loading.attr="disabled"
+                                dusk="rx-apply-template"
+                                title="{{ $t['description'] }}"
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-emerald-300 dark:border-emerald-700 bg-white dark:bg-zinc-800 text-emerald-700 dark:text-emerald-300 text-sm font-medium hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition disabled:opacity-40"
+                            >
+                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M12 4v16m8-8H4"
+                                    />
+                                </svg>
+                                {{ $t['name'] }}
+                            </button>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
+
+            {{-- Lista de medicamentos --}}
+            <div class="border-t border-gray-100 dark:border-zinc-800 pt-5">
+                <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">
+                    Medicamentos
+                    @if (count($items) > 0)
+                        <span class="ml-1 text-xs font-normal text-gray-400">({{ count($items) }})</span>
+                    @endif
+                </h3>
+
+                @if (count($items) > 0)
+                    <div class="space-y-2 mb-4">
+                        @foreach ($items as $index => $item)
+                            <div class="bg-gray-50 dark:bg-zinc-800 rounded-lg px-4 py-3" dusk="rx-item">
+                                @if ($item['editing'])
+                                    {{-- Modo edición inline --}}
+                                    <div class="space-y-2">
+                                        <div class="grid grid-cols-2 lg:grid-cols-4 gap-2">
+                                            <div class="lg:col-span-2">
+                                                <input
+                                                    wire:model="items.{{ $index }}.medication_name"
+                                                    type="text"
+                                                    placeholder="Medicamento *"
+                                                    class="w-full px-2.5 py-1.5 border border-emerald-400 rounded-md bg-white dark:bg-zinc-700 text-gray-900 dark:text-gray-100 text-sm focus:ring-1 focus:ring-emerald-500"
+                                                />
+                                            </div>
+                                            <div>
+                                                <input
+                                                    wire:model="items.{{ $index }}.dose"
+                                                    type="text"
+                                                    placeholder="Dosis *"
+                                                    class="w-full px-2.5 py-1.5 border border-emerald-400 rounded-md bg-white dark:bg-zinc-700 text-gray-900 dark:text-gray-100 text-sm focus:ring-1 focus:ring-emerald-500"
+                                                />
+                                            </div>
+                                            <div>
+                                                <input
+                                                    wire:model="items.{{ $index }}.frequency"
+                                                    type="text"
+                                                    placeholder="Frecuencia *"
+                                                    class="w-full px-2.5 py-1.5 border border-emerald-400 rounded-md bg-white dark:bg-zinc-700 text-gray-900 dark:text-gray-100 text-sm focus:ring-1 focus:ring-emerald-500"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div class="grid grid-cols-2 gap-2">
+                                            <input
+                                                wire:model="items.{{ $index }}.duration"
+                                                type="text"
+                                                placeholder="Duración *"
+                                                class="w-full px-2.5 py-1.5 border border-emerald-400 rounded-md bg-white dark:bg-zinc-700 text-gray-900 dark:text-gray-100 text-sm focus:ring-1 focus:ring-emerald-500"
+                                            />
+                                            <input
+                                                wire:model="items.{{ $index }}.instructions"
+                                                type="text"
+                                                placeholder="Instrucciones (opcional)"
+                                                class="w-full px-2.5 py-1.5 border border-gray-300 dark:border-zinc-600 rounded-md bg-white dark:bg-zinc-700 text-gray-900 dark:text-gray-100 text-sm focus:ring-1 focus:ring-emerald-500"
+                                            />
+                                        </div>
+                                        <div class="flex justify-end gap-2 pt-1">
+                                            <button
+                                                wire:click="cancelEditing('{{ $item['id'] }}')"
+                                                class="px-3 py-1 text-xs rounded-md border border-gray-300 dark:border-zinc-600 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-zinc-700 transition"
+                                            >
+                                                Cancelar
+                                            </button>
+                                            <button
+                                                wire:click="saveItem('{{ $item['id'] }}')"
+                                                class="px-3 py-1 text-xs rounded-md bg-emerald-600 text-white hover:bg-emerald-700 transition"
+                                            >
+                                                Guardar
+                                            </button>
+                                        </div>
+                                    </div>
+                                @else
+                                    {{-- Vista normal --}}
+                                    <div class="flex items-start justify-between gap-3">
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                                {{ $item['medication_name'] }}
+                                            </p>
+                                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                                {{ $item['dose'] }} · {{ $item['frequency'] }} ·
+                                                {{ $item['duration'] }}
+                                            </p>
+                                            @if ($item['instructions'])
+                                                <p class="text-xs text-gray-400 dark:text-zinc-500 mt-0.5 italic">
+                                                    {{ $item['instructions'] }}
+                                                </p>
+                                            @endif
+                                        </div>
+                                        @if (! $finalized)
+                                            <div class="flex-shrink-0 flex items-center gap-1">
+                                                <button
+                                                    wire:click="startEditing('{{ $item['id'] }}')"
+                                                    dusk="rx-edit-item"
+                                                    class="text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition p-1"
+                                                    title="Editar"
+                                                >
+                                                    <svg
+                                                        class="w-4 h-4"
+                                                        fill="none"
+                                                        viewBox="0 0 24 24"
+                                                        stroke="currentColor"
+                                                    >
+                                                        <path
+                                                            stroke-linecap="round"
+                                                            stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                                                        />
+                                                    </svg>
+                                                </button>
+                                                <button
+                                                    wire:click="removeItem('{{ $item['id'] }}')"
+                                                    wire:loading.attr="disabled"
+                                                    dusk="rx-remove-item"
+                                                    class="text-red-400 hover:text-red-600 dark:hover:text-red-300 transition p-1"
+                                                    title="Eliminar"
+                                                >
+                                                    <svg
+                                                        class="w-4 h-4"
+                                                        fill="none"
+                                                        viewBox="0 0 24 24"
+                                                        stroke="currentColor"
+                                                    >
+                                                        <path
+                                                            stroke-linecap="round"
+                                                            stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                                        />
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        @endif
+                                    </div>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
+                @else
+                    <p class="text-sm text-gray-400 dark:text-zinc-500 mb-4">
+                        Sin medicamentos aún. Aplica una plantilla o agrega uno manualmente.
+                    </p>
+                @endif
+
+                {{-- Formulario agregar medicamento libre --}}
+                @if (! $finalized)
+                    @if ($prescriptionId)
                         <div
                             class="bg-gray-50 dark:bg-zinc-800/60 rounded-xl p-4 border border-gray-200 dark:border-zinc-700"
                         >
                             <p
                                 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3"
                             >
-                                Agregar Medicamento
+                                Agregar Medicamento Libre
                             </p>
                             <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-3">
                                 <div class="lg:col-span-2">
@@ -426,9 +619,13 @@ new class extends Component {
                                 </button>
                             </div>
                         </div>
+                    @else
+                        <p class="text-xs text-gray-400 dark:text-zinc-500 italic">
+                            Escribe una observación o aplica una plantilla para habilitar la edición de medicamentos.
+                        </p>
                     @endif
-                </div>
-            @endif
+                @endif
+            </div>
         </div>
     </div>
 </section>

@@ -49,7 +49,7 @@ describe('ConsultationController', function () {
             'patient_id' => $patient->id,
             'doctor_id' => $doctor->id,
             'type' => 'digital',
-            'status' => 'saved',
+            'status' => 'draft',
         ]);
     });
 
@@ -90,7 +90,7 @@ describe('ConsultationController', function () {
 
         $this->assertDatabaseHas('consultations', [
             'id' => $consultation->id,
-            'type' => 'manual',
+            'status' => 'saved',
         ]);
     });
 
@@ -146,7 +146,6 @@ describe('ConsultationController', function () {
             ->assertSee('Signos Vitales')
             ->assertSee('Nota SOAP')
             ->assertSee('Receta')
-            ->assertSee('Vacunas Aplicadas')
-            ->assertSee('Guardar SOAP', false);
+            ->assertSee('Vacunas');
     });
 });

@@ -207,20 +207,21 @@ describe('PacienteController - Store', function () {
         ]);
     });
 
-    test('falla si grupo sanguineo es invalido al crear', function () {
+    test('acepta grupo sanguineo no estandar al crear', function () {
         $user = User::factory()->create();
 
         $data = [
-            'full_name' => 'Paciente Grupo Invalido',
+            'full_name' => 'Paciente Grupo Raro',
             'date_of_birth' => '2018-05-11',
             'gender' => 'M',
-            'blood_group' => 'X+',
+            'blood_group' => 'Bombay',
         ];
 
-        $response = $this->actingAs($user)
-            ->post(route('pacientes.store'), $data);
+        $this->actingAs($user)
+            ->post(route('pacientes.store'), $data)
+            ->assertSessionHasNoErrors();
 
-        $response->assertSessionHasErrors('blood_group');
+        $this->assertDatabaseHas('patients', ['blood_group' => 'Bombay']);
     });
 
     test('puede crear paciente sin especificar grupo sanguineo', function () {
@@ -432,20 +433,24 @@ describe('PacienteController - Update', function () {
         ]);
     });
 
-    test('falla si grupo sanguineo es invalido al actualizar', function () {
+    test('acepta grupo sanguineo no estandar al actualizar', function () {
         $user = User::factory()->create();
 
         $data = [
             'full_name' => $this->patient->full_name,
             'date_of_birth' => $this->patient->date_of_birth->format('Y-m-d'),
             'gender' => $this->patient->gender->value(),
-            'blood_group' => 'ZZ',
+            'blood_group' => 'Rh nulo',
         ];
 
-        $response = $this->actingAs($user)
-            ->put(route('pacientes.update', $this->patient->id), $data);
+        $this->actingAs($user)
+            ->put(route('pacientes.update', $this->patient->id), $data)
+            ->assertSessionHasNoErrors();
 
-        $response->assertSessionHasErrors('blood_group');
+        $this->assertDatabaseHas('patients', [
+            'id' => $this->patient->id,
+            'blood_group' => 'Rh nulo',
+        ]);
     });
 
     test('puede limpiar el grupo sanguineo de un paciente al actualizar', function () {

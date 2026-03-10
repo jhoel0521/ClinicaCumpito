@@ -20,7 +20,7 @@ class UpdatePacienteRequest extends FormRequest
             'full_name' => ['required', 'string', 'max:255'],
             'date_of_birth' => ['required', 'date', 'before:today'],
             'gender' => ['required', 'in:M,F'],
-            'blood_group' => ['nullable', 'in:O+,O-,A+,A-,B+,B-,AB+,AB-'],
+            'blood_group' => ['nullable', 'string', 'max:30'],
             'birth_weight' => ['nullable', 'numeric', 'min:0.1', 'max:10'],
             'birth_height' => ['nullable', 'numeric', 'min:0.1', 'max:100'],
             'birth_head_circumference' => ['nullable', 'numeric', 'min:0.1', 'max:100'],

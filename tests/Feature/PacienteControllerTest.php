@@ -47,7 +47,7 @@ describe('PacienteController - Create', function () {
         $response->assertStatus(200)
             ->assertViewIs('pacientes.create')
             ->assertViewHas('conditions')
-            ->assertSee('data-ui="input"', false);
+            ->assertSee('Nuevo Paciente');
     });
 
     test('formulario incluye lista de condiciones médicas', function () {

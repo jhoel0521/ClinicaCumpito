@@ -26,9 +26,8 @@ class ConsultationSnapshotService implements ConsultationSnapshotServiceContract
                 throw new \DomainException('No se puede agregar plantillas a una consulta finalizada.');
             }
 
-            $prescription = Prescription::updateOrCreate(
-                ['consultation_id' => $consultationId],
-                ['source_template_id' => $templateId]
+            $prescription = Prescription::firstOrCreate(
+                ['consultation_id' => $consultationId]
             );
 
             $template->items()->each(function ($templateItem) use ($prescription) {
@@ -61,9 +60,8 @@ class ConsultationSnapshotService implements ConsultationSnapshotServiceContract
                 throw new \DomainException('No se puede agregar plantillas de laboratorio a una consulta finalizada.');
             }
 
-            $request = LaboratoryRequest::updateOrCreate(
-                ['consultation_id' => $consultationId],
-                ['source_template_id' => $templateId]
+            $request = LaboratoryRequest::firstOrCreate(
+                ['consultation_id' => $consultationId]
             );
 
             $template->items()->each(function ($templateItem) use ($request) {

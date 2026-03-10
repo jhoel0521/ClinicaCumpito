@@ -3,7 +3,6 @@
 use App\DTOs\LaboratoryRequestDTO;
 use App\Models\Consultation;
 use App\Models\LaboratoryRequest;
-use App\Models\LaboratoryTemplate;
 use App\Services\LaboratoryRequestService;
 
 describe('LaboratoryRequestService', function () {
@@ -12,20 +11,17 @@ describe('LaboratoryRequestService', function () {
         $consultation = Consultation::factory()->create([
             'status' => 'saved',
         ]);
-        $template = LaboratoryTemplate::factory()->create([
-            'doctor_id' => $consultation->doctor_id,
-        ]);
 
         $dto = LaboratoryRequestDTO::fromArray([
-            'source_template_id' => $template->id,
             'observations' => 'Ayunas de 8 horas.',
+            'status' => 'pending',
         ]);
 
         $request = $service->upsert($consultation->id, $dto);
 
         expect($request)->toBeInstanceOf(LaboratoryRequest::class)
             ->and($request->consultation_id)->toBe($consultation->id)
-            ->and($request->source_template_id)->toBe($template->id);
+            ->and($request->observations)->toBe('Ayunas de 8 horas.');
     });
 
     test('upsert falla en consulta finalizada', function () {

@@ -2,7 +2,6 @@
 
 use App\Models\Consultation;
 use App\Models\Prescription;
-use App\Models\PrescriptionTemplate;
 use App\Models\User;
 
 describe('PrescriptionController', function () {
@@ -11,13 +10,9 @@ describe('PrescriptionController', function () {
         $consultation = Consultation::factory()->create([
             'status' => 'saved',
         ]);
-        $template = PrescriptionTemplate::factory()->create([
-            'doctor_id' => $consultation->doctor_id,
-        ]);
 
         $response = $this->actingAs($user)
             ->post(route('consultas.prescriptions.store', $consultation->id), [
-                'source_template_id' => $template->id,
                 'observations' => 'Indicaciones generales de receta.',
             ]);
 
@@ -25,7 +20,7 @@ describe('PrescriptionController', function () {
 
         $this->assertDatabaseHas('prescriptions', [
             'consultation_id' => $consultation->id,
-            'source_template_id' => $template->id,
+            'observations' => 'Indicaciones generales de receta.',
         ]);
     });
 

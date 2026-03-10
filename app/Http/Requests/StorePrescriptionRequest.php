@@ -17,7 +17,6 @@ class StorePrescriptionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'source_template_id' => ['nullable', 'uuid', 'exists:prescription_templates,id'],
             'observations' => ['nullable', 'string', 'max:5000'],
         ];
     }

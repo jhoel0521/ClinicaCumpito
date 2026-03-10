@@ -4,7 +4,6 @@ namespace Database\Factories;
 
 use App\Models\Consultation;
 use App\Models\LaboratoryRequest;
-use App\Models\LaboratoryTemplate;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -18,8 +17,8 @@ class LaboratoryRequestFactory extends Factory
     {
         return [
             'consultation_id' => Consultation::factory(),
-            'source_template_id' => LaboratoryTemplate::factory(),
             'observations' => $this->faker->optional()->sentence(),
+            'status' => 'pending',
         ];
     }
 }

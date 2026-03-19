@@ -380,7 +380,7 @@ describe('8.3 — Regresión: flujo completo de consulta SOAP', function (): voi
         expect($consultation->status->value())->toBe(ConsultationStatus::FINALIZED);
         expect($consultation->vitalSigns)->not->toBeNull();
         expect($consultation->soapNote)->not->toBeNull();
-        expect($consultation->prescription->items()->count())->toBe(1);
-        expect($consultation->laboratoryRequest->items()->count())->toBe(1);
+        expect($consultation->prescriptions->first()->items()->count())->toBe(1);
+        expect($consultation->laboratoryRequests->first()->items()->count())->toBe(1);
     });
 });

@@ -73,16 +73,16 @@ class Consultation extends Model
         return $this->hasOne(SoapNote::class, 'consultation_id');
     }
 
-    /** @return HasOne<Prescription, $this> */
-    public function prescription(): HasOne
+    /** @return HasMany<Prescription, $this> */
+    public function prescriptions(): HasMany
     {
-        return $this->hasOne(Prescription::class, 'consultation_id');
+        return $this->hasMany(Prescription::class, 'consultation_id')->orderBy('created_at');
     }
 
-    /** @return HasOne<LaboratoryRequest, $this> */
-    public function laboratoryRequest(): HasOne
+    /** @return HasMany<LaboratoryRequest, $this> */
+    public function laboratoryRequests(): HasMany
     {
-        return $this->hasOne(LaboratoryRequest::class, 'consultation_id');
+        return $this->hasMany(LaboratoryRequest::class, 'consultation_id')->orderBy('created_at');
     }
 
     /** @return HasMany<PatientVaccine, $this> */

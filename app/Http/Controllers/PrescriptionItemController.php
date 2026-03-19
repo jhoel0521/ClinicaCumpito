@@ -14,7 +14,8 @@ class PrescriptionItemController extends Controller
 
     public function store(StorePrescriptionItemRequest $request, Consultation $consulta): \Illuminate\Http\RedirectResponse
     {
-        if (! $consulta->prescription) {
+        $prescription = $consulta->prescriptions()->first();
+        if (! $prescription) {
             return back()->withErrors([
                 'prescription_items' => 'Debe crear la receta antes de registrar detalles.',
             ]);
@@ -22,7 +23,7 @@ class PrescriptionItemController extends Controller
 
         try {
             $dto = PrescriptionItemDTO::fromArray($request->validated());
-            $this->service->create($consulta->prescription->id, $dto);
+            $this->service->create($prescription->id, $dto);
 
             return redirect()->route('consultas.show', $consulta->id)
                 ->with('success', 'Detalle de receta guardado exitosamente.');

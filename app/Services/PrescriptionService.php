@@ -10,28 +10,52 @@ use App\Models\PrescriptionAppliedTemplate;
 use App\Models\PrescriptionItem;
 use App\Models\PrescriptionTemplate;
 use App\ValueObjects\ConsultationStatus;
+use Illuminate\Support\Collection;
 
 class PrescriptionService implements PrescriptionServiceContract
 {
-    public function upsert(string $consultationId, PrescriptionDTO $dto): Prescription
+    public function createForConsultation(string $consultationId, PrescriptionDTO $dto): Prescription
     {
         $consultation = Consultation::findOrFail($consultationId);
+
+        if ($this->statusValue($consultation) === ConsultationStatus::FINALIZED) {
+            throw new \DomainException('No se puede agregar recetas a una consulta finalizada.');
+        }
+
+        $prescription = Prescription::create([
+            'consultation_id' => $consultationId,
+            ...$dto->toArray(),
+        ]);
+
+        $fresh = $prescription->fresh(['consultation']);
+        if (! $fresh instanceof Prescription) {
+            throw new \RuntimeException('No se pudo refrescar la receta.');
+        }
+
+        return $fresh;
+    }
+
+    public function update(string $prescriptionId, PrescriptionDTO $dto): Prescription
+    {
+        $prescription = Prescription::with('consultation')->findOrFail($prescriptionId);
+        $consultation = $prescription->consultation;
+
+        if (! $consultation instanceof Consultation) {
+            throw new \RuntimeException('No se encontró la consulta asociada a la receta.');
+        }
 
         if ($this->statusValue($consultation) === ConsultationStatus::FINALIZED) {
             throw new \DomainException('No se puede editar la receta de una consulta finalizada.');
         }
 
-        $prescription = Prescription::updateOrCreate(
-            ['consultation_id' => $consultationId],
-            $dto->toArray()
-        );
+        $prescription->update($dto->toArray());
 
-        $freshPrescription = $prescription->fresh(['consultation']);
-        if (! $freshPrescription instanceof Prescription) {
+        $fresh = $prescription->fresh(['consultation']);
+        if (! $fresh instanceof Prescription) {
             throw new \RuntimeException('No se pudo refrescar la receta.');
         }
 
-        return $freshPrescription;
+        return $fresh;
     }
 
     public function applyTemplate(string $prescriptionId, string $templateId): Prescription
@@ -59,6 +83,7 @@ class PrescriptionService implements PrescriptionServiceContract
                 'prescription_id' => $prescriptionId,
                 'medication_name' => $medicationName,
                 'dose' => $templateItem->dose ?? '',
+                'quantity' => $templateItem->quantity,
                 'frequency' => $templateItem->frequency ?? '',
                 'duration' => $templateItem->duration ?? '',
                 'instructions' => $templateItem->instructions,
@@ -77,25 +102,26 @@ class PrescriptionService implements PrescriptionServiceContract
             ?? $prescription;
     }
 
-    public function findByConsultation(string $consultationId): ?Prescription
+    /** @return Collection<int, Prescription> */
+    public function listByConsultation(string $consultationId): Collection
     {
-        return Prescription::with(['consultation', 'items', 'appliedTemplates'])
+        return Prescription::with(['items', 'appliedTemplates'])
             ->where('consultation_id', $consultationId)
-            ->first();
+            ->orderBy('created_at')
+            ->get();
     }
 
-    public function deleteByConsultation(string $consultationId): bool
+    public function delete(string $prescriptionId): bool
     {
-        $consultation = Consultation::findOrFail($consultationId);
+        $prescription = Prescription::with('consultation')->findOrFail($prescriptionId);
+        $consultation = $prescription->consultation;
+
+        if (! $consultation instanceof Consultation) {
+            throw new \RuntimeException('No se encontró la consulta asociada a la receta.');
+        }
 
         if ($this->statusValue($consultation) === ConsultationStatus::FINALIZED) {
             throw new \DomainException('No se puede eliminar la receta de una consulta finalizada.');
-        }
-
-        $prescription = Prescription::where('consultation_id', $consultationId)->first();
-
-        if (! $prescription) {
-            return false;
         }
 
         return (bool) $prescription->delete();

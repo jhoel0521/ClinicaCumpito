@@ -5,6 +5,7 @@ namespace App\DTOs;
 class PrescriptionDTO
 {
     public function __construct(
+        public readonly ?string $reason,
         public readonly ?string $observations,
     ) {}
 
@@ -14,9 +15,8 @@ class PrescriptionDTO
     public static function fromArray(array $data): self
     {
         return new self(
-            observations: isset($data['observations'])
-                ? (string) $data['observations']
-                : null,
+            reason: isset($data['reason']) ? (string) $data['reason'] : null,
+            observations: isset($data['observations']) ? (string) $data['observations'] : null,
         );
     }
 
@@ -26,6 +26,7 @@ class PrescriptionDTO
     public function toArray(): array
     {
         return [
+            'reason' => $this->reason,
             'observations' => $this->observations,
         ];
     }

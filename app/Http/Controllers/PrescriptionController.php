@@ -15,7 +15,7 @@ class PrescriptionController extends Controller
     {
         try {
             $dto = PrescriptionDTO::fromArray($request->validated());
-            $this->service->upsert($consulta->id, $dto);
+            $this->service->createForConsultation($consulta->id, $dto);
 
             return redirect()->route('consultas.show', $consulta->id)
                 ->with('success', 'Receta guardada exitosamente.');
@@ -30,7 +30,8 @@ class PrescriptionController extends Controller
     {
         try {
             $dto = PrescriptionDTO::fromArray($request->validated());
-            $this->service->upsert($consulta->id, $dto);
+            $prescription = $consulta->prescriptions()->firstOrFail();
+            $this->service->update($prescription->id, $dto);
 
             return redirect()->route('consultas.show', $consulta->id)
                 ->with('success', 'Receta actualizada exitosamente.');
@@ -44,7 +45,8 @@ class PrescriptionController extends Controller
     public function destroy(Consultation $consulta): \Illuminate\Http\RedirectResponse
     {
         try {
-            $this->service->deleteByConsultation($consulta->id);
+            $prescription = $consulta->prescriptions()->firstOrFail();
+            $this->service->delete($prescription->id);
 
             return redirect()->route('consultas.show', $consulta->id)
                 ->with('success', 'Receta eliminada exitosamente.');

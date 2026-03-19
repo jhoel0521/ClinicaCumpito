@@ -31,6 +31,7 @@ describe('PrescriptionController', function () {
         ]);
         Prescription::factory()->create([
             'consultation_id' => $consultation->id,
+            'observations' => 'Observaciones originales.',
         ]);
 
         $response = $this->actingAs($user)

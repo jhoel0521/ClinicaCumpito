@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ConsultationController;
 use App\Http\Controllers\ConsultationFileController;
+use App\Http\Controllers\ConsultationPdfController;
 use App\Http\Controllers\LaboratoryRequestController;
 use App\Http\Controllers\LaboratoryRequestItemController;
 use App\Http\Controllers\PatientVaccineController;
@@ -75,4 +76,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('consultas.laboratory-request-items.update');
     Route::delete('consultas/{consulta}/laboratorios/detalles/{detalleLabor}', [LaboratoryRequestItemController::class, 'destroy'])
         ->name('consultas.laboratory-request-items.destroy');
+
+    // PDF
+    Route::get('consultas/{consulta}/pdf/recetas', [ConsultationPdfController::class, 'allPrescriptions'])
+        ->name('consultas.pdf.recetas.all');
+    Route::get('consultas/{consulta}/pdf/recetas/{prescription}', [ConsultationPdfController::class, 'singlePrescription'])
+        ->name('consultas.pdf.recetas.single');
+    Route::get('consultas/{consulta}/pdf/laboratorios', [ConsultationPdfController::class, 'allLaboratory'])
+        ->name('consultas.pdf.laboratorio.all');
+    Route::get('consultas/{consulta}/pdf/laboratorios/{laboratoryRequest}', [ConsultationPdfController::class, 'singleLaboratory'])
+        ->name('consultas.pdf.laboratorio.single');
 });

@@ -13,25 +13,48 @@ use App\ValueObjects\ConsultationStatus;
 
 class LaboratoryRequestService implements LaboratoryRequestServiceContract
 {
-    public function upsert(string $consultationId, LaboratoryRequestDTO $dto): LaboratoryRequest
+    public function createForConsultation(string $consultationId, LaboratoryRequestDTO $dto): LaboratoryRequest
     {
         $consultation = Consultation::findOrFail($consultationId);
+
+        if ($this->statusValue($consultation) === ConsultationStatus::FINALIZED) {
+            throw new \DomainException('No se puede agregar solicitudes a una consulta finalizada.');
+        }
+
+        $request = LaboratoryRequest::create([
+            'consultation_id' => $consultationId,
+            ...$dto->toArray(),
+        ]);
+
+        $fresh = $request->fresh(['consultation']);
+        if (! $fresh instanceof LaboratoryRequest) {
+            throw new \RuntimeException('No se pudo refrescar la solicitud de laboratorio.');
+        }
+
+        return $fresh;
+    }
+
+    public function update(string $labRequestId, LaboratoryRequestDTO $dto): LaboratoryRequest
+    {
+        $request = LaboratoryRequest::with('consultation')->findOrFail($labRequestId);
+        $consultation = $request->consultation;
+
+        if (! $consultation instanceof Consultation) {
+            throw new \RuntimeException('No se encontró la consulta asociada a la solicitud.');
+        }
 
         if ($this->statusValue($consultation) === ConsultationStatus::FINALIZED) {
             throw new \DomainException('No se puede editar la solicitud de laboratorio de una consulta finalizada.');
         }
 
-        $request = LaboratoryRequest::updateOrCreate(
-            ['consultation_id' => $consultationId],
-            $dto->toArray()
-        );
+        $request->update($dto->toArray());
 
-        $freshRequest = $request->fresh(['consultation']);
-        if (! $freshRequest instanceof LaboratoryRequest) {
+        $fresh = $request->fresh(['consultation']);
+        if (! $fresh instanceof LaboratoryRequest) {
             throw new \RuntimeException('No se pudo refrescar la solicitud de laboratorio.');
         }
 
-        return $freshRequest;
+        return $fresh;
     }
 
     public function applyTemplate(string $laboratoryRequestId, string $templateId): LaboratoryRequest
@@ -81,18 +104,17 @@ class LaboratoryRequestService implements LaboratoryRequestServiceContract
             ->first();
     }
 
-    public function deleteByConsultation(string $consultationId): bool
+    public function delete(string $labRequestId): bool
     {
-        $consultation = Consultation::findOrFail($consultationId);
+        $request = LaboratoryRequest::with('consultation')->findOrFail($labRequestId);
+        $consultation = $request->consultation;
+
+        if (! $consultation instanceof Consultation) {
+            throw new \RuntimeException('No se encontró la consulta asociada a la solicitud.');
+        }
 
         if ($this->statusValue($consultation) === ConsultationStatus::FINALIZED) {
             throw new \DomainException('No se puede eliminar la solicitud de laboratorio de una consulta finalizada.');
-        }
-
-        $request = LaboratoryRequest::where('consultation_id', $consultationId)->first();
-
-        if (! $request) {
-            return false;
         }
 
         return (bool) $request->delete();

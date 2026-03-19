@@ -12,6 +12,7 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->uuid('laboratory_request_id');
             $table->string('exam_name');
+            $table->string('parameter_name')->nullable();
             $table->text('indications')->nullable();
             $table->timestamps();
 

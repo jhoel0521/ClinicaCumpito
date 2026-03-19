@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\LaboratoryCategory;
 use App\Models\LaboratoryExam;
+use App\Models\LaboratoryExamParameter;
 use Illuminate\Database\Seeder;
 
 class LaboratoryCatalogSeeder extends Seeder
@@ -15,87 +16,229 @@ class LaboratoryCatalogSeeder extends Seeder
                 'name' => 'Hematología',
                 'description' => 'Estudios de la sangre y sus componentes.',
                 'exams' => [
-                    ['name' => 'Hemograma Completo (BHC)',  'unit' => 'Ver reporte',  'reference_range' => 'Ver reporte', 'description' => 'Eritrograma, leucograma y plaquetas.'],
-                    ['name' => 'Velocidad de Sedimentación Globular (VSG)', 'unit' => 'mm/h', 'reference_range' => '< 20',          'description' => 'Marcador inespecífico de inflamación.'],
-                    ['name' => 'Grupo Sanguíneo y Factor Rh', 'unit' => 'N/A',       'reference_range' => 'N/A',           'description' => 'Tipificación ABO y Rh.'],
-                    ['name' => 'Tiempo de Protrombina (TP)', 'unit' => 'segundos',   'reference_range' => '11 - 13.5',     'description' => 'Evaluación de la coagulación extrínseca.'],
-                    ['name' => 'Tiempo de Tromboplastina Parcial (TTP)', 'unit' => 'segundos', 'reference_range' => '25 - 35', 'description' => 'Coagulación intrínseca.'],
+                    [
+                        'name' => 'Hemograma',
+                        'description' => 'Biometría hemática completa: eritrograma, leucograma y plaquetas.',
+                        'parameters' => [
+                            'Leucocitos (WBC)', 'Eritrocitos (RBC)', 'Hemoglobina (Hgb)',
+                            'Hematocrito (Hct)', 'Plaquetas', 'Neutrófilos %',
+                            'Linfocitos %', 'Monocitos %', 'Eosinófilos %', 'Basófilos %',
+                            'VCM (Volumen corpuscular medio)', 'HCM (Hemoglobina corpuscular media)',
+                            'CHCM (Concentración HCM)',
+                        ],
+                    ],
+                    [
+                        'name' => 'Grupo Sanguíneo y Factor Rh',
+                        'description' => 'Tipificación ABO y Rh.',
+                        'parameters' => ['Grupo ABO', 'Factor Rh'],
+                    ],
+                    [
+                        'name' => 'Tiempo de Protrombina (TP)',
+                        'description' => 'Evaluación de la coagulación extrínseca.',
+                        'parameters' => ['TP (segundos)', 'INR', 'Actividad %'],
+                    ],
+                    [
+                        'name' => 'Tiempo de Tromboplastina Parcial (TTPA)',
+                        'description' => 'Coagulación intrínseca.',
+                        'parameters' => ['TTPA (segundos)'],
+                    ],
+                    [
+                        'name' => 'VSG (Velocidad de Sedimentación)',
+                        'description' => 'Marcador inespecífico de inflamación.',
+                        'parameters' => ['VSG 1h (mm)'],
+                    ],
                 ],
             ],
             [
                 'name' => 'Química Sanguínea',
                 'description' => 'Análisis bioquímicos de la sangre.',
                 'exams' => [
-                    ['name' => 'Glucemia en ayunas',       'unit' => 'mg/dL',  'reference_range' => '70 - 100',     'description' => ''],
-                    ['name' => 'Glucemia postprandial (2h)', 'unit' => 'mg/dL', 'reference_range' => '< 140',        'description' => ''],
-                    ['name' => 'Urea',                     'unit' => 'mg/dL',  'reference_range' => '15 - 40',      'description' => ''],
-                    ['name' => 'Creatinina',               'unit' => 'mg/dL',  'reference_range' => '0.3 - 0.7',   'description' => 'Ajustar por edad.'],
-                    ['name' => 'Ácido úrico',              'unit' => 'mg/dL',  'reference_range' => '2.0 - 5.5',   'description' => ''],
-                    ['name' => 'ALT (TGP)',                'unit' => 'U/L',    'reference_range' => '< 35',         'description' => 'Enzima hepática.'],
-                    ['name' => 'AST (TGO)',                'unit' => 'U/L',    'reference_range' => '< 40',         'description' => 'Enzima hepática.'],
-                    ['name' => 'Bilirrubina Total',        'unit' => 'mg/dL',  'reference_range' => '0.2 - 1.0',   'description' => ''],
-                    ['name' => 'Bilirrubina Directa',      'unit' => 'mg/dL',  'reference_range' => '0.0 - 0.3',   'description' => ''],
-                    ['name' => 'Proteínas Totales',        'unit' => 'g/dL',   'reference_range' => '6.0 - 8.0',   'description' => ''],
-                    ['name' => 'Albúmina',                 'unit' => 'g/dL',   'reference_range' => '3.5 - 5.0',   'description' => ''],
-                    ['name' => 'Colesterol Total',         'unit' => 'mg/dL',  'reference_range' => '< 170',        'description' => 'Pediátrico.'],
-                    ['name' => 'HDL Colesterol',           'unit' => 'mg/dL',  'reference_range' => '> 45',         'description' => ''],
-                    ['name' => 'LDL Colesterol',           'unit' => 'mg/dL',  'reference_range' => '< 110',        'description' => ''],
-                    ['name' => 'Triglicéridos',            'unit' => 'mg/dL',  'reference_range' => '< 150',        'description' => ''],
-                    ['name' => 'Calcio sérico',            'unit' => 'mg/dL',  'reference_range' => '8.5 - 10.5',  'description' => ''],
-                    ['name' => 'Fósforo sérico',           'unit' => 'mg/dL',  'reference_range' => '3.5 - 5.5',   'description' => ''],
-                    ['name' => 'Hierro sérico',            'unit' => 'µg/dL',  'reference_range' => '50 - 120',     'description' => ''],
-                    ['name' => 'Ferritina',                'unit' => 'ng/mL',  'reference_range' => '12 - 150',     'description' => ''],
-                ],
-            ],
-            [
-                'name' => 'Inmunología y Marcadores Infecciosos',
-                'description' => 'Pruebas de respuesta inmune e infección.',
-                'exams' => [
-                    ['name' => 'Proteína C Reactiva (PCR) cuantitativa', 'unit' => 'mg/L', 'reference_range' => '< 5',  'description' => 'Marcador de infección bacteriana.'],
-                    ['name' => 'Procalcitonina (PCT)',  'unit' => 'ng/mL', 'reference_range' => '< 0.5',  'description' => 'Sepsis bacteriana.'],
-                    ['name' => 'Antiestreptolisina O (ASTO)', 'unit' => 'UI/mL', 'reference_range' => '< 200', 'description' => 'Infección estreptocócica previa.'],
-                    ['name' => 'IgE Total',             'unit' => 'UI/mL', 'reference_range' => 'Según edad', 'description' => 'Atopia y alergia.'],
-                    ['name' => 'TSH',                   'unit' => 'µUI/mL', 'reference_range' => '0.5 - 4.5', 'description' => 'Función tiroidea.'],
-                    ['name' => 'T4 libre (T4L)',        'unit' => 'ng/dL', 'reference_range' => '0.8 - 1.8', 'description' => ''],
-                    ['name' => 'Prueba de Chagas (ELISA)', 'unit' => 'N/A', 'reference_range' => 'Negativo',  'description' => 'Endémica Bolivia. Confirmar con IFI.'],
-                    ['name' => 'Prueba de Chagas (IFI)', 'unit' => 'N/A', 'reference_range' => '< 1:32',    'description' => 'Confirmación de Chagas.'],
-                    ['name' => 'Dengue NS1 (Antígeno)', 'unit' => 'N/A',  'reference_range' => 'Negativo',  'description' => 'Fase aguda dengue (días 1-5).'],
-                    ['name' => 'Dengue IgM / IgG',      'unit' => 'N/A',  'reference_range' => 'Negativo',  'description' => 'Dengue tardío o inmunidad.'],
-                    ['name' => 'PPD (Mantoux)',          'unit' => 'mm',   'reference_range' => '< 10 mm',   'description' => 'Tamizaje tuberculosis.'],
-                    ['name' => 'HIV (Elisa 4ta gen)',    'unit' => 'N/A',  'reference_range' => 'No reactivo', 'description' => ''],
-                    ['name' => 'VDRL',                  'unit' => 'N/A',  'reference_range' => 'No reactivo', 'description' => 'Tamizaje sífilis.'],
+                    [
+                        'name' => 'Glucosa',
+                        'description' => 'Glucemia en ayunas y/o postprandial.',
+                        'parameters' => ['Glucosa basal (mg/dL)', 'Glucosa postprandial 2h (mg/dL)'],
+                    ],
+                    [
+                        'name' => 'Hemoglobina Glicosilada (HbA1c)',
+                        'description' => 'Control glucémico a largo plazo.',
+                        'parameters' => ['HbA1c %'],
+                    ],
+                    [
+                        'name' => 'Perfil Lipídico',
+                        'description' => 'Colesterol total, fracciones y triglicéridos.',
+                        'parameters' => ['Colesterol Total (mg/dL)', 'HDL (mg/dL)', 'LDL (mg/dL)', 'Triglicéridos (mg/dL)', 'VLDL (mg/dL)'],
+                    ],
+                    [
+                        'name' => 'Función Renal',
+                        'description' => 'Evaluación del filtrado glomerular y metabolismo nitrogenado.',
+                        'parameters' => ['Creatinina (mg/dL)', 'BUN/Urea (mg/dL)', 'Ácido Úrico (mg/dL)', 'Depuración de creatinina (mL/min)'],
+                    ],
+                    [
+                        'name' => 'Función Hepática',
+                        'description' => 'Enzimas y parámetros de síntesis hepática.',
+                        'parameters' => ['ALT/TGP (U/L)', 'AST/TGO (U/L)', 'Fosfatasa Alcalina (U/L)', 'Bilirrubina Total (mg/dL)', 'Bilirrubina Directa (mg/dL)', 'Bilirrubina Indirecta (mg/dL)', 'Proteínas Totales (g/dL)', 'Albúmina (g/dL)', 'GGT (U/L)'],
+                    ],
+                    [
+                        'name' => 'Perfil de Hierro',
+                        'description' => 'Metabolismo del hierro.',
+                        'parameters' => ['Hierro Sérico (µg/dL)', 'Ferritina (ng/mL)', 'TIBC (µg/dL)', 'Saturación de transferrina %'],
+                    ],
+                    [
+                        'name' => 'Electrolitos',
+                        'description' => 'Iones séricos.',
+                        'parameters' => ['Sodio (mEq/L)', 'Potasio (mEq/L)', 'Cloro (mEq/L)', 'Calcio (mg/dL)', 'Fósforo (mg/dL)', 'Magnesio (mg/dL)'],
+                    ],
+                    [
+                        'name' => 'TSH y Tiroides',
+                        'description' => 'Función tiroidea.',
+                        'parameters' => ['TSH (µUI/mL)', 'T4 libre (ng/dL)', 'T3 libre (pg/mL)'],
+                    ],
                 ],
             ],
             [
                 'name' => 'Uroanálisis',
                 'description' => 'Exámenes de orina.',
                 'exams' => [
-                    ['name' => 'Examen General de Orina (EGO)', 'unit' => 'N/A',    'reference_range' => 'Normal',    'description' => 'Físico, químico y microscópico.'],
-                    ['name' => 'Urocultivo',                    'unit' => 'UFC/ml', 'reference_range' => '< 10.000',  'description' => 'Cultivo + antibiograma.'],
-                    ['name' => 'Proteinuria en orina de 24h',   'unit' => 'mg/24h', 'reference_range' => '< 150',     'description' => 'Síndrome nefrótico si > 40 mg/m²/h.'],
-                    ['name' => 'Microalbuminuria',              'unit' => 'mg/L',   'reference_range' => '< 30',      'description' => ''],
+                    [
+                        'name' => 'EGO (Examen General de Orina)',
+                        'description' => 'Análisis físico, químico y microscópico de orina.',
+                        'parameters' => [
+                            'Aspecto', 'Color', 'Densidad', 'pH',
+                            'Proteínas', 'Glucosa', 'Cetonas', 'Hemoglobina',
+                            'Leucocitos', 'Nitritos', 'Bilirrubina', 'Urobilinógeno',
+                            'Eritrocitos (microscopia)', 'Leucocitos (microscopia)',
+                            'Células epiteliales', 'Cilindros', 'Bacterias', 'Cristales',
+                        ],
+                    ],
+                    [
+                        'name' => 'Urocultivo',
+                        'description' => 'Cultivo de orina con antibiograma.',
+                        'parameters' => ['Cultivo (UFC/mL)', 'Antibiograma'],
+                    ],
+                    [
+                        'name' => 'Proteinuria 24h',
+                        'description' => 'Proteínas en orina de 24 horas.',
+                        'parameters' => ['Proteínas en orina 24h (mg/24h)'],
+                    ],
+                    [
+                        'name' => 'Microalbuminuria',
+                        'description' => 'Detección temprana de daño renal.',
+                        'parameters' => ['Microalbúmina (mg/L)', 'Relación albúmina/creatinina'],
+                    ],
                 ],
             ],
             [
                 'name' => 'Microbiología',
                 'description' => 'Cultivos y antibiogramas.',
                 'exams' => [
-                    ['name' => 'Hemocultivo (x2)',               'unit' => 'N/A', 'reference_range' => 'Sin crecimiento', 'description' => 'Dos extracciones en sitios diferentes.'],
-                    ['name' => 'Coprocultivo',                   'unit' => 'N/A', 'reference_range' => 'Sin crecimiento', 'description' => ''],
-                    ['name' => 'Cultivo de secreción faríngea',  'unit' => 'N/A', 'reference_range' => 'Sin crecimiento', 'description' => 'Streptococcus pyogenes.'],
-                    ['name' => 'Test rápido Streptococo A',      'unit' => 'N/A', 'reference_range' => 'Negativo',        'description' => ''],
+                    [
+                        'name' => 'Hemocultivo',
+                        'description' => 'Cultivo de sangre para detección de bacteriemia.',
+                        'parameters' => ['Cultivo (muestra 1)', 'Cultivo (muestra 2)', 'Antibiograma'],
+                    ],
+                    [
+                        'name' => 'Coprocultivo',
+                        'description' => 'Cultivo de heces con antibiograma.',
+                        'parameters' => ['Cultivo', 'Antibiograma'],
+                    ],
+                    [
+                        'name' => 'Cultivo Faríngeo',
+                        'description' => 'Cultivo de secreción faríngea (Streptococcus pyogenes).',
+                        'parameters' => ['Cultivo', 'Antibiograma'],
+                    ],
+                    [
+                        'name' => 'Test Streptococo A (rápido)',
+                        'description' => 'Detección rápida de Streptococcus pyogenes grupo A.',
+                        'parameters' => ['Resultado'],
+                    ],
                 ],
             ],
             [
                 'name' => 'Parasitología',
                 'description' => 'Exámenes para detección de parásitos.',
                 'exams' => [
-                    ['name' => 'Examen Coproparasitológico (seriado x3)', 'unit' => 'N/A', 'reference_range' => 'Negativo', 'description' => 'Tres muestras en días alternos.'],
-                    ['name' => 'Test de Graham (Oxiuros)',                'unit' => 'N/A', 'reference_range' => 'Negativo', 'description' => 'Enterobius vermicularis.'],
-                    ['name' => 'Gota gruesa (Malaria)',                  'unit' => 'N/A', 'reference_range' => 'Negativo', 'description' => 'Plasmodium spp. Zonas endémicas Bolivia.'],
+                    [
+                        'name' => 'Coprológico (COPR)',
+                        'description' => 'Examen general de heces, seriado x3 en días alternos.',
+                        'parameters' => [
+                            'Consistencia', 'Color', 'pH',
+                            'Sangre oculta', 'Leucocitos fecales', 'Grasa neutral',
+                            'Parásitos / Huevos', 'Levaduras',
+                        ],
+                    ],
+                    [
+                        'name' => 'Test de Graham (Oxiuros)',
+                        'description' => 'Detección de Enterobius vermicularis.',
+                        'parameters' => ['Resultado'],
+                    ],
+                    [
+                        'name' => 'Gota Gruesa (Malaria)',
+                        'description' => 'Plasmodium spp. — zonas endémicas.',
+                        'parameters' => ['Resultado', 'Especie identificada', 'Parasitemia %'],
+                    ],
+                ],
+            ],
+            [
+                'name' => 'Inmunología / Serología',
+                'description' => 'Pruebas de anticuerpos, antígenos y marcadores infecciosos.',
+                'exams' => [
+                    [
+                        'name' => 'Dengue',
+                        'description' => 'Panel serológico para dengue.',
+                        'parameters' => ['NS1 Antígeno (fase aguda días 1-5)', 'IgM (desde día 5)', 'IgG (inmunidad/infección tardía)', 'PCR Dengue'],
+                    ],
+                    [
+                        'name' => 'VIH (ELISA)',
+                        'description' => 'Tamizaje VIH de 4ª generación.',
+                        'parameters' => ['Resultado ELISA 4ª gen'],
+                    ],
+                    [
+                        'name' => 'VDRL (Sífilis)',
+                        'description' => 'Tamizaje serológico de sífilis.',
+                        'parameters' => ['Resultado', 'Título (si reactivo)'],
+                    ],
+                    [
+                        'name' => 'Prueba de Embarazo (β-hCG)',
+                        'description' => 'Hormona gonadotropina coriónica.',
+                        'parameters' => ['Resultado cualitativo', 'β-hCG cuantitativa (mUI/mL)'],
+                    ],
+                    [
+                        'name' => 'Chagas',
+                        'description' => 'Tamizaje y confirmación de Trypanosoma cruzi.',
+                        'parameters' => ['ELISA', 'IFI (título confirmatorio)'],
+                    ],
+                    [
+                        'name' => 'PCR Cuantitativa (Proteína C Reactiva)',
+                        'description' => 'Marcador de inflamación/infección bacteriana.',
+                        'parameters' => ['PCR (mg/L)'],
+                    ],
+                    [
+                        'name' => 'ASTO (Antiestreptolisina O)',
+                        'description' => 'Infección estreptocócica previa.',
+                        'parameters' => ['ASTO (UI/mL)'],
+                    ],
+                ],
+            ],
+            [
+                'name' => 'Imagenología',
+                'description' => 'Estudios de gabinete: radiología y ultrasonografía.',
+                'exams' => [
+                    [
+                        'name' => 'Rayos X',
+                        'description' => 'Radiología convencional.',
+                        'parameters' => ['Tórax AP', 'Tórax AP y Lateral', 'Extremidad superior', 'Extremidad inferior', 'Columna cervical', 'Columna dorsal', 'Columna lumbar', 'Abdomen simple', 'Senos paranasales'],
+                    ],
+                    [
+                        'name' => 'Ecografía',
+                        'description' => 'Ultrasonografía diagnóstica.',
+                        'parameters' => ['Abdominal', 'Abdominal y pélvica', 'Pélvica', 'Obstétrica', 'Renal', 'Testicular', 'Tiroides', 'Partes blandas'],
+                    ],
                 ],
             ],
         ];
+
+        $totalExams = 0;
+        $totalParams = 0;
 
         foreach ($catalog as $cat) {
             $category = LaboratoryCategory::firstOrCreate(
@@ -103,19 +246,24 @@ class LaboratoryCatalogSeeder extends Seeder
                 ['description' => $cat['description']]
             );
 
-            foreach ($cat['exams'] as $exam) {
-                LaboratoryExam::firstOrCreate(
-                    ['category_id' => $category->id, 'name' => $exam['name']],
-                    [
-                        'unit' => $exam['unit'],
-                        'reference_range' => $exam['reference_range'],
-                        'description' => $exam['description'],
-                    ]
+            foreach ($cat['exams'] as $examData) {
+                $exam = LaboratoryExam::firstOrCreate(
+                    ['category_id' => $category->id, 'name' => $examData['name']],
+                    ['description' => $examData['description']]
                 );
+
+                $totalExams++;
+
+                foreach ($examData['parameters'] as $order => $paramName) {
+                    LaboratoryExamParameter::firstOrCreate(
+                        ['exam_id' => $exam->id, 'name' => $paramName],
+                        ['sort_order' => $order]
+                    );
+                    $totalParams++;
+                }
             }
         }
 
-        $total = collect($catalog)->sum(fn ($c) => count($c['exams']));
-        $this->command->info('✔ Laboratorio: '.count($catalog)." categorías, {$total} exámenes cargados.");
+        $this->command->info('✔ Laboratorio: '.count($catalog)." categorías, {$totalExams} exámenes, {$totalParams} parámetros cargados.");
     }
 }

@@ -31,6 +31,7 @@ describe('LaboratoryRequestController', function () {
         ]);
         LaboratoryRequest::factory()->create([
             'consultation_id' => $consultation->id,
+            'observations' => 'Observaciones originales.',
         ]);
 
         $response = $this->actingAs($user)

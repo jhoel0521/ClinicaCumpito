@@ -14,7 +14,8 @@ class LaboratoryRequestItemController extends Controller
 
     public function store(StoreLaboratoryRequestItemRequest $request, Consultation $consulta): \Illuminate\Http\RedirectResponse
     {
-        if (! $consulta->laboratoryRequest) {
+        $labRequest = $consulta->laboratoryRequests()->first();
+        if (! $labRequest) {
             return back()->withErrors([
                 'laboratory_request_items' => 'Debe crear la solicitud de laboratorio antes de registrar detalles.',
             ]);
@@ -22,7 +23,7 @@ class LaboratoryRequestItemController extends Controller
 
         try {
             $dto = LaboratoryRequestItemDTO::fromArray($request->validated());
-            $this->service->create($consulta->laboratoryRequest->id, $dto);
+            $this->service->create($labRequest->id, $dto);
 
             return redirect()->route('consultas.show', $consulta->id)
                 ->with('success', 'Detalle de solicitud de laboratorio guardado exitosamente.');

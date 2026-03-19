@@ -17,6 +17,7 @@ class LaboratoryRequestItem extends Model
     protected $fillable = [
         'laboratory_request_id',
         'exam_name',
+        'parameter_name',
         'indications',
         'result_value',
         'is_abnormal',

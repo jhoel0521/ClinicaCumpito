@@ -15,7 +15,7 @@ class LaboratoryRequestController extends Controller
     {
         try {
             $dto = LaboratoryRequestDTO::fromArray($request->validated());
-            $this->service->upsert($consulta->id, $dto);
+            $this->service->createForConsultation($consulta->id, $dto);
 
             return redirect()->route('consultas.show', $consulta->id)
                 ->with('success', 'Solicitud de laboratorio guardada exitosamente.');
@@ -30,7 +30,8 @@ class LaboratoryRequestController extends Controller
     {
         try {
             $dto = LaboratoryRequestDTO::fromArray($request->validated());
-            $this->service->upsert($consulta->id, $dto);
+            $labRequest = $consulta->laboratoryRequests()->firstOrFail();
+            $this->service->update($labRequest->id, $dto);
 
             return redirect()->route('consultas.show', $consulta->id)
                 ->with('success', 'Solicitud de laboratorio actualizada exitosamente.');
@@ -44,7 +45,8 @@ class LaboratoryRequestController extends Controller
     public function destroy(Consultation $consulta): \Illuminate\Http\RedirectResponse
     {
         try {
-            $this->service->deleteByConsultation($consulta->id);
+            $labRequest = $consulta->laboratoryRequests()->firstOrFail();
+            $this->service->delete($labRequest->id);
 
             return redirect()->route('consultas.show', $consulta->id)
                 ->with('success', 'Solicitud de laboratorio eliminada exitosamente.');

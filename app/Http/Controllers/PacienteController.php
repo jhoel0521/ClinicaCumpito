@@ -60,7 +60,7 @@ class PacienteController extends Controller
         $patient->load([
             'medicalConditions',
             'consultations' => fn ($q) => $q->orderByDesc('consultation_date')
-                ->with(['vitalSigns', 'soapNote', 'prescription.items', 'laboratoryRequest.items', 'doctor']),
+                ->with(['vitalSigns', 'soapNote', 'prescriptions.items', 'laboratoryRequests.items', 'doctor']),
         ]);
 
         $latestConsultation = $patient->consultations->first();

@@ -342,7 +342,7 @@
                     @endif
 
                     {{-- Receta --}}
-                    @if ($latestConsultation->prescription && $latestConsultation->prescription->items->isNotEmpty())
+                    @if ($latestConsultation->prescriptions->isNotEmpty() && $latestConsultation->prescriptions->flatMap(fn ($p) => $p->items)->isNotEmpty())
                         <div
                             class="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-700 p-5"
                         >
@@ -352,7 +352,7 @@
                                 Receta
                             </h3>
                             <ul class="space-y-2 text-sm">
-                                @foreach ($latestConsultation->prescription->items as $item)
+                                @foreach ($latestConsultation->prescriptions->flatMap(fn ($p) => $p->items) as $item)
                                     <li class="flex gap-2 items-start">
                                         <span class="text-teal-500 mt-0.5">💊</span>
                                         <div>
@@ -370,7 +370,7 @@
                     @endif
 
                     {{-- Laboratorio --}}
-                    @if ($latestConsultation->laboratoryRequest && $latestConsultation->laboratoryRequest->items->isNotEmpty())
+                    @if ($latestConsultation->laboratoryRequests->isNotEmpty() && $latestConsultation->laboratoryRequests->flatMap(fn ($r) => $r->items)->isNotEmpty())
                         <div
                             class="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-700 p-5"
                         >
@@ -380,7 +380,7 @@
                                 Laboratorio Solicitado
                             </h3>
                             <ul class="space-y-1.5 text-sm">
-                                @foreach ($latestConsultation->laboratoryRequest->items as $item)
+                                @foreach ($latestConsultation->laboratoryRequests->flatMap(fn ($r) => $r->items) as $item)
                                     <li class="flex gap-2 items-start">
                                         <span class="text-blue-500 mt-0.5">🧪</span>
                                         <span class="text-zinc-700 dark:text-zinc-300">{{ $item->exam_name }}</span>
@@ -485,11 +485,11 @@
                                                 <span title="SOAP" class="text-teal-400 text-xs">SOAP</span>
                                             @endif
 
-                                            @if ($consultation->prescription)
+                                            @if ($consultation->prescriptions->isNotEmpty())
                                                 <span title="Receta" class="text-purple-400 text-xs">Rx</span>
                                             @endif
 
-                                            @if ($consultation->laboratoryRequest)
+                                            @if ($consultation->laboratoryRequests->isNotEmpty())
                                                 <span title="Laboratorio" class="text-orange-400 text-xs">Lab</span>
                                             @endif
                                         </div>
@@ -521,9 +521,7 @@
             <h2 class="text-xl font-bold text-zinc-800 dark:text-zinc-100 mb-4">Historial de Recetas</h2>
 
             @php
-                $consultasConReceta = $patient->consultations->filter(
-                    fn ($c) => $c->prescription && $c->prescription->items->isNotEmpty(),
-                );
+                $consultasConReceta = $patient->consultations->filter(fn ($c) => $c->prescriptions->isNotEmpty() && $c->prescriptions->flatMap(fn ($p) => $p->items)->isNotEmpty());
             @endphp
 
             @if ($consultasConReceta->isNotEmpty())
@@ -547,7 +545,7 @@
                                 </a>
                             </div>
                             <ul class="space-y-1.5 text-sm">
-                                @foreach ($consultation->prescription->items as $item)
+                                @foreach ($consultation->prescriptions->flatMap(fn ($p) => $p->items) as $item)
                                     <li class="flex gap-3 items-start">
                                         <span class="text-purple-400 flex-shrink-0">💊</span>
                                         <div class="text-zinc-700 dark:text-zinc-300">
@@ -581,7 +579,7 @@
             <h2 class="text-xl font-bold text-zinc-800 dark:text-zinc-100 mb-4">Historial de Laboratorios</h2>
 
             @php
-                $consultasConLab = $patient->consultations->filter(fn ($c) => $c->laboratoryRequest && $c->laboratoryRequest->items->isNotEmpty());
+                $consultasConLab = $patient->consultations->filter(fn ($c) => $c->laboratoryRequests->isNotEmpty() && $c->laboratoryRequests->flatMap(fn ($r) => $r->items)->isNotEmpty());
             @endphp
 
             @if ($consultasConLab->isNotEmpty())
@@ -605,7 +603,7 @@
                                 </a>
                             </div>
                             <ul class="space-y-1.5 text-sm">
-                                @foreach ($consultation->laboratoryRequest->items as $item)
+                                @foreach ($consultation->laboratoryRequests->flatMap(fn ($r) => $r->items) as $item)
                                     <li class="flex gap-3 items-start">
                                         <span class="text-blue-400 flex-shrink-0">🧪</span>
                                         <div class="text-zinc-700 dark:text-zinc-300">

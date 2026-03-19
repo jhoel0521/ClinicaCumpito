@@ -9,6 +9,10 @@
         <x-ui.button type="button" variant="secondary" onclick="document.getElementById('{{ $id }}').showModal()">
             {{ $triggerText }}
         </x-ui.button>
+    @elseif (isset($trigger))
+        <span onclick="document.getElementById('{{ $id }}').showModal()" style="cursor: pointer">
+            {{ $trigger }}
+        </span>
     @endif
 
     <dialog

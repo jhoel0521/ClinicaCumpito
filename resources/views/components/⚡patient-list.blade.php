@@ -58,7 +58,7 @@ new class extends Component {
     <div class="flex flex-col sm:flex-row gap-4 mb-6">
         <div class="relative flex-1 max-w-md">
             <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
-                <i class="fas fa-search font-light"></i>
+                <flux:icon.magnifying-glass class="size-4" />
             </span>
             <x-ui.input
                 wire:model.live.debounce.300ms="search"
@@ -222,14 +222,14 @@ new class extends Component {
                                     class="text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 transition"
                                     title="Ver Detalles"
                                 >
-                                    <i class="fas fa-eye text-lg"></i>
+                                    <flux:icon.eye class="size-5" />
                                 </a>
                                 <a
                                     href="{{ route('pacientes.edit', $patient->id) }}"
                                     class="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition"
                                     title="Editar"
                                 >
-                                    <i class="fas fa-edit text-lg"></i>
+                                    <flux:icon.pencil-square class="size-5" />
                                 </a>
                                 <x-ui.modal
                                     :id="'delete-patient-' . $patient->id"
@@ -242,7 +242,7 @@ new class extends Component {
                                             class="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition"
                                             title="Eliminar"
                                         >
-                                            <i class="fas fa-trash-alt text-lg"></i>
+                                            <flux:icon.trash class="size-5" />
                                         </button>
                                     </x-slot>
                                     <p class="text-gray-700 dark:text-gray-300">

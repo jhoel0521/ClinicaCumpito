@@ -51,6 +51,14 @@ class PatientVaccineService implements PatientVaccineServiceContract
             ->get();
     }
 
+    public function listAllForPatient(string $patientId): Collection
+    {
+        return PatientVaccine::with('vaccine')
+            ->where('patient_id', $patientId)
+            ->orderBy('applied_at')
+            ->get();
+    }
+
     public function delete(string $patientVaccineId): bool
     {
         $patientVaccine = PatientVaccine::findOrFail($patientVaccineId);

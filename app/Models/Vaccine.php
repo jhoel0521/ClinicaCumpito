@@ -18,6 +18,7 @@ class Vaccine extends Model
         'disease_prevented',
         'recommended_age',
         'dose_sequence',
+        'min_age_months',
     ];
 
     /** @return HasMany<PatientVaccine, $this> */

@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('disease_prevented')->nullable();
             $table->string('recommended_age')->nullable();
             $table->integer('dose_sequence')->nullable();
+            $table->unsignedSmallInteger('min_age_months')->nullable(); // edad mínima en meses (0 = recién nacido)
             $table->softDeletes();
             $table->timestamps();
         });

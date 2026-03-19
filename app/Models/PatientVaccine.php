@@ -16,6 +16,7 @@ class PatientVaccine extends Model
 
     protected $casts = [
         'applied_at' => 'datetime',
+        'applied_elsewhere' => 'boolean',
     ];
 
     protected $fillable = [
@@ -27,6 +28,7 @@ class PatientVaccine extends Model
         'applied_at',
         'dose_number',
         'notes',
+        'applied_elsewhere',
     ];
 
     /** @return BelongsTo<Patient, $this> */

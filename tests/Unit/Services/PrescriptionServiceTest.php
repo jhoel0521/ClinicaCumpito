@@ -6,7 +6,7 @@ use App\Models\Prescription;
 use App\Services\PrescriptionService;
 
 describe('PrescriptionService', function () {
-    test('upsert crea receta para una consulta', function () {
+    test('createForConsultation crea receta para una consulta', function () {
         $service = new PrescriptionService;
         $consultation = Consultation::factory()->create([
             'status' => 'saved',
@@ -16,14 +16,14 @@ describe('PrescriptionService', function () {
             'observations' => 'Control en 72 horas.',
         ]);
 
-        $prescription = $service->upsert($consultation->id, $dto);
+        $prescription = $service->createForConsultation($consultation->id, $dto);
 
         expect($prescription)->toBeInstanceOf(Prescription::class)
             ->and($prescription->consultation_id)->toBe($consultation->id)
             ->and($prescription->observations)->toBe('Control en 72 horas.');
     });
 
-    test('upsert falla en consulta finalizada', function () {
+    test('createForConsultation falla en consulta finalizada', function () {
         $service = new PrescriptionService;
         $consultation = Consultation::factory()->create([
             'status' => 'finalized',
@@ -34,10 +34,10 @@ describe('PrescriptionService', function () {
         ]);
 
         $this->expectException(DomainException::class);
-        $service->upsert($consultation->id, $dto);
+        $service->createForConsultation($consultation->id, $dto);
     });
 
-    test('deleteByConsultation elimina receta existente', function () {
+    test('delete elimina receta existente', function () {
         $service = new PrescriptionService;
         $consultation = Consultation::factory()->create([
             'status' => 'saved',
@@ -46,7 +46,7 @@ describe('PrescriptionService', function () {
             'consultation_id' => $consultation->id,
         ]);
 
-        $deleted = $service->deleteByConsultation($prescription->consultation_id);
+        $deleted = $service->delete($prescription->id);
 
         expect($deleted)->toBeTrue();
         expect(Prescription::find($prescription->id))->toBeNull();

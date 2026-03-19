@@ -18,6 +18,7 @@ class Prescription extends Model
 
     protected $fillable = [
         'consultation_id',
+        'reason',
         'observations',
     ];
 

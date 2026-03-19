@@ -13,6 +13,7 @@ return new class extends Migration
             $table->uuid('prescription_id');
             $table->string('medication_name');
             $table->string('dose');
+            $table->string('quantity')->nullable();
             $table->string('frequency');
             $table->string('duration');
             $table->text('instructions')->nullable();

@@ -17,6 +17,7 @@ return new class extends Migration
             $table->uuid('medication_id')->nullable();
             $table->string('custom_medication_name')->nullable();
             $table->string('dose')->nullable();
+            $table->string('quantity')->nullable();
             $table->string('frequency')->nullable();
             $table->string('duration')->nullable();
             $table->text('instructions')->nullable();

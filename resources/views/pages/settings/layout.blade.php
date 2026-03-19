@@ -20,6 +20,12 @@
                     {{ __('Perfil Profesional') }}
                 </flux:navlist.item>
             @endrole
+
+            @role('Admin')
+                <flux:navlist.item :href="route('clinic.edit')" wire:navigate>
+                    {{ __('Datos de la Clínica') }}
+                </flux:navlist.item>
+            @endrole
         </flux:navlist>
     </div>
 

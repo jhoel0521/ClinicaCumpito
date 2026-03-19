@@ -9,6 +9,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
+            ClinicSettingSeeder::class,          // datos de la clínica (nombre, dirección, etc.)
             RolesAndPermissionsSeeder::class,   // roles: Admin, Doctor, Tecnico
             MedicalConditionSeeder::class,       // condiciones médicas pediátricas
             LaboratoryCatalogSeeder::class,      // categorías y exámenes de laboratorio

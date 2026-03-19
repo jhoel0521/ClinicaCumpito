@@ -11,6 +11,10 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['role:Doctor'])->group(function () {
         Route::livewire('settings/professional', 'pages::settings.doctor-profile')->name('doctor-profile.edit');
     });
+
+    Route::middleware(['role:Admin'])->group(function () {
+        Route::livewire('settings/clinica', 'pages::settings.clinic')->name('clinic.edit');
+    });
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {

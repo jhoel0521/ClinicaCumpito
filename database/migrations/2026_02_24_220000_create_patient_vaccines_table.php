@@ -18,6 +18,7 @@ return new class extends Migration
             $table->timestamp('applied_at');
             $table->unsignedTinyInteger('dose_number')->nullable();
             $table->text('notes')->nullable();
+            $table->boolean('applied_elsewhere')->default(false); // la mamá informa que fue aplicada en otro lugar
             $table->timestamps();
 
             $table->foreign('patient_id')

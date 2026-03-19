@@ -15,5 +15,8 @@ interface PatientVaccineServiceContract
     /** @return Collection<int, PatientVaccine> */
     public function listByConsultation(string $consultationId): Collection;
 
+    /** @return Collection<int, PatientVaccine> */
+    public function listAllForPatient(string $patientId): Collection;
+
     public function delete(string $patientVaccineId): bool;
 }

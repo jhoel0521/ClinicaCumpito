@@ -10,6 +10,7 @@ class VaccineDTO
         public readonly ?string $disease_prevented = null,
         public readonly ?string $recommended_age = null,
         public readonly ?int $dose_sequence = null,
+        public readonly ?int $min_age_months = null,
     ) {}
 
     /**
@@ -23,6 +24,7 @@ class VaccineDTO
             disease_prevented: $data['disease_prevented'] ?? null,
             recommended_age: $data['recommended_age'] ?? null,
             dose_sequence: isset($data['dose_sequence']) ? (int) $data['dose_sequence'] : null,
+            min_age_months: isset($data['min_age_months']) ? (int) $data['min_age_months'] : null,
         );
     }
 
@@ -37,6 +39,7 @@ class VaccineDTO
             'disease_prevented' => $this->disease_prevented,
             'recommended_age' => $this->recommended_age,
             'dose_sequence' => $this->dose_sequence,
+            'min_age_months' => $this->min_age_months,
         ], fn ($value) => ! is_null($value));
     }
 }

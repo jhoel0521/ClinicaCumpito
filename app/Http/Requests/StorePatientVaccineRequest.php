@@ -23,6 +23,7 @@ class StorePatientVaccineRequest extends FormRequest
             'application_site' => ['nullable', 'string', 'max:255'],
             'dose_number' => ['nullable', 'integer', 'min:1', 'max:20'],
             'notes' => ['nullable', 'string', 'max:1000'],
+            'applied_elsewhere' => ['boolean'],
         ];
     }
 }

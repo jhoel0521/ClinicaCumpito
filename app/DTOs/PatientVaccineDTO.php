@@ -11,6 +11,7 @@ class PatientVaccineDTO
         public readonly ?string $application_site,
         public readonly ?int $dose_number,
         public readonly ?string $notes,
+        public readonly bool $applied_elsewhere = false,
     ) {}
 
     /**
@@ -25,11 +26,12 @@ class PatientVaccineDTO
             application_site: isset($data['application_site']) ? (string) $data['application_site'] : null,
             dose_number: isset($data['dose_number']) ? (int) $data['dose_number'] : null,
             notes: isset($data['notes']) ? (string) $data['notes'] : null,
+            applied_elsewhere: isset($data['applied_elsewhere']) ? (bool) $data['applied_elsewhere'] : false,
         );
     }
 
     /**
-     * @return array<string, int|string|null>
+     * @return array<string, bool|int|string|null>
      */
     public function toArray(): array
     {
@@ -40,6 +42,7 @@ class PatientVaccineDTO
             'application_site' => $this->application_site,
             'dose_number' => $this->dose_number,
             'notes' => $this->notes,
+            'applied_elsewhere' => $this->applied_elsewhere,
         ];
     }
 }

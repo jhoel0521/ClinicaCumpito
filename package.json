@@ -5,13 +5,15 @@
     "scripts": {
         "build": "vite build",
         "dev": "vite",
-        "format:blade": "prettier --write resources/views/**/*.blade.php",
+        "format:blade": "prettier --write --log-level warn \"resources/views/**/*.blade.php\"",
         "lint:blade": "prettier --check resources/views/**/*.blade.php",
         "blade:fix": "npm run format:blade",
         "test": "php artisan test --testsuite=Unit,Feature",
         "test:browser": "php artisan dusk",
         "test:browser:filter": "php artisan dusk --filter",
-        "pre-commit:fast": "php vendor/bin/pint && npm run blade:fix && php vendor/bin/phpstan analyse",
+        "pre-commit:backend": "php vendor/bin/pint && php vendor/bin/phpstan analyse",
+        "pre-commit:frontend": "npm run blade:fix && npm run lint:blade",
+        "pre-commit:fast": "npm run pre-commit:backend && npm run pre-commit:frontend",
         "pre-commit": "npm run pre-commit:fast && npm run test"
     },
     "dependencies": {

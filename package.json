@@ -8,7 +8,7 @@
         "format:blade": "prettier --write --log-level warn \"resources/views/**/*.blade.php\"",
         "lint:blade": "prettier --check resources/views/**/*.blade.php",
         "blade:fix": "npm run format:blade",
-        "test": "php artisan test --testsuite=Unit,Feature",
+        "test": "php artisan test --compact --stop-on-failure",
         "test:browser": "php artisan dusk",
         "test:browser:filter": "php artisan dusk --filter",
         "pre-commit:backend": "php vendor/bin/pint && php vendor/bin/phpstan analyse",

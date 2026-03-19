@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class LaboratoryExam extends Model
@@ -29,5 +30,11 @@ class LaboratoryExam extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(LaboratoryCategory::class, 'category_id');
+    }
+
+    /** @return HasMany<LaboratoryExamParameter, $this> */
+    public function parameters(): HasMany
+    {
+        return $this->hasMany(LaboratoryExamParameter::class, 'exam_id')->orderBy('sort_order');
     }
 }

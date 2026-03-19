@@ -10,8 +10,7 @@ return new class extends Migration
     {
         Schema::create('laboratory_requests', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->uuid('consultation_id')->unique();
-            $table->uuid('source_template_id')->nullable();
+            $table->uuid('consultation_id');
             $table->text('observations')->nullable();
             $table->timestamps();
             $table->softDeletes();
@@ -20,11 +19,6 @@ return new class extends Migration
                 ->references('id')
                 ->on('consultations')
                 ->onDelete('cascade');
-
-            $table->foreign('source_template_id')
-                ->references('id')
-                ->on('laboratory_templates')
-                ->onDelete('set null');
         });
     }
 

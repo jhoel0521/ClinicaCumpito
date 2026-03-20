@@ -25,6 +25,8 @@ new class extends Component {
 
     public string $error = '';
 
+    public bool $showAllPoints = false;
+
     private const TIPO_MAP = [
         'peso' => 'peso_edad',
         'talla' => 'talla_edad',
@@ -395,7 +397,7 @@ new class extends Component {
                                 </tr>
                             </thead>
                             <tbody class="bg-white dark:bg-zinc-900 divide-y divide-gray-100 dark:divide-zinc-800">
-                                @foreach ($this->chartData['patient_datapoints'] as $point)
+                                @foreach ($this->showAllPoints ? $this->chartData['patient_datapoints'] : array_slice($this->chartData['patient_datapoints'], 0, 5) as $point)
                                     @php
                                         $colors = [
                                             'Normal' => 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300',
@@ -431,6 +433,17 @@ new class extends Component {
                             </tbody>
                         </table>
                     </div>
+                    @if (count($this->chartData['patient_datapoints']) > 5)
+                        <div class="mt-2 text-center">
+                            <flux:button size="sm" variant="ghost" wire:click="$toggle('showAllPoints')">
+                                @if ($this->showAllPoints)
+                                    Ver menos
+                                @else
+                                    Ver todos los {{ count($this->chartData['patient_datapoints']) }} puntos
+                                @endif
+                            </flux:button>
+                        </div>
+                    @endif
                 </div>
             @else
                 <div
@@ -564,8 +577,13 @@ new class extends Component {
                 };
 
                 const xAxisConfig = {
-                    grid: { display: false },
-                    title: { display: true, text: xL },
+                    grid: {
+                        display: false,
+                    },
+                    title: {
+                        display: true,
+                        text: xL,
+                    },
                 };
                 if (this._maxX !== null) {
                     xAxisConfig.max = this._maxX;
@@ -581,7 +599,10 @@ new class extends Component {
                         responsive: true,
                         maintainAspectRatio: false,
                         animation: false,
-                        interaction: { mode: 'index', intersect: false },
+                        interaction: {
+                            mode: 'index',
+                            intersect: false,
+                        },
                         plugins: {
                             legend: {
                                 display: true,
@@ -594,8 +615,12 @@ new class extends Component {
                             },
                             tooltip: {
                                 backgroundColor: 'rgba(30, 41, 59, 0.92)',
-                                titleFont: { size: 13 },
-                                bodyFont: { size: 12 },
+                                titleFont: {
+                                    size: 13,
+                                },
+                                bodyFont: {
+                                    size: 12,
+                                },
                                 padding: 10,
                                 cornerRadius: 6,
                                 callbacks: {
@@ -624,8 +649,13 @@ new class extends Component {
                         scales: {
                             x: xAxisConfig,
                             y: {
-                                grid: { color: '#f3f4f620' },
-                                title: { display: true, text: yL },
+                                grid: {
+                                    color: '#f3f4f620',
+                                },
+                                title: {
+                                    display: true,
+                                    text: yL,
+                                },
                             },
                         },
                     },

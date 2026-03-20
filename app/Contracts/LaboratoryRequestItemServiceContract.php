@@ -12,8 +12,6 @@ interface LaboratoryRequestItemServiceContract
 
     public function update(string $laboratoryRequestItemId, LaboratoryRequestItemDTO $dto): LaboratoryRequestItem;
 
-    public function updateResult(string $laboratoryRequestItemId, ?string $resultValue, bool $isAbnormal, ?string $resultNotes): LaboratoryRequestItem;
-
     /** @return Collection<int, LaboratoryRequestItem> */
     public function listByRequest(string $laboratoryRequestId): Collection;
 

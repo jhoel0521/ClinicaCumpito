@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class LaboratoryRequestItem extends Model
 {
@@ -18,21 +19,25 @@ class LaboratoryRequestItem extends Model
         'laboratory_request_id',
         'exam_name',
         'parameter_name',
-        'indications',
-        'result_value',
-        'is_abnormal',
-        'result_notes',
-        'result_received_at',
-    ];
-
-    protected $casts = [
-        'is_abnormal' => 'boolean',
-        'result_received_at' => 'datetime',
     ];
 
     /** @return BelongsTo<LaboratoryRequest, $this> */
     public function laboratoryRequest(): BelongsTo
     {
         return $this->belongsTo(LaboratoryRequest::class);
+    }
+
+    /** @return HasMany<LaboratoryItemResult, $this> */
+    public function results(): HasMany
+    {
+        return $this->hasMany(LaboratoryItemResult::class, 'laboratory_request_item_id')
+            ->orderBy('sort_order');
+    }
+
+    /** @return HasMany<LaboratoryAttachment, $this> */
+    public function attachments(): HasMany
+    {
+        return $this->hasMany(LaboratoryAttachment::class, 'laboratory_request_item_id')
+            ->orderBy('sort_order');
     }
 }

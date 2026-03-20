@@ -7,7 +7,6 @@ use App\DTOs\ConsultationDTO;
 use App\Http\Requests\StoreConsultationRequest;
 use App\Http\Requests\UpdateConsultationRequest;
 use App\Models\Consultation;
-use App\Models\LaboratoryTemplate;
 use App\Models\Patient;
 use App\Models\PrescriptionTemplate;
 use App\Models\Vaccine;
@@ -104,17 +103,12 @@ class ConsultationController extends Controller
 
         $consulta->load([
             'patient', 'doctor', 'vitalSigns', 'soapNote',
-            'prescriptions.appliedTemplates', 'prescriptions.items',
-            'laboratoryRequests.appliedTemplates', 'laboratoryRequests.items',
+            'prescriptions.items',
+            'laboratoryRequests.items',
             'patientVaccines.vaccine',
         ]);
         $vaccines = Vaccine::query()->orderBy('name')->get(['id', 'name']);
         $prescriptionTemplates = PrescriptionTemplate::query()
-            ->where('doctor_id', $consulta->doctor_id)
-            ->where('is_active', true)
-            ->orderBy('name')
-            ->get(['id', 'name']);
-        $laboratoryTemplates = LaboratoryTemplate::query()
             ->where('doctor_id', $consulta->doctor_id)
             ->where('is_active', true)
             ->orderBy('name')
@@ -124,7 +118,6 @@ class ConsultationController extends Controller
             'consultation' => $consulta,
             'vaccines' => $vaccines,
             'prescriptionTemplates' => $prescriptionTemplates,
-            'laboratoryTemplates' => $laboratoryTemplates,
         ]);
     }
 

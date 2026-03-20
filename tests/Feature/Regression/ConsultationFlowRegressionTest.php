@@ -168,7 +168,6 @@ describe('8.3 — Regresión: flujo completo de consulta SOAP', function (): voi
         $this->actingAs($this->user)
             ->post(route('consultas.laboratory-request-items.store', $consultation->id), [
                 'exam_name' => 'Hemograma completo',
-                'indications' => 'Toma venosa.',
             ])
             ->assertRedirect();
 

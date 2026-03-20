@@ -29,20 +29,20 @@ describe('LaboratoryRequestController', function () {
         $consultation = Consultation::factory()->create([
             'status' => 'saved',
         ]);
-        LaboratoryRequest::factory()->create([
+        $labRequest = LaboratoryRequest::factory()->create([
             'consultation_id' => $consultation->id,
             'observations' => 'Observaciones originales.',
         ]);
 
         $response = $this->actingAs($user)
-            ->put(route('consultas.laboratory-requests.update', $consultation->id), [
+            ->put(route('consultas.laboratory-requests.update', [$consultation->id, $labRequest->id]), [
                 'observations' => 'Observaciones actualizadas.',
             ]);
 
         $response->assertRedirect(route('consultas.show', $consultation->id));
 
         $this->assertDatabaseHas('laboratory_requests', [
-            'consultation_id' => $consultation->id,
+            'id' => $labRequest->id,
             'observations' => 'Observaciones actualizadas.',
         ]);
     });
@@ -52,19 +52,34 @@ describe('LaboratoryRequestController', function () {
         $consultation = Consultation::factory()->create([
             'status' => 'saved',
         ]);
-        LaboratoryRequest::factory()->create([
+        $labRequest = LaboratoryRequest::factory()->create([
             'consultation_id' => $consultation->id,
         ]);
 
         $response = $this->actingAs($user)
-            ->delete(route('consultas.laboratory-requests.destroy', $consultation->id));
+            ->delete(route('consultas.laboratory-requests.destroy', [$consultation->id, $labRequest->id]));
 
         $response->assertRedirect(route('consultas.show', $consultation->id));
 
-        $this->assertDatabaseMissing('laboratory_requests', [
-            'consultation_id' => $consultation->id,
-            'deleted_at' => null,
+        $this->assertSoftDeleted('laboratory_requests', [
+            'id' => $labRequest->id,
         ]);
+    });
+
+    test('update retorna 404 si la orden no pertenece a la consulta', function () {
+        $user = User::factory()->create();
+        $consultation = Consultation::factory()->create(['status' => 'saved']);
+        $otherConsultation = Consultation::factory()->create(['status' => 'saved']);
+        $labRequest = LaboratoryRequest::factory()->create([
+            'consultation_id' => $otherConsultation->id,
+        ]);
+
+        $response = $this->actingAs($user)
+            ->put(route('consultas.laboratory-requests.update', [$consultation->id, $labRequest->id]), [
+                'observations' => 'Intento inválido.',
+            ]);
+
+        $response->assertNotFound();
     });
 
     test('no permite crear solicitud de laboratorio en consulta finalizada', function () {

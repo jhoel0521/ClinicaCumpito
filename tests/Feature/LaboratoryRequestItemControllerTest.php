@@ -16,7 +16,6 @@ describe('LaboratoryRequestItemController', function () {
         $response = $this->actingAs($user)
             ->post(route('consultas.laboratory-request-items.store', $consultation->id), [
                 'exam_name' => 'Hemograma completo',
-                'indications' => 'Ayunas de 8 horas',
             ]);
 
         $response->assertRedirect(route('consultas.show', $consultation->id));
@@ -40,7 +39,6 @@ describe('LaboratoryRequestItemController', function () {
         $response = $this->actingAs($user)
             ->put(route('consultas.laboratory-request-items.update', [$consultation->id, $item->id]), [
                 'exam_name' => 'Glucosa en ayunas',
-                'indications' => 'Sin azúcar 12 horas antes',
             ]);
 
         $response->assertRedirect(route('consultas.show', $consultation->id));

@@ -167,7 +167,7 @@ new class extends Component {
 
 <section class="p-6">
     <div class="mb-4">
-        <flux:link :href="route('catalogs.oms-graficas')" icon="arrow-left">
+        <flux:link :href="route('settings.catalogs.oms-graficas')" icon="arrow-left">
             {{ __('Volver a Gráficas OMS') }}
         </flux:link>
     </div>

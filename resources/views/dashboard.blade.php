@@ -168,7 +168,7 @@
 
                 {{-- Plantillas --}}
                 <a
-                    href="{{ route('templates.index') }}"
+                    href="{{ route('settings.prescriptions') }}"
                     class="group relative overflow-hidden rounded-xl border border-indigo-200 dark:border-indigo-800 bg-gradient-to-br from-indigo-50 to-indigo-100 dark:from-indigo-900/50 dark:to-indigo-800/50 p-5 shadow-sm hover:shadow-md transition-all hover:border-indigo-400 dark:hover:border-indigo-600"
                 >
                     <div
@@ -261,7 +261,7 @@
                 {{-- Catálogos (solo Admin) --}}
                 @role('Admin')
                     <a
-                        href="{{ route('catalogs.index') }}"
+                        href="{{ route('settings.catalogs') }}"
                         class="group relative overflow-hidden rounded-xl border border-amber-200 dark:border-amber-800 bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/50 dark:to-amber-800/50 p-5 shadow-sm hover:shadow-md transition-all hover:border-amber-400 dark:hover:border-amber-600"
                     >
                         <div
@@ -391,7 +391,7 @@
                     </a>
 
                     <a
-                        href="{{ route('templates.prescriptions') }}"
+                        href="{{ route('settings.prescriptions') }}"
                         class="flex items-center gap-3 p-3 rounded-lg bg-indigo-50 dark:bg-indigo-900/40 border border-indigo-200 dark:border-indigo-800 hover:bg-indigo-100 dark:hover:bg-indigo-800/60 transition"
                     >
                         <i class="fas fa-file-medical-alt text-indigo-600 dark:text-indigo-400 w-5 text-center"></i>

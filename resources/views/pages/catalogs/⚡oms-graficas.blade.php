@@ -202,7 +202,7 @@ new class extends Component {
                                 variant="ghost"
                                 size="sm"
                                 icon="table-cells"
-                                :href="route('catalogs.oms-datos', $grafica->id)"
+                                :href="route('settings.catalogs.oms-datos', $grafica->id)"
                                 dusk="btn-ver-datos-{{ $grafica->id }}"
                             />
                             <flux:button

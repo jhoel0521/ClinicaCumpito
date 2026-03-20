@@ -5,12 +5,14 @@ namespace App\Services;
 use App\Contracts\CatalogServiceContract;
 use App\DTOs\Catalogs\LaboratoryCategoryDTO;
 use App\DTOs\Catalogs\LaboratoryExamDTO;
+use App\DTOs\Catalogs\MedicalConditionDTO;
 use App\DTOs\Catalogs\MedicationDTO;
 use App\DTOs\Catalogs\OmsCatalogoGraficaDTO;
 use App\DTOs\Catalogs\OmsDatoGraficaDTO;
 use App\DTOs\Catalogs\VaccineDTO;
 use App\Models\LaboratoryCategory;
 use App\Models\LaboratoryExam;
+use App\Models\MedicalCondition;
 use App\Models\Medication;
 use App\Models\OmsCatalogoGrafica;
 use App\Models\OmsDatoGrafica;
@@ -194,5 +196,34 @@ class CatalogService implements CatalogServiceContract
         return OmsDatoGrafica::where('oms_catalogo_grafica_id', $graficaId)
             ->orderBy('x_value')
             ->get();
+    }
+
+    // Medical Conditions
+    public function createMedicalCondition(MedicalConditionDTO $dto): MedicalCondition
+    {
+        return DB::transaction(fn () => MedicalCondition::create($dto->toArray()));
+    }
+
+    public function updateMedicalCondition(string $id, MedicalConditionDTO $dto): MedicalCondition
+    {
+        return DB::transaction(function () use ($id, $dto) {
+            $condition = MedicalCondition::findOrFail($id);
+            $condition->update($dto->toArray());
+
+            return $condition;
+        });
+    }
+
+    public function deleteMedicalCondition(string $id): bool
+    {
+        return (bool) DB::transaction(fn () => MedicalCondition::findOrFail($id)->delete());
+    }
+
+    /**
+     * @return Collection<int, MedicalCondition>
+     */
+    public function getAllMedicalConditions(): Collection
+    {
+        return MedicalCondition::orderBy('name')->get();
     }
 }

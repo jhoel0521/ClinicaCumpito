@@ -12,7 +12,7 @@ new class extends Component {
 
     public string $fullName = '';
 
-    public ?string $patientId = null;
+    public ?Patient $patient = null;
 
     public string $scanDate = '';
 
@@ -28,18 +28,24 @@ new class extends Component {
 
         $patient = Patient::create(['full_name' => $this->fullName]);
 
-        $this->patientId = $patient->id;
+        $this->patient = $patient;
         $this->step = 'scans';
     }
 
     public function uploadScan(): void
     {
+        if (! $this->patient) {
+            $this->addError('patient', 'Primero crea el paciente antes de subir archivos.');
+
+            return;
+        }
+
         $this->validate([
             'scanFile' => 'required|file|mimes:pdf,jpg,jpeg,png|max:20480',
             'scanDate' => 'required|date|before_or_equal:today',
         ]);
 
-        $patient = Patient::findOrFail($this->patientId);
+        $patient = $this->patient;
 
         /** @var \App\Models\User $uploader */
         $uploader = auth()->user();
@@ -205,7 +211,7 @@ new class extends Component {
                     @endif
                 </p>
                 <a
-                    href="{{ $patientId ? route('pacientes.show', $patientId) : '#' }}"
+                    href="{{ $patient ? route('pacientes.show', $patient) : '#' }}"
                     dusk="btn-finalizar-old"
                     @class([
                         'inline-flex items-center gap-2 font-semibold px-5 py-2.5 rounded-lg text-sm transition',

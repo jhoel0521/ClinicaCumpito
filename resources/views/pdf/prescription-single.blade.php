@@ -52,7 +52,6 @@
             @endif
 
             <div class="footer">
-                <div style="margin-bottom: 32px">&nbsp;</div>
                 <div>_________________________________</div>
                 <div><strong>{{ $consultation->doctor?->full_name ?? '' }}</strong></div>
                 @if ($consultation->doctor?->specialty)

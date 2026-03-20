@@ -7,6 +7,7 @@ class LaboratoryRequestDTO
     public function __construct(
         public readonly ?string $observations,
         public readonly string $status = 'pending',
+        public readonly ?string $presumptive_diagnosis = null,
     ) {}
 
     /**
@@ -19,6 +20,9 @@ class LaboratoryRequestDTO
                 ? (string) $data['observations']
                 : null,
             status: isset($data['status']) ? (string) $data['status'] : 'pending',
+            presumptive_diagnosis: isset($data['presumptive_diagnosis'])
+                ? (string) $data['presumptive_diagnosis']
+                : null,
         );
     }
 
@@ -30,6 +34,7 @@ class LaboratoryRequestDTO
         return [
             'observations' => $this->observations,
             'status' => $this->status,
+            'presumptive_diagnosis' => $this->presumptive_diagnosis,
         ];
     }
 }

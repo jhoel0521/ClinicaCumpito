@@ -19,6 +19,7 @@ class LaboratoryRequest extends Model
     protected $fillable = [
         'consultation_id',
         'observations',
+        'presumptive_diagnosis',
         'status',
     ];
 
@@ -38,6 +39,14 @@ class LaboratoryRequest extends Model
     public function appliedTemplates(): HasMany
     {
         return $this->hasMany(LaboratoryAppliedTemplate::class, 'laboratory_request_id')->orderBy('applied_at');
+    }
+
+    /** @return HasMany<LaboratoryAttachment, $this> */
+    public function attachments(): HasMany
+    {
+        return $this->hasMany(LaboratoryAttachment::class, 'laboratory_request_id')
+            ->whereNull('laboratory_request_item_id')
+            ->orderBy('sort_order');
     }
 
     public function isPending(): bool

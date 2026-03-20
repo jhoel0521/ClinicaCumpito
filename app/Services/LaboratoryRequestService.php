@@ -81,7 +81,6 @@ class LaboratoryRequestService implements LaboratoryRequestServiceContract
             LaboratoryRequestItem::create([
                 'laboratory_request_id' => $laboratoryRequestId,
                 'exam_name' => $examName,
-                'indications' => $templateItem->indications,
             ]);
         }
 

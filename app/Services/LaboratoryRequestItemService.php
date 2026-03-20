@@ -64,20 +64,6 @@ class LaboratoryRequestItemService implements LaboratoryRequestItemServiceContra
             ->get();
     }
 
-    public function updateResult(string $laboratoryRequestItemId, ?string $resultValue, bool $isAbnormal, ?string $resultNotes): LaboratoryRequestItem
-    {
-        $item = LaboratoryRequestItem::findOrFail($laboratoryRequestItemId);
-
-        $item->update([
-            'result_value' => $resultValue,
-            'is_abnormal' => $isAbnormal,
-            'result_notes' => $resultNotes,
-            'result_received_at' => $resultValue !== null ? now() : null,
-        ]);
-
-        return $item->fresh() ?? $item;
-    }
-
     public function delete(string $laboratoryRequestItemId): bool
     {
         $item = LaboratoryRequestItem::with('laboratoryRequest.consultation')->findOrFail($laboratoryRequestItemId);

@@ -38,15 +38,6 @@
                     </flux:sidebar.item>
 
                     <flux:sidebar.item
-                        icon="clipboard-document-list"
-                        :href="route('templates.index')"
-                        :current="request()->routeIs('templates.*')"
-                        wire:navigate
-                    >
-                        {{ __('Plantillas') }}
-                    </flux:sidebar.item>
-
-                    <flux:sidebar.item
                         icon="clipboard"
                         :href="route('consultas.index')"
                         :current="request()->routeIs('consultas.*')"
@@ -54,17 +45,73 @@
                     >
                         {{ __('Consultas') }}
                     </flux:sidebar.item>
+
+                    <flux:sidebar.item
+                        icon="clipboard-document-list"
+                        :href="route('settings.prescriptions')"
+                        :current="request()->routeIs('settings.prescriptions')"
+                        wire:navigate
+                    >
+                        {{ __('Recetas predefinidas') }}
+                    </flux:sidebar.item>
+                </flux:sidebar.group>
+
+                <flux:sidebar.group :heading="__('Mi cuenta')" class="grid">
+                    <flux:sidebar.item
+                        icon="cog-6-tooth"
+                        :href="route('profile.edit')"
+                        :current="request()->routeIs('profile.edit', 'doctor-profile.edit', 'clinic.edit', 'appearance.edit', 'user-password.edit', 'two-factor.show')"
+                        wire:navigate
+                    >
+                        {{ __('Ajustes') }}
+                    </flux:sidebar.item>
                 </flux:sidebar.group>
 
                 @role('Admin')
-                    <flux:sidebar.group :heading="__('Administración')" class="grid">
+                    <flux:sidebar.group :heading="__('Configuración')" class="grid">
                         <flux:sidebar.item
-                            icon="layout-grid"
-                            :href="route('catalogs.index')"
-                            :current="request()->routeIs('catalogs.*')"
+                            icon="beaker"
+                            :href="route('settings.catalogs.laboratories')"
+                            :current="request()->routeIs('settings.catalogs.laboratories')"
                             wire:navigate
                         >
-                            {{ __('Catálogos') }}
+                            {{ __('Laboratorios') }}
+                        </flux:sidebar.item>
+
+                        <flux:sidebar.item
+                            icon="cube"
+                            :href="route('settings.catalogs.medications')"
+                            :current="request()->routeIs('settings.catalogs.medications')"
+                            wire:navigate
+                        >
+                            {{ __('Medicamentos') }}
+                        </flux:sidebar.item>
+
+                        <flux:sidebar.item
+                            icon="shield-check"
+                            :href="route('settings.catalogs.vaccines')"
+                            :current="request()->routeIs('settings.catalogs.vaccines')"
+                            wire:navigate
+                        >
+                            {{ __('Vacunas') }}
+                        </flux:sidebar.item>
+
+                        <flux:sidebar.item
+                            icon="heart"
+                            :href="route('settings.catalogs.medical-conditions')"
+                            :current="request()->routeIs('settings.catalogs.medical-conditions')"
+                            wire:navigate
+                        >
+                            {{ __('Condiciones Médicas') }}
+                        </flux:sidebar.item>
+
+                        <flux:sidebar.item
+                            icon="chart-bar"
+                            :href="route('settings.catalogs.oms-graficas')"
+                            :current="request()->routeIs('settings.catalogs.oms-graficas*')"
+                            wire:navigate
+                        >
+                            {{ __('OMS Gráficas') }}
                         </flux:sidebar.item>
                     </flux:sidebar.group>
                 @endrole
@@ -87,22 +134,6 @@
                         <option value="light">Claro</option>
                     </select>
                 </div>
-
-                <flux:sidebar.item
-                    icon="folder-git-2"
-                    href="https://github.com/laravel/livewire-starter-kit"
-                    target="_blank"
-                >
-                    {{ __('Repository') }}
-                </flux:sidebar.item>
-
-                <flux:sidebar.item
-                    icon="book-open-text"
-                    href="https://laravel.com/docs/starter-kits#livewire"
-                    target="_blank"
-                >
-                    {{ __('Documentation') }}
-                </flux:sidebar.item>
             </flux:sidebar.nav>
 
             <x-desktop-user-menu class="hidden lg:block" :name="auth()->user()->name" />
@@ -179,20 +210,20 @@
                     {{ __('Pacientes') }}
                 </flux:navbar.item>
                 <flux:navbar.item
-                    icon="clipboard-document-list"
-                    :href="route('templates.index')"
-                    :current="request()->routeIs('templates.*')"
-                    wire:navigate
-                >
-                    {{ __('Plantillas') }}
-                </flux:navbar.item>
-                <flux:navbar.item
                     icon="clipboard"
                     :href="route('consultas.index')"
                     :current="request()->routeIs('consultas.*')"
                     wire:navigate
                 >
                     {{ __('Consultas') }}
+                </flux:navbar.item>
+                <flux:navbar.item
+                    icon="clipboard-document-list"
+                    :href="route('settings.prescriptions')"
+                    :current="request()->routeIs('settings.prescriptions')"
+                    wire:navigate
+                >
+                    {{ __('Recetas predefinidas') }}
                 </flux:navbar.item>
             </flux:navbar>
 

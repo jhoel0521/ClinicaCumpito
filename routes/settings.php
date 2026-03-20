@@ -32,3 +32,20 @@ Route::middleware(['auth', 'verified'])->group(function () {
         )
         ->name('two-factor.show');
 });
+
+// Recetas predefinidas
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::livewire('settings/prescriptions', 'pages::templates.prescription-templates')
+        ->name('settings.prescriptions');
+});
+
+// Catálogos (solo Admin)
+Route::middleware(['auth', 'verified', 'role:Admin'])->group(function () {
+    Route::livewire('settings/catalogs', 'pages::catalogs.index')->name('settings.catalogs');
+    Route::livewire('settings/catalogs/laboratories', 'pages::catalogs.laboratories')->name('settings.catalogs.laboratories');
+    Route::livewire('settings/catalogs/medications', 'pages::catalogs.medications')->name('settings.catalogs.medications');
+    Route::livewire('settings/catalogs/vaccines', 'pages::catalogs.vaccines')->name('settings.catalogs.vaccines');
+    Route::livewire('settings/catalogs/oms-graficas', 'pages::catalogs.oms-graficas')->name('settings.catalogs.oms-graficas');
+    Route::livewire('settings/catalogs/oms-datos/{graficaId}', 'pages::catalogs.oms-datos')->name('settings.catalogs.oms-datos');
+    Route::livewire('settings/catalogs/medical-conditions', 'pages::catalogs.medical-conditions')->name('settings.catalogs.medical-conditions');
+});

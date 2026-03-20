@@ -3,6 +3,7 @@
     <head>
         @include('partials.head')
     </head>
+
     <body class="antialiased" data-auth-layout>
         <div data-auth-card>
             <!-- Logo y Link a Home -->

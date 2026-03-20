@@ -3,6 +3,7 @@
     <head>
         @include('partials.head')
     </head>
+
     <body class="min-h-screen bg-white antialiased dark:bg-linear-to-b dark:from-neutral-950 dark:to-neutral-900">
         <div
             class="relative grid h-dvh flex-col items-center justify-center px-8 sm:px-0 lg:max-w-none lg:grid-cols-2 lg:px-0"
@@ -29,7 +30,9 @@
                 <div class="relative z-20 mt-auto">
                     <blockquote class="space-y-2">
                         <flux:heading size="lg">&ldquo;{{ trim($message) }}&rdquo;</flux:heading>
-                        <footer><flux:heading>{{ trim($author) }}</flux:heading></footer>
+                        <footer>
+                            <flux:heading>{{ trim($author) }}</flux:heading>
+                        </footer>
                     </blockquote>
                 </div>
             </div>

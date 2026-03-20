@@ -14,20 +14,24 @@
                 letter-spacing: 3px;
                 margin-bottom: 12px;
             }
+
             .patient-row {
                 width: 100%;
                 border-collapse: collapse;
                 font-size: 11px;
                 margin-bottom: 12px;
             }
+
             .patient-row td {
                 padding: 3px 4px 3px 0;
             }
+
             .pfield {
                 border-bottom: 1px solid #333;
                 display: inline-block;
                 min-width: 80px;
             }
+
             .exam-col-header {
                 background: #1e3a5f;
                 color: white;
@@ -37,16 +41,19 @@
                 letter-spacing: 0.5px;
                 padding: 5px 8px;
             }
+
             .exam-col-cell {
                 border: 1px solid #d1d5db;
                 vertical-align: top;
                 padding: 0;
             }
+
             .param-item {
                 padding: 4px 8px;
                 font-size: 10px;
                 border-bottom: 1px solid #f0f0f0;
             }
+
             .col-dx {
                 padding: 4px 8px;
                 font-size: 9px;
@@ -54,27 +61,33 @@
                 border-top: 1px solid #dbeafe;
                 background: #eff6ff;
             }
+
             .col-obs {
                 padding: 4px 8px;
                 font-size: 9px;
                 color: #555;
                 border-top: 1px dashed #e5e7eb;
             }
+
             .col-w-1 {
                 width: 100%;
             }
+
             .col-w-2 {
                 width: 50%;
             }
+
             .col-w-3 {
                 width: 33%;
             }
+
             .result-normal {
                 padding-left: 18px;
                 font-size: 9px;
                 color: #374151;
                 border-bottom: 1px solid #f0f0f0;
             }
+
             .result-abnormal {
                 padding-left: 18px;
                 font-size: 9px;
@@ -83,6 +96,7 @@
             }
         </style>
     </head>
+
     <body>
         <div class="page">
             @include('pdf._header')

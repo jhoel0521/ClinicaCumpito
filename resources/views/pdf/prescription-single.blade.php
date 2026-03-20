@@ -5,6 +5,7 @@
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         @include('pdf._style')
     </head>
+
     <body>
         <div class="page">
             @include('pdf._header')

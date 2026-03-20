@@ -14,20 +14,24 @@
                 letter-spacing: 3px;
                 margin-bottom: 12px;
             }
+
             .patient-row {
                 width: 100%;
                 border-collapse: collapse;
                 font-size: 11px;
                 margin-bottom: 12px;
             }
+
             .patient-row td {
                 padding: 3px 4px 3px 0;
             }
+
             .pfield {
                 border-bottom: 1px solid #333;
                 display: inline-block;
                 min-width: 80px;
             }
+
             .exam-cat-header {
                 background: #1e3a5f;
                 color: white;
@@ -37,6 +41,7 @@
                 letter-spacing: 1px;
                 padding: 6px 10px;
             }
+
             .param-cell {
                 border: 1px solid #d1d5db;
                 padding: 5px 10px;
@@ -44,6 +49,7 @@
                 vertical-align: middle;
                 width: 50%;
             }
+
             .obs-box {
                 margin-top: 10px;
                 padding: 5px 10px;
@@ -54,6 +60,7 @@
             }
         </style>
     </head>
+
     <body>
         <div class="page">
             {{-- Cabecera de clínica (logo, nombre, dirección) --}}

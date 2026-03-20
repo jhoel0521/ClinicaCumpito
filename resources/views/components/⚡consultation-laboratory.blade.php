@@ -725,7 +725,7 @@ new class extends Component {
                             <select
                                 wire:change="saveField('{{ $labReq['id'] }}', 'status', $event.target.value)"
                                 @disabled($finalized)
-                                class="text-xs rounded-full px-2 py-0.5 border font-medium transition focus:ring-1 focus:ring-sky-500 disabled:opacity-50 flex-shrink-0 @if($labReq['status'] === 'pending') bg-amber-50 dark:bg-amber-900/20 border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-300 @else bg-green-50 dark:bg-green-900/20 border-green-300 dark:border-green-700 text-green-700 dark:text-green-300 @endif"
+                                class="text-xs rounded-full px-2 py-0.5 border font-medium transition focus:ring-1 focus:ring-sky-500 disabled:opacity-50 flex-shrink-0 @if ($labReq['status'] === 'pending') bg-amber-50 dark:bg-amber-900/20 border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-300 @else bg-green-50 dark:bg-green-900/20 border-green-300 dark:border-green-700 text-green-700 dark:text-green-300 @endif"
                             >
                                 <option value="pending" @selected($labReq['status'] === 'pending')>Pendiente</option>
                                 <option value="received" @selected($labReq['status'] === 'received')>
@@ -993,8 +993,7 @@ new class extends Component {
                                                             @endforeach
 
                                                             @if (! $finalized)
-                                                                @if (
-                                                                $attachingToItemId === $item['id'] && $attachingToRequestId === $labReq['id']                                                                )
+                                                                @if ($attachingToItemId === $item['id'] && $attachingToRequestId === $labReq['id'])
                                                                     <div class="flex items-center gap-2">
                                                                         <input
                                                                             type="file"
@@ -1132,7 +1131,7 @@ new class extends Component {
                                 placeholder="Instrucciones para el paciente..."
                                 class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-900 text-gray-900 dark:text-gray-100 text-sm resize-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 disabled:opacity-50"
                             >
-{{ $labReq['observations'] }}</textarea
+                        {{ $labReq['observations'] }}</textarea
                             >
                         </div>
                     </div>

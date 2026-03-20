@@ -18,7 +18,6 @@ class StoreLaboratoryRequestItemRequest extends FormRequest
     {
         return [
             'exam_name' => ['required', 'string', 'max:255'],
-            'indications' => ['nullable', 'string', 'max:2000'],
         ];
     }
 }

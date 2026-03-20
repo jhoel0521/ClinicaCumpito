@@ -65,9 +65,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::post('consultas/{consulta}/laboratorios', [LaboratoryRequestController::class, 'store'])
         ->name('consultas.laboratory-requests.store');
-    Route::put('consultas/{consulta}/laboratorios', [LaboratoryRequestController::class, 'update'])
+    Route::put('consultas/{consulta}/laboratorios/{laboratoryRequest}', [LaboratoryRequestController::class, 'update'])
         ->name('consultas.laboratory-requests.update');
-    Route::delete('consultas/{consulta}/laboratorios', [LaboratoryRequestController::class, 'destroy'])
+    Route::delete('consultas/{consulta}/laboratorios/{laboratoryRequest}', [LaboratoryRequestController::class, 'destroy'])
         ->name('consultas.laboratory-requests.destroy');
 
     Route::post('consultas/{consulta}/laboratorios/detalles', [LaboratoryRequestItemController::class, 'store'])

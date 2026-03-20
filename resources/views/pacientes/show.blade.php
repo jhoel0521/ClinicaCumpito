@@ -608,9 +608,9 @@
                                         <span class="text-blue-400 flex-shrink-0">🧪</span>
                                         <div class="text-zinc-700 dark:text-zinc-300">
                                             <span class="font-medium">{{ $item->exam_name }}</span>
-                                            @if ($item->indications)
+                                            @if ($item->parameter_name)
                                                 <span class="text-zinc-500 dark:text-zinc-400">
-                                                    — {{ $item->indications }}
+                                                    — {{ $item->parameter_name }}
                                                 </span>
                                             @endif
                                         </div>

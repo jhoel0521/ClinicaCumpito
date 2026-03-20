@@ -60,7 +60,7 @@ class ConsultationSnapshotService implements ConsultationSnapshotServiceContract
                 throw new \DomainException('No se puede agregar plantillas de laboratorio a una consulta finalizada.');
             }
 
-            $request = LaboratoryRequest::firstOrCreate(
+            $request = LaboratoryRequest::create(
                 ['consultation_id' => $consultationId]
             );
 
@@ -68,7 +68,6 @@ class ConsultationSnapshotService implements ConsultationSnapshotServiceContract
                 LaboratoryRequestItem::create([
                     'laboratory_request_id' => $request->id,
                     'exam_name' => $templateItem->exam?->name,
-                    'indications' => $templateItem->indications,
                 ]);
             });
 

@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\PacienteController;
-use App\Models\Patient;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -16,8 +15,8 @@ Route::view('dashboard', 'dashboard')
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('pacientes/create-old', [PacienteController::class, 'createOld'])
         ->name('pacientes.create-old');
-    Route::resource('pacientes', PacienteController::class);
-    Route::model('paciente', Patient::class);
+    Route::resource('pacientes', PacienteController::class)
+        ->parameters(['pacientes' => 'patient']);
 });
 
 require __DIR__.'/settings.php';

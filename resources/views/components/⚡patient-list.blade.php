@@ -200,7 +200,7 @@ new class extends Component {
                         <td class="px-6 py-4 whitespace-nowrap">
                             @if (! $patient->hasCompleteBasicData())
                                 <a
-                                    href="{{ route('pacientes.edit', $patient->id) }}?require_complete=1"
+                                    href="{{ route('pacientes.edit', $patient) }}?require_complete=1"
                                     class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-900/60 transition"
                                     title="Completar datos básicos"
                                 >
@@ -218,14 +218,14 @@ new class extends Component {
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="flex items-center gap-2">
                                 <a
-                                    href="{{ route('pacientes.show', $patient->id) }}"
+                                    href="{{ route('pacientes.show', $patient) }}"
                                     class="text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 transition"
                                     title="Ver Detalles"
                                 >
                                     <flux:icon.eye class="size-5" />
                                 </a>
                                 <a
-                                    href="{{ route('pacientes.edit', $patient->id) }}"
+                                    href="{{ route('pacientes.edit', $patient) }}"
                                     class="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition"
                                     title="Editar"
                                 >

@@ -3,6 +3,7 @@
 use App\Contracts\ConsultationServiceContract;
 use App\DTOs\ConsultationDTO;
 use App\Models\Consultation;
+use App\Models\Patient;
 use App\ValueObjects\ConsultationStatus;
 use Livewire\Component;
 
@@ -15,7 +16,7 @@ new class extends Component {
 
     public string $patientName = '';
 
-    public string $patientId = '';
+    public ?Patient $patient = null;
 
     public string $doctorName = '';
 
@@ -31,8 +32,8 @@ new class extends Component {
                 ? $consultation->status->value()
                 : (string) $consultation->status;
         $this->consultation_date = optional($consultation->consultation_date)->format('Y-m-d\TH:i') ?? '';
+        $this->patient = $consultation->patient;
         $this->patientName = $consultation->patient->full_name;
-        $this->patientId = $consultation->patient->id;
         $this->doctorName = $consultation->doctor->full_name;
     }
 
@@ -106,7 +107,7 @@ new class extends Component {
         <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
             <div>
                 <a
-                    href="{{ route('pacientes.show', $patientId) }}"
+                    href="{{ route('pacientes.show', $patient) }}"
                     class="text-blue-200 hover:text-white text-sm transition mb-1 inline-flex items-center gap-1"
                 >
                     <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

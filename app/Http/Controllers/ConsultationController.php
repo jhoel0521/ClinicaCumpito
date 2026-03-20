@@ -34,7 +34,7 @@ class ConsultationController extends Controller
 
         if ($patient && ! $patient->hasCompleteBasicData()) {
             return redirect()
-                ->route('pacientes.edit', $patient->id)
+                ->route('pacientes.edit', $patient)
                 ->with('require_complete', true);
         }
 
@@ -49,7 +49,7 @@ class ConsultationController extends Controller
 
         if (! $patient->hasCompleteBasicData()) {
             return redirect()
-                ->route('pacientes.edit', $patient->id)
+                ->route('pacientes.edit', $patient)
                 ->with('require_complete', true);
         }
 
@@ -78,7 +78,7 @@ class ConsultationController extends Controller
 
         if (! $patient->hasCompleteBasicData()) {
             return redirect()
-                ->route('pacientes.edit', $patient->id)
+                ->route('pacientes.edit', $patient)
                 ->with('require_complete', true)
                 ->withErrors(['patient_id' => 'Completa la fecha de nacimiento y el sexo del paciente antes de crear una consulta.',
                 ]);

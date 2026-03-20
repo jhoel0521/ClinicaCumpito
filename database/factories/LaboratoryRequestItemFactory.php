@@ -18,7 +18,6 @@ class LaboratoryRequestItemFactory extends Factory
         return [
             'laboratory_request_id' => LaboratoryRequest::factory(),
             'exam_name' => $this->faker->words(3, true),
-            'indications' => $this->faker->optional()->sentence(),
         ];
     }
 }

@@ -16,7 +16,6 @@ describe('LaboratoryRequestItemService', function () {
 
         $dto = LaboratoryRequestItemDTO::fromArray([
             'exam_name' => 'Hemograma completo',
-            'indications' => 'Ayunas de 8 horas',
         ]);
 
         $item = $service->create($labRequest->id, $dto);
@@ -53,13 +52,11 @@ describe('LaboratoryRequestItemService', function () {
 
         $dto = LaboratoryRequestItemDTO::fromArray([
             'exam_name' => 'Urocultivo',
-            'indications' => 'Muestra de orina de primera hora',
         ]);
 
         $updated = $service->update($item->id, $dto);
 
-        expect($updated->exam_name)->toBe('Urocultivo')
-            ->and($updated->indications)->toBe('Muestra de orina de primera hora');
+        expect($updated->exam_name)->toBe('Urocultivo');
     });
 
     test('listByRequest retorna ítems de la solicitud', function () {

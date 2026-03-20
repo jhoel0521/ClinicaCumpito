@@ -52,7 +52,7 @@ describe('ConsultationSnapshotService', function () {
 
         LaboratoryTemplateItem::factory()
             ->for($template, 'template')
-            ->create(['indications' => 'Ayunas de 8 horas']);
+            ->create();
 
         $request = $this->service->snapshotLaboratoryFromTemplate(
             $this->consultation->id,
@@ -60,7 +60,6 @@ describe('ConsultationSnapshotService', function () {
         );
 
         expect($request->items())->count()->toBe(1);
-        expect($request->items->first()->indications)->toBe('Ayunas de 8 horas');
     });
 
     test('lockConsultationSnapshots establece status FINALIZED', function () {

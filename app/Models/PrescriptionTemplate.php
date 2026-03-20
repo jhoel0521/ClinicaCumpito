@@ -41,12 +41,4 @@ class PrescriptionTemplate extends Model
     {
         return $this->hasMany(PrescriptionTemplateItem::class, 'template_id');
     }
-
-    /**
-     * @return HasMany<PrescriptionAppliedTemplate, $this>
-     */
-    public function appliedIn(): HasMany
-    {
-        return $this->hasMany(PrescriptionAppliedTemplate::class, 'template_id');
-    }
 }

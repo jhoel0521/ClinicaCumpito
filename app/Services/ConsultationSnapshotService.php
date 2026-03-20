@@ -5,8 +5,6 @@ namespace App\Services;
 use App\Contracts\ConsultationSnapshotServiceContract;
 use App\Models\Consultation;
 use App\Models\LaboratoryRequest;
-use App\Models\LaboratoryRequestItem;
-use App\Models\LaboratoryTemplate;
 use App\Models\Prescription;
 use App\Models\PrescriptionItem;
 use App\Models\PrescriptionTemplate;
@@ -44,36 +42,6 @@ class ConsultationSnapshotService implements ConsultationSnapshotServiceContract
             $fresh = $prescription->fresh(['items']);
             if (! $fresh instanceof Prescription) {
                 throw new \RuntimeException('No se pudo refrescar la receta snapshot.');
-            }
-
-            return $fresh;
-        });
-    }
-
-    public function snapshotLaboratoryFromTemplate(string $consultationId, string $templateId): LaboratoryRequest
-    {
-        return DB::transaction(function () use ($consultationId, $templateId): LaboratoryRequest {
-            $consultation = Consultation::findOrFail($consultationId);
-            $template = LaboratoryTemplate::findOrFail($templateId);
-
-            if ($this->isConsultationFinalized($consultation)) {
-                throw new \DomainException('No se puede agregar plantillas de laboratorio a una consulta finalizada.');
-            }
-
-            $request = LaboratoryRequest::create(
-                ['consultation_id' => $consultationId]
-            );
-
-            $template->items()->each(function ($templateItem) use ($request) {
-                LaboratoryRequestItem::create([
-                    'laboratory_request_id' => $request->id,
-                    'exam_name' => $templateItem->exam?->name,
-                ]);
-            });
-
-            $fresh = $request->fresh(['items']);
-            if (! $fresh instanceof LaboratoryRequest) {
-                throw new \RuntimeException('No se pudo refrescar la solicitud de laboratorio snapshot.');
             }
 
             return $fresh;

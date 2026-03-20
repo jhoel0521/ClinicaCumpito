@@ -6,7 +6,6 @@ use App\Contracts\PrescriptionServiceContract;
 use App\DTOs\PrescriptionDTO;
 use App\Models\Consultation;
 use App\Models\Prescription;
-use App\Models\PrescriptionAppliedTemplate;
 use App\Models\PrescriptionItem;
 use App\Models\PrescriptionTemplate;
 use App\ValueObjects\ConsultationStatus;
@@ -90,22 +89,14 @@ class PrescriptionService implements PrescriptionServiceContract
             ]);
         }
 
-        // Record which template was applied (audit trail)
-        PrescriptionAppliedTemplate::create([
-            'prescription_id' => $prescriptionId,
-            'template_id' => $templateId,
-            'template_name' => $template->name,
-            'applied_at' => now(),
-        ]);
-
-        return $prescription->fresh(['consultation', 'items', 'appliedTemplates'])
+        return $prescription->fresh(['consultation', 'items'])
             ?? $prescription;
     }
 
     /** @return Collection<int, Prescription> */
     public function listByConsultation(string $consultationId): Collection
     {
-        return Prescription::with(['items', 'appliedTemplates'])
+        return Prescription::with(['items'])
             ->where('consultation_id', $consultationId)
             ->orderBy('created_at')
             ->get();

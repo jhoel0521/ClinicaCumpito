@@ -35,12 +35,6 @@ class LaboratoryRequest extends Model
         return $this->hasMany(LaboratoryRequestItem::class, 'laboratory_request_id');
     }
 
-    /** @return HasMany<LaboratoryAppliedTemplate, $this> */
-    public function appliedTemplates(): HasMany
-    {
-        return $this->hasMany(LaboratoryAppliedTemplate::class, 'laboratory_request_id')->orderBy('applied_at');
-    }
-
     /** @return HasMany<LaboratoryAttachment, $this> */
     public function attachments(): HasMany
     {

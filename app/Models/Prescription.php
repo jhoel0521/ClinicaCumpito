@@ -33,10 +33,4 @@ class Prescription extends Model
     {
         return $this->hasMany(PrescriptionItem::class, 'prescription_id');
     }
-
-    /** @return HasMany<PrescriptionAppliedTemplate, $this> */
-    public function appliedTemplates(): HasMany
-    {
-        return $this->hasMany(PrescriptionAppliedTemplate::class, 'prescription_id')->orderBy('applied_at');
-    }
 }

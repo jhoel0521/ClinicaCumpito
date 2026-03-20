@@ -1,8 +1,6 @@
 <?php
 
 use App\Models\Doctor;
-use App\Models\LaboratoryCategory;
-use App\Models\LaboratoryExam;
 use App\Models\Medication;
 use App\Models\PrescriptionTemplate;
 use App\Models\User;
@@ -15,23 +13,13 @@ describe('Template module', function () {
         $this->user->update(['doctor_id' => $this->doctor->id]);
     });
 
-    test('rutas de plantillas requieren autenticacion', function () {
-        $this->get(route('templates.index'))->assertRedirect(route('login'));
-        $this->get(route('templates.prescriptions'))->assertRedirect(route('login'));
-        $this->get(route('templates.laboratories'))->assertRedirect(route('login'));
+    test('ruta de recetas predefinidas requiere autenticacion', function () {
+        $this->get(route('settings.prescriptions'))->assertRedirect(route('login'));
     });
 
-    test('doctor autenticado puede acceder al modulo de plantillas', function () {
+    test('doctor autenticado puede acceder a recetas predefinidas', function () {
         $this->actingAs($this->user)
-            ->get(route('templates.index'))
-            ->assertOk();
-
-        $this->actingAs($this->user)
-            ->get(route('templates.prescriptions'))
-            ->assertOk();
-
-        $this->actingAs($this->user)
-            ->get(route('templates.laboratories'))
+            ->get(route('settings.prescriptions'))
             ->assertOk();
     });
 
@@ -80,49 +68,6 @@ describe('Template module', function () {
         $this->assertDatabaseHas('prescription_template_items', [
             'template_id' => $template->id,
             'medication_id' => $medication->id,
-        ]);
-    });
-
-    test('openCreateModal resetea el formulario y dispara modal-show en laboratorio', function () {
-        $this->actingAs($this->user);
-
-        Livewire::test('pages::templates.laboratory-templates')
-            ->set('name', 'borrador lab')
-            ->call('openCreateModal')
-            ->assertSet('name', '')
-            ->assertSet('items', [])
-            ->assertSet('editingTemplateId', null)
-            ->assertDispatched('modal-show');
-    });
-
-    test('puede crear plantilla de laboratorio con items', function () {
-        $this->actingAs($this->user);
-
-        $category = LaboratoryCategory::factory()->create();
-        $exam = LaboratoryExam::factory()->create([
-            'category_id' => $category->id,
-        ]);
-
-        Livewire::test('pages::templates.laboratory-templates')
-            ->set('name', 'Laboratorio de prueba')
-            ->set('description', 'Plantilla para estudios clínicos')
-            ->set('isActive', true)
-            ->set('items', [[
-                'laboratory_exam_id' => $exam->id,
-                'indications' => 'Ayuno de 8 horas',
-            ]])
-            ->call('save')
-            ->assertHasNoErrors()
-            ->assertDispatched('modal-close');
-
-        $this->assertDatabaseHas('laboratory_templates', [
-            'doctor_id' => $this->doctor->id,
-            'name' => 'Laboratorio de prueba',
-        ]);
-
-        $this->assertDatabaseHas('laboratory_template_items', [
-            'laboratory_exam_id' => $exam->id,
-            'indications' => 'Ayuno de 8 horas',
         ]);
     });
 });

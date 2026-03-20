@@ -16,7 +16,7 @@ describe('OmsGraficasTest', function () {
         $user = User::factory()->create(['email_verified_at' => now()]);
         $this->actingAs($user);
 
-        $this->get('/catalogs/oms-graficas')->assertForbidden();
+        $this->get('/settings/catalogs/oms-graficas')->assertForbidden();
     });
 
     test('admin puede crear una boleta OMS', function () {

@@ -18,7 +18,7 @@ describe('OmsDatosTest', function () {
         $user = User::factory()->create(['email_verified_at' => now()]);
         $this->actingAs($user);
 
-        $this->get("/catalogs/oms-datos/{$catalogo->id}")->assertForbidden();
+        $this->get("/settings/catalogs/oms-datos/{$catalogo->id}")->assertForbidden();
     });
 
     test('admin puede crear un dato OMS', function () {

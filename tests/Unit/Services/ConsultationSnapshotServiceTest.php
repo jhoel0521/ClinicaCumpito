@@ -2,8 +2,6 @@
 
 use App\Models\Consultation;
 use App\Models\Doctor;
-use App\Models\LaboratoryTemplate;
-use App\Models\LaboratoryTemplateItem;
 use App\Models\Patient;
 use App\Models\PrescriptionTemplate;
 use App\Models\PrescriptionTemplateItem;
@@ -43,23 +41,6 @@ describe('ConsultationSnapshotService', function () {
 
         expect($prescription->items())->count()->toBe(2);
         expect($prescription->items->first()->dose)->toBe('500mg');
-    });
-
-    test('snapshotLaboratoryFromTemplate copia items de plantilla', function () {
-        $template = LaboratoryTemplate::factory()
-            ->for($this->doctor)
-            ->create(['name' => 'Perfil Básico']);
-
-        LaboratoryTemplateItem::factory()
-            ->for($template, 'template')
-            ->create();
-
-        $request = $this->service->snapshotLaboratoryFromTemplate(
-            $this->consultation->id,
-            $template->id
-        );
-
-        expect($request->items())->count()->toBe(1);
     });
 
     test('lockConsultationSnapshots establece status FINALIZED', function () {

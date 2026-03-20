@@ -6,7 +6,6 @@ use App\Models\Consultation;
 use App\Models\Doctor;
 use App\Models\LaboratoryCategory;
 use App\Models\LaboratoryExam;
-use App\Models\LaboratoryTemplate;
 use App\Models\Medication;
 use App\Models\OmsCatalogoGrafica;
 use App\Models\Patient;
@@ -489,48 +488,39 @@ class ClinicalWorkflowTest extends DuskTestCase
             'doctor_id' => $doctor->id,
         ]);
         $patient = Patient::factory()->create(['full_name' => 'Emilio Castillo']);
-        $labTemplate = LaboratoryTemplate::factory()->create([
-            'doctor_id' => $doctor->id,
-            'name' => 'Panel Básico',
-        ]);
+        $category = LaboratoryCategory::factory()->create(['name' => 'Hematología']);
+        $exam = LaboratoryExam::factory()->create(['name' => 'Hemograma completo', 'category_id' => $category->id]);
         $consultation = Consultation::factory()->create([
             'doctor_id' => $doctor->id,
             'patient_id' => $patient->id,
             'status' => 'saved',
         ]);
 
-        $this->browse(function (Browser $browser) use ($consultation, $labTemplate) {
+        $this->browse(function (Browser $browser) use ($consultation, $category, $exam) {
             // ── 1. Login ──────────────────────────────────────────────────────
             $this->loginAs($browser, 'lucia@clinica.com');
 
-            // ── 2. Ir a la consulta ───────────────────────────────────────────
-            // dusk="lab-source-template" y dusk="lab-observations" evitan colisión
-            // con los selects/textareas de nombre idéntico del formulario de Receta.
+            // ── 2. Ir a la consulta y abrir el formulario de lab ──────────────
             $browser
                 ->visit('/consultas/'.$consultation->id)
-                ->waitForText('Solicitud de Laboratorio', 10);
+                ->waitForText('Solicitudes de Laboratorio', 10);
 
-            // ── 3. Seleccionar plantilla y agregar observaciones ───────────────
-            // select() usa findByCss("select[dusk='lab-source-template']") como fallback.
-            // type() usa findByCss('textarea[dusk="lab-observations"]') como fallback.
-            // Los botones usan JS click para evitar ElementClickInterceptedException
-            // causado por el SVG del sidebar Flux que bloquea el click en (67, 636).
-            // script() retorna el resultado JS (array), no el Browser → no se puede encadenar
+            // ── 3. Abrir panel y seleccionar categoría/examen ─────────────────
+            $browser->script("document.querySelector('[dusk=\"section-laboratory\"] button').click()");
             $browser
-                ->select('[dusk="lab-source-template"]', $labTemplate->id)
-                ->type('textarea[dusk="lab-observations"]', 'Ayunas de 8 horas previo al examen.');
-            $browser->script("document.querySelector('[dusk=\"lab-save-btn\"]').click()");
-            $browser->waitForText('Guardado', 10);
-
-            // ── 4. Agregar un examen ───────────────────────────────────────────
-            // La sección de exámenes aparece tras guardar la solicitud ($labRequestId != null).
-            // Tras addItem(), el nombre del examen aparece en la lista con dusk="lab-exam-item".
-            $browser
-                ->waitFor('[dusk="lab-exam-name"]', 10)
-                ->type('[dusk="lab-exam-name"]', 'Hemograma completo')
-                ->type('[dusk="lab-indications"]', 'Sin restricciones');
-            $browser->script("document.querySelector('[dusk=\"lab-add-exam-btn\"]').click()");
-            $browser->waitForText('Hemograma completo', 10);
+                ->waitForText('Categoría', 10)
+                ->waitForText($category->name, 10);
+            $browser->script("
+                document.querySelectorAll('[dusk=\"section-laboratory\"] button')[1].click();
+            ");
+            $browser->waitForText($exam->name, 10);
+            $browser->script("
+                Array.from(document.querySelectorAll('[dusk=\"section-laboratory\"] button'))
+                    .find(b => b.textContent.trim() === '{$exam->name}').click();
+            ");
+            $browser->pause(500);
+            $browser->script("document.querySelector('button[wire\\\\:click=\"submitNewLabOrder\"]').click()");
+            $browser->waitForText($exam->name, 10);
         });
 
         $this->assertDatabaseHas('laboratory_requests', [

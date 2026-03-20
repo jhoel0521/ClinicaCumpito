@@ -17,14 +17,14 @@ test('catalogs index page is restricted to admins', function () {
     $user = User::factory()->create();
     // Non-admin user
     $this->actingAs($user)
-        ->get(route('catalogs.index'))
+        ->get(route('settings.catalogs'))
         ->assertForbidden();
 
     // Admin user
     $admin = User::factory()->create(['email_verified_at' => now()]);
     $admin->assignRole('Admin');
     $this->actingAs($admin)
-        ->get(route('catalogs.index'))
+        ->get(route('settings.catalogs'))
         ->assertOk();
 });
 

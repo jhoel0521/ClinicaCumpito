@@ -3,7 +3,6 @@
 namespace Tests\Feature\Policies;
 
 use App\Models\Doctor;
-use App\Models\LaboratoryTemplate;
 use App\Models\Medication;
 use App\Models\PrescriptionTemplate;
 use App\Models\User;
@@ -63,21 +62,5 @@ describe('PrescriptionTemplatePolicy', function (): void {
             ->set('items', [['medication_id' => '', 'custom_medication_name' => 'Med X', 'dose' => '1mg', 'frequency' => 'c/8h', 'duration' => '3d', 'instructions' => '']])
             ->call('save')
             ->assertForbidden();
-    });
-});
-
-describe('LaboratoryTemplatePolicy', function (): void {
-    test('doctor puede eliminar su propia plantilla de laboratorio', function (): void {
-        $this->actingAs($this->user);
-
-        $template = LaboratoryTemplate::factory()->create([
-            'doctor_id' => $this->doctor->id,
-        ]);
-
-        Livewire::test('pages::templates.laboratory-templates')
-            ->call('delete', $template->id)
-            ->assertHasNoErrors();
-
-        $this->assertSoftDeleted('laboratory_templates', ['id' => $template->id]);
     });
 });

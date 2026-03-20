@@ -342,7 +342,10 @@
                     @endif
 
                     {{-- Receta --}}
-                    @if ($latestConsultation->prescriptions->isNotEmpty() && $latestConsultation->prescriptions->flatMap(fn ($p) => $p->items)->isNotEmpty())
+                    @if (
+
+                        $latestConsultation->prescriptions->isNotEmpty() &&
+                        $latestConsultation->prescriptions->flatMap(fn ($p) => $p->items)->isNotEmpty()                    )
                         <div
                             class="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-700 p-5"
                         >
@@ -370,7 +373,10 @@
                     @endif
 
                     {{-- Laboratorio --}}
-                    @if ($latestConsultation->laboratoryRequests->isNotEmpty() && $latestConsultation->laboratoryRequests->flatMap(fn ($r) => $r->items)->isNotEmpty())
+                    @if (
+
+                        $latestConsultation->laboratoryRequests->isNotEmpty() &&
+                        $latestConsultation->laboratoryRequests->flatMap(fn ($r) => $r->items)->isNotEmpty()                    )
                         <div
                             class="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-700 p-5"
                         >
@@ -424,11 +430,28 @@
         {{-- ═══════════════════════════════════════════════════════════════════ --}}
         <section id="historial-consultas" dusk="section-historial-consultas" class="scroll-mt-16">
             <div class="flex items-center justify-between mb-4">
-                <h2 class="text-xl font-bold text-zinc-800 dark:text-zinc-100">Historial de Consultas</h2>
-                <livewire:patient-upload-scan :patient="$patient" />
+                <div class="flex items-center gap-3">
+                    <h2 class="text-xl font-bold text-zinc-800 dark:text-zinc-100">Historial de Consultas</h2>
+                    @if ($totalConsultaciones > 0)
+                        <span
+                            class="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400"
+                        >
+                            últimas 3 de {{ $totalConsultaciones }}
+                        </span>
+                    @endif
+                </div>
+                <div class="flex items-center gap-3">
+                    <a
+                        href="{{ route('consultas.index') }}?search={{ urlencode($patient->full_name) }}"
+                        class="text-sm text-teal-600 dark:text-teal-400 hover:underline font-medium"
+                    >
+                        Ver todas →
+                    </a>
+                    <livewire:patient-upload-scan :patient="$patient" />
+                </div>
             </div>
 
-            @if ($patient->consultations->isNotEmpty())
+            @if ($recentConsultations->isNotEmpty())
                 <div
                     class="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-700 overflow-hidden"
                 >
@@ -445,7 +468,7 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-zinc-100 dark:divide-zinc-800">
-                            @foreach ($patient->consultations as $consultation)
+                            @foreach ($recentConsultations as $consultation)
                                 <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition">
                                     <td class="px-4 py-3 font-medium text-zinc-800 dark:text-zinc-200">
                                         {{ $consultation->consultation_date->format('d/m/Y') }}
@@ -518,15 +541,19 @@
         {{-- SECCIÓN 5: HISTORIAL DE RECETAS --}}
         {{-- ═══════════════════════════════════════════════════════════════════ --}}
         <section id="historial-recetas" dusk="section-historial-recetas" class="scroll-mt-16">
-            <h2 class="text-xl font-bold text-zinc-800 dark:text-zinc-100 mb-4">Historial de Recetas</h2>
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-bold text-zinc-800 dark:text-zinc-100">Historial de Recetas</h2>
+                <a
+                    href="{{ route('pacientes.recetas', $patient) }}"
+                    class="text-sm text-teal-600 dark:text-teal-400 hover:underline font-medium"
+                >
+                    Ver todas →
+                </a>
+            </div>
 
-            @php
-                $consultasConReceta = $patient->consultations->filter(fn ($c) => $c->prescriptions->isNotEmpty() && $c->prescriptions->flatMap(fn ($p) => $p->items)->isNotEmpty());
-            @endphp
-
-            @if ($consultasConReceta->isNotEmpty())
+            @if ($recentConsultasConReceta->isNotEmpty())
                 <div class="space-y-4">
-                    @foreach ($consultasConReceta as $consultation)
+                    @foreach ($recentConsultasConReceta as $consultation)
                         <div
                             class="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-700 p-5"
                         >
@@ -551,7 +578,8 @@
                                         <div class="text-zinc-700 dark:text-zinc-300">
                                             <span class="font-medium">{{ $item->medication_name }}</span>
                                             <span class="text-zinc-500 dark:text-zinc-400">
-                                                — {{ $item->dose }} · {{ $item->frequency }} · {{ $item->duration }}
+                                                — {{ $item->dose }} · {{ $item->frequency }} ·
+                                                {{ $item->duration }}
                                             </span>
                                             @if ($item->instructions)
                                                 <span class="text-zinc-400 dark:text-zinc-500">
@@ -576,15 +604,19 @@
         {{-- SECCIÓN 6: HISTORIAL DE LABORATORIOS --}}
         {{-- ═══════════════════════════════════════════════════════════════════ --}}
         <section id="historial-laboratorios" dusk="section-historial-laboratorios" class="scroll-mt-16">
-            <h2 class="text-xl font-bold text-zinc-800 dark:text-zinc-100 mb-4">Historial de Laboratorios</h2>
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-bold text-zinc-800 dark:text-zinc-100">Historial de Laboratorios</h2>
+                <a
+                    href="{{ route('pacientes.laboratorios', $patient) }}"
+                    class="text-sm text-teal-600 dark:text-teal-400 hover:underline font-medium"
+                >
+                    Ver todos →
+                </a>
+            </div>
 
-            @php
-                $consultasConLab = $patient->consultations->filter(fn ($c) => $c->laboratoryRequests->isNotEmpty() && $c->laboratoryRequests->flatMap(fn ($r) => $r->items)->isNotEmpty());
-            @endphp
-
-            @if ($consultasConLab->isNotEmpty())
+            @if ($recentConsultasConLab->isNotEmpty())
                 <div class="space-y-4">
-                    @foreach ($consultasConLab as $consultation)
+                    @foreach ($recentConsultasConLab as $consultation)
                         <div
                             class="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-700 p-5"
                         >

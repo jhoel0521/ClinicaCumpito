@@ -57,15 +57,40 @@ class PacienteController extends Controller
     {
         $this->authorize('view', $patient);
 
-        $patient->load([
-            'medicalConditions',
-            'consultations' => fn ($q) => $q->orderByDesc('consultation_date')
-                ->with(['vitalSigns', 'soapNote', 'prescriptions.items', 'laboratoryRequests.items', 'doctor']),
-        ]);
+        $patient->load('medicalConditions');
 
-        $latestConsultation = $patient->consultations->first();
+        $recentConsultations = $patient->consultations()
+            ->orderByDesc('consultation_date')
+            ->with(['vitalSigns', 'soapNote', 'prescriptions.items', 'laboratoryRequests.items', 'doctor'])
+            ->limit(3)
+            ->get();
 
-        return view('pacientes.show', compact('patient', 'latestConsultation'));
+        $latestConsultation = $recentConsultations->first();
+
+        $recentConsultasConReceta = $patient->consultations()
+            ->whereHas('prescriptions.items')
+            ->orderByDesc('consultation_date')
+            ->with(['prescriptions.items', 'doctor'])
+            ->limit(3)
+            ->get();
+
+        $recentConsultasConLab = $patient->consultations()
+            ->whereHas('laboratoryRequests.items')
+            ->orderByDesc('consultation_date')
+            ->with(['laboratoryRequests.items', 'doctor'])
+            ->limit(3)
+            ->get();
+
+        $totalConsultaciones = $patient->consultations()->count();
+
+        return view('pacientes.show', compact(
+            'patient',
+            'latestConsultation',
+            'recentConsultations',
+            'recentConsultasConReceta',
+            'recentConsultasConLab',
+            'totalConsultaciones',
+        ));
     }
 
     /**

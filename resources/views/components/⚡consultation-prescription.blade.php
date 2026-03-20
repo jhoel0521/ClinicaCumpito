@@ -518,7 +518,8 @@ new class extends Component {
                                                 @if (! $finalized)
                                                     <textarea
                                                         x-data
-                                                        x-init="$el.value = $el.dataset.val || ''; $el.style.height = $el.scrollHeight + 'px'"
+                                                        x-init="$el.value = $el.dataset.val || '';
+                                                    $el.style.height = $el.scrollHeight + 'px'"
                                                         @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'"
                                                         data-val="{{ $item['medication_name'] }}"
                                                         wire:change="updateItemField('{{ $prescription['id'] }}', '{{ $item['id'] }}', 'medication_name', $event.target.value)"
@@ -538,7 +539,8 @@ new class extends Component {
                                                 @if (! $finalized)
                                                     <textarea
                                                         x-data
-                                                        x-init="$el.value = $el.dataset.val || ''; $el.style.height = $el.scrollHeight + 'px'"
+                                                        x-init="$el.value = $el.dataset.val || '';
+                                                    $el.style.height = $el.scrollHeight + 'px'"
                                                         @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'"
                                                         data-val="{{ $item['dose'] }}"
                                                         wire:change="updateItemField('{{ $prescription['id'] }}', '{{ $item['id'] }}', 'dose', $event.target.value)"
@@ -556,7 +558,8 @@ new class extends Component {
                                                 @if (! $finalized)
                                                     <textarea
                                                         x-data
-                                                        x-init="$el.value = $el.dataset.val || ''; $el.style.height = $el.scrollHeight + 'px'"
+                                                        x-init="$el.value = $el.dataset.val || '';
+                                                    $el.style.height = $el.scrollHeight + 'px'"
                                                         @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'"
                                                         data-val="{{ $item['quantity'] }}"
                                                         wire:change="updateItemField('{{ $prescription['id'] }}', '{{ $item['id'] }}', 'quantity', $event.target.value)"
@@ -574,7 +577,8 @@ new class extends Component {
                                                 @if (! $finalized)
                                                     <textarea
                                                         x-data
-                                                        x-init="$el.value = $el.dataset.val || ''; $el.style.height = $el.scrollHeight + 'px'"
+                                                        x-init="$el.value = $el.dataset.val || '';
+                                                    $el.style.height = $el.scrollHeight + 'px'"
                                                         @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'"
                                                         data-val="{{ $item['frequency'] }}"
                                                         wire:change="updateItemField('{{ $prescription['id'] }}', '{{ $item['id'] }}', 'frequency', $event.target.value)"
@@ -592,7 +596,8 @@ new class extends Component {
                                                 @if (! $finalized)
                                                     <textarea
                                                         x-data
-                                                        x-init="$el.value = $el.dataset.val || ''; $el.style.height = $el.scrollHeight + 'px'"
+                                                        x-init="$el.value = $el.dataset.val || '';
+                                                    $el.style.height = $el.scrollHeight + 'px'"
                                                         @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'"
                                                         data-val="{{ $item['duration'] }}"
                                                         wire:change="updateItemField('{{ $prescription['id'] }}', '{{ $item['id'] }}', 'duration', $event.target.value)"
@@ -630,7 +635,8 @@ new class extends Component {
                                                 @if (! $finalized)
                                                     <textarea
                                                         x-data
-                                                        x-init="$el.value = $el.dataset.val || ''; $el.style.height = $el.scrollHeight + 'px'"
+                                                        x-init="$el.value = $el.dataset.val || '';
+                                                    $el.style.height = $el.scrollHeight + 'px'"
                                                         @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'"
                                                         data-val="{{ $item['instructions'] }}"
                                                         wire:change="updateItemField('{{ $prescription['id'] }}', '{{ $item['id'] }}', 'instructions', $event.target.value)"

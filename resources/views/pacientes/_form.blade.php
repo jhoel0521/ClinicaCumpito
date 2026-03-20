@@ -328,7 +328,7 @@
                 class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg shadow-sm bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100 focus:ring-teal-500 focus:border-teal-500"
                 placeholder="Medicamentos, alimentos..."
             >
-{{ old('allergies', $patient?->allergies) }}</textarea
+            {{ old('allergies', $patient?->allergies) }}</textarea
             >
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -342,7 +342,7 @@
                     rows="2"
                     class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg shadow-sm bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100 focus:ring-teal-500 focus:border-teal-500"
                 >
-{{ old('pathologies', $patient?->pathologies) }}</textarea
+                {{ old('pathologies', $patient?->pathologies) }}</textarea
                 >
             </div>
             <div>
@@ -355,7 +355,7 @@
                     rows="2"
                     class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg shadow-sm bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100 focus:ring-teal-500 focus:border-teal-500"
                 >
-{{ old('surgeries', $patient?->surgeries) }}</textarea
+                {{ old('surgeries', $patient?->surgeries) }}</textarea
                 >
             </div>
         </div>

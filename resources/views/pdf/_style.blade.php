@@ -2,6 +2,7 @@
     * {
         box-sizing: border-box;
     }
+
     body {
         font-family:
             DejaVu Sans,
@@ -11,9 +12,11 @@
         margin: 0;
         padding: 0;
     }
+
     .page {
         padding: 28px 32px 110px;
     }
+
     h3.section-title {
         font-size: 12px;
         font-weight: bold;
@@ -23,11 +26,13 @@
         background: #f0faf6;
         border-left: 3px solid #0d7b5c;
     }
+
     table.data-table {
         width: 100%;
         border-collapse: collapse;
         margin-top: 4px;
     }
+
     table.data-table th {
         background: #f0faf6;
         border: 1px solid #b2ddd0;
@@ -37,12 +42,14 @@
         text-transform: uppercase;
         color: #0d7b5c;
     }
+
     table.data-table td {
         border: 1px solid #d1e8e2;
         padding: 5px 8px;
         vertical-align: top;
         font-size: 11px;
     }
+
     .instructions-row td {
         border-top: none;
         border-left: 1px solid #d1e8e2;
@@ -53,6 +60,7 @@
         color: #555;
         font-size: 10px;
     }
+
     .observations {
         font-size: 10px;
         color: #555;
@@ -61,6 +69,7 @@
         padding: 4px 8px;
         border-left: 2px solid #d1e8e2;
     }
+
     .badge-pending {
         display: inline-block;
         padding: 2px 7px;
@@ -72,6 +81,7 @@
         font-weight: bold;
         text-transform: uppercase;
     }
+
     .badge-received {
         display: inline-block;
         padding: 2px 7px;
@@ -83,10 +93,12 @@
         font-weight: bold;
         text-transform: uppercase;
     }
+
     .abnormal {
         color: #dc3545;
         font-weight: bold;
     }
+
     .footer {
         position: fixed;
         bottom: 0;
@@ -99,6 +111,7 @@
         font-size: 10px;
         color: #555;
     }
+
     .separator {
         margin: 18px 0;
         border: none;

@@ -74,7 +74,7 @@
                             </form>
                         @else
                             <a
-                                href="{{ route('pacientes.edit', $patient->id) }}?require_complete=1"
+                                href="{{ route('pacientes.edit', $patient) }}?require_complete=1"
                                 class="inline-flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-white font-semibold px-4 py-2 rounded-lg text-sm transition"
                                 title="Completa los datos básicos del paciente antes de crear una consulta"
                             >
@@ -82,7 +82,7 @@
                             </a>
                         @endif
                         <a
-                            href="{{ route('pacientes.edit', $patient->id) }}"
+                            href="{{ route('pacientes.edit', $patient) }}"
                             class="inline-flex items-center gap-1.5 bg-white/20 hover:bg-white/30 font-medium px-4 py-2 rounded-lg text-sm transition"
                         >
                             Editar
@@ -425,7 +425,7 @@
         <section id="historial-consultas" dusk="section-historial-consultas" class="scroll-mt-16">
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-xl font-bold text-zinc-800 dark:text-zinc-100">Historial de Consultas</h2>
-                <livewire:patient-upload-scan :patientId="$patient->id" />
+                <livewire:patient-upload-scan :patient="$patient" />
             </div>
 
             @if ($patient->consultations->isNotEmpty())

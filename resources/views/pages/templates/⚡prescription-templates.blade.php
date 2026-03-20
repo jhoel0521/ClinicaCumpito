@@ -1,6 +1,6 @@
 <?php
 
-use App\Contracts\TemplateServiceContract;
+use App\Contracts\PrescriptionTemplateServiceContract;
 use App\DTOs\Templates\PrescriptionTemplateDTO;
 use App\Models\Medication;
 use App\Models\PrescriptionTemplate;
@@ -56,7 +56,7 @@ new class extends Component {
         $this->dispatch('modal-show', name: 'template-modal');
     }
 
-    public function save(TemplateServiceContract $service): void
+    public function save(PrescriptionTemplateServiceContract $service): void
     {
         if ($this->editingTemplateId) {
             $this->authorize('update', PrescriptionTemplate::findOrFail($this->editingTemplateId));
@@ -125,7 +125,7 @@ new class extends Component {
         $this->dispatch('modal-show', name: 'template-modal');
     }
 
-    public function delete(string $id, TemplateServiceContract $service): void
+    public function delete(string $id, PrescriptionTemplateServiceContract $service): void
     {
         $this->authorize('delete', PrescriptionTemplate::findOrFail($id));
         $service->deletePrescriptionTemplate($id);

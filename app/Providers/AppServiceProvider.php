@@ -7,6 +7,7 @@ use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 
@@ -99,6 +100,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
+        $this->configureUrlScheme();
 
         Gate::define('manage-catalog', [CatalogPolicy::class, 'manage']);
     }
@@ -124,5 +126,23 @@ class AppServiceProvider extends ServiceProvider
                 ->uncompromised()
             : null
         );
+    }
+
+    /**
+     * Force URL scheme based on APP_URL.
+     */
+    protected function configureUrlScheme(): void
+    {
+        $scheme = parse_url((string) config('app.url'), PHP_URL_SCHEME);
+
+        if ($scheme === 'https') {
+            URL::forceScheme('https');
+
+            return;
+        }
+
+        if ($scheme === 'http') {
+            URL::forceScheme('http');
+        }
     }
 }

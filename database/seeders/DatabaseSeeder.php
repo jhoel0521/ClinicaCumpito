@@ -17,7 +17,6 @@ class DatabaseSeeder extends Seeder
             VaccineCatalogSeeder::class,         // esquema PAI Bolivia
             DefaultUsersSeeder::class,           // 1 usuario con todos los roles
             PrescriptionTemplateSeeder::class,   // plantillas: resfriado, vómitos, dengue, vitaminas
-            LaboratoryTemplateSeeder::class,     // plantillas de lab: rutina anual, pre-quirúrgico, chagas, etc.
             WhoDataSeeder::class,
             GrowthChartTestDataSeeder::class,
         ]);

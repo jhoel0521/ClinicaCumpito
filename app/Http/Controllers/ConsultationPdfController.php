@@ -41,7 +41,7 @@ class ConsultationPdfController extends Controller
 
     public function allLaboratory(Consultation $consulta): Response
     {
-        $consulta->load(['patient', 'doctor', 'laboratoryRequests.items']);
+        $consulta->load(['patient', 'doctor', 'laboratoryRequests.items.results', 'laboratoryRequests.items.attachments', 'laboratoryRequests.attachments']);
         $clinic = ClinicSetting::current();
 
         $pdf = Pdf::loadView('pdf.laboratory-all', [
@@ -55,7 +55,7 @@ class ConsultationPdfController extends Controller
     public function singleLaboratory(Consultation $consulta, LaboratoryRequest $laboratoryRequest): Response
     {
         $consulta->load(['patient', 'doctor']);
-        $laboratoryRequest->load('items');
+        $laboratoryRequest->load(['items.results', 'items.attachments', 'attachments']);
         $clinic = ClinicSetting::current();
 
         $pdf = Pdf::loadView('pdf.laboratory-single', [

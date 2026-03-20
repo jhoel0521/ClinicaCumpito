@@ -6,6 +6,7 @@ use App\Contracts\LaboratoryRequestServiceContract;
 use App\DTOs\LaboratoryRequestDTO;
 use App\Http\Requests\StoreLaboratoryRequestRequest;
 use App\Models\Consultation;
+use App\Models\LaboratoryRequest;
 
 class LaboratoryRequestController extends Controller
 {
@@ -26,12 +27,12 @@ class LaboratoryRequestController extends Controller
         }
     }
 
-    public function update(StoreLaboratoryRequestRequest $request, Consultation $consulta): \Illuminate\Http\RedirectResponse
+    public function update(StoreLaboratoryRequestRequest $request, Consultation $consulta, LaboratoryRequest $laboratoryRequest): \Illuminate\Http\RedirectResponse
     {
         try {
+            abort_if($laboratoryRequest->consultation_id !== $consulta->id, 404);
             $dto = LaboratoryRequestDTO::fromArray($request->validated());
-            $labRequest = $consulta->laboratoryRequests()->firstOrFail();
-            $this->service->update($labRequest->id, $dto);
+            $this->service->update($laboratoryRequest->id, $dto);
 
             return redirect()->route('consultas.show', $consulta->id)
                 ->with('success', 'Solicitud de laboratorio actualizada exitosamente.');
@@ -42,11 +43,11 @@ class LaboratoryRequestController extends Controller
         }
     }
 
-    public function destroy(Consultation $consulta): \Illuminate\Http\RedirectResponse
+    public function destroy(Consultation $consulta, LaboratoryRequest $laboratoryRequest): \Illuminate\Http\RedirectResponse
     {
         try {
-            $labRequest = $consulta->laboratoryRequests()->firstOrFail();
-            $this->service->delete($labRequest->id);
+            abort_if($laboratoryRequest->consultation_id !== $consulta->id, 404);
+            $this->service->delete($laboratoryRequest->id);
 
             return redirect()->route('consultas.show', $consulta->id)
                 ->with('success', 'Solicitud de laboratorio eliminada exitosamente.');

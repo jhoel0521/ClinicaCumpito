@@ -29,8 +29,8 @@ class AppServiceProvider extends ServiceProvider
         );
 
         $this->app->bind(
-            \App\Contracts\TemplateServiceContract::class,
-            \App\Services\TemplateService::class
+            \App\Contracts\PrescriptionTemplateServiceContract::class,
+            \App\Services\PrescriptionTemplateService::class
         );
 
         $this->app->bind(

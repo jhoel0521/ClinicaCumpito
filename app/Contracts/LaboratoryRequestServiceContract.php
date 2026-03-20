@@ -11,8 +11,6 @@ interface LaboratoryRequestServiceContract
 
     public function update(string $labRequestId, LaboratoryRequestDTO $dto): LaboratoryRequest;
 
-    public function applyTemplate(string $laboratoryRequestId, string $templateId): LaboratoryRequest;
-
     public function findByConsultation(string $consultationId): ?LaboratoryRequest;
 
     public function delete(string $labRequestId): bool;

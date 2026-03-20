@@ -46,7 +46,7 @@ class PacienteController extends Controller
         $dto = PacienteDTO::fromArray($request->validated());
         $patient = $this->service->create($dto);
 
-        return redirect()->route('pacientes.show', $patient->id)
+        return redirect()->route('pacientes.show', $patient)
             ->with('success', 'Paciente creado exitosamente.');
     }
 
@@ -91,7 +91,7 @@ class PacienteController extends Controller
         $dto = PacienteDTO::fromArray($request->validated());
         $patient = $this->service->update($patient->id, $dto);
 
-        return redirect()->route('pacientes.show', $patient->id)
+        return redirect()->route('pacientes.show', $patient)
             ->with('success', 'Paciente actualizado exitosamente.');
     }
 

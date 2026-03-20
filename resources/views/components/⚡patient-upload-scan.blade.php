@@ -8,7 +8,7 @@ use Livewire\WithFileUploads;
 new class extends Component {
     use WithFileUploads;
 
-    public string $patientId;
+    public Patient $patient;
 
     /** @var mixed */
     public $scanFile = null;
@@ -41,7 +41,7 @@ new class extends Component {
 
         $this->reset(['scanFile', 'scanDate']);
         $this->dispatch('modal-close', name: 'upload-scan-modal');
-        $this->redirect(route('pacientes.show', $this->patientId));
+        $this->redirect(route('pacientes.show', $this->patient));
     }
 }; ?>
 

@@ -6,7 +6,7 @@
                 <p class="text-gray-500 dark:text-gray-400 text-sm mt-2">{{ $patient->full_name }}</p>
             </div>
             <a
-                href="{{ route('pacientes.show', $patient->id) }}"
+                href="{{ route('pacientes.show', $patient) }}"
                 class="bg-gray-200 dark:bg-zinc-800 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg hover:bg-gray-300 dark:hover:bg-zinc-700 transition flex items-center gap-2"
             >
                 <i class="fas fa-arrow-left"></i>
@@ -24,7 +24,7 @@
             </div>
         @endif
 
-        <form action="{{ route('pacientes.update', $patient->id) }}" method="POST" class="space-y-6">
+        <form action="{{ route('pacientes.update', $patient) }}" method="POST" class="space-y-6">
             @csrf
             @method('PUT')
 
@@ -32,7 +32,7 @@
 
             <div class="flex justify-end space-x-4 pt-4">
                 <a
-                    href="{{ route('pacientes.show', $patient->id) }}"
+                    href="{{ route('pacientes.show', $patient) }}"
                     class="px-4 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-800 transition"
                 >
                     Cancelar

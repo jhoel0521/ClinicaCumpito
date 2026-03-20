@@ -385,7 +385,7 @@
         >
             <span>Consulta #{{ substr($consultation->id, 0, 8) }}</span>
             <a
-                href="{{ route('pacientes.show', $consultation->patient->id) }}"
+                href="{{ route('pacientes.show', $consultation->patient) }}"
                 class="text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 transition"
             >
                 Ver dashboard del paciente →

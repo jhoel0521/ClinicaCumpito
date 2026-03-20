@@ -14,12 +14,9 @@ describe('ConsultationController', function () {
     test('usuario autenticado puede ver lista de consultas', function () {
         Consultation::factory()->count(3)->create();
 
-        $response = $this->actingAs(User::factory()->create())
-            ->get(route('consultas.index'));
-
-        $response->assertStatus(200)
-            ->assertViewIs('consultas.index')
-            ->assertViewHas('consultations');
+        $this->actingAs(User::factory()->create())
+            ->get(route('consultas.index'))
+            ->assertOk();
     });
 
     test('usuario no autenticado es redirigido a login', function () {

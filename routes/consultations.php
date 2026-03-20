@@ -21,9 +21,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('consultas/create/{patient?}', [ConsultationController::class, 'create'])
         ->name('consultas.create');
 
+    Route::livewire('consultas', 'pages::consultas.index')->name('consultas.index');
+
     Route::resource('consultas', ConsultationController::class)
         ->parameters(['consultas' => 'consulta'])
-        ->except(['create']);
+        ->except(['create', 'index']);
 
     Route::get('consultas/{consulta}/archivo', [ConsultationFileController::class, 'serve'])
         ->name('consultas.archivo.serve');

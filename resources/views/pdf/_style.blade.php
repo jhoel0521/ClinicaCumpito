@@ -12,7 +12,7 @@
         padding: 0;
     }
     .page {
-        padding: 28px 32px;
+        padding: 28px 32px 110px;
     }
     h3.section-title {
         font-size: 12px;
@@ -88,9 +88,13 @@
         font-weight: bold;
     }
     .footer {
-        margin-top: 48px;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 10px 32px 14px;
+        background: white;
         border-top: 1px solid #ccc;
-        padding-top: 8px;
         text-align: right;
         font-size: 10px;
         color: #555;

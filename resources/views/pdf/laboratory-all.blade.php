@@ -4,78 +4,171 @@
         <meta charset="UTF-8" />
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         @include('pdf._style')
+        <style>
+            .lab-title-box {
+                text-align: center;
+                border: 2px solid #1a1a1a;
+                padding: 9px 12px;
+                font-size: 16px;
+                font-weight: bold;
+                letter-spacing: 3px;
+                margin-bottom: 12px;
+            }
+            .patient-row {
+                width: 100%;
+                border-collapse: collapse;
+                font-size: 11px;
+                margin-bottom: 12px;
+            }
+            .patient-row td {
+                padding: 3px 4px 3px 0;
+            }
+            .pfield {
+                border-bottom: 1px solid #333;
+                display: inline-block;
+                min-width: 80px;
+            }
+            .exam-col-header {
+                background: #1e3a5f;
+                color: white;
+                font-weight: bold;
+                font-size: 10px;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                padding: 5px 8px;
+            }
+            .exam-col-cell {
+                border: 1px solid #d1d5db;
+                vertical-align: top;
+                padding: 0;
+            }
+            .param-item {
+                padding: 4px 8px;
+                font-size: 10px;
+                border-bottom: 1px solid #f0f0f0;
+            }
+            .col-dx {
+                padding: 4px 8px;
+                font-size: 9px;
+                color: #1d4ed8;
+                border-top: 1px solid #dbeafe;
+                background: #eff6ff;
+            }
+            .col-obs {
+                padding: 4px 8px;
+                font-size: 9px;
+                color: #555;
+                border-top: 1px dashed #e5e7eb;
+            }
+            .col-w-1 {
+                width: 100%;
+            }
+            .col-w-2 {
+                width: 50%;
+            }
+            .col-w-3 {
+                width: 33%;
+            }
+            .result-normal {
+                padding-left: 18px;
+                font-size: 9px;
+                color: #374151;
+                border-bottom: 1px solid #f0f0f0;
+            }
+            .result-abnormal {
+                padding-left: 18px;
+                font-size: 9px;
+                color: #dc2626;
+                border-bottom: 1px solid #f0f0f0;
+            }
+        </style>
     </head>
     <body>
         <div class="page">
             @include('pdf._header')
 
-            <div style="font-size: 13px; font-weight: bold; color: #1a1a1a; margin-bottom: 12px">
-                SOLICITUD / RESULTADOS DE LABORATORIO
-                <span style="font-size: 11px; font-weight: normal; color: #555">
-                    ({{ $consultation->laboratoryRequests->count() }}
-                    {{ $consultation->laboratoryRequests->count() === 1 ? 'solicitud' : 'solicitudes' }})
-                </span>
-            </div>
+            {{-- Título en caja --}}
+            <div class="lab-title-box">ORDEN DE LABORATORIO</div>
 
-            @if ($consultation->laboratoryRequests->isEmpty())
-                <p style="color: #888; font-style: italic">Sin solicitudes de laboratorio en esta consulta.</p>
-            @else
-                @foreach ($consultation->laboratoryRequests as $i => $lab)
-                    @if ($i > 0)
-                        <hr class="separator" />
-                    @endif
+            {{-- Datos del paciente --}}
+            @php
+                $pat = $consultation->patient;
+                $ageStr = '';
+                if ($pat?->date_of_birth) {
+                    $months = (int) \Carbon\Carbon::parse($pat->date_of_birth)->diffInMonths(now());
+                    $yrs = (int) floor($months / 12);
+                    $rem = $months % 12;
+                    $ageStr = $yrs > 0 ? "{$yrs} año(s)" : '';
+                    $ageStr .= $yrs > 0 && $rem > 0 ? " {$rem} mes(es)" : ($yrs === 0 ? "{$rem} mes(es)" : '');
+                }
+                $labs = $consultation->laboratoryRequests;
+                $total = $labs->count();
+                $cols = $total === 0 ? 1 : ($total === 1 ? 1 : ($total === 2 ? 2 : 3));
+            @endphp
 
-                    <h3 class="section-title">
-                        Laboratorio #{{ $i + 1 }} &nbsp;
-                        @if ($lab->status === 'received')
-                            <span class="badge-received">Resultados recibidos</span>
-                        @else
-                            <span class="badge-pending">Solicitud pendiente</span>
+            <table class="patient-row">
+                <tr>
+                    <td colspan="4">
+                        <strong>NOMBRES:</strong>
+                        <span class="pfield" style="min-width: 260px">{{ $pat?->full_name ?? '' }}</span>
+                    </td>
+                    <td style="text-align: right">
+                        <strong>FECHA:</strong>
+                        <span class="pfield" style="min-width: 80px">
+                            {{ $consultation->consultation_date?->format('d/m/Y') ?? now()->format('d/m/Y') }}
+                        </span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <strong>EDAD:</strong>
+                        <span class="pfield" style="min-width: 90px">{{ $ageStr ?: '—' }}</span>
+                    </td>
+                    <td colspan="2">
+                        <strong>MÉDICO:</strong>
+                        <span class="pfield" style="min-width: 180px">
+                            {{ $consultation->doctor?->full_name ?? '' }}
+                        </span>
+                    </td>
+                    <td colspan="2" style="text-align: right">
+                        @if ($consultation->doctor?->license_number)
+                            <strong>MAT.:</strong>
+                            <span class="pfield" style="min-width: 80px">
+                                {{ $consultation->doctor->license_number }}
+                            </span>
                         @endif
-                    </h3>
+                    </td>
+                </tr>
+            </table>
 
-                    @if ($lab->items->isNotEmpty())
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th style="width: 22%">Examen</th>
-                                    <th style="width: 20%">Parámetro</th>
-                                    <th style="width: 22%">Indicaciones</th>
-                                    @if ($lab->status === 'received')
-                                        <th style="width: 18%">Resultado</th>
-                                        <th style="width: 18%">Notas</th>
-                                    @endif
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($lab->items as $item)
-                                    <tr>
-                                        <td><strong>{{ $item->exam_name }}</strong></td>
-                                        <td>{{ $item->parameter_name ?: '—' }}</td>
-                                        <td>{{ $item->indications ?: '—' }}</td>
-                                        @if ($lab->status === 'received')
-                                            <td class="{{ $item->is_abnormal ? 'abnormal' : '' }}">
-                                                {{ $item->result_value ?: '—' }}
-                                                @if ($item->is_abnormal)
-                                                    ⚠
-                                                @endif
-                                            </td>
-                                            <td>{{ $item->result_notes ?: '—' }}</td>
-                                        @endif
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    @endif
+            @if ($labs->isEmpty())
+                <p style="color: #888; font-style: italic">Sin solicitudes de laboratorio en esta consulta.</p>
+            @endif
 
-                    @if ($lab->observations)
-                        <div class="observations">Observaciones: {{ $lab->observations }}</div>
-                    @endif
+            @if ($labs->isNotEmpty())
+                {{-- Grid de solicitudes: máximo 3 columnas por fila --}}
+                @foreach ($labs->chunk($cols) as $row)
+                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 6px; table-layout: fixed">
+                        <tr>
+                            @foreach ($row as $lab)
+                                @php
+                                    $examName = $lab->items->first()?->exam_name ?? 'Sin examen';
+                                @endphp
+
+                                <td class="exam-col-cell col-w-{{ $cols }}">
+                                    @include('pdf._lab-all-cell', ['lab' => $lab, 'examName' => $examName])
+                                </td>
+                            @endforeach
+
+                            @for ($e = $row->count(); $e < $cols; $e++)
+                                <td class="exam-col-cell col-w-{{ $cols }}" style="background: #fafafa"></td>
+                            @endfor
+                        </tr>
+                    </table>
                 @endforeach
             @endif
 
             <div class="footer">
-                <div style="margin-bottom: 32px">&nbsp;</div>
                 <div>_________________________________</div>
                 <div><strong>{{ $consultation->doctor?->full_name ?? '' }}</strong></div>
                 @if ($consultation->doctor?->specialty)

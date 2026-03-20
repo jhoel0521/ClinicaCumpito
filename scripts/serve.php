@@ -17,7 +17,7 @@ while ($port < 8020) {
 }
 
 if ($port !== $startPort) {
-    echo "\033[33m⚠  Puerto {$startPort} ocupado — usando {$port}\033[0m" . PHP_EOL;
+    echo "\033[33m⚠  Puerto {$startPort} ocupado — usando {$port}\033[0m".PHP_EOL;
 }
 
 passthru("php artisan serve --port={$port}");

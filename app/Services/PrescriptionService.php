@@ -70,13 +70,11 @@ class PrescriptionService implements PrescriptionServiceContract
             throw new \DomainException('No se puede editar la receta de una consulta finalizada.');
         }
 
-        $template = PrescriptionTemplate::with('items.medication')->findOrFail($templateId);
+        $template = PrescriptionTemplate::with('items')->findOrFail($templateId);
 
         // Snapshot: copy each template item to prescription items
         foreach ($template->items as $templateItem) {
-            $medicationName = $templateItem->custom_medication_name !== null
-                ? $templateItem->custom_medication_name
-                : ($templateItem->medication !== null ? $templateItem->medication->name : '');
+            $medicationName = $templateItem->custom_medication_name ?? '';
 
             PrescriptionItem::create([
                 'prescription_id' => $prescriptionId,

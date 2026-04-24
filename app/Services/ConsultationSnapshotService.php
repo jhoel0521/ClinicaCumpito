@@ -31,7 +31,7 @@ class ConsultationSnapshotService implements ConsultationSnapshotServiceContract
             $template->items()->each(function ($templateItem) use ($prescription) {
                 PrescriptionItem::create([
                     'prescription_id' => $prescription->id,
-                    'medication_name' => $templateItem->custom_medication_name ?? $templateItem->medication?->name,
+                    'medication_name' => $templateItem->custom_medication_name ?? '',
                     'dose' => $templateItem->dose,
                     'frequency' => $templateItem->frequency,
                     'duration' => $templateItem->duration,

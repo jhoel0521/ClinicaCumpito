@@ -50,7 +50,7 @@ class PrescriptionTemplateService implements PrescriptionTemplateServiceContract
     public function getPrescriptionTemplatesByDoctor(string $doctor_id): Collection
     {
         return PrescriptionTemplate::where('doctor_id', $doctor_id)
-            ->with('items.medication')
+            ->with('items')
             ->get();
     }
 }

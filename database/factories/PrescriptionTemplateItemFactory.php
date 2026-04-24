@@ -2,7 +2,6 @@
 
 namespace Database\Factories;
 
-use App\Models\Medication;
 use App\Models\PrescriptionTemplate;
 use App\Models\PrescriptionTemplateItem;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -18,8 +17,7 @@ class PrescriptionTemplateItemFactory extends Factory
     {
         return [
             'template_id' => PrescriptionTemplate::factory(),
-            'medication_id' => Medication::factory(),
-            'custom_medication_name' => null,
+            'custom_medication_name' => fake()->words(2, true),
             'dose' => '1 tableta',
             'frequency' => 'cada 8 horas',
             'duration' => '7 días',

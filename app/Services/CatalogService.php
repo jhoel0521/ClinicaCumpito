@@ -6,14 +6,12 @@ use App\Contracts\CatalogServiceContract;
 use App\DTOs\Catalogs\LaboratoryCategoryDTO;
 use App\DTOs\Catalogs\LaboratoryExamDTO;
 use App\DTOs\Catalogs\MedicalConditionDTO;
-use App\DTOs\Catalogs\MedicationDTO;
 use App\DTOs\Catalogs\OmsCatalogoGraficaDTO;
 use App\DTOs\Catalogs\OmsDatoGraficaDTO;
 use App\DTOs\Catalogs\VaccineDTO;
 use App\Models\LaboratoryCategory;
 use App\Models\LaboratoryExam;
 use App\Models\MedicalCondition;
-use App\Models\Medication;
 use App\Models\OmsCatalogoGrafica;
 use App\Models\OmsDatoGrafica;
 use App\Models\Vaccine;
@@ -78,35 +76,6 @@ class CatalogService implements CatalogServiceContract
     public function getExamsByCategory(string $categoryId): Collection
     {
         return LaboratoryExam::where('category_id', $categoryId)->get();
-    }
-
-    // Medications
-    public function createMedication(MedicationDTO $dto): Medication
-    {
-        return DB::transaction(fn () => Medication::create($dto->toArray()));
-    }
-
-    public function updateMedication(string $id, MedicationDTO $dto): Medication
-    {
-        return DB::transaction(function () use ($id, $dto) {
-            $medication = Medication::findOrFail($id);
-            $medication->update($dto->toArray());
-
-            return $medication;
-        });
-    }
-
-    public function deleteMedication(string $id): bool
-    {
-        return (bool) DB::transaction(fn () => Medication::findOrFail($id)->delete());
-    }
-
-    /**
-     * @return Collection<int, Medication>
-     */
-    public function getAllMedications(): Collection
-    {
-        return Medication::all();
     }
 
     // Vaccines

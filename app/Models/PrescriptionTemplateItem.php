@@ -16,7 +16,6 @@ class PrescriptionTemplateItem extends Model
 
     protected $fillable = [
         'template_id',
-        'medication_id',
         'custom_medication_name',
         'dose',
         'quantity',
@@ -31,14 +30,6 @@ class PrescriptionTemplateItem extends Model
     public function template(): BelongsTo
     {
         return $this->belongsTo(PrescriptionTemplate::class, 'template_id');
-    }
-
-    /**
-     * @return BelongsTo<Medication, $this>
-     */
-    public function medication(): BelongsTo
-    {
-        return $this->belongsTo(Medication::class);
     }
 
     /**

@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\Doctor;
-use App\Models\Medication;
 use App\Models\PrescriptionTemplate;
 use App\Models\PrescriptionTemplateItem;
 use Illuminate\Database\Seeder;
@@ -184,15 +183,9 @@ class PrescriptionTemplateSeeder extends Seeder
             foreach ($tplData['items'] as $item) {
                 [$medName, $form, $concentration] = $item['med'];
 
-                $medication = Medication::where('name', $medName)
-                    ->where('pharmaceutical_form', $form)
-                    ->where('concentration', $concentration)
-                    ->first();
-
                 PrescriptionTemplateItem::create([
                     'template_id' => $template->id,
-                    'medication_id' => $medication?->id,
-                    'custom_medication_name' => $medication ? null : $medName,
+                    'custom_medication_name' => $medName,
                     'dose' => $item['dose'],
                     'quantity' => $item['quantity'],
                     'frequency' => $item['frequency'],

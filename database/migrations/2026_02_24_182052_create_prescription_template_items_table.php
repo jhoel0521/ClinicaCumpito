@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('prescription_template_items', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('template_id');
-            $table->uuid('medication_id')->nullable();
             $table->string('custom_medication_name')->nullable();
             $table->string('dose')->nullable();
             $table->string('quantity')->nullable();
@@ -27,11 +26,6 @@ return new class extends Migration
                 ->references('id')
                 ->on('prescription_templates')
                 ->onDelete('cascade');
-
-            $table->foreign('medication_id')
-                ->references('id')
-                ->on('medications')
-                ->onDelete('set null');
         });
     }
 

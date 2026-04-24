@@ -5,14 +5,12 @@ namespace App\Contracts;
 use App\DTOs\Catalogs\LaboratoryCategoryDTO;
 use App\DTOs\Catalogs\LaboratoryExamDTO;
 use App\DTOs\Catalogs\MedicalConditionDTO;
-use App\DTOs\Catalogs\MedicationDTO;
 use App\DTOs\Catalogs\OmsCatalogoGraficaDTO;
 use App\DTOs\Catalogs\OmsDatoGraficaDTO;
 use App\DTOs\Catalogs\VaccineDTO;
 use App\Models\LaboratoryCategory;
 use App\Models\LaboratoryExam;
 use App\Models\MedicalCondition;
-use App\Models\Medication;
 use App\Models\OmsCatalogoGrafica;
 use App\Models\OmsDatoGrafica;
 use App\Models\Vaccine;
@@ -43,18 +41,6 @@ interface CatalogServiceContract
      * @return Collection<int, LaboratoryExam>
      */
     public function getExamsByCategory(string $categoryId): Collection;
-
-    // Medications
-    public function createMedication(MedicationDTO $dto): Medication;
-
-    public function updateMedication(string $id, MedicationDTO $dto): Medication;
-
-    public function deleteMedication(string $id): bool;
-
-    /**
-     * @return Collection<int, Medication>
-     */
-    public function getAllMedications(): Collection;
 
     // Vaccines
     public function createVaccine(VaccineDTO $dto): Vaccine;

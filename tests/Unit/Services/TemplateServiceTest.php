@@ -2,7 +2,6 @@
 
 use App\DTOs\Templates\PrescriptionTemplateDTO;
 use App\Models\Doctor;
-use App\Models\Medication;
 use App\Models\PrescriptionTemplate;
 use App\Services\PrescriptionTemplateService;
 
@@ -10,7 +9,6 @@ describe('PrescriptionTemplateService', function () {
     test('puede crear una plantilla de receta con items', function () {
         $service = new PrescriptionTemplateService;
         $doctor = Doctor::factory()->create();
-        $medication = Medication::factory()->create();
 
         $dto = PrescriptionTemplateDTO::fromArray([
             'doctor_id' => $doctor->id,
@@ -18,7 +16,7 @@ describe('PrescriptionTemplateService', function () {
             'description' => 'Tratamiento base para faringitis',
             'items' => [
                 [
-                    'medication_id' => $medication->id,
+                    'custom_medication_name' => 'Amoxicilina 500mg',
                     'dose' => '500mg',
                     'frequency' => 'cada 8 horas',
                     'duration' => '7 días',
@@ -30,20 +28,19 @@ describe('PrescriptionTemplateService', function () {
 
         expect($template)->toBeInstanceOf(PrescriptionTemplate::class);
         expect($template->items)->toHaveCount(1);
-        expect($template->items->first()->medication_id)->toBe($medication->id);
+        expect($template->items->first()->custom_medication_name)->toBe('Amoxicilina 500mg');
     })->group('template-service');
 
     test('puede actualizar una plantilla de receta y sus items', function () {
         $service = new PrescriptionTemplateService;
         $template = PrescriptionTemplate::factory()->create();
-        $medication = Medication::factory()->create();
 
         $dto = PrescriptionTemplateDTO::fromArray([
             'doctor_id' => $template->doctor_id,
             'name' => 'Nombre Actualizado',
             'items' => [
                 [
-                    'medication_id' => $medication->id,
+                    'custom_medication_name' => 'Ibuprofeno 400mg',
                     'dose' => '1g',
                 ],
             ],

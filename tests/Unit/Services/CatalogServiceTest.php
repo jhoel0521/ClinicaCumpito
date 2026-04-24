@@ -2,11 +2,9 @@
 
 use App\DTOs\Catalogs\LaboratoryCategoryDTO;
 use App\DTOs\Catalogs\LaboratoryExamDTO;
-use App\DTOs\Catalogs\MedicationDTO;
 use App\DTOs\Catalogs\VaccineDTO;
 use App\Models\LaboratoryCategory;
 use App\Models\LaboratoryExam;
-use App\Models\Medication;
 use App\Models\Vaccine;
 use App\Services\CatalogService;
 
@@ -77,33 +75,6 @@ describe('CatalogService', function () {
         expect(LaboratoryExam::find($exam->id))->toBeNull();
     })->group('catalog-service');
 
-    test('puede crear, actualizar y eliminar medicamento', function () {
-        $createDto = new MedicationDTO(
-            id: null,
-            name: 'Paracetamol',
-            generic_name: 'Acetaminofén',
-            pharmaceutical_form: 'Jarabe',
-            concentration: '120mg/5ml',
-        );
-
-        $medication = $this->service->createMedication($createDto);
-
-        $updateDto = new MedicationDTO(
-            id: $medication->id,
-            name: 'Paracetamol Forte',
-            generic_name: 'Acetaminofén',
-            pharmaceutical_form: 'Tableta',
-            concentration: '500mg',
-        );
-
-        $updated = $this->service->updateMedication($medication->id, $updateDto);
-        $deleted = $this->service->deleteMedication($medication->id);
-
-        expect($updated->name)->toBe('Paracetamol Forte');
-        expect($deleted)->toBeTrue();
-        expect(Medication::find($medication->id))->toBeNull();
-    })->group('catalog-service');
-
     test('puede crear, actualizar y eliminar vacuna', function () {
         $createDto = new VaccineDTO(
             id: null,
@@ -131,17 +102,14 @@ describe('CatalogService', function () {
         expect(Vaccine::find($vaccine->id))->toBeNull();
     })->group('catalog-service');
 
-    test('puede listar catalogos activos de medicaciones, vacunas y categorias', function () {
+    test('puede listar catalogos activos de vacunas y categorias', function () {
         LaboratoryCategory::factory()->count(2)->create();
-        Medication::factory()->count(3)->create();
         Vaccine::factory()->count(2)->create();
 
         $categories = $this->service->getAllLaboratoryCategories();
-        $medications = $this->service->getAllMedications();
         $vaccines = $this->service->getAllVaccines();
 
         expect($categories->count())->toBeGreaterThanOrEqual(2);
-        expect($medications->count())->toBeGreaterThanOrEqual(3);
         expect($vaccines->count())->toBeGreaterThanOrEqual(2);
     })->group('catalog-service');
 });

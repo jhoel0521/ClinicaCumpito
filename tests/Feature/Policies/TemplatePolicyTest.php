@@ -3,7 +3,6 @@
 namespace Tests\Feature\Policies;
 
 use App\Models\Doctor;
-use App\Models\Medication;
 use App\Models\PrescriptionTemplate;
 use App\Models\User;
 use Livewire\Livewire;
@@ -17,13 +16,10 @@ describe('PrescriptionTemplatePolicy', function (): void {
     test('doctor puede crear plantilla de receta', function (): void {
         $this->actingAs($this->user);
 
-        $medication = Medication::factory()->create();
-
         Livewire::test('pages::templates.prescription-templates')
             ->set('name', 'Receta test policy')
             ->set('items', [[
-                'medication_id' => $medication->id,
-                'custom_medication_name' => '',
+                'custom_medication_name' => 'Amoxicilina 500mg',
                 'dose' => '500mg',
                 'frequency' => 'cada 8h',
                 'duration' => '5 días',
@@ -59,7 +55,7 @@ describe('PrescriptionTemplatePolicy', function (): void {
 
         Livewire::test('pages::templates.prescription-templates')
             ->set('name', 'Intento sin doctor')
-            ->set('items', [['medication_id' => '', 'custom_medication_name' => 'Med X', 'dose' => '1mg', 'frequency' => 'c/8h', 'duration' => '3d', 'instructions' => '']])
+            ->set('items', [['custom_medication_name' => 'Med X', 'dose' => '1mg', 'frequency' => 'c/8h', 'duration' => '3d', 'instructions' => '']])
             ->call('save')
             ->assertForbidden();
     });

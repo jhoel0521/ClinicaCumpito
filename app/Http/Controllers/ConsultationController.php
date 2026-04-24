@@ -18,15 +18,6 @@ class ConsultationController extends Controller
 {
     public function __construct(private ConsultationServiceContract $service) {}
 
-    public function index(): View
-    {
-        $this->authorize('viewAny', Consultation::class);
-
-        $consultations = $this->service->paginate();
-
-        return view('consultas.index', compact('consultations'));
-    }
-
     public function create(Request $request, ?Patient $patient = null): View|RedirectResponse
     {
         $this->authorize('create', Consultation::class);

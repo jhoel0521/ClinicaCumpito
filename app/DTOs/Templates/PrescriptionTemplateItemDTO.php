@@ -6,7 +6,6 @@ class PrescriptionTemplateItemDTO
 {
     public function __construct(
         public readonly ?string $id,
-        public readonly ?string $medication_id,
         public readonly ?string $custom_medication_name,
         public readonly ?string $dose,
         public readonly ?string $frequency,
@@ -21,7 +20,6 @@ class PrescriptionTemplateItemDTO
     {
         return new self(
             id: $data['id'] ?? null,
-            medication_id: $data['medication_id'] ?? null,
             custom_medication_name: $data['custom_medication_name'] ?? null,
             dose: $data['dose'] ?? null,
             frequency: $data['frequency'] ?? null,
@@ -37,7 +35,6 @@ class PrescriptionTemplateItemDTO
     {
         return array_filter([
             'id' => $this->id,
-            'medication_id' => $this->medication_id,
             'custom_medication_name' => $this->custom_medication_name,
             'dose' => $this->dose,
             'frequency' => $this->frequency,

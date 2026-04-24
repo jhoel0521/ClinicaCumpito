@@ -21,8 +21,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('pacientes.laboratorios');
     Route::livewire('pacientes/{patient}/vacunas', 'pages::pacientes.vacunas')
         ->name('pacientes.vacunas');
+    Route::livewire('pacientes/{patient}/feed', 'pages::pacientes.historia-feed')
+        ->name('pacientes.feed');
     Route::resource('pacientes', PacienteController::class)
         ->parameters(['pacientes' => 'patient']);
+
+    // Laboratorios
+    Route::livewire('laboratorios/{laboratoryRequest}', 'pages::laboratorios.detalle')
+        ->name('laboratorios.show');
 });
 
 require __DIR__.'/settings.php';

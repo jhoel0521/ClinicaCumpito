@@ -27,14 +27,6 @@ new class extends Component {
     public string $newReason = '';
     public string $newTemplateId = '';
 
-    public ?string $addingItemForPrescription = null;
-    public string $newMedicationName = '';
-    public string $newDose = '';
-    public string $newQuantity = '';
-    public string $newFrequency = '';
-    public string $newDuration = '';
-    public string $newInstructions = '';
-
     public function mount(string $consultationId): void
     {
         $this->consultationId = $consultationId;
@@ -160,7 +152,7 @@ new class extends Component {
                     'reason' => $prescription->reason ?? '',
                     'items' => [],
                 ];
-                $this->addingItemForPrescription = $prescription->id;
+                $this->addEmptyItem($prescription->id);
             }
         } catch (\Throwable $e) {
             $this->errorMessage = 'Error al crear receta: ' . $e->getMessage();
@@ -196,9 +188,6 @@ new class extends Component {
             $this->prescriptions = array_values(
                 array_filter($this->prescriptions, fn ($p) => $p['id'] !== $prescriptionId),
             );
-            if ($this->addingItemForPrescription === $prescriptionId) {
-                $this->addingItemForPrescription = null;
-            }
         } catch (\Throwable $e) {
             $this->errorMessage = 'Error al eliminar receta: ' . $e->getMessage();
         }
@@ -243,83 +232,41 @@ new class extends Component {
         }
     }
 
-    public function startAddingItem(string $prescriptionId): void
+    public function addEmptyItem(string $prescriptionId): void
     {
-        $this->addingItemForPrescription = $prescriptionId;
-        $this->resetNewItemForm();
-    }
-
-    public function cancelAddingItem(): void
-    {
-        $this->addingItemForPrescription = null;
-        $this->resetNewItemForm();
-    }
-
-    public function addItem(): void
-    {
-        if ($this->finalized || ! $this->addingItemForPrescription) {
+        if ($this->finalized) {
             return;
         }
 
         $this->errorMessage = '';
 
-        $this->validate(
-            [
-                'newMedicationName' => ['required', 'string', 'max:200'],
-                'newDose' => ['required', 'string', 'max:100'],
-                'newQuantity' => ['nullable', 'string', 'max:100'],
-                'newFrequency' => ['required', 'string', 'max:100'],
-                'newDuration' => ['required', 'string', 'max:100'],
-                'newInstructions' => ['nullable', 'string', 'max:500'],
-            ],
-            [
-                'newMedicationName.required' => 'El medicamento es obligatorio.',
-                'newDose.required' => 'La dosis es obligatoria.',
-                'newFrequency.required' => 'La frecuencia es obligatoria.',
-                'newDuration.required' => 'La duración es obligatoria.',
-            ],
-        );
-
         try {
             $dto = new PrescriptionItemDTO(
-                medication_name: $this->newMedicationName,
-                dose: $this->newDose,
-                quantity: $this->newQuantity !== '' ? $this->newQuantity : null,
-                frequency: $this->newFrequency,
-                duration: $this->newDuration,
-                instructions: $this->newInstructions !== '' ? $this->newInstructions : null,
+                medication_name: '',
+                dose: '',
+                quantity: null,
+                frequency: '',
+                duration: '',
+                instructions: null,
             );
 
-            $item = app(PrescriptionItemServiceContract::class)->create($this->addingItemForPrescription, $dto);
+            $item = app(PrescriptionItemServiceContract::class)->create($prescriptionId, $dto);
 
-            $pIndex = array_search($this->addingItemForPrescription, array_column($this->prescriptions, 'id'));
+            $pIndex = array_search($prescriptionId, array_column($this->prescriptions, 'id'));
             if ($pIndex !== false) {
                 $this->prescriptions[$pIndex]['items'][] = [
                     'id' => $item->id,
-                    'medication_name' => $item->medication_name,
-                    'dose' => $item->dose,
-                    'quantity' => $item->quantity ?? '',
-                    'frequency' => $item->frequency,
-                    'duration' => $item->duration,
-                    'instructions' => $item->instructions ?? '',
+                    'medication_name' => '',
+                    'dose' => '',
+                    'quantity' => '',
+                    'frequency' => '',
+                    'duration' => '',
+                    'instructions' => '',
                 ];
             }
-
-            $this->resetNewItemForm();
         } catch (\Throwable $e) {
-            $this->errorMessage = 'Error al agregar medicamento: ' . $e->getMessage();
+            $this->errorMessage = 'Error al agregar fila: ' . $e->getMessage();
         }
-    }
-
-    private function resetNewItemForm(): void
-    {
-        $this->newMedicationName = '';
-        $this->newDose = '';
-        $this->newQuantity = '';
-        $this->newFrequency = '';
-        $this->newDuration = '';
-        $this->newInstructions = '';
-        $this->resetValidation();
     }
 }; ?>
 
@@ -663,117 +610,17 @@ new class extends Component {
                         @endif
                     </div>
 
-                    {{-- Form agregar medicamento --}}
                     @if (! $finalized)
-                        @if ($addingItemForPrescription === $prescription['id'])
-                            <div
-                                class="border-t border-gray-100 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-800/40 px-4 py-4 space-y-3"
+                        <div class="border-t border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-4 py-2">
+                            <button
+                                wire:click="addEmptyItem('{{ $prescription['id'] }}')"
+                                wire:loading.attr="disabled"
+                                class="inline-flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition font-medium"
                             >
-                                <p
-                                    class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide"
-                                >
-                                    Nuevo medicamento
-                                </p>
-                                <div class="grid grid-cols-2 lg:grid-cols-5 gap-2">
-                                    <div class="lg:col-span-2">
-                                        <input
-                                            wire:model="newMedicationName"
-                                            type="text"
-                                            placeholder="Medicamento *"
-                                            dusk="rx-new-medication"
-                                            class="{{ $inp }}"
-                                        />
-                                        @error('newMedicationName')
-                                            <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
-                                        @enderror
-                                    </div>
-                                    <div>
-                                        <input
-                                            wire:model="newDose"
-                                            type="text"
-                                            placeholder="Dosis *"
-                                            dusk="rx-new-dose"
-                                            class="{{ $inp }}"
-                                        />
-                                        @error('newDose')
-                                            <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
-                                        @enderror
-                                    </div>
-                                    <div>
-                                        <input
-                                            wire:model="newQuantity"
-                                            type="text"
-                                            placeholder="Cantidad"
-                                            class="{{ $inp }}"
-                                        />
-                                    </div>
-                                    <div>
-                                        <input
-                                            wire:model="newFrequency"
-                                            type="text"
-                                            placeholder="Frecuencia *"
-                                            dusk="rx-new-frequency"
-                                            class="{{ $inp }}"
-                                        />
-                                        @error('newFrequency')
-                                            <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
-                                        @enderror
-                                    </div>
-                                </div>
-                                <div class="grid grid-cols-2 lg:grid-cols-5 gap-2">
-                                    <div>
-                                        <input
-                                            wire:model="newDuration"
-                                            type="text"
-                                            placeholder="Duración *"
-                                            dusk="rx-new-duration"
-                                            class="{{ $inp }}"
-                                        />
-                                        @error('newDuration')
-                                            <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
-                                        @enderror
-                                    </div>
-                                    <div class="lg:col-span-4">
-                                        <textarea
-                                            wire:model="newInstructions"
-                                            rows="2"
-                                            placeholder="Instrucciones adicionales (opcional)"
-                                            dusk="rx-new-instructions"
-                                            class="{{ $inp }} resize-none"
-                                        ></textarea>
-                                    </div>
-                                </div>
-                                <div class="flex gap-2">
-                                    <button
-                                        wire:click="addItem"
-                                        wire:loading.attr="disabled"
-                                        dusk="rx-add-item-btn"
-                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium transition disabled:opacity-50"
-                                    >
-                                        <flux:icon.plus class="size-4" />
-                                        Agregar
-                                    </button>
-                                    <button
-                                        wire:click="cancelAddingItem"
-                                        class="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-zinc-600 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-zinc-800 text-sm transition"
-                                    >
-                                        Cancelar
-                                    </button>
-                                </div>
-                            </div>
-                        @else
-                            <div
-                                class="border-t border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-4 py-2"
-                            >
-                                <button
-                                    wire:click="startAddingItem('{{ $prescription['id'] }}')"
-                                    class="inline-flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition font-medium"
-                                >
-                                    <flux:icon.plus class="size-3.5" />
-                                    Agregar medicamento
-                                </button>
-                            </div>
-                        @endif
+                                <flux:icon.plus class="size-3.5" />
+                                Añadir fila
+                            </button>
+                        </div>
                     @endif
                 </div>
             @empty

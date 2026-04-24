@@ -2,7 +2,6 @@
 
 use App\Contracts\PrescriptionTemplateServiceContract;
 use App\DTOs\Templates\PrescriptionTemplateDTO;
-use App\Models\Medication;
 use App\Models\PrescriptionTemplate;
 use Livewire\Component;
 use Illuminate\Support\Collection;
@@ -11,7 +10,7 @@ new class extends Component {
     public string $name = '';
     public string $description = '';
     public bool $isActive = true;
-    public array $items = []; // [{medication_id, custom_name, dose, frequency, duration, instructions}]
+    public array $items = []; // [{custom_medication_name, dose, frequency, duration, instructions}]
 
     public ?string $editingTemplateId = null;
     public string $search = '';
@@ -24,18 +23,16 @@ new class extends Component {
             'templates' => $doctor
                 ? $doctor
                     ->prescriptionTemplates()
-                    ->with('items.medication')
+                    ->with('items')
                     ->latest()
                     ->get()
                 : collect(),
-            'medications' => Medication::all(),
         ];
     }
 
     public function addItem(): void
     {
         $this->items[] = [
-            'medication_id' => '',
             'custom_medication_name' => '',
             'dose' => '',
             'frequency' => '',
@@ -75,8 +72,7 @@ new class extends Component {
             'name' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',
             'items' => 'required|array|min:1',
-            'items.*.medication_id' => 'nullable|exists:medications,id|required_without:items.*.custom_medication_name',
-            'items.*.custom_medication_name' => 'nullable|string|max:255|required_without:items.*.medication_id',
+            'items.*.custom_medication_name' => 'required|string|max:255',
         ]);
 
         $dto = PrescriptionTemplateDTO::fromArray([
@@ -112,7 +108,6 @@ new class extends Component {
             ->map(
                 fn ($item) => [
                     'id' => $item->id,
-                    'medication_id' => $item->medication_id ?? '',
                     'custom_medication_name' => $item->custom_medication_name ?? '',
                     'dose' => $item->dose ?? '',
                     'frequency' => $item->frequency ?? '',
@@ -181,7 +176,7 @@ new class extends Component {
                         <div class="flex flex-wrap gap-1 mt-2">
                             @foreach ($template->items->take(3) as $item)
                                 <flux:badge size="sm" variant="outline" class="text-xs">
-                                    {{ $item->medication?->name ?? $item->custom_medication_name }}
+                                    {{ $item->custom_medication_name }}
                                 </flux:badge>
                             @endforeach
 
@@ -269,26 +264,12 @@ new class extends Component {
                                     wire:click="removeItem({{ $index }})"
                                 />
 
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                                    <div class="flex flex-col gap-1">
-                                        <flux:label>{{ __('Medicamento del Catálogo') }}</flux:label>
-                                        <select
-                                            dusk="select-medicamento-{{ $index }}"
-                                            wire:model="items.{{ $index }}.medication_id"
-                                            class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-zinc-900 dark:border-zinc-700"
-                                        >
-                                            <option value="">{{ __('--- Seleccionar o escribir abajo ---') }}</option>
-                                            @foreach ($medications as $med)
-                                                <option value="{{ $med->id }}">
-                                                    {{ $med->name }} ({{ $med->concentration }})
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                    </div>
+                                <div class="mb-4">
                                     <flux:input
                                         wire:model="items.{{ $index }}.custom_medication_name"
-                                        :label="__('O escribir medicamento personalizado')"
-                                        :placeholder="__('Si no está en el catálogo...')"
+                                        :label="__('Nombre del Medicamento')"
+                                        :placeholder="__('Ej: Paracetamol 500mg')"
+                                        required
                                     />
                                 </div>
 

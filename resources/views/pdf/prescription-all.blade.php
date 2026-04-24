@@ -67,6 +67,18 @@
             @endif
 
             <div class="footer">
+                {{-- Aquí irá la firma digitalizada --}}
+                <div style="height: 60px; margin-bottom: 5px">
+                    @if ($consultation->doctor?->digital_signature_path)
+                        <img
+                            src="{{ public_path('storage/' . $consultation->doctor->digital_signature_path) }}"
+                            alt="Firma del doctor"
+                            style="max-height: 60px; max-width: 200px; object-fit: contain"
+                        />
+                    @else
+                        <div style="height: 60px; display: inline-block"></div>
+                    @endif
+                </div>
                 <div>_________________________________</div>
                 <div><strong>{{ $consultation->doctor?->full_name ?? '' }}</strong></div>
                 @if ($consultation->doctor?->specialty)

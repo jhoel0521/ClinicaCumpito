@@ -33,6 +33,12 @@ new class extends Component {
     public array $labRequests = [];
 
     /**
+     * Pendientes de otras consultas del mismo paciente.
+     * @var array<int, array<string, mixed>>
+     */
+    public array $pendingPreviousLabRequests = [];
+
+    /**
      * Exam catalog for the selector.
      *
      * @var array<int, array{id: string, name: string, exams: array<int, array{id: string, name: string, parameters: array<int, string>}>}>
@@ -109,6 +115,25 @@ new class extends Component {
             ->orderBy('created_at')
             ->get()
             ->map(fn ($r) => $this->mapRequest($r))
+            ->values()
+            ->all();
+
+        $this->pendingPreviousLabRequests = LaboratoryRequest::with([
+            'items.results',
+            'items.attachments',
+            'attachments',
+            'consultation',
+        ])
+            ->whereHas('consultation', fn ($q) => $q->where('patient_id', $consultation->patient_id))
+            ->where('consultation_id', '!=', $this->consultationId)
+            ->where('status', 'pending')
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(
+                fn ($r) => array_merge($this->mapRequest($r), [
+                    'consultation_date' => $r->consultation->consultation_date->format('d/m/Y'),
+                ]),
+            )
             ->values()
             ->all();
     }
@@ -265,22 +290,35 @@ new class extends Component {
 
     public function saveField(string $requestId, string $field, string $value): void
     {
-        if ($this->finalized) {
-            return;
-        }
-
         $allowed = ['status', 'presumptive_diagnosis', 'observations'];
         if (! in_array($field, $allowed, true)) {
             return;
         }
 
-        $rIndex = array_search($requestId, array_column($this->labRequests, 'id'));
-        if ($rIndex === false) {
+        // Only allow status change if finalized (to allow loading results)
+        // presumptive_diagnosis and observations remain locked if finalized
+        if ($this->finalized && $field !== 'status') {
             return;
         }
 
-        $this->labRequests[$rIndex][$field] = $value;
-        $r = $this->labRequests[$rIndex];
+        $rIndex = array_search($requestId, array_column($this->labRequests, 'id'));
+        $isPrevious = false;
+
+        if ($rIndex === false) {
+            $rIndex = array_search($requestId, array_column($this->pendingPreviousLabRequests, 'id'));
+            if ($rIndex === false) {
+                return;
+            }
+            $isPrevious = true;
+        }
+
+        if ($isPrevious) {
+            $this->pendingPreviousLabRequests[$rIndex][$field] = $value;
+            $r = $this->pendingPreviousLabRequests[$rIndex];
+        } else {
+            $this->labRequests[$rIndex][$field] = $value;
+            $r = $this->labRequests[$rIndex];
+        }
 
         $this->errorMessage = '';
 
@@ -689,21 +727,30 @@ new class extends Component {
                 </div>
             @endif
 
-            {{-- ── Lista de laboratorios ── --}}
-            @forelse ($labRequests as $labReq)
-                <div class="rounded-xl border border-gray-200 dark:border-zinc-700 overflow-hidden">
+            {{-- ── Lista de laboratorios (Actuales y Pendientes Previas) ── --}}
+            @forelse (array_merge($pendingPreviousLabRequests, $labRequests) as $labReq)
+                <div
+                    class="rounded-xl border {{ isset($labReq['consultation_date']) ? 'border-amber-200 dark:border-amber-700/50' : 'border-gray-200 dark:border-zinc-700' }} overflow-hidden"
+                >
                     {{-- Encabezado: nombre del examen + estado + eliminar --}}
                     <div
-                        class="flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-zinc-800 border-b border-gray-200 dark:border-zinc-700"
+                        class="flex items-center justify-between px-4 py-3 {{ isset($labReq['consultation_date']) ? 'bg-amber-50 dark:bg-amber-900/10 border-b border-amber-200 dark:border-amber-700/50' : 'bg-gray-50 dark:bg-zinc-800 border-b border-gray-200 dark:border-zinc-700' }}"
                     >
                         <div class="flex items-center gap-3 min-w-0">
+                            @if (isset($labReq['consultation_date']))
+                                <span
+                                    class="shrink-0 text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-400 px-2 py-0.5 rounded"
+                                >
+                                    Previa ({{ $labReq['consultation_date'] }})
+                                </span>
+                            @endif
+
                             <span class="text-sm font-semibold text-gray-800 dark:text-gray-200 truncate">
                                 {{ $labReq['examName'] }}
                             </span>
                             <select
                                 wire:change="saveField('{{ $labReq['id'] }}', 'status', $event.target.value)"
-                                @disabled($finalized)
-                                class="text-xs rounded-full px-2 py-0.5 border font-medium transition focus:ring-1 focus:ring-sky-500 disabled:opacity-50 flex-shrink-0 @if ($labReq['status'] === 'pending') bg-amber-50 dark:bg-amber-900/20 border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-300 @else bg-green-50 dark:bg-green-900/20 border-green-300 dark:border-green-700 text-green-700 dark:text-green-300 @endif"
+                                class="text-xs rounded-full px-2 py-0.5 border font-medium transition focus:ring-1 focus:ring-sky-500 flex-shrink-0 @if ($labReq['status'] === 'pending') bg-amber-50 dark:bg-amber-900/20 border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-300 @else bg-green-50 dark:bg-green-900/20 border-green-300 dark:border-green-700 text-green-700 dark:text-green-300 @endif"
                             >
                                 <option value="pending" @selected($labReq['status'] === 'pending')>Pendiente</option>
                                 <option value="received" @selected($labReq['status'] === 'received')>
@@ -763,6 +810,19 @@ new class extends Component {
                                                     </button>
                                                 @endif
                                             </div>
+
+                                            {{-- Botón rápido para cargar resultados si está pendiente --}}
+                                            @if ($labReq['status'] === 'pending')
+                                                <div class="mt-2">
+                                                    <button
+                                                        wire:click="saveField('{{ $labReq['id'] }}', 'status', 'received')"
+                                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-sky-50 dark:bg-sky-900/30 text-sky-700 dark:text-sky-400 text-xs font-semibold hover:bg-sky-100 transition border border-sky-100 dark:border-sky-800"
+                                                    >
+                                                        <flux:icon.clipboard-document-check class="size-3.5" />
+                                                        Cargar Resultados
+                                                    </button>
+                                                </div>
+                                            @endif
 
                                             {{-- Resultados — solo si status = received ── --}}
                                             @if ($labReq['status'] === 'received')
@@ -827,18 +887,16 @@ new class extends Component {
                                                                                     />
                                                                                 @endif
                                                                             </td>
-                                                                            @if (! $finalized)
-                                                                                <td class="px-2 py-2">
-                                                                                    <button
-                                                                                        wire:click="deleteResult('{{ $result['id'] }}')"
-                                                                                        class="text-red-400 hover:text-red-600 transition"
-                                                                                    >
-                                                                                        <flux:icon.x-mark
-                                                                                            class="size-3.5"
-                                                                                        />
-                                                                                    </button>
-                                                                                </td>
-                                                                            @endif
+                                                                            <td class="px-2 py-2">
+                                                                                <button
+                                                                                    wire:click="deleteResult('{{ $result['id'] }}')"
+                                                                                    class="text-red-400 hover:text-red-600 transition"
+                                                                                >
+                                                                                    <flux:icon.x-mark
+                                                                                        class="size-3.5"
+                                                                                    />
+                                                                                </button>
+                                                                            </td>
                                                                         </tr>
                                                                         @if ($result['report_text'])
                                                                             <tr class="bg-gray-50 dark:bg-zinc-800/50">
@@ -857,58 +915,56 @@ new class extends Component {
                                                     @endif
 
                                                     {{-- Formulario nueva respuesta --}}
-                                                    @if (! $finalized)
-                                                        <div
-                                                            class="rounded-lg border border-sky-200 dark:border-sky-800 bg-sky-50 dark:bg-sky-900/10 p-3 space-y-2"
-                                                        >
-                                                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                                                    <div
+                                                        class="rounded-lg border border-sky-200 dark:border-sky-800 bg-sky-50 dark:bg-sky-900/10 p-3 space-y-2"
+                                                    >
+                                                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                                                            <input
+                                                                wire:model="newResults.{{ $item['id'] }}.paramName"
+                                                                type="text"
+                                                                placeholder="Parámetro (opcional)"
+                                                                class="px-2.5 py-1.5 border border-gray-300 dark:border-zinc-600 rounded bg-white dark:bg-zinc-900 text-gray-900 dark:text-gray-100 text-sm focus:ring-1 focus:ring-sky-500"
+                                                            />
+                                                            <input
+                                                                wire:model="newResults.{{ $item['id'] }}.value"
+                                                                type="text"
+                                                                placeholder="Valor (opcional)"
+                                                                class="px-2.5 py-1.5 border border-gray-300 dark:border-zinc-600 rounded bg-white dark:bg-zinc-900 text-gray-900 dark:text-gray-100 text-sm focus:ring-1 focus:ring-sky-500"
+                                                            />
+                                                            <input
+                                                                wire:model="newResults.{{ $item['id'] }}.range"
+                                                                type="text"
+                                                                placeholder="Referencia (opcional)"
+                                                                class="px-2.5 py-1.5 border border-gray-300 dark:border-zinc-600 rounded bg-white dark:bg-zinc-900 text-gray-900 dark:text-gray-100 text-sm focus:ring-1 focus:ring-sky-500"
+                                                            />
+                                                        </div>
+                                                        <textarea
+                                                            wire:model="newResults.{{ $item['id'] }}.report"
+                                                            rows="2"
+                                                            placeholder="Informe / texto libre (radiología, cultivos...)"
+                                                            class="w-full px-2.5 py-1.5 border border-gray-300 dark:border-zinc-600 rounded bg-white dark:bg-zinc-900 text-gray-900 dark:text-gray-100 text-sm resize-none focus:ring-1 focus:ring-sky-500"
+                                                        ></textarea>
+                                                        <div class="flex items-center justify-between">
+                                                            <label
+                                                                class="flex items-center gap-2 text-sm text-red-600 dark:text-red-400 cursor-pointer"
+                                                            >
                                                                 <input
-                                                                    wire:model="newResults.{{ $item['id'] }}.paramName"
-                                                                    type="text"
-                                                                    placeholder="Parámetro (opcional)"
-                                                                    class="px-2.5 py-1.5 border border-gray-300 dark:border-zinc-600 rounded bg-white dark:bg-zinc-900 text-gray-900 dark:text-gray-100 text-sm focus:ring-1 focus:ring-sky-500"
+                                                                    type="checkbox"
+                                                                    wire:model="newResults.{{ $item['id'] }}.abnormal"
+                                                                    class="rounded border-gray-300 text-red-500 focus:ring-red-400"
                                                                 />
-                                                                <input
-                                                                    wire:model="newResults.{{ $item['id'] }}.value"
-                                                                    type="text"
-                                                                    placeholder="Valor (opcional)"
-                                                                    class="px-2.5 py-1.5 border border-gray-300 dark:border-zinc-600 rounded bg-white dark:bg-zinc-900 text-gray-900 dark:text-gray-100 text-sm focus:ring-1 focus:ring-sky-500"
-                                                                />
-                                                                <input
-                                                                    wire:model="newResults.{{ $item['id'] }}.range"
-                                                                    type="text"
-                                                                    placeholder="Referencia (opcional)"
-                                                                    class="px-2.5 py-1.5 border border-gray-300 dark:border-zinc-600 rounded bg-white dark:bg-zinc-900 text-gray-900 dark:text-gray-100 text-sm focus:ring-1 focus:ring-sky-500"
-                                                                />
-                                                            </div>
-                                                            <textarea
-                                                                wire:model="newResults.{{ $item['id'] }}.report"
-                                                                rows="2"
-                                                                placeholder="Informe / texto libre (radiología, cultivos...)"
-                                                                class="w-full px-2.5 py-1.5 border border-gray-300 dark:border-zinc-600 rounded bg-white dark:bg-zinc-900 text-gray-900 dark:text-gray-100 text-sm resize-none focus:ring-1 focus:ring-sky-500"
-                                                            ></textarea>
-                                                            <div class="flex items-center justify-between">
-                                                                <label
-                                                                    class="flex items-center gap-2 text-sm text-red-600 dark:text-red-400 cursor-pointer"
+                                                                Resultado anormal
+                                                            </label>
+                                                            <div class="flex gap-2">
+                                                                <button
+                                                                    wire:click="saveNewResult('{{ $item['id'] }}')"
+                                                                    class="px-3 py-1 text-xs rounded bg-sky-600 hover:bg-sky-700 text-white transition"
                                                                 >
-                                                                    <input
-                                                                        type="checkbox"
-                                                                        wire:model="newResults.{{ $item['id'] }}.abnormal"
-                                                                        class="rounded border-gray-300 text-red-500 focus:ring-red-400"
-                                                                    />
-                                                                    Resultado anormal
-                                                                </label>
-                                                                <div class="flex gap-2">
-                                                                    <button
-                                                                        wire:click="saveNewResult('{{ $item['id'] }}')"
-                                                                        class="px-3 py-1 text-xs rounded bg-sky-600 hover:bg-sky-700 text-white transition"
-                                                                    >
-                                                                        Guardar
-                                                                    </button>
-                                                                </div>
+                                                                    Guardar
+                                                                </button>
                                                             </div>
                                                         </div>
-                                                    @endif
+                                                    </div>
 
                                                     {{-- Adjuntos del ítem --}}
                                                     <div>
@@ -945,49 +1001,45 @@ new class extends Component {
                                                                             {{ $att['original_name'] ?? 'Documento' }}
                                                                         </a>
                                                                     @endif
-                                                                    @if (! $finalized)
-                                                                        <button
-                                                                            wire:click="deleteAttachment('{{ $att['id'] }}')"
-                                                                            class="ml-1 text-gray-400 hover:text-red-500 transition"
-                                                                        >
-                                                                            <flux:icon.x-mark class="size-3" />
-                                                                        </button>
-                                                                    @endif
+                                                                    <button
+                                                                        wire:click="deleteAttachment('{{ $att['id'] }}')"
+                                                                        class="ml-1 text-gray-400 hover:text-red-500 transition"
+                                                                    >
+                                                                        <flux:icon.x-mark class="size-3" />
+                                                                    </button>
                                                                 </div>
                                                             @endforeach
 
-                                                            @if (! $finalized)
-                                                                @if ($attachingToItemId === $item['id'] && $attachingToRequestId === $labReq['id'])
-                                                                    <div class="flex items-center gap-2">
-                                                                        <input
-                                                                            type="file"
-                                                                            wire:model="newAttachmentFile"
-                                                                            accept=".jpg,.jpeg,.png,.webp,.pdf"
-                                                                            class="text-xs"
-                                                                        />
-                                                                        <button
-                                                                            wire:click="uploadAttachment"
-                                                                            wire:loading.attr="disabled"
-                                                                            class="px-2 py-1 text-xs rounded bg-sky-600 hover:bg-sky-700 text-white transition disabled:opacity-50"
-                                                                        >
-                                                                            Subir
-                                                                        </button>
-                                                                        <button
-                                                                            wire:click="$set('attachingToItemId', null)"
-                                                                            class="px-2 py-1 text-xs rounded border border-gray-300 dark:border-zinc-600 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-zinc-700 transition"
-                                                                        >
-                                                                            ×
-                                                                        </button>
-                                                                    </div>
-                                                                @else
+                                                            @if ($attachingToItemId === $item['id'] && $attachingToRequestId === $labReq['id'])
+                                                                <div class="flex items-center gap-2">
+                                                                    <input
+                                                                        type="file"
+                                                                        wire:model="newAttachmentFile"
+                                                                        accept=".jpg,.jpeg,.png,.webp,.pdf"
+                                                                        class="text-xs"
+                                                                    />
                                                                     <button
-                                                                        wire:click="openAttachment('{{ $labReq['id'] }}', '{{ $item['id'] }}')"
-                                                                        class="text-xs text-sky-600 dark:text-sky-400 hover:underline flex items-center gap-1"
+                                                                        wire:click="uploadAttachment"
+                                                                        wire:loading.attr="disabled"
+                                                                        class="px-2 py-1 text-xs rounded bg-sky-600 hover:bg-sky-700 text-white transition disabled:opacity-50"
                                                                     >
-                                                                        <flux:icon.paper-clip class="size-3" />
-                                                                        Adjuntar
+                                                                        Subir
                                                                     </button>
-                                                                @endif
+                                                                    <button
+                                                                        wire:click="$set('attachingToItemId', null)"
+                                                                        class="px-2 py-1 text-xs rounded border border-gray-300 dark:border-zinc-600 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-zinc-700 transition"
+                                                                    >
+                                                                        ×
+                                                                    </button>
+                                                                </div>
+                                                            @else
+                                                                <button
+                                                                    wire:click="openAttachment('{{ $labReq['id'] }}', '{{ $item['id'] }}')"
+                                                                    class="text-xs text-sky-600 dark:text-sky-400 hover:underline flex items-center gap-1"
+                                                                >
+                                                                    <flux:icon.paper-clip class="size-3" />
+                                                                    Adjuntar
+                                                                </button>
                                                             @endif
                                                         </div>
                                                     </div>

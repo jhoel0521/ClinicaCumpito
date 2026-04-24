@@ -1,7 +1,6 @@
 <?php
 
 use App\Models\Doctor;
-use App\Models\Medication;
 use App\Models\PrescriptionTemplate;
 use App\Models\User;
 use Livewire\Livewire;
@@ -38,15 +37,12 @@ describe('Template module', function () {
     test('puede crear plantilla de receta con items', function () {
         $this->actingAs($this->user);
 
-        $medication = Medication::factory()->create();
-
         Livewire::test('pages::templates.prescription-templates')
             ->set('name', 'Receta de prueba')
             ->set('description', 'Plantilla para pruebas')
             ->set('isActive', true)
             ->set('items', [[
-                'medication_id' => $medication->id,
-                'custom_medication_name' => '',
+                'custom_medication_name' => 'Paracetamol 500mg',
                 'dose' => '500mg',
                 'frequency' => 'cada 8h',
                 'duration' => '5 días',
@@ -67,7 +63,7 @@ describe('Template module', function () {
 
         $this->assertDatabaseHas('prescription_template_items', [
             'template_id' => $template->id,
-            'medication_id' => $medication->id,
+            'custom_medication_name' => 'Paracetamol 500mg',
         ]);
     });
 });

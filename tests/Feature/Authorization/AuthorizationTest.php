@@ -258,7 +258,6 @@ describe('8.2 — PatientPolicy: usuarios no autenticados', function (): void {
     test('usuario no autenticado es redirigido a login en rutas de catálogos', function (): void {
         $this->get(route('settings.catalogs'))->assertRedirect(route('login'));
         $this->get(route('settings.catalogs.laboratories'))->assertRedirect(route('login'));
-        $this->get(route('settings.catalogs.medications'))->assertRedirect(route('login'));
         $this->get(route('settings.catalogs.vaccines'))->assertRedirect(route('login'));
     });
 });

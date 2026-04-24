@@ -46,6 +46,17 @@
                         {{ __('Consultas') }}
                     </flux:sidebar.item>
 
+                    @if (isset($patient) && isset($patient->id))
+                        <flux:sidebar.item
+                            icon="queue-list"
+                            href="{{ route('pacientes.feed', $patient) }}"
+                            :current="request()->routeIs('pacientes.feed')"
+                            wire:navigate
+                        >
+                            {{ __('Feed Historia Clínica') }}
+                        </flux:sidebar.item>
+                    @endif
+
                     <flux:sidebar.item
                         icon="clipboard-document-list"
                         :href="route('settings.prescriptions')"

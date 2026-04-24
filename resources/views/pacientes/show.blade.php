@@ -86,6 +86,12 @@
                             </a>
                         @endif
                         <a
+                            href="{{ route('pacientes.feed', $patient) }}"
+                            class="inline-flex items-center gap-1.5 bg-white/20 hover:bg-white/30 font-medium px-4 py-2 rounded-lg text-sm transition"
+                        >
+                            📱 Feed Historial
+                        </a>
+                        <a
                             href="{{ route('pacientes.edit', $patient) }}"
                             class="inline-flex items-center gap-1.5 bg-white/20 hover:bg-white/30 font-medium px-4 py-2 rounded-lg text-sm transition"
                         >

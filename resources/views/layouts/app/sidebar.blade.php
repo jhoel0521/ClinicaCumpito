@@ -79,15 +79,6 @@
                         </flux:sidebar.item>
 
                         <flux:sidebar.item
-                            icon="cube"
-                            :href="route('settings.catalogs.medications')"
-                            :current="request()->routeIs('settings.catalogs.medications')"
-                            wire:navigate
-                        >
-                            {{ __('Medicamentos') }}
-                        </flux:sidebar.item>
-
-                        <flux:sidebar.item
                             icon="shield-check"
                             :href="route('settings.catalogs.vaccines')"
                             :current="request()->routeIs('settings.catalogs.vaccines')"

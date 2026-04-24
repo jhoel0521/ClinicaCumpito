@@ -30,6 +30,10 @@
             >
                 Laboratorios
             </a>
+            <span class="text-zinc-300 dark:text-zinc-600">·</span>
+            <a href="#historial-vacunas" class="text-teal-600 dark:text-teal-400 hover:underline whitespace-nowrap">
+                Vacunas
+            </a>
         </nav>
 
         {{-- ═══════════════════════════════════════════════════════════════════ --}}
@@ -615,47 +619,114 @@
             </div>
 
             @if ($recentConsultasConLab->isNotEmpty())
-                <div class="space-y-4">
-                    @foreach ($recentConsultasConLab as $consultation)
-                        <div
-                            class="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-700 p-5"
+                <div
+                    class="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-700 overflow-hidden"
+                >
+                    <table class="w-full text-sm">
+                        <thead
+                            class="bg-zinc-50 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 text-xs uppercase tracking-wide"
                         >
-                            <div class="flex items-center justify-between mb-3">
-                                <div class="flex gap-3 items-center text-sm text-zinc-500 dark:text-zinc-400">
-                                    <span class="font-medium text-zinc-800 dark:text-zinc-200">
+                            <tr>
+                                <th class="text-left px-4 py-3">Fecha</th>
+                                <th class="text-left px-4 py-3">Doctor</th>
+                                <th class="text-left px-4 py-3">Pruebas Solicitadas</th>
+                                <th class="text-right px-4 py-3"></th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-zinc-100 dark:divide-zinc-800">
+                            @foreach ($recentConsultasConLab as $consultation)
+                                <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition">
+                                    <td class="px-4 py-3 font-medium text-zinc-800 dark:text-zinc-200">
                                         {{ $consultation->consultation_date->format('d/m/Y') }}
-                                    </span>
-                                    <span>{{ $consultation->doctor?->full_name ?? '—' }}</span>
-                                </div>
-                                <a
-                                    href="{{ route('consultas.show', $consultation->id) }}"
-                                    class="text-xs text-teal-600 dark:text-teal-400 hover:underline"
-                                >
-                                    Ver consulta →
-                                </a>
-                            </div>
-                            <ul class="space-y-1.5 text-sm">
-                                @foreach ($consultation->laboratoryRequests->flatMap(fn ($r) => $r->items) as $item)
-                                    <li class="flex gap-3 items-start">
-                                        <span class="text-blue-400 flex-shrink-0">🧪</span>
-                                        <div class="text-zinc-700 dark:text-zinc-300">
-                                            <span class="font-medium">{{ $item->exam_name }}</span>
-                                            @if ($item->parameter_name)
-                                                <span class="text-zinc-500 dark:text-zinc-400">
-                                                    — {{ $item->parameter_name }}
-                                                </span>
-                                            @endif
-                                        </div>
-                                    </li>
-                                @endforeach
-                            </ul>
-                        </div>
-                    @endforeach
+                                    </td>
+                                    <td class="px-4 py-3 text-zinc-600 dark:text-zinc-400">
+                                        {{ $consultation->doctor?->full_name ?? '—' }}
+                                    </td>
+                                    <td class="px-4 py-3 text-zinc-600 dark:text-zinc-400">
+                                        {{ $consultation->laboratoryRequests->flatMap(fn ($r) => $r->items)->count() }}
+                                        pruebas
+                                    </td>
+                                    <td class="px-4 py-3 text-right">
+                                        <a
+                                            href="{{ route('consultas.show', $consultation->id) }}"
+                                            class="text-teal-600 dark:text-teal-400 hover:underline text-xs font-medium"
+                                        >
+                                            Ver →
+                                        </a>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
                 </div>
             @else
                 <p class="text-zinc-400 dark:text-zinc-500 text-sm italic">
                     Sin solicitudes de laboratorio registradas.
                 </p>
+            @endif
+        </section>
+
+        <hr class="border-zinc-200 dark:border-zinc-800" />
+
+        {{-- ═══════════════════════════════════════════════════════════════════ --}}
+        {{-- SECCIÓN 7: HISTORIAL DE VACUNAS --}}
+        {{-- ═══════════════════════════════════════════════════════════════════ --}}
+        <section id="historial-vacunas" dusk="section-historial-vacunas" class="scroll-mt-16">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-bold text-zinc-800 dark:text-zinc-100">Historial de Vacunas</h2>
+                <a
+                    href="{{ route('pacientes.vacunas', $patient) }}"
+                    class="text-sm text-teal-600 dark:text-teal-400 hover:underline font-medium"
+                >
+                    Ver esquema completo →
+                </a>
+            </div>
+
+            @php
+                $ultimasVacunas = App\Models\PatientVaccine::where('patient_id', $patient->id)
+                    ->with(['vaccine', 'appliedByDoctor'])
+                    ->orderByDesc('applied_at')
+                    ->limit(5)
+                    ->get();
+            @endphp
+
+            @if ($ultimasVacunas->isNotEmpty())
+                <div
+                    class="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-700 overflow-hidden"
+                >
+                    <table class="w-full text-sm">
+                        <thead
+                            class="bg-zinc-50 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 text-xs uppercase tracking-wide"
+                        >
+                            <tr>
+                                <th class="text-left px-4 py-3">Fecha</th>
+                                <th class="text-left px-4 py-3">Vacuna</th>
+                                <th class="text-left px-4 py-3">Dosis</th>
+                                <th class="text-left px-4 py-3">Administrado por</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-zinc-100 dark:divide-zinc-800">
+                            @foreach ($ultimasVacunas as $pv)
+                                <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition">
+                                    <td class="px-4 py-3 font-medium text-zinc-800 dark:text-zinc-200">
+                                        {{ $pv->applied_at?->format('d/m/Y') ?? '—' }}
+                                    </td>
+                                    <td class="px-4 py-3 text-zinc-800 dark:text-zinc-200 font-medium">
+                                        {{ $pv->vaccine->name }}
+                                    </td>
+                                    <td class="px-4 py-3 text-zinc-600 dark:text-zinc-400">
+                                        {{ $pv->dose_number }}
+                                    </td>
+                                    <td class="px-4 py-3 text-zinc-600 dark:text-zinc-400">
+                                        {{ $pv->applied_elsewhere ? 'Otro lugar' : $pv->appliedByDoctor?->full_name ?? '—' }}
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @else
+                <p class="text-zinc-400 dark:text-zinc-500 text-sm italic">Sin vacunas registradas.</p>
             @endif
         </section>
     </div>

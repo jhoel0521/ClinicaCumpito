@@ -57,12 +57,7 @@ new class extends Component {
     public string $customParamName = '';
 
     // ── Add result state ──
-    public ?string $addingResultToItemId = null;
-    public string $newResultParamName = '';
-    public string $newResultValue = '';
-    public string $newResultRange = '';
-    public string $newResultReport = '';
-    public bool $newResultAbnormal = false;
+    public array $newResults = [];
 
     // ── Attachment upload state ──
     /** @var mixed */
@@ -363,40 +358,23 @@ new class extends Component {
 
     // ── Results ──
 
-    public function openAddResult(string $itemId): void
+    public function saveNewResult(string $itemId): void
     {
-        $this->addingResultToItemId = $itemId;
-        $this->newResultParamName = '';
-        $this->newResultValue = '';
-        $this->newResultRange = '';
-        $this->newResultReport = '';
-        $this->newResultAbnormal = false;
-    }
-
-    public function cancelAddResult(): void
-    {
-        $this->addingResultToItemId = null;
-    }
-
-    public function saveNewResult(): void
-    {
-        if (! $this->addingResultToItemId) {
-            return;
-        }
-
         $this->errorMessage = '';
 
         try {
+            $data = $this->newResults[$itemId] ?? [];
+
             LaboratoryItemResult::create([
-                'laboratory_request_item_id' => $this->addingResultToItemId,
-                'parameter_name' => trim($this->newResultParamName) !== '' ? trim($this->newResultParamName) : null,
-                'value' => trim($this->newResultValue) !== '' ? trim($this->newResultValue) : null,
-                'reference_range' => trim($this->newResultRange) !== '' ? trim($this->newResultRange) : null,
-                'report_text' => trim($this->newResultReport) !== '' ? trim($this->newResultReport) : null,
-                'is_abnormal' => $this->newResultAbnormal,
+                'laboratory_request_item_id' => $itemId,
+                'parameter_name' => ! empty($data['paramName']) ? trim($data['paramName']) : null,
+                'value' => ! empty($data['value']) ? trim($data['value']) : null,
+                'reference_range' => ! empty($data['range']) ? trim($data['range']) : null,
+                'report_text' => ! empty($data['report']) ? trim($data['report']) : null,
+                'is_abnormal' => ! empty($data['abnormal']),
             ]);
 
-            $this->addingResultToItemId = null;
+            $this->newResults[$itemId] = [];
             $this->reload();
         } catch (\Throwable $e) {
             $this->errorMessage = 'Error al guardar resultado: ' . $e->getMessage();
@@ -879,32 +857,32 @@ new class extends Component {
                                                     @endif
 
                                                     {{-- Formulario nueva respuesta --}}
-                                                    @if ($addingResultToItemId === $item['id'])
+                                                    @if (! $finalized)
                                                         <div
                                                             class="rounded-lg border border-sky-200 dark:border-sky-800 bg-sky-50 dark:bg-sky-900/10 p-3 space-y-2"
                                                         >
                                                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
                                                                 <input
-                                                                    wire:model="newResultParamName"
+                                                                    wire:model="newResults.{{ $item['id'] }}.paramName"
                                                                     type="text"
                                                                     placeholder="Parámetro (opcional)"
                                                                     class="px-2.5 py-1.5 border border-gray-300 dark:border-zinc-600 rounded bg-white dark:bg-zinc-900 text-gray-900 dark:text-gray-100 text-sm focus:ring-1 focus:ring-sky-500"
                                                                 />
                                                                 <input
-                                                                    wire:model="newResultValue"
+                                                                    wire:model="newResults.{{ $item['id'] }}.value"
                                                                     type="text"
                                                                     placeholder="Valor (opcional)"
                                                                     class="px-2.5 py-1.5 border border-gray-300 dark:border-zinc-600 rounded bg-white dark:bg-zinc-900 text-gray-900 dark:text-gray-100 text-sm focus:ring-1 focus:ring-sky-500"
                                                                 />
                                                                 <input
-                                                                    wire:model="newResultRange"
+                                                                    wire:model="newResults.{{ $item['id'] }}.range"
                                                                     type="text"
                                                                     placeholder="Referencia (opcional)"
                                                                     class="px-2.5 py-1.5 border border-gray-300 dark:border-zinc-600 rounded bg-white dark:bg-zinc-900 text-gray-900 dark:text-gray-100 text-sm focus:ring-1 focus:ring-sky-500"
                                                                 />
                                                             </div>
                                                             <textarea
-                                                                wire:model="newResultReport"
+                                                                wire:model="newResults.{{ $item['id'] }}.report"
                                                                 rows="2"
                                                                 placeholder="Informe / texto libre (radiología, cultivos...)"
                                                                 class="w-full px-2.5 py-1.5 border border-gray-300 dark:border-zinc-600 rounded bg-white dark:bg-zinc-900 text-gray-900 dark:text-gray-100 text-sm resize-none focus:ring-1 focus:ring-sky-500"
@@ -915,35 +893,21 @@ new class extends Component {
                                                                 >
                                                                     <input
                                                                         type="checkbox"
-                                                                        wire:model="newResultAbnormal"
+                                                                        wire:model="newResults.{{ $item['id'] }}.abnormal"
                                                                         class="rounded border-gray-300 text-red-500 focus:ring-red-400"
                                                                     />
                                                                     Resultado anormal
                                                                 </label>
                                                                 <div class="flex gap-2">
                                                                     <button
-                                                                        wire:click="saveNewResult"
+                                                                        wire:click="saveNewResult('{{ $item['id'] }}')"
                                                                         class="px-3 py-1 text-xs rounded bg-sky-600 hover:bg-sky-700 text-white transition"
                                                                     >
                                                                         Guardar
                                                                     </button>
-                                                                    <button
-                                                                        wire:click="cancelAddResult"
-                                                                        class="px-3 py-1 text-xs rounded border border-gray-300 dark:border-zinc-600 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-zinc-700 transition"
-                                                                    >
-                                                                        Cancelar
-                                                                    </button>
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                    @elseif (! $finalized)
-                                                        <button
-                                                            wire:click="openAddResult('{{ $item['id'] }}')"
-                                                            class="text-xs text-sky-600 dark:text-sky-400 hover:underline flex items-center gap-1"
-                                                        >
-                                                            <flux:icon.plus class="size-3" />
-                                                            Agregar respuesta
-                                                        </button>
                                                     @endif
 
                                                     {{-- Adjuntos del ítem --}}

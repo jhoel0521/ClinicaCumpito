@@ -57,7 +57,7 @@ new class extends Component {
         }
 
         $this->resetForm();
-        $this->dispatch('close-modal', 'vaccine-modal');
+        $this->dispatch('modal-close', name: 'vaccine-modal');
     }
 
     public function edit(string $id): void
@@ -68,7 +68,13 @@ new class extends Component {
         $this->diseasePrevented = $vaccine->disease_prevented ?? '';
         $this->recommendedAge = $vaccine->recommended_age ?? '';
         $this->doseSequence = $vaccine->dose_sequence ?? 1;
-        $this->dispatch('open-modal', 'vaccine-modal');
+        $this->dispatch('modal-show', name: 'vaccine-modal');
+    }
+
+    public function openCreateModal(): void
+    {
+        $this->resetForm();
+        $this->dispatch('modal-show', name: 'vaccine-modal');
     }
 
     public function delete(string $id, CatalogServiceContract $service): void
@@ -88,7 +94,7 @@ new class extends Component {
             <flux:heading size="xl">{{ __('Vacunas') }}</flux:heading>
             <flux:subheading>{{ __('Gestiona el esquema de vacunación y dosis recomendadas.') }}</flux:subheading>
         </div>
-        <flux:button variant="primary" icon="plus" wire:click="$dispatch('open-modal', 'vaccine-modal')">
+        <flux:button variant="primary" icon="plus" wire:click="openCreateModal">
             {{ __('Nueva Vacuna') }}
         </flux:button>
     </div>

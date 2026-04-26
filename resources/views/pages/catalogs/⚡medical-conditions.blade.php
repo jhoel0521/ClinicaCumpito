@@ -45,7 +45,7 @@ new class extends Component {
         }
 
         $this->resetForm();
-        $this->dispatch('close-modal', 'condition-modal');
+        $this->dispatch('modal-close', name: 'condition-modal');
     }
 
     public function edit(string $id): void
@@ -54,7 +54,13 @@ new class extends Component {
         $this->editingId = $condition->id;
         $this->name = $condition->name;
         $this->description = $condition->description ?? '';
-        $this->dispatch('open-modal', 'condition-modal');
+        $this->dispatch('modal-show', name: 'condition-modal');
+    }
+
+    public function openCreateModal(): void
+    {
+        $this->resetForm();
+        $this->dispatch('modal-show', name: 'condition-modal');
     }
 
     public function delete(string $id, CatalogServiceContract $service): void
@@ -76,7 +82,7 @@ new class extends Component {
                 {{ __('Gestiona las condiciones médicas disponibles para el historial de pacientes.') }}
             </flux:subheading>
         </div>
-        <flux:button variant="primary" icon="plus" wire:click="$dispatch('open-modal', 'condition-modal')">
+        <flux:button variant="primary" icon="plus" wire:click="openCreateModal">
             {{ __('Nueva Condición') }}
         </flux:button>
     </div>

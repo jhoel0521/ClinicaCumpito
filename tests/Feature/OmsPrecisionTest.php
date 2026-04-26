@@ -18,7 +18,7 @@
  *     exactas y se valida la precisión del datapoint resultante.
  *
  * NOTA: Tests agrupados en métodos amplios para minimizar ejecuciones del
- * WhoDataSeeder (50 archivos Excel, ~1 GB en parsing acumulado).
+ * WhoDataSeeder (múltiples archivos Excel, alto costo de parsing acumulado).
  */
 
 use App\Contracts\GrowthChartServiceContract;
@@ -63,7 +63,7 @@ describe('7.4 Precisión OMS', function () {
     //    (mediana, SD±1, SD±2, SD±3) con datos OMS reales
     // =====================================================================
 
-    test('ZScoreService: mediana produce z≈0 en las 10 boletas OMS', function () {
+    test('ZScoreService: mediana produce z≈0 en las boletas OMS disponibles', function () {
         $catalogs = [
             ['codigo' => 'peso_edad_M',         'x' => 6.0],
             ['codigo' => 'peso_edad_F',         'x' => 12.0],
@@ -71,8 +71,6 @@ describe('7.4 Precisión OMS', function () {
             ['codigo' => 'talla_edad_F',        'x' => 36.0],
             ['codigo' => 'perimetro_cefalico_M', 'x' => 3.0],
             ['codigo' => 'perimetro_cefalico_F', 'x' => 18.0],
-            ['codigo' => 'imc_M',               'x' => 12.0],
-            ['codigo' => 'imc_F',               'x' => 48.0],
             ['codigo' => 'peso_talla_M',        'x' => 70.0],
             ['codigo' => 'peso_talla_F',        'x' => 90.0],
         ];
@@ -116,9 +114,9 @@ describe('7.4 Precisión OMS', function () {
         expect($z->rounded(0))->toBe(3.0)->and($z->category())->toBe('Severamente alto');
 
         // SD−1 → z≈−1, categoría "Normal"
-        $g = graficaPorCodigo('imc_F');
-        $punto = puntoOms($g->id, 48.0);
-        $z = $this->zscore->calculateByGrafica($g->id, 48.0, (float) $punto->sd1neg);
+        $g = graficaPorCodigo('peso_talla_M');
+        $punto = puntoOms($g->id, 80.0);
+        $z = $this->zscore->calculateByGrafica($g->id, 80.0, (float) $punto->sd1neg);
         expect($z->rounded(0))->toBe(-1.0)->and($z->category())->toBe('Normal');
 
         // SD+1 → z≈+1, categoría "Normal"
@@ -216,7 +214,7 @@ describe('7.4 Precisión OMS', function () {
             ->and($dp2['category'])->toBeIn(['Bajo', 'Normal']);
     });
 
-    test('GrowthChartService: pipeline peso_talla, perímetro cefálico e IMC', function () {
+    test('GrowthChartService: pipeline peso_talla y perímetro cefálico', function () {
         // ── peso_talla: niño talla=80cm, peso=mediana → z≈0 ────
         $g = graficaPorCodigo('peso_talla_M');
         $punto = puntoOms($g->id, 80.0);
@@ -266,32 +264,6 @@ describe('7.4 Precisión OMS', function () {
         expect(round($data2['patient_datapoints'][0]['z_score'], 0))->toBe(2.0)
             ->and($data2['patient_datapoints'][0]['category'])->toBeIn(['Alto', 'Normal']);
 
-        // ── imc: niño 24m, IMC=mediana → z≈0 ──────────────────
-        $g3 = graficaPorCodigo('imc_M');
-        $punto3 = puntoOms($g3->id, 24.0);
-        $targetImc = (float) $punto3->m_value;
-        $heightCm = 85.0;
-        $weight = round($targetImc * (($heightCm / 100.0) ** 2), 2);
-
-        $patient3 = Patient::factory()->create([
-            'gender' => 'M',
-            'date_of_birth' => now()->subMonths(24)->toDateString(),
-        ]);
-        $c3 = Consultation::factory()->create([
-            'patient_id' => $patient3->id,
-            'consultation_date' => now(),
-            'status' => 'draft',
-        ]);
-        VitalSign::factory()->create([
-            'consultation_id' => $c3->id,
-            'weight' => $weight,
-            'height' => $heightCm,
-        ]);
-
-        $data3 = $this->chart->prepareChartData($patient3->id, $g3->id);
-        expect($data3['patient_datapoints'])->toHaveCount(1);
-        expect(abs($data3['patient_datapoints'][0]['z_score']))->toBeLessThanOrEqual(0.1)
-            ->and($data3['patient_datapoints'][0]['category'])->toBe('Normal');
     });
 
     test('GrowthChartService: múltiples consultas generan múltiples datapoints', function () {

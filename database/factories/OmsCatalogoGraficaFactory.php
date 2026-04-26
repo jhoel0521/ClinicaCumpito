@@ -50,12 +50,12 @@ class OmsCatalogoGraficaFactory extends Factory
                 'descripcion' => 'Gráfica OMS de perímetro cefálico en niñas de 0 a 5 años.',
             ],
             [
-                'nombre' => 'IMC para la Edad - Niños',
-                'codigo' => 'WHO_BMI_AGE_M_5_19Y',
-                'tipo_grafica' => 'imc',
-                'rango_edad' => '5-19 años',
+                'nombre' => 'Peso para la Edad - Niños',
+                'codigo' => 'WHO_WT_AGE_M_0_5Y',
+                'tipo_grafica' => 'peso_edad',
+                'rango_edad' => '0-5 años',
                 'sexo' => 'M',
-                'descripcion' => 'Gráfica OMS de IMC para la edad en niños de 5 a 19 años.',
+                'descripcion' => 'Gráfica OMS de peso para la edad en niños de 0 a 5 años.',
             ],
         ];
 

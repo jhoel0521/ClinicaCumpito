@@ -10,12 +10,12 @@ describe('WhoDataSeeder', function () {
         $this->seed(WhoDataSeeder::class);
     });
 
-    it('crea exactamente 10 OmsCatalogoGrafica', function () {
-        expect(OmsCatalogoGrafica::count())->toBe(10);
+    it('crea exactamente 8 OmsCatalogoGrafica', function () {
+        expect(OmsCatalogoGrafica::count())->toBe(8);
     });
 
     it('crea 2 boletas por cada tipo de gráfica (M + F)', function () {
-        $tipos = ['peso_edad', 'talla_edad', 'perimetro_cefalico', 'imc', 'peso_talla'];
+        $tipos = ['peso_edad', 'talla_edad', 'perimetro_cefalico', 'peso_talla'];
         foreach ($tipos as $tipo) {
             expect(OmsCatalogoGrafica::where('tipo_grafica', $tipo)->count())
                 ->toBe(2, "Se esperaban 2 boletas para tipo_grafica={$tipo}");
@@ -61,15 +61,6 @@ describe('WhoDataSeeder', function () {
             // No debe haber saltos (todos los meses 0-60 presentes)
             expect($g->datos()->count())->toBe(61);
         }
-    });
-
-    it('imc tiene datos continuos hasta mes 60 (merge 0-2 + 2-5)', function () {
-        $g = OmsCatalogoGrafica::where('tipo_grafica', 'imc')
-            ->where('sexo', 'M')
-            ->first();
-
-        expect((float) $g->datos()->max('x_value'))->toBe(60.0)
-            ->and($g->datos()->count())->toBe(61);
     });
 
     it('peso_talla usa cm como x_value (rango 45–120 cm)', function () {

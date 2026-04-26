@@ -27,8 +27,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->parameters(['pacientes' => 'patient']);
 
     // Laboratorios
-    Route::livewire('laboratorios/{laboratoryRequest}', 'pages::laboratorios.detalle')
+    Route::livewire('laboratorios/{laboratorio}', 'pages::laboratorios.detalle')
         ->name('laboratorios.show');
+    Route::livewire('pacientes/{patient}/laboratorios/{laboratorio}', 'pages::laboratorios.detalle')
+        ->name('pacientes.laboratorios.show');
 });
 
 require __DIR__.'/settings.php';

@@ -58,25 +58,28 @@ new class extends Component {
     @else
         <div class="space-y-4">
             @foreach ($consultations as $consultation)
-                <div class="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-700 p-5">
-                    <div class="flex items-center justify-between mb-3">
-                        <div class="flex gap-3 items-center text-sm text-zinc-500 dark:text-zinc-400">
-                            <span class="font-medium text-zinc-800 dark:text-zinc-200">
-                                {{ $consultation->consultation_date->format('d/m/Y') }}
-                            </span>
-                            <span>{{ $consultation->doctor?->full_name ?? '—' }}</span>
-                        </div>
-                        <a
-                            href="{{ route('consultas.show', $consultation->id) }}"
-                            class="text-xs text-teal-600 dark:text-teal-400 hover:underline"
-                            wire:navigate
-                        >
-                            Ver consulta →
-                        </a>
+                <div
+                    class="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-700 overflow-hidden"
+                >
+                    {{-- Cabecera de la consulta --}}
+                    <div
+                        class="flex items-center gap-3 px-5 py-3 bg-zinc-50 dark:bg-zinc-800/50 border-b border-zinc-200 dark:border-zinc-700 text-sm"
+                    >
+                        <span class="font-semibold text-zinc-800 dark:text-zinc-200">
+                            {{ $consultation->consultation_date->format('d/m/Y') }}
+                        </span>
+                        <span class="text-zinc-400">·</span>
+                        <span class="text-zinc-500 dark:text-zinc-400">
+                            {{ $consultation->doctor?->full_name ?? '—' }}
+                        </span>
                     </div>
-                    <div class="space-y-3">
+
+                    {{-- Una fila por orden de laboratorio --}}
+                    <div class="divide-y divide-zinc-100 dark:divide-zinc-800">
                         @foreach ($consultation->laboratoryRequests as $lab)
                             @php
+                                $examName = $lab->items->first()?->exam_name ?? 'Sin examen';
+                                $count = $lab->items->count();
                                 $days = (int) $lab->created_at->diffInDays(now());
                                 $isPending = $lab->status === 'pending';
                                 $isUrgent = $isPending && $days >= 3;
@@ -88,27 +91,28 @@ new class extends Component {
                                 $labStatusLabel = $isPending ? "Pendiente · {$days}d" : 'Recibido';
                             @endphp
 
-                            <div class="flex items-start justify-between gap-3">
-                                <ul class="space-y-1 text-sm flex-1">
-                                    @foreach ($lab->items as $item)
-                                        <li class="flex gap-3 items-start">
-                                            <span class="text-blue-400 flex-shrink-0">🧪</span>
-                                            <div class="text-zinc-700 dark:text-zinc-300">
-                                                <span class="font-medium">{{ $item->exam_name }}</span>
-                                                @if ($item->parameter_name)
-                                                    <span class="text-zinc-500 dark:text-zinc-400">
-                                                        — {{ $item->parameter_name }}
-                                                    </span>
-                                                @endif
-                                            </div>
-                                        </li>
-                                    @endforeach
-                                </ul>
-                                <span
-                                    class="flex-shrink-0 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $labStatusClass }}"
-                                >
-                                    {{ $labStatusLabel }}
-                                </span>
+                            <div class="flex items-center justify-between gap-3 px-5 py-3">
+                                <div class="flex items-center gap-2 text-sm min-w-0">
+                                    <span class="text-blue-400 flex-shrink-0">🧪</span>
+                                    <span class="font-medium text-zinc-800 dark:text-zinc-200">{{ $examName }}</span>
+                                    <span class="text-zinc-400 dark:text-zinc-500 text-xs flex-shrink-0">
+                                        · {{ $count }} parámetro{{ $count !== 1 ? 's' : '' }}
+                                    </span>
+                                </div>
+                                <div class="flex items-center gap-2 flex-shrink-0">
+                                    <span
+                                        class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $labStatusClass }}"
+                                    >
+                                        {{ $labStatusLabel }}
+                                    </span>
+                                    <a
+                                        href="{{ route('pacientes.laboratorios.show', [$patient, $lab]) }}"
+                                        class="text-xs text-teal-600 dark:text-teal-400 hover:underline font-medium"
+                                        wire:navigate
+                                    >
+                                        Ver →
+                                    </a>
+                                </div>
                             </div>
                         @endforeach
                     </div>

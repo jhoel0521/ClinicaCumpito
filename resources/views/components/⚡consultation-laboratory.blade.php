@@ -126,8 +126,8 @@ new class extends Component {
         ])
             ->whereHas('consultation', fn ($q) => $q->where('patient_id', $consultation->patient_id))
             ->where('consultation_id', '!=', $this->consultationId)
-            ->where('status', 'pending')
             ->orderBy('created_at', 'desc')
+            ->limit(10)
             ->get()
             ->map(
                 fn ($r) => array_merge($this->mapRequest($r), [
@@ -155,9 +155,8 @@ new class extends Component {
                     ->map(
                         fn ($res) => [
                             'id' => $res->id,
-                            'parameter_name' => $res->parameter_name,
+                            'consultation_id' => $res->consultation_id,
                             'value' => $res->value,
-                            'reference_range' => $res->reference_range,
                             'report_text' => $res->report_text,
                             'is_abnormal' => (bool) $res->is_abnormal,
                         ],
@@ -405,9 +404,8 @@ new class extends Component {
 
             LaboratoryItemResult::create([
                 'laboratory_request_item_id' => $itemId,
-                'parameter_name' => ! empty($data['paramName']) ? trim($data['paramName']) : null,
+                'consultation_id' => $this->consultationId,
                 'value' => ! empty($data['value']) ? trim($data['value']) : null,
-                'reference_range' => ! empty($data['range']) ? trim($data['range']) : null,
                 'report_text' => ! empty($data['report']) ? trim($data['report']) : null,
                 'is_abnormal' => ! empty($data['abnormal']),
             ]);
@@ -811,237 +809,185 @@ new class extends Component {
                                                 @endif
                                             </div>
 
-                                            {{-- Botón rápido para cargar resultados si está pendiente --}}
-                                            @if ($labReq['status'] === 'pending')
-                                                <div class="mt-2">
-                                                    <button
-                                                        wire:click="saveField('{{ $labReq['id'] }}', 'status', 'received')"
-                                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-sky-50 dark:bg-sky-900/30 text-sky-700 dark:text-sky-400 text-xs font-semibold hover:bg-sky-100 transition border border-sky-100 dark:border-sky-800"
-                                                    >
-                                                        <flux:icon.clipboard-document-check class="size-3.5" />
-                                                        Cargar Resultados
-                                                    </button>
+                                            {{-- Tabla de resultados: visible siempre que existan, sin importar el status --}}
+                                            @if (count($item['results']) > 0)
+                                                <div
+                                                    class="mt-3 rounded-lg border border-gray-200 dark:border-zinc-700 overflow-hidden"
+                                                >
+                                                    <table class="w-full text-xs">
+                                                        <thead>
+                                                            <tr
+                                                                class="bg-gray-50 dark:bg-zinc-800 text-gray-500 dark:text-gray-400 uppercase tracking-wide"
+                                                            >
+                                                                <th class="px-3 py-1.5 text-left font-medium">Valor</th>
+                                                                <th class="px-3 py-1.5 text-center font-medium w-8">
+                                                                    ⚠
+                                                                </th>
+                                                                @if (! $finalized && $labReq['status'] === 'pending')
+                                                                    <th class="w-6"></th>
+                                                                @endif
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody class="divide-y divide-gray-100 dark:divide-zinc-800">
+                                                            @foreach ($item['results'] as $result)
+                                                                <tr class="bg-white dark:bg-zinc-900">
+                                                                    <td
+                                                                        class="px-3 py-2 font-medium {{ $result['is_abnormal'] ? 'text-red-600 dark:text-red-400' : 'text-gray-800 dark:text-gray-200' }}"
+                                                                    >
+                                                                        {{ $result['value'] ?: '—' }}
+                                                                    </td>
+                                                                    <td class="px-3 py-2 text-center">
+                                                                        @if ($result['is_abnormal'])
+                                                                            <flux:icon.exclamation-triangle
+                                                                                class="size-3.5 text-red-500 mx-auto"
+                                                                            />
+                                                                        @else
+                                                                            <flux:icon.check
+                                                                                class="size-3.5 text-green-500 mx-auto"
+                                                                            />
+                                                                        @endif
+                                                                    </td>
+                                                                    @if (! $finalized && $labReq['status'] === 'pending')
+                                                                        <td class="px-2 py-2">
+                                                                            <button
+                                                                                wire:click="deleteResult('{{ $result['id'] }}')"
+                                                                                class="text-red-400 hover:text-red-600 transition"
+                                                                            >
+                                                                                <flux:icon.x-mark class="size-3.5" />
+                                                                            </button>
+                                                                        </td>
+                                                                    @endif
+                                                                </tr>
+                                                                @if ($result['report_text'])
+                                                                    <tr class="bg-gray-50 dark:bg-zinc-800/50">
+                                                                        <td
+                                                                            colspan="{{ ! $finalized && $labReq['status'] === 'pending' ? 3 : 2 }}"
+                                                                            class="px-3 py-2 text-xs text-gray-600 dark:text-gray-400 italic"
+                                                                        >
+                                                                            {{ $result['report_text'] }}
+                                                                        </td>
+                                                                    </tr>
+                                                                @endif
+                                                            @endforeach
+                                                        </tbody>
+                                                    </table>
                                                 </div>
                                             @endif
 
-                                            {{-- Resultados — solo si status = received ── --}}
-                                            @if ($labReq['status'] === 'received')
-                                                <div class="mt-3 space-y-2">
-                                                    {{-- Tabla de resultados existentes --}}
-                                                    @if (count($item['results']) > 0)
-                                                        <div
-                                                            class="rounded-lg border border-gray-200 dark:border-zinc-700 overflow-hidden"
+                                            {{-- Formulario de entrada: solo cuando pendiente y no finalizado --}}
+                                            @if ($labReq['status'] === 'pending' && ! $finalized)
+                                                <div
+                                                    class="mt-2 rounded-lg border border-sky-200 dark:border-sky-800 bg-sky-50 dark:bg-sky-900/10 p-3 space-y-2"
+                                                >
+                                                    <input
+                                                        wire:model="newResults.{{ $item['id'] }}.value"
+                                                        type="text"
+                                                        placeholder="Valor"
+                                                        class="w-full px-2.5 py-1.5 border border-gray-300 dark:border-zinc-600 rounded bg-white dark:bg-zinc-900 text-gray-900 dark:text-gray-100 text-sm focus:ring-1 focus:ring-sky-500"
+                                                    />
+                                                    <textarea
+                                                        wire:model="newResults.{{ $item['id'] }}.report"
+                                                        rows="2"
+                                                        placeholder="Informe / texto libre (radiología, cultivos...)"
+                                                        class="w-full px-2.5 py-1.5 border border-gray-300 dark:border-zinc-600 rounded bg-white dark:bg-zinc-900 text-gray-900 dark:text-gray-100 text-sm resize-none focus:ring-1 focus:ring-sky-500"
+                                                    ></textarea>
+                                                    <div class="flex items-center justify-between">
+                                                        <label
+                                                            class="flex items-center gap-2 text-sm text-red-600 dark:text-red-400 cursor-pointer"
                                                         >
-                                                            <table class="w-full text-xs">
-                                                                <thead>
-                                                                    <tr
-                                                                        class="bg-gray-50 dark:bg-zinc-800 text-gray-500 dark:text-gray-400 uppercase tracking-wide"
-                                                                    >
-                                                                        <th class="px-3 py-1.5 text-left font-medium">
-                                                                            Parámetro
-                                                                        </th>
-                                                                        <th class="px-3 py-1.5 text-left font-medium">
-                                                                            Valor
-                                                                        </th>
-                                                                        <th class="px-3 py-1.5 text-left font-medium">
-                                                                            Referencia
-                                                                        </th>
-                                                                        <th
-                                                                            class="px-3 py-1.5 text-center font-medium w-8"
-                                                                        >
-                                                                            ⚠
-                                                                        </th>
-                                                                        @if (! $finalized)
-                                                                            <th class="w-6"></th>
-                                                                        @endif
-                                                                    </tr>
-                                                                </thead>
-                                                                <tbody
-                                                                    class="divide-y divide-gray-100 dark:divide-zinc-800"
-                                                                >
-                                                                    @foreach ($item['results'] as $result)
-                                                                        <tr class="bg-white dark:bg-zinc-900">
-                                                                            <td
-                                                                                class="px-3 py-2 text-gray-700 dark:text-gray-300"
-                                                                            >
-                                                                                {{ $result['parameter_name'] ?: '—' }}
-                                                                            </td>
-                                                                            <td
-                                                                                class="px-3 py-2 font-medium {{ $result['is_abnormal'] ? 'text-red-600 dark:text-red-400' : 'text-gray-800 dark:text-gray-200' }}"
-                                                                            >
-                                                                                {{ $result['value'] ?: '—' }}
-                                                                            </td>
-                                                                            <td
-                                                                                class="px-3 py-2 text-gray-500 dark:text-gray-400"
-                                                                            >
-                                                                                {{ $result['reference_range'] ?: '—' }}
-                                                                            </td>
-                                                                            <td class="px-3 py-2 text-center">
-                                                                                @if ($result['is_abnormal'])
-                                                                                    <flux:icon.exclamation-triangle
-                                                                                        class="size-3.5 text-red-500 mx-auto"
-                                                                                    />
-                                                                                @else
-                                                                                    <flux:icon.check
-                                                                                        class="size-3.5 text-green-500 mx-auto"
-                                                                                    />
-                                                                                @endif
-                                                                            </td>
-                                                                            <td class="px-2 py-2">
-                                                                                <button
-                                                                                    wire:click="deleteResult('{{ $result['id'] }}')"
-                                                                                    class="text-red-400 hover:text-red-600 transition"
-                                                                                >
-                                                                                    <flux:icon.x-mark
-                                                                                        class="size-3.5"
-                                                                                    />
-                                                                                </button>
-                                                                            </td>
-                                                                        </tr>
-                                                                        @if ($result['report_text'])
-                                                                            <tr class="bg-gray-50 dark:bg-zinc-800/50">
-                                                                                <td
-                                                                                    colspan="{{ $finalized ? 4 : 5 }}"
-                                                                                    class="px-3 py-2 text-xs text-gray-600 dark:text-gray-400 italic"
-                                                                                >
-                                                                                    {{ $result['report_text'] }}
-                                                                                </td>
-                                                                            </tr>
-                                                                        @endif
-                                                                    @endforeach
-                                                                </tbody>
-                                                            </table>
-                                                        </div>
-                                                    @endif
+                                                            <input
+                                                                type="checkbox"
+                                                                wire:model="newResults.{{ $item['id'] }}.abnormal"
+                                                                class="rounded border-gray-300 text-red-500 focus:ring-red-400"
+                                                            />
+                                                            Resultado anormal
+                                                        </label>
+                                                        <button
+                                                            wire:click="saveNewResult('{{ $item['id'] }}')"
+                                                            class="px-3 py-1 text-xs rounded bg-sky-600 hover:bg-sky-700 text-white transition"
+                                                        >
+                                                            Guardar
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            @endif
 
-                                                    {{-- Formulario nueva respuesta --}}
-                                                    <div
-                                                        class="rounded-lg border border-sky-200 dark:border-sky-800 bg-sky-50 dark:bg-sky-900/10 p-3 space-y-2"
+                                            {{-- Adjuntos del ítem: solo cuando recibido --}}
+                                            @if ($labReq['status'] === 'received')
+                                                <div class="mt-2">
+                                                    <p
+                                                        class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1"
                                                     >
-                                                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                                                            <input
-                                                                wire:model="newResults.{{ $item['id'] }}.paramName"
-                                                                type="text"
-                                                                placeholder="Parámetro (opcional)"
-                                                                class="px-2.5 py-1.5 border border-gray-300 dark:border-zinc-600 rounded bg-white dark:bg-zinc-900 text-gray-900 dark:text-gray-100 text-sm focus:ring-1 focus:ring-sky-500"
-                                                            />
-                                                            <input
-                                                                wire:model="newResults.{{ $item['id'] }}.value"
-                                                                type="text"
-                                                                placeholder="Valor (opcional)"
-                                                                class="px-2.5 py-1.5 border border-gray-300 dark:border-zinc-600 rounded bg-white dark:bg-zinc-900 text-gray-900 dark:text-gray-100 text-sm focus:ring-1 focus:ring-sky-500"
-                                                            />
-                                                            <input
-                                                                wire:model="newResults.{{ $item['id'] }}.range"
-                                                                type="text"
-                                                                placeholder="Referencia (opcional)"
-                                                                class="px-2.5 py-1.5 border border-gray-300 dark:border-zinc-600 rounded bg-white dark:bg-zinc-900 text-gray-900 dark:text-gray-100 text-sm focus:ring-1 focus:ring-sky-500"
-                                                            />
-                                                        </div>
-                                                        <textarea
-                                                            wire:model="newResults.{{ $item['id'] }}.report"
-                                                            rows="2"
-                                                            placeholder="Informe / texto libre (radiología, cultivos...)"
-                                                            class="w-full px-2.5 py-1.5 border border-gray-300 dark:border-zinc-600 rounded bg-white dark:bg-zinc-900 text-gray-900 dark:text-gray-100 text-sm resize-none focus:ring-1 focus:ring-sky-500"
-                                                        ></textarea>
-                                                        <div class="flex items-center justify-between">
-                                                            <label
-                                                                class="flex items-center gap-2 text-sm text-red-600 dark:text-red-400 cursor-pointer"
+                                                        Archivos del examen
+                                                    </p>
+                                                    <div class="flex flex-wrap gap-2 items-center">
+                                                        @foreach ($item['attachments'] as $att)
+                                                            <div
+                                                                class="inline-flex items-center gap-1 px-2 py-1 rounded border border-gray-200 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800 text-xs text-gray-700 dark:text-gray-300"
                                                             >
-                                                                <input
-                                                                    type="checkbox"
-                                                                    wire:model="newResults.{{ $item['id'] }}.abnormal"
-                                                                    class="rounded border-gray-300 text-red-500 focus:ring-red-400"
-                                                                />
-                                                                Resultado anormal
-                                                            </label>
-                                                            <div class="flex gap-2">
+                                                                @if ($att['is_image'])
+                                                                    <a
+                                                                        href="{{ $att['url'] }}"
+                                                                        target="_blank"
+                                                                        class="flex items-center gap-1 hover:text-sky-600 transition"
+                                                                    >
+                                                                        <flux:icon.photo
+                                                                            class="size-3.5 text-sky-500"
+                                                                        />
+                                                                        {{ $att['original_name'] ?? 'Imagen' }}
+                                                                    </a>
+                                                                @else
+                                                                    <a
+                                                                        href="{{ $att['url'] }}"
+                                                                        target="_blank"
+                                                                        class="flex items-center gap-1 hover:text-sky-600 transition"
+                                                                    >
+                                                                        <flux:icon.document
+                                                                            class="size-3.5 text-red-500"
+                                                                        />
+                                                                        {{ $att['original_name'] ?? 'Documento' }}
+                                                                    </a>
+                                                                @endif
                                                                 <button
-                                                                    wire:click="saveNewResult('{{ $item['id'] }}')"
-                                                                    class="px-3 py-1 text-xs rounded bg-sky-600 hover:bg-sky-700 text-white transition"
+                                                                    wire:click="deleteAttachment('{{ $att['id'] }}')"
+                                                                    class="ml-1 text-gray-400 hover:text-red-500 transition"
                                                                 >
-                                                                    Guardar
+                                                                    <flux:icon.x-mark class="size-3" />
                                                                 </button>
                                                             </div>
-                                                        </div>
-                                                    </div>
+                                                        @endforeach
 
-                                                    {{-- Adjuntos del ítem --}}
-                                                    <div>
-                                                        <p
-                                                            class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1"
-                                                        >
-                                                            Archivos del examen
-                                                        </p>
-                                                        <div class="flex flex-wrap gap-2 items-center">
-                                                            @foreach ($item['attachments'] as $att)
-                                                                <div
-                                                                    class="inline-flex items-center gap-1 px-2 py-1 rounded border border-gray-200 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800 text-xs text-gray-700 dark:text-gray-300"
-                                                                >
-                                                                    @if ($att['is_image'])
-                                                                        <a
-                                                                            href="{{ $att['url'] }}"
-                                                                            target="_blank"
-                                                                            class="flex items-center gap-1 hover:text-sky-600 transition"
-                                                                        >
-                                                                            <flux:icon.photo
-                                                                                class="size-3.5 text-sky-500"
-                                                                            />
-                                                                            {{ $att['original_name'] ?? 'Imagen' }}
-                                                                        </a>
-                                                                    @else
-                                                                        <a
-                                                                            href="{{ $att['url'] }}"
-                                                                            target="_blank"
-                                                                            class="flex items-center gap-1 hover:text-sky-600 transition"
-                                                                        >
-                                                                            <flux:icon.document
-                                                                                class="size-3.5 text-red-500"
-                                                                            />
-                                                                            {{ $att['original_name'] ?? 'Documento' }}
-                                                                        </a>
-                                                                    @endif
-                                                                    <button
-                                                                        wire:click="deleteAttachment('{{ $att['id'] }}')"
-                                                                        class="ml-1 text-gray-400 hover:text-red-500 transition"
-                                                                    >
-                                                                        <flux:icon.x-mark class="size-3" />
-                                                                    </button>
-                                                                </div>
-                                                            @endforeach
-
-                                                            @if ($attachingToItemId === $item['id'] && $attachingToRequestId === $labReq['id'])
-                                                                <div class="flex items-center gap-2">
-                                                                    <input
-                                                                        type="file"
-                                                                        wire:model="newAttachmentFile"
-                                                                        accept=".jpg,.jpeg,.png,.webp,.pdf"
-                                                                        class="text-xs"
-                                                                    />
-                                                                    <button
-                                                                        wire:click="uploadAttachment"
-                                                                        wire:loading.attr="disabled"
-                                                                        class="px-2 py-1 text-xs rounded bg-sky-600 hover:bg-sky-700 text-white transition disabled:opacity-50"
-                                                                    >
-                                                                        Subir
-                                                                    </button>
-                                                                    <button
-                                                                        wire:click="$set('attachingToItemId', null)"
-                                                                        class="px-2 py-1 text-xs rounded border border-gray-300 dark:border-zinc-600 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-zinc-700 transition"
-                                                                    >
-                                                                        ×
-                                                                    </button>
-                                                                </div>
-                                                            @else
+                                                        @if ($attachingToItemId === $item['id'] && $attachingToRequestId === $labReq['id'])
+                                                            <div class="flex items-center gap-2">
+                                                                <input
+                                                                    type="file"
+                                                                    wire:model="newAttachmentFile"
+                                                                    accept=".jpg,.jpeg,.png,.webp,.pdf"
+                                                                    class="text-xs"
+                                                                />
                                                                 <button
-                                                                    wire:click="openAttachment('{{ $labReq['id'] }}', '{{ $item['id'] }}')"
-                                                                    class="text-xs text-sky-600 dark:text-sky-400 hover:underline flex items-center gap-1"
+                                                                    wire:click="uploadAttachment"
+                                                                    wire:loading.attr="disabled"
+                                                                    class="px-2 py-1 text-xs rounded bg-sky-600 hover:bg-sky-700 text-white transition disabled:opacity-50"
                                                                 >
-                                                                    <flux:icon.paper-clip class="size-3" />
-                                                                    Adjuntar
+                                                                    Subir
                                                                 </button>
-                                                            @endif
-                                                        </div>
+                                                                <button
+                                                                    wire:click="$set('attachingToItemId', null)"
+                                                                    class="px-2 py-1 text-xs rounded border border-gray-300 dark:border-zinc-600 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-zinc-700 transition"
+                                                                >
+                                                                    ×
+                                                                </button>
+                                                            </div>
+                                                        @else
+                                                            <button
+                                                                wire:click="openAttachment('{{ $labReq['id'] }}', '{{ $item['id'] }}')"
+                                                                class="text-xs text-sky-600 dark:text-sky-400 hover:underline flex items-center gap-1"
+                                                            >
+                                                                <flux:icon.paper-clip class="size-3" />
+                                                                Adjuntar
+                                                            </button>
+                                                        @endif
                                                     </div>
                                                 </div>
                                             @endif
@@ -1051,6 +997,23 @@ new class extends Component {
                             </div>
                         @else
                             <p class="text-xs text-gray-400 dark:text-zinc-500 italic">Sin parámetros definidos.</p>
+                        @endif
+
+                        {{-- Marcar como recibido: cuando pending y hay al menos un resultado --}}
+                        @php
+                            $hasAnyResults = collect($labReq['items'])->contains(fn ($i) => count($i['results']) > 0);
+                        @endphp
+
+                        @if ($labReq['status'] === 'pending' && $hasAnyResults && ! $finalized)
+                            <div class="mt-3 flex justify-end">
+                                <button
+                                    wire:click="saveField('{{ $labReq['id'] }}', 'status', 'received')"
+                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-600 hover:bg-green-700 text-white text-xs font-semibold transition"
+                                >
+                                    <flux:icon.check class="size-3.5" />
+                                    Marcar como recibido
+                                </button>
+                            </div>
                         @endif
 
                         {{-- Archivos de toda la solicitud (solo si received) --}}

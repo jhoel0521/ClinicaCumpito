@@ -624,7 +624,7 @@
                 </a>
             </div>
 
-            @if ($recentConsultasConLab->isNotEmpty())
+            @if ($recentLaboratoryRequests->isNotEmpty())
                 <div
                     class="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-700 overflow-hidden"
                 >
@@ -635,26 +635,45 @@
                             <tr>
                                 <th class="text-left px-4 py-3">Fecha</th>
                                 <th class="text-left px-4 py-3">Doctor</th>
-                                <th class="text-left px-4 py-3">Pruebas Solicitadas</th>
+                                <th class="text-left px-4 py-3">Examen</th>
+                                <th class="text-left px-4 py-3">Estado</th>
                                 <th class="text-right px-4 py-3"></th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-zinc-100 dark:divide-zinc-800">
-                            @foreach ($recentConsultasConLab as $consultation)
+                            @foreach ($recentLaboratoryRequests as $lab)
+                                @php
+                                    $examName = $lab->items->first()?->exam_name ?? 'Sin examen';
+                                    $count = $lab->items->count();
+                                    $isPending = $lab->status === 'pending';
+                                    $badgeClass = $isPending
+                                        ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+                                        : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400';
+                                @endphp
+
                                 <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition">
                                     <td class="px-4 py-3 font-medium text-zinc-800 dark:text-zinc-200">
-                                        {{ $consultation->consultation_date->format('d/m/Y') }}
+                                        {{ $lab->created_at->format('d/m/Y') }}
                                     </td>
                                     <td class="px-4 py-3 text-zinc-600 dark:text-zinc-400">
-                                        {{ $consultation->doctor?->full_name ?? '—' }}
+                                        {{ $lab->consultation->doctor?->full_name ?? '—' }}
                                     </td>
-                                    <td class="px-4 py-3 text-zinc-600 dark:text-zinc-400">
-                                        {{ $consultation->laboratoryRequests->flatMap(fn ($r) => $r->items)->count() }}
-                                        pruebas
+                                    <td class="px-4 py-3 text-zinc-700 dark:text-zinc-300">
+                                        <span class="font-medium">{{ $examName }}</span>
+                                        <span class="text-zinc-400 text-xs ml-1">
+                                            · {{ $count }} parámetro{{ $count !== 1 ? 's' : '' }}
+                                        </span>
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <span
+                                            class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $badgeClass }}"
+                                        >
+                                            {{ $isPending ? 'Pendiente' : 'Recibido' }}
+                                        </span>
                                     </td>
                                     <td class="px-4 py-3 text-right">
                                         <a
-                                            href="{{ route('consultas.show', $consultation->id) }}"
+                                            href="{{ route('pacientes.laboratorios.show', [$patient, $lab]) }}"
                                             class="text-teal-600 dark:text-teal-400 hover:underline text-xs font-medium"
                                         >
                                             Ver →

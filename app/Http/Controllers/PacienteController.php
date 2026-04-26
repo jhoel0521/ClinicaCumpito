@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\DTOs\PacienteDTO;
 use App\Http\Requests\StorePacienteRequest;
 use App\Http\Requests\UpdatePacienteRequest;
+use App\Models\LaboratoryRequest;
 use App\Models\MedicalCondition;
 use App\Models\Patient;
 use App\Services\PacienteService;
@@ -74,11 +75,12 @@ class PacienteController extends Controller
             ->limit(3)
             ->get();
 
-        $recentConsultasConLab = $patient->consultations()
-            ->whereHas('laboratoryRequests.items')
-            ->orderByDesc('consultation_date')
-            ->with(['laboratoryRequests.items', 'doctor'])
-            ->limit(3)
+        $recentLaboratoryRequests = LaboratoryRequest::whereHas(
+            'consultation', fn ($q) => $q->where('patient_id', $patient->id)
+        )
+            ->with(['items', 'consultation.doctor'])
+            ->orderByDesc('created_at')
+            ->limit(5)
             ->get();
 
         $totalConsultaciones = $patient->consultations()->count();
@@ -88,7 +90,7 @@ class PacienteController extends Controller
             'latestConsultation',
             'recentConsultations',
             'recentConsultasConReceta',
-            'recentConsultasConLab',
+            'recentLaboratoryRequests',
             'totalConsultaciones',
         ));
     }

@@ -41,7 +41,14 @@ class LaboratoryRequestService implements LaboratoryRequestServiceContract
         }
 
         if ($this->statusValue($consultation) === ConsultationStatus::FINALIZED) {
-            throw new \DomainException('No se puede editar la solicitud de laboratorio de una consulta finalizada.');
+            // Allow status-only update (e.g., marking received) even after finalization.
+            $request->update(['status' => $dto->status]);
+            $fresh = $request->fresh(['consultation']);
+            if (! $fresh instanceof LaboratoryRequest) {
+                throw new \RuntimeException('No se pudo refrescar la solicitud de laboratorio.');
+            }
+
+            return $fresh;
         }
 
         $request->update($dto->toArray());

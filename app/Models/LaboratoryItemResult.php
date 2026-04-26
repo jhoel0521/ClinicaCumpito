@@ -14,9 +14,8 @@ class LaboratoryItemResult extends Model
 
     protected $fillable = [
         'laboratory_request_item_id',
-        'parameter_name',
+        'consultation_id',
         'value',
-        'reference_range',
         'report_text',
         'is_abnormal',
         'sort_order',
@@ -30,5 +29,11 @@ class LaboratoryItemResult extends Model
     public function item(): BelongsTo
     {
         return $this->belongsTo(LaboratoryRequestItem::class, 'laboratory_request_item_id');
+    }
+
+    /** @return BelongsTo<Consultation, $this> */
+    public function consultation(): BelongsTo
+    {
+        return $this->belongsTo(Consultation::class);
     }
 }

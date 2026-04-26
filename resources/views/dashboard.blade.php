@@ -174,9 +174,10 @@
                                 @foreach ($ultimasConsultas as $consulta)
                                     <tr class="hover:bg-gray-50 dark:hover:bg-zinc-700/50 transition">
                                         <td class="py-2.5 pr-3">
-                                            <span class="font-medium text-gray-800 dark:text-gray-200">
-                                                {{ $consulta->patient?->full_name ?? '—' }}
-                                            </span>
+                                            <x-patient-link
+                                                :patient="$consulta->patient"
+                                                class="text-gray-800 dark:text-gray-200"
+                                            />
                                         </td>
                                         <td class="py-2.5 pr-3">
                                             @if ($consulta->type?->isManual())

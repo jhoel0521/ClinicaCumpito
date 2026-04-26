@@ -149,12 +149,7 @@ new class extends Component {
                 @forelse ($patients as $patient)
                     <tr class="hover:bg-gray-50 dark:hover:bg-zinc-800 transition">
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <a
-                                href="{{ route('pacientes.show', $patient) }}"
-                                class="font-medium text-gray-900 dark:text-gray-100 hover:text-teal-600 dark:hover:text-teal-400 transition"
-                            >
-                                {{ $patient->full_name }}
-                            </a>
+                            <x-patient-link :patient="$patient" class="text-gray-900 dark:text-gray-100" />
                             @if ($patient->blood_group)
                                 <span
                                     class="ml-1.5 inline-block px-1.5 py-0.5 text-[10px] font-bold rounded bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300"

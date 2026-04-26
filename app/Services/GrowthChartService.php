@@ -146,7 +146,6 @@ class GrowthChartService implements GrowthChartServiceContract
      *   peso_edad           → x = edad meses, y = peso kg
      *   peso_talla          → x = talla cm,   y = peso kg
      *   perimetro_cefalico  → x = edad meses, y = PC cm
-     *   imc                 → x = edad meses, y = peso(kg) / talla(m)²
      *
      * @return array{0: float|null, 1: float|null}
      */
@@ -168,12 +167,6 @@ class GrowthChartService implements GrowthChartServiceContract
             'peso_edad' => [(float) $ageMonths, $weight],
             'peso_talla' => [$height, $weight],
             'perimetro_cefalico' => [(float) $ageMonths, $hc],
-            'imc' => [
-                (float) $ageMonths,
-                ($weight !== null && $height !== null && $height > 0.0)
-                    ? round($weight / (($height / 100.0) ** 2), 2)
-                    : null,
-            ],
             default => [null, null],
         };
     }

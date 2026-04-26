@@ -12,7 +12,7 @@ class WhoDataSeeder extends Seeder
     private const BASE = 'resources/data who';
 
     /**
-     * 10 configuraciones: 5 tipos × 2 sexos.
+     * 8 configuraciones: 4 tipos × 2 sexos.
      * zscore_files  → array de rutas relativas a BASE, se cargan y fusionan en orden.
      * pctile_files  → igual, para percentiles.
      * x_cutoff      → para peso_talla: umbral en cm donde se corta el primer archivo (wfl).
@@ -88,37 +88,6 @@ class WhoDataSeeder extends Seeder
             'rango_edad' => '0-60 meses',
             'zscore_files' => ['Head circumference for age/hcfa-girls-0-5-zscores.xlsx'],
             'pctile_files' => ['Head circumference for age/tab_hcfa_girls_p_0_5.xlsx'],
-        ],
-        // ── imc ─────────────────────────────────────────────────────────────────
-        [
-            'tipo' => 'imc',
-            'sexo' => 'M',
-            'codigo' => 'imc_M',
-            'nombre' => 'IMC para la Edad — Niños',
-            'rango_edad' => '0-60 meses',
-            'zscore_files' => [
-                'Body mass index-for-age (BMI-for-age)/bmi_boys_0-to-2-years_zcores.xlsx',
-                'Body mass index-for-age (BMI-for-age)/bmi_boys_2-to-5-years_zscores.xlsx',
-            ],
-            'pctile_files' => [
-                'Body mass index-for-age (BMI-for-age)/tab_bmi_boys_p_0_2.xlsx',
-                'Body mass index-for-age (BMI-for-age)/tab_bmi_boys_p_2_5.xlsx',
-            ],
-        ],
-        [
-            'tipo' => 'imc',
-            'sexo' => 'F',
-            'codigo' => 'imc_F',
-            'nombre' => 'IMC para la Edad — Niñas',
-            'rango_edad' => '0-60 meses',
-            'zscore_files' => [
-                'Body mass index-for-age (BMI-for-age)/bmi_girls_0-to-2-years_zscores.xlsx',
-                'Body mass index-for-age (BMI-for-age)/bmi_girls_2-to-5-years_zscores.xlsx',
-            ],
-            'pctile_files' => [
-                'Body mass index-for-age (BMI-for-age)/tab_bmi_girls_p_0_2.xlsx',
-                'Body mass index-for-age (BMI-for-age)/tab_bmi_girls_p_2_5.xlsx',
-            ],
         ],
         // ── peso_talla ──────────────────────────────────────────────────────────
         // wfl cubre 45–110.5 cm (longitud, acostado).

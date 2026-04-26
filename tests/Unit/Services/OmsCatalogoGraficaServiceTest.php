@@ -62,8 +62,8 @@ describe('OmsCatalogoGraficaService', function () {
     test('deleteOmsCatalogo() hace soft-delete', function () {
         $grafica = OmsCatalogoGrafica::factory()->create([
             'codigo' => 'WHO_DEL_001',
-            'tipo_grafica' => 'imc',
-            'rango_edad' => '5-19 años',
+            'tipo_grafica' => 'peso_edad',
+            'rango_edad' => '0-5 años',
             'sexo' => 'M',
         ]);
 

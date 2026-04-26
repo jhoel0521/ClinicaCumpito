@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('nombre');
             $table->string('codigo')->unique();
             $table->text('descripcion')->nullable();
-            $table->string('tipo_grafica'); // peso_talla|talla_edad|peso_edad|perimetro_cefalico|imc
+            $table->string('tipo_grafica'); // peso_talla|talla_edad|peso_edad|perimetro_cefalico
             $table->string('rango_edad');   // texto libre, ej. "0-24 meses"
             $table->string('sexo');         // M|F
             $table->integer('minimo_z_score')->default(-3);

@@ -50,7 +50,7 @@ new class extends Component {
         $this->validate([
             'nombre' => 'required|string|max:255',
             'codigo' => 'required|string|max:100',
-            'tipoGrafica' => 'required|string|in:peso_talla,talla_edad,peso_edad,perimetro_cefalico,imc',
+            'tipoGrafica' => 'required|string|in:peso_talla,talla_edad,peso_edad,perimetro_cefalico',
             'rangoEdad' => 'required|string|max:100',
             'sexo' => 'required|string|in:M,F',
             'descripcion' => 'nullable|string',
@@ -253,7 +253,6 @@ new class extends Component {
                         <flux:select.option value="perimetro_cefalico">
                             {{ __('Perímetro Cefálico') }}
                         </flux:select.option>
-                        <flux:select.option value="imc">{{ __('IMC') }}</flux:select.option>
                     </flux:select>
 
                     <flux:select wire:model="sexo" :label="__('Sexo')" required>

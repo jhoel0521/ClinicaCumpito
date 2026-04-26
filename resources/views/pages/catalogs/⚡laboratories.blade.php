@@ -68,7 +68,7 @@ new class extends Component {
         }
 
         $this->resetForm();
-        $this->dispatch('close-modal', 'category-modal');
+        $this->dispatch('modal-close', name: 'category-modal');
     }
 
     public function saveExam(CatalogServiceContract $service): void
@@ -97,7 +97,7 @@ new class extends Component {
         }
 
         $this->resetForm();
-        $this->dispatch('close-modal', 'exam-modal');
+        $this->dispatch('modal-close', name: 'exam-modal');
     }
 
     public function editCategory(string $id): void
@@ -106,7 +106,7 @@ new class extends Component {
         $this->editingCategoryId = $category->id;
         $this->categoryName = $category->name;
         $this->categoryDescription = $category->description ?? '';
-        $this->dispatch('open-modal', 'category-modal');
+        $this->dispatch('modal-show', name: 'category-modal');
     }
 
     public function editExam(string $id): void
@@ -118,7 +118,19 @@ new class extends Component {
         $this->examDescription = $exam->description ?? '';
         $this->examUnit = $exam->unit ?? '';
         $this->examReferenceRange = $exam->reference_range ?? '';
-        $this->dispatch('open-modal', 'exam-modal');
+        $this->dispatch('modal-show', name: 'exam-modal');
+    }
+
+    public function openCategoryModal(): void
+    {
+        $this->resetForm();
+        $this->dispatch('modal-show', name: 'category-modal');
+    }
+
+    public function openExamModal(): void
+    {
+        $this->resetForm();
+        $this->dispatch('modal-show', name: 'exam-modal');
     }
 
     public function deleteCategory(string $id, CatalogServiceContract $service): void
@@ -156,10 +168,10 @@ new class extends Component {
             </flux:subheading>
         </div>
         <div class="flex gap-2">
-            <flux:button variant="primary" icon="plus" wire:click="$dispatch('open-modal', 'category-modal')">
+            <flux:button variant="primary" icon="plus" wire:click="openCategoryModal">
                 {{ __('Categoría') }}
             </flux:button>
-            <flux:button variant="primary" icon="plus" wire:click="$dispatch('open-modal', 'exam-modal')">
+            <flux:button variant="primary" icon="plus" wire:click="openExamModal">
                 {{ __('Examen') }}
             </flux:button>
         </div>

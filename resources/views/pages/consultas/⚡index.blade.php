@@ -201,7 +201,9 @@ new class extends Component {
                     @endphp
 
                     <tr wire:key="{{ $consultation->id }}">
-                        <td class="px-6 py-4 font-medium">{{ $consultation->patient->full_name }}</td>
+                        <td class="px-6 py-4 font-medium">
+                            <x-patient-link :patient="$consultation->patient" />
+                        </td>
                         <td class="px-6 py-4 text-gray-600 dark:text-gray-400">
                             {{ $consultation->doctor?->full_name ?? '—' }}
                         </td>

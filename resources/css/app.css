@@ -100,9 +100,6 @@
 /* ============================================
    COMPONENTES FLUX
    ============================================ */
-[data-flux-field]:not(ui-radio, ui-checkbox) {
-    @apply grid gap-2;
-}
 
 [data-flux-label] {
     @apply !mb-0 !leading-tight font-medium;
@@ -114,16 +111,16 @@ select:focus[data-flux-control] {
     @apply outline-hidden ring-2 ring-teal-500 dark:ring-teal-400 ring-offset-2 ring-offset-white dark:ring-offset-zinc-950;
 }
 
-/* Input y Textarea Mejorados */
-[data-flux-control] {
-    @apply bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 text-zinc-900 dark:text-zinc-50 placeholder-zinc-400 dark:placeholder-zinc-500 transition-all;
+/* Input y Textarea — exclude custom elements (ui-checkbox, ui-radio) so their own Flux styles aren't overridden */
+[data-flux-control]:not(ui-checkbox, ui-radio) {
+    @apply bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-lg text-zinc-900 dark:text-zinc-50 placeholder-zinc-400 dark:placeholder-zinc-500 transition-all;
 }
 
-[data-flux-control]:hover:not(:disabled) {
+[data-flux-control]:not(ui-checkbox, ui-radio):hover:not(:disabled) {
     @apply border-zinc-300 dark:border-zinc-600;
 }
 
-[data-flux-control]:disabled {
+[data-flux-control]:not(ui-checkbox, ui-radio):disabled {
     @apply opacity-50 cursor-not-allowed;
 }
 

@@ -34,14 +34,14 @@
         </div>
         @foreach ($item->results as $result)
             <div class="{{ $result->is_abnormal ? 'result-abnormal' : 'result-normal' }}">
-                {{ $result->parameter_name ?: '—' }}:
                 {{ $result->value ?: '—' }}
-                @if ($result->reference_range)
-                    (ref: {{ $result->reference_range }})
-                @endif
-
                 @if ($result->is_abnormal)
                     ⚠
+                @endif
+
+                @if ($result->report_text)
+                    <br />
+                    <em style="font-size: 9px">{{ $result->report_text }}</em>
                 @endif
             </div>
         @endforeach

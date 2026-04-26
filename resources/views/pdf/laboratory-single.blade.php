@@ -193,21 +193,17 @@
                             <table class="data-table" style="margin-top: 0">
                                 <thead>
                                     <tr>
-                                        <th style="width: 28%">Parámetro</th>
-                                        <th style="width: 20%">Valor</th>
-                                        <th style="width: 22%">Referencia</th>
-                                        <th style="width: 25%">Informe</th>
-                                        <th style="width: 5%">⚠</th>
+                                        <th style="width: 45%">Valor</th>
+                                        <th style="width: 45%">Informe</th>
+                                        <th style="width: 10%">⚠</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach ($item->results as $result)
                                         <tr>
-                                            <td>{{ $result->parameter_name ?: '—' }}</td>
                                             <td class="{{ $result->is_abnormal ? 'abnormal' : '' }}">
                                                 {{ $result->value ?: '—' }}
                                             </td>
-                                            <td>{{ $result->reference_range ?: '—' }}</td>
                                             <td style="font-size: 10px; font-style: italic">
                                                 {{ $result->report_text ?: '—' }}
                                             </td>

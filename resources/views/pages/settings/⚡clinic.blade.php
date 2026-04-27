@@ -104,7 +104,7 @@ new class extends Component {
                 label="Nombre de la clínica *"
                 type="text"
                 required
-                placeholder="Ej: Clínica Cumpito"
+                placeholder="Ej: VitalTrack"
             />
 
             <flux:input

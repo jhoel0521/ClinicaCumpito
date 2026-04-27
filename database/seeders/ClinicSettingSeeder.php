@@ -10,13 +10,13 @@ class ClinicSettingSeeder extends Seeder
     public function run(): void
     {
         ClinicSetting::updateOrCreate([], [
-            'name' => 'Clínica Cumpito',
+            'name' => 'VitalTrack',
             'address' => 'Santa Cruz, Bolivia',
             'phone' => null,
             'whatsapp' => null,
             'logo_path' => null,
         ]);
 
-        $this->command->info('✔ Configuración de clínica: Clínica Cumpito / Santa Cruz, Bolivia.');
+        $this->command->info('✔ Configuración de clínica: VitalTrack / Santa Cruz, Bolivia.');
     }
 }

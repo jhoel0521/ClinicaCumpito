@@ -21,7 +21,7 @@
                     Bienvenido, {{ auth()->user()->name }}
                 </h1>
                 <p class="text-gray-500 dark:text-gray-400 mt-1 text-sm">
-                    Panel de control · Clínica Cumpito ·
+                    Panel de control · VitalTrack ·
                     <span class="text-teal-600 dark:text-teal-400 font-medium">
                         {{ now()->isoFormat('D [de] MMMM, YYYY') }}
                     </span>

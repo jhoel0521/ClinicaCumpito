@@ -14,8 +14,8 @@ return new class extends Migration
             $table->string('action');                 // created | updated | deleted
             $table->string('auditable_type');         // class name of the audited model
             $table->uuid('auditable_id');             // UUID of the audited record
-            $table->jsonb('old_values')->nullable();
-            $table->jsonb('new_values')->nullable();
+            $table->json('old_values')->nullable();
+            $table->json('new_values')->nullable();
             $table->string('ip_address', 45)->nullable();
             $table->text('user_agent')->nullable();
             $table->timestamps();

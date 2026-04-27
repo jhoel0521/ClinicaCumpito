@@ -1,8 +1,8 @@
-# Arquitectura de Clínica Cumpito
+# Arquitectura de VitalTrack
 
 ## Visión General
 
-Clínica Cumpito implementa una **Arquitectura Hexagonal (Puertos y Adaptadores)** para mantener una separación clara de responsabilidades y facilitar el testing, mantenimiento y escalabilidad del sistema.
+VitalTrack implementa una **Arquitectura Hexagonal (Puertos y Adaptadores)** para mantener una separación clara de responsabilidades y facilitar el testing, mantenimiento y escalabilidad del sistema.
 
 ## Capas Arquitectónicas
 

@@ -19,6 +19,6 @@ class ClinicSetting extends Model
      */
     public static function current(): self
     {
-        return self::firstOrCreate([], ['name' => 'Clínica Cumpito']);
+        return self::firstOrCreate([], ['name' => 'VitalTrack']);
     }
 }

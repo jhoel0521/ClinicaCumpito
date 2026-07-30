@@ -38,20 +38,39 @@ git clone https://github.com/usuario/ClinicaCumpito.git
 cd ClinicaCumpito
 ```
 
-### 2. Instalar Dependencias PHP
+### 2. Iniciar los servicios de desarrollo
+
+Con Docker y Docker Compose instalados:
 
 ```bash
-composer install
+docker compose -f dev-docker-compose.yml up -d --wait
 ```
 
-### 3. Configurar Variables de Entorno
+Esto inicia PostgreSQL en `127.0.0.1:5432` con la configuración incluida en
+`.env.example`.
+
+### 3. Instalar la aplicación
 
 ```bash
-cp .env.example .env
-php artisan key:generate
+composer setup
 ```
 
-Actualiza `.env` con tus credenciales de PostgreSQL:
+El comando instala las dependencias de PHP y Node, configura Laravel, ejecuta
+las migraciones y compila los assets.
+
+Para detener PostgreSQL:
+
+```bash
+docker compose -f dev-docker-compose.yml down
+```
+
+Para borrar también los datos locales de PostgreSQL:
+
+```bash
+docker compose -f dev-docker-compose.yml down --volumes
+```
+
+La configuración de conexión local es:
 
 ```env
 DB_CONNECTION=pgsql
@@ -59,29 +78,7 @@ DB_HOST=127.0.0.1
 DB_PORT=5432
 DB_DATABASE=vitaltrack
 DB_USERNAME=root
-DB_PASSWORD=root
-```
-
-### 4. Crear Base de Datos
-
-```bash
-# Si PostgreSQL está corriendo localmente
-psql -U postgres -c "CREATE USER root WITH PASSWORD 'root';"
-psql -U postgres -c "ALTER USER root WITH SUPERUSER;"
-psql -U postgres -c "CREATE DATABASE vitaltrack OWNER root;"
-```
-
-### 5. Ejecutar Migraciones
-
-```bash
-php artisan migrate:fresh --seed
-```
-
-### 6. Instalar Node Dependencies
-
-```bash
-npm install
-npm run build
+DB_PASSWORD=
 ```
 
 ## 🏃 Ejecución

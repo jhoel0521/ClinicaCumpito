@@ -3,6 +3,7 @@
     "private": true,
     "type": "module",
     "scripts": {
+        "audit": "npm audit",
         "build": "vite build",
         "dev": "vite",
         "format:blade": "prettier --write --log-level warn \"resources/views/**/*.blade.php\"",

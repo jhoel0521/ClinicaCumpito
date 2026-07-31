@@ -29,6 +29,8 @@ new class extends Component {
                 'soapNote',
                 'vitalSigns',
                 'prescriptions.items',
+                'laboratoryRequests.attachments',
+                'laboratoryRequests.items.attachments',
                 'laboratoryRequests.items.results',
             ])
                 ->where('patient_id', $this->patient->id)
@@ -126,6 +128,85 @@ new class extends Component {
                             >
                                 Abrir
                             </flux:button>
+                        </div>
+
+                        @php
+                            $prescriptionItemsCount = $consultation->prescriptions->sum(
+                                fn ($prescription) => $prescription->items->count(),
+                            );
+                            $laboratoryRequestsCount = $consultation->laboratoryRequests->count();
+                            $laboratoryResultsCount = $consultation->laboratoryRequests->sum(
+                                fn ($request) => $request->items->sum(fn ($item) => $item->results->count()),
+                            );
+                            $laboratoryAttachmentsCount = $consultation->laboratoryRequests->sum(
+                                fn ($request) => $request->attachments->count()
+                                    + $request->items->sum(fn ($item) => $item->attachments->count()),
+                            );
+                            $hasLaboratoryResults = $laboratoryResultsCount + $laboratoryAttachmentsCount > 0;
+                        @endphp
+
+                        {{-- Resumen clínico de la consulta --}}
+                        <div class="mb-4 flex flex-wrap gap-2" dusk="consultation-summary-{{ $consultation->id }}">
+                            @if ($consultation->soapNote)
+                                <span
+                                    class="inline-flex items-center gap-1 rounded-full bg-teal-50 px-2.5 py-1 text-xs font-medium text-teal-700 ring-1 ring-inset ring-teal-200 dark:bg-teal-900/30 dark:text-teal-300 dark:ring-teal-800"
+                                >
+                                    <flux:icon.check-circle class="size-3.5" />
+                                    SOAP registrado
+                                </span>
+                            @else
+                                <span
+                                    class="inline-flex items-center gap-1 rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-500 ring-1 ring-inset ring-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:ring-zinc-700"
+                                >
+                                    SOAP pendiente
+                                </span>
+                            @endif
+
+                            @if ($prescriptionItemsCount > 0)
+                                <span
+                                    class="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:ring-blue-800"
+                                >
+                                    <flux:icon.document-text class="size-3.5" />
+                                    Receta · {{ $prescriptionItemsCount }}
+                                    {{ $prescriptionItemsCount === 1 ? 'medicamento' : 'medicamentos' }}
+                                </span>
+                            @else
+                                <span
+                                    class="inline-flex items-center gap-1 rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-500 ring-1 ring-inset ring-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:ring-zinc-700"
+                                >
+                                    Sin receta
+                                </span>
+                            @endif
+
+                            @if ($laboratoryRequestsCount > 0)
+                                <span
+                                    class="inline-flex items-center gap-1 rounded-full bg-violet-50 px-2.5 py-1 text-xs font-medium text-violet-700 ring-1 ring-inset ring-violet-200 dark:bg-violet-900/30 dark:text-violet-300 dark:ring-violet-800"
+                                >
+                                    <flux:icon.beaker class="size-3.5" />
+                                    Laboratorio solicitado · {{ $laboratoryRequestsCount }}
+                                </span>
+
+                                @if ($hasLaboratoryResults)
+                                    <span
+                                        class="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-300 dark:ring-emerald-800"
+                                    >
+                                        <flux:icon.check-circle class="size-3.5" />
+                                        Resultados registrados
+                                    </span>
+                                @else
+                                    <span
+                                        class="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700 ring-1 ring-inset ring-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:ring-amber-800"
+                                    >
+                                        Resultados pendientes
+                                    </span>
+                                @endif
+                            @else
+                                <span
+                                    class="inline-flex items-center gap-1 rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-500 ring-1 ring-inset ring-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:ring-zinc-700"
+                                >
+                                    Sin laboratorio
+                                </span>
+                            @endif
                         </div>
 
                         {{-- Contenido SOAP --}}

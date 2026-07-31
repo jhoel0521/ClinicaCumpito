@@ -81,14 +81,13 @@ new class extends Component {
 }; ?>
 
 <section class="p-6">
-    <div class="mb-6 flex justify-between items-end">
+    <div class="mb-6">
         <div>
             <flux:heading size="xl">{{ __('Consultas') }}</flux:heading>
-            <flux:subheading>{{ __('Gestión del flujo clínico de consultas') }}</flux:subheading>
+            <flux:subheading>
+                {{ __('Consulta el historial. Para iniciar una atención, abre primero el perfil del paciente.') }}
+            </flux:subheading>
         </div>
-        <flux:button variant="primary" icon="plus" :href="route('consultas.create')" wire:navigate>
-            {{ __('Nueva Consulta') }}
-        </flux:button>
     </div>
 
     {{-- Filtros --}}

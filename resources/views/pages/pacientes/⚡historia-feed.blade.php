@@ -80,14 +80,6 @@ new class extends Component {
                 >
                     Volver al perfil
                 </flux:button>
-                <flux:button
-                    href="{{ route('consultas.create', ['patient_id' => $patient->id]) }}"
-                    variant="primary"
-                    size="sm"
-                    icon="plus"
-                >
-                    Nueva Consulta
-                </flux:button>
             </div>
         </div>
 

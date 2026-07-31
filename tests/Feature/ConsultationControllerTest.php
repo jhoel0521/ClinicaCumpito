@@ -25,22 +25,17 @@ describe('ConsultationController', function () {
         $response->assertRedirect(route('login'));
     });
 
-    test('puede crear una consulta con datos validos', function () {
+    test('puede crear una consulta desde el perfil de un paciente', function () {
         $doctor = Doctor::factory()->create();
         $user = User::factory()->create(['doctor_id' => $doctor->id]);
         $patient = Patient::factory()->create();
 
         $response = $this->actingAs($user)
-            ->post(route('consultas.store'), [
-                'patient_id' => $patient->id,
-                'doctor_id' => $doctor->id,
-                'type' => 'digital',
-                'status' => 'saved',
-                'consultation_date' => now()->format('Y-m-d H:i:s'),
-                'pending_transcription' => true,
-            ]);
+            ->post(route('consultas.quick-store', $patient));
 
-        $response->assertRedirect();
+        $consultation = Consultation::query()->where('patient_id', $patient->id)->sole();
+
+        $response->assertRedirect(route('consultas.show', $consultation));
 
         $this->assertDatabaseHas('consultations', [
             'patient_id' => $patient->id,
@@ -50,19 +45,10 @@ describe('ConsultationController', function () {
         ]);
     });
 
-    test('falla validacion al crear consulta sin paciente', function () {
-        $doctor = Doctor::factory()->create();
-        $user = User::factory()->create(['doctor_id' => $doctor->id]);
-
-        $response = $this->actingAs($user)
-            ->post(route('consultas.store'), [
-                'doctor_id' => $doctor->id,
-                'type' => 'digital',
-                'status' => 'saved',
-                'consultation_date' => now()->format('Y-m-d H:i:s'),
-            ]);
-
-        $response->assertSessionHasErrors('patient_id');
+    test('la ruta generica para crear consultas no existe', function () {
+        $this->actingAs(User::factory()->create())
+            ->get('/consultas/create')
+            ->assertNotFound();
     });
 
     test('puede actualizar consulta no finalizada', function () {

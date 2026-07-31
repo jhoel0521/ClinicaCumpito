@@ -33,41 +33,41 @@ beforeEach(function (): void {
 describe('8.2 — ConsultationPolicy::create', function (): void {
     test('usuario sin doctor_id y sin rol recibe 403 al crear consulta', function (): void {
         $user = User::factory()->create();
+        $patient = Patient::factory()->create();
 
         $this->actingAs($user)
-            ->get(route('consultas.create'))
+            ->post(route('consultas.quick-store', $patient))
             ->assertForbidden();
     });
 
-    test('admin puede acceder al formulario de creación de consulta', function (): void {
+    test('admin puede crear consulta desde el perfil de un paciente', function (): void {
         $user = User::factory()->create();
         $user->assignRole('Admin');
 
-        $this->actingAs($user)
-            ->get(route('consultas.create'))
-            ->assertOk();
+        expect($user->can('create', Consultation::class))->toBeTrue();
     });
 
-    test('tecnico puede acceder al formulario de creación de consulta', function (): void {
+    test('tecnico puede crear consulta desde el perfil de un paciente', function (): void {
         $user = User::factory()->create();
         $user->assignRole('Tecnico');
 
-        $this->actingAs($user)
-            ->get(route('consultas.create'))
-            ->assertOk();
+        expect($user->can('create', Consultation::class))->toBeTrue();
     });
 
-    test('doctor (con doctor_id) puede acceder al formulario de creación', function (): void {
+    test('doctor puede crear consulta desde el perfil de un paciente', function (): void {
         $doctor = Doctor::factory()->create();
         $user = User::factory()->create(['doctor_id' => $doctor->id]);
+        $patient = Patient::factory()->create();
 
         $this->actingAs($user)
-            ->get(route('consultas.create'))
-            ->assertOk();
+            ->post(route('consultas.quick-store', $patient))
+            ->assertRedirect();
     });
 
     test('usuario sin autenticar es redirigido al crear consulta', function (): void {
-        $this->get(route('consultas.create'))
+        $patient = Patient::factory()->create();
+
+        $this->post(route('consultas.quick-store', $patient))
             ->assertRedirect(route('login'));
     });
 });
@@ -249,9 +249,10 @@ describe('8.2 — PatientPolicy: usuarios no autenticados', function (): void {
 
     test('usuario no autenticado es redirigido a login en rutas de consultas', function (): void {
         $consultation = Consultation::factory()->create();
+        $patient = Patient::factory()->create();
 
         $this->get(route('consultas.index'))->assertRedirect(route('login'));
-        $this->get(route('consultas.create'))->assertRedirect(route('login'));
+        $this->post(route('consultas.quick-store', $patient))->assertRedirect(route('login'));
         $this->get(route('consultas.show', $consultation->id))->assertRedirect(route('login'));
     });
 

@@ -71,6 +71,7 @@
                                 @csrf
                                 <button
                                     type="submit"
+                                    dusk="create-consultation"
                                     class="inline-flex items-center gap-1.5 bg-white text-teal-700 hover:bg-teal-50 font-semibold px-4 py-2 rounded-lg text-sm transition"
                                 >
                                     + Nueva Consulta
@@ -413,12 +414,17 @@
                     <p class="text-zinc-400 dark:text-zinc-500 text-sm">
                         Este paciente aún no tiene consultas registradas.
                     </p>
-                    <a
-                        href="{{ route('consultas.create', $patient->id) }}"
-                        class="mt-3 inline-block text-teal-600 dark:text-teal-400 hover:underline text-sm font-medium"
-                    >
-                        Crear primera consulta →
-                    </a>
+                    @if ($patient->hasCompleteBasicData())
+                        <form action="{{ route('consultas.quick-store', $patient) }}" method="POST" class="mt-3">
+                            @csrf
+                            <button
+                                type="submit"
+                                class="text-teal-600 dark:text-teal-400 hover:underline text-sm font-medium"
+                            >
+                                Crear primera consulta →
+                            </button>
+                        </form>
+                    @endif
                 </div>
             @endif
         </section>

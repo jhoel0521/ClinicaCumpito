@@ -21,30 +21,30 @@ describe('ConsultationPolicy', function (): void {
             ->assertOk();
     });
 
-    test('usuario sin doctor_id no puede crear consulta', function (): void {
+    test('usuario sin doctor_id no puede iniciar consulta desde un paciente', function (): void {
         $user = User::factory()->create();
+        $patient = \App\Models\Patient::factory()->create();
 
         $this->actingAs($user)
-            ->get(route('consultas.create'))
+            ->post(route('consultas.quick-store', $patient))
             ->assertForbidden();
     });
 
-    test('doctor puede acceder al formulario de creación', function (): void {
+    test('doctor puede iniciar consulta desde un paciente', function (): void {
         $doctor = Doctor::factory()->create();
         $user = User::factory()->create(['doctor_id' => $doctor->id]);
+        $patient = \App\Models\Patient::factory()->create();
 
         $this->actingAs($user)
-            ->get(route('consultas.create'))
-            ->assertOk();
+            ->post(route('consultas.quick-store', $patient))
+            ->assertRedirect();
     });
 
-    test('admin puede acceder al formulario de creación', function (): void {
+    test('admin puede iniciar consulta desde un paciente', function (): void {
         $user = User::factory()->create();
         $user->assignRole('Admin');
 
-        $this->actingAs($user)
-            ->get(route('consultas.create'))
-            ->assertOk();
+        expect($user->can('create', Consultation::class))->toBeTrue();
     });
 
     test('doctor puede editar su propia consulta', function (): void {
@@ -88,13 +88,11 @@ describe('ConsultationPolicy', function (): void {
             ->assertRedirect(route('consultas.index'));
     });
 
-    test('tecnico puede acceder al formulario de creación', function (): void {
+    test('tecnico puede iniciar consulta desde un paciente', function (): void {
         $user = User::factory()->create(['doctor_id' => null]);
         $user->assignRole('Tecnico');
 
-        $this->actingAs($user)
-            ->get(route('consultas.create'))
-            ->assertOk();
+        expect($user->can('create', Consultation::class))->toBeTrue();
     });
 
     test('tecnico puede editar consulta manual sin doctor asignado', function (): void {

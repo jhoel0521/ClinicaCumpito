@@ -327,23 +327,15 @@ class ClinicalWorkflowTest extends DuskTestCase
             'full_name' => 'Sofía Vargas',
         ]);
 
-        $this->browse(function (Browser $browser) use ($doctor, $patient) {
+        $this->browse(function (Browser $browser) use ($patient) {
             // ── 1. Login ──────────────────────────────────────────────────────
             $this->loginAs($browser, 'maria@clinica.com');
 
-            // ── 2. Navegar al formulario de nueva consulta ────────────────────
+            // ── 2. Iniciar la consulta desde el perfil del paciente ───────────
             $browser
-                ->visit('/consultas/create')
-                ->waitForText('Nueva Consulta', 10);
-
-            // ── 3. Llenar y enviar ────────────────────────────────────────────
-            $browser
-                ->select('patient_id', $patient->id)
-                ->select('doctor_id', $doctor->id)
-                ->select('type', 'digital')
-                ->select('status', 'draft')
-                ->type('consultation_date', now()->format('Y-m-d\TH:i'))
-                ->press('Guardar Consulta')
+                ->visit('/pacientes/'.$patient->id)
+                ->waitFor('@create-consultation', 10)
+                ->click('@create-consultation')
                 ->waitForText('Sofía Vargas', 15);
         });
 
@@ -385,7 +377,7 @@ class ClinicalWorkflowTest extends DuskTestCase
             'name' => 'Glucosa en ayunas',
         ]);
 
-        $this->browse(function (Browser $browser) use ($doctor, $medication, $exam) {
+        $this->browse(function (Browser $browser) use ($medication, $exam) {
             // ═══════════════════════════════════════════════════════════════
             // PASO 1: Login
             // ═══════════════════════════════════════════════════════════════
@@ -446,14 +438,9 @@ class ClinicalWorkflowTest extends DuskTestCase
             $patient = Patient::where('full_name', 'Valentina Cruz')->firstOrFail();
 
             $browser
-                ->visit('/consultas/create')
-                ->waitForText('Nueva Consulta', 10)
-                ->select('patient_id', $patient->id)
-                ->select('doctor_id', $doctor->id)
-                ->select('type', 'digital')
-                ->select('status', 'draft')
-                ->type('consultation_date', now()->format('Y-m-d\TH:i'))
-                ->press('Guardar Consulta')
+                ->visit('/pacientes/'.$patient->id)
+                ->waitFor('@create-consultation', 10)
+                ->click('@create-consultation')
                 ->waitForText('Valentina Cruz', 15);
         });
 
@@ -691,17 +678,17 @@ class ClinicalWorkflowTest extends DuskTestCase
             'email_verified_at' => now(),
         ]);
         $admin->assignRole($adminRole);
+        $patient = Patient::factory()->create();
 
-        $this->browse(function (Browser $browser) {
+        $this->browse(function (Browser $browser) use ($patient) {
             // ── ESCENARIO A: usuario sin rol no puede crear consulta ──────────
             $this->loginAs($browser, 'sinrol@test.com');
 
             $browser
-                ->visit('/consultas/create')
-                ->pause(1500);   // esperar renderizado del error
-
-            // El formulario de Nueva Consulta NO debe estar visible
-            $browser->assertDontSee('Nueva Consulta');
+                ->visit('/pacientes/'.$patient->id)
+                ->waitFor('@create-consultation', 10)
+                ->click('@create-consultation')
+                ->waitForText('403', 10);
 
             // ── ESCENARIO B: doctor SÍ puede crear consulta ───────────────────
             // Nueva sesión
@@ -709,8 +696,8 @@ class ClinicalWorkflowTest extends DuskTestCase
             $this->loginAs($browser, 'doctorpolicy@test.com');
 
             $browser
-                ->visit('/consultas/create')
-                ->waitForText('Nueva Consulta', 10)
+                ->visit('/pacientes/'.$patient->id)
+                ->waitFor('@create-consultation', 10)
                 ->assertSee('Nueva Consulta');
 
             // ── ESCENARIO C: admin también puede crear consulta ───────────────
@@ -718,8 +705,8 @@ class ClinicalWorkflowTest extends DuskTestCase
             $this->loginAs($browser, 'adminpolicy@test.com');
 
             $browser
-                ->visit('/consultas/create')
-                ->waitForText('Nueva Consulta', 10)
+                ->visit('/pacientes/'.$patient->id)
+                ->waitFor('@create-consultation', 10)
                 ->assertSee('Nueva Consulta');
         });
     }

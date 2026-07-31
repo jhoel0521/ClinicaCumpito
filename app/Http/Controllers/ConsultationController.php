@@ -4,34 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Contracts\ConsultationServiceContract;
 use App\DTOs\ConsultationDTO;
-use App\Http\Requests\StoreConsultationRequest;
 use App\Http\Requests\UpdateConsultationRequest;
 use App\Models\Consultation;
 use App\Models\Patient;
 use App\Models\PrescriptionTemplate;
 use App\Models\Vaccine;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class ConsultationController extends Controller
 {
     public function __construct(private ConsultationServiceContract $service) {}
-
-    public function create(Request $request, ?Patient $patient = null): View|RedirectResponse
-    {
-        $this->authorize('create', Consultation::class);
-
-        if ($patient && ! $patient->hasCompleteBasicData()) {
-            return redirect()
-                ->route('pacientes.edit', $patient)
-                ->with('require_complete', true);
-        }
-
-        $patients = Patient::query()->orderBy('full_name')->get(['id', 'full_name']);
-
-        return view('consultas.create', compact('patients', 'patient'));
-    }
 
     public function quickStore(Patient $patient): RedirectResponse
     {
@@ -57,35 +40,6 @@ class ConsultationController extends Controller
         $consultation = $this->service->create($dto);
 
         return redirect()->route('consultas.show', $consultation->id);
-    }
-
-    public function store(StoreConsultationRequest $request): RedirectResponse
-    {
-        $this->authorize('create', Consultation::class);
-
-        /** @var Patient $patient */
-        $patient = Patient::findOrFail($request->patient_id);
-
-        if (! $patient->hasCompleteBasicData()) {
-            return redirect()
-                ->route('pacientes.edit', $patient)
-                ->with('require_complete', true)
-                ->withErrors(['patient_id' => 'Completa la fecha de nacimiento y el sexo del paciente antes de crear una consulta.',
-                ]);
-        }
-
-        /** @var \App\Models\User $user */
-        $user = auth()->user();
-
-        $dto = ConsultationDTO::fromArray(array_merge($request->validated(), [
-            'doctor_id' => $user->doctor_id,
-            'type' => 'digital',
-            'status' => 'draft',
-        ]));
-        $consultation = $this->service->create($dto);
-
-        return redirect()->route('consultas.show', $consultation->id)
-            ->with('success', 'Consulta creada exitosamente.');
     }
 
     public function show(Consultation $consulta): View

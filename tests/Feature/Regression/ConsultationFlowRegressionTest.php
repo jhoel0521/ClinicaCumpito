@@ -43,13 +43,7 @@ describe('8.3 — Regresión: flujo completo de consulta SOAP', function (): voi
         $patient = Patient::factory()->withCompleteData()->create();
 
         $response = $this->actingAs($this->user)
-            ->post(route('consultas.store'), [
-                'patient_id' => $patient->id,
-                'doctor_id' => $this->doctor->id,
-                'type' => 'digital',
-                'status' => 'draft',
-                'consultation_date' => now()->toDateString(),
-            ]);
+            ->post(route('consultas.quick-store', $patient));
 
         $response->assertRedirect();
 

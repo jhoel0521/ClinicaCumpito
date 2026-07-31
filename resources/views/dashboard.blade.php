@@ -90,13 +90,13 @@
                     </a>
 
                     <a
-                        href="{{ route('consultas.create') }}"
+                        href="{{ route('pacientes.index') }}"
                         class="flex items-center gap-3 p-3 rounded-lg bg-blue-50 dark:bg-blue-900/40 border border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-800/60 transition"
                     >
-                        <i class="fas fa-plus-square text-blue-600 dark:text-blue-400 w-5 text-center"></i>
+                        <i class="fas fa-search text-blue-600 dark:text-blue-400 w-5 text-center"></i>
                         <div>
-                            <p class="font-semibold text-blue-900 dark:text-blue-200 text-sm">Nueva Consulta</p>
-                            <p class="text-xs text-blue-600 dark:text-blue-400">Atención digital</p>
+                            <p class="font-semibold text-blue-900 dark:text-blue-200 text-sm">Buscar Paciente</p>
+                            <p class="text-xs text-blue-600 dark:text-blue-400">Iniciar atención desde su perfil</p>
                         </div>
                     </a>
 

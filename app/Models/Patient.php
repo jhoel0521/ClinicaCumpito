@@ -26,6 +26,7 @@ class Patient extends Model
         'gender' => Gender::class,
         'blood_group' => BloodGroup::class,
         'birth_type' => BirthType::class,
+        'heel_prick_done' => 'boolean',
     ];
 
     protected $fillable = [
@@ -39,6 +40,7 @@ class Patient extends Model
         'birth_head_circumference',
         'birth_type',
         'birth_place',
+        'heel_prick_done',
         'blood_group',
         'allergies',
         'pathologies',

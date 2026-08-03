@@ -7,6 +7,8 @@ Route::get('/', function () {
     return view('home');
 })->name('home');
 
+Route::get('/up', fn () => response()->json(['status' => 'ok']));
+
 Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])
     ->name('dashboard');

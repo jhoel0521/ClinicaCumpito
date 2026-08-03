@@ -60,7 +60,10 @@ RUN apt-get update \
         /etc/apache2/sites-available/*.conf \
         /etc/apache2/apache2.conf \
         /etc/apache2/conf-available/*.conf \
+    && echo 'ServerName localhost' >> /etc/apache2/apache2.conf \
     && rm -rf /var/lib/apt/lists/*
+
+COPY docker/php-production.ini /usr/local/etc/php/conf.d/99-production.ini
 
 WORKDIR /var/www/html
 

@@ -68,7 +68,7 @@ new class extends Component {
                 <div>
                     <h1 class="text-2xl font-bold text-zinc-900 dark:text-white">{{ $patient->full_name }}</h1>
                     <p class="text-zinc-500 dark:text-zinc-400 text-sm">
-                        {{ $patient->age()?->forDisplay() ?? 'Edad desconocida' }} ·
+                        {{ $patient->age()?->forDisplayFull() ?? 'Edad desconocida' }} ·
                         {{ $patient->gender ? ($patient->gender->value() === 'M' ? 'Masculino' : 'Femenino') : '—' }}
                     </p>
                 </div>
@@ -131,16 +131,13 @@ new class extends Component {
                         </div>
 
                         @php
-                            $prescriptionItemsCount = $consultation->prescriptions->sum(
-                                fn ($prescription) => $prescription->items->count(),
-                            );
+                            $prescriptionItemsCount = $consultation->prescriptions->sum(fn ($prescription) => $prescription->items->count());
                             $laboratoryRequestsCount = $consultation->laboratoryRequests->count();
                             $laboratoryResultsCount = $consultation->laboratoryRequests->sum(
                                 fn ($request) => $request->items->sum(fn ($item) => $item->results->count()),
                             );
                             $laboratoryAttachmentsCount = $consultation->laboratoryRequests->sum(
-                                fn ($request) => $request->attachments->count()
-                                    + $request->items->sum(fn ($item) => $item->attachments->count()),
+                                fn ($request) => $request->attachments->count() + $request->items->sum(fn ($item) => $item->attachments->count()),
                             );
                             $hasLaboratoryResults = $laboratoryResultsCount + $laboratoryAttachmentsCount > 0;
                         @endphp
@@ -277,50 +274,48 @@ new class extends Component {
                                     <table class="w-full text-xs text-left">
                                         <thead class="bg-zinc-50 dark:bg-zinc-800/50 text-zinc-600 dark:text-zinc-400">
                                             <tr>
-                                                <th class="px-3 py-2 font-medium">Parámetro</th>
-                                                <th class="px-3 py-2 font-medium text-right">Resultado</th>
+                                                <th class="px-3 py-2 font-medium">Examen solicitado</th>
+                                                <th class="px-3 py-2 font-medium text-right">Estado</th>
                                             </tr>
                                         </thead>
                                         <tbody class="divide-y divide-zinc-100 dark:divide-zinc-800">
                                             @foreach ($consultation->laboratoryRequests as $labReq)
                                                 @php
-                                                    $grouped = $labReq->items->groupBy('exam_name');
+                                                    // Un examen por línea (deduplicado): el detalle por
+                                                    // parámetro queda en la vista de detalle del laboratorio.
+                                                    $examNames = $labReq->items
+                                                        ->pluck('exam_name')
+                                                        ->unique()
+                                                        ->filter();
+                                                    $hasResults =
+                                                        $labReq->items->contains(fn ($item) => $item->results->isNotEmpty()) ||
+                                                        $labReq->attachments->isNotEmpty();
+                                                    $isReceived = ($labReq->status ?? 'pending') === 'received';
                                                 @endphp
 
-                                                @foreach ($grouped as $examName => $items)
-                                                    <tr class="bg-zinc-100 dark:bg-zinc-800/50">
+                                                @foreach ($examNames as $examName)
+                                                    <tr class="bg-white dark:bg-zinc-900">
                                                         <td
-                                                            colspan="2"
-                                                            class="px-3 py-1.5 font-semibold text-zinc-700 dark:text-zinc-200"
+                                                            class="px-3 py-2 font-medium text-zinc-800 dark:text-zinc-200"
                                                         >
                                                             {{ $examName }}
-                                                            <span class="font-normal text-zinc-400 ml-1">
-                                                                ({{ $items->count() }})
-                                                            </span>
+                                                        </td>
+                                                        <td class="px-3 py-2 text-right">
+                                                            @if ($isReceived || $hasResults)
+                                                                <span
+                                                                    class="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-300 dark:ring-emerald-800"
+                                                                >
+                                                                    Con resultados
+                                                                </span>
+                                                            @else
+                                                                <span
+                                                                    class="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-700 ring-1 ring-inset ring-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:ring-amber-800"
+                                                                >
+                                                                    Pendiente
+                                                                </span>
+                                                            @endif
                                                         </td>
                                                     </tr>
-                                                    @foreach ($items as $item)
-                                                        @php
-                                                            $firstResult = $item->results->first();
-                                                        @endphp
-
-                                                        <tr class="bg-white dark:bg-zinc-900">
-                                                            <td
-                                                                class="px-3 py-1.5 pl-6 text-zinc-600 dark:text-zinc-400"
-                                                            >
-                                                                {{ $item->parameter_name ?: '(examen completo)' }}
-                                                            </td>
-                                                            <td
-                                                                class="px-3 py-1.5 font-mono text-right text-zinc-900 dark:text-zinc-200"
-                                                            >
-                                                                @if ($firstResult)
-                                                                    {{ $firstResult->value ?? 'Ver adjunto' }}
-                                                                @else
-                                                                    <span class="italic text-zinc-400">Pendiente</span>
-                                                                @endif
-                                                            </td>
-                                                        </tr>
-                                                    @endforeach
                                                 @endforeach
 
                                                 <tr class="bg-zinc-50 dark:bg-zinc-800/30">

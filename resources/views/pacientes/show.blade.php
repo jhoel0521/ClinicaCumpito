@@ -49,7 +49,7 @@
                         <h1 class="text-3xl font-bold">{{ $patient->full_name }}</h1>
                         <div class="flex flex-wrap gap-3 mt-3">
                             <span class="bg-white/20 px-3 py-1 rounded-full text-sm font-medium">
-                                {{ $patient->age()?->forDisplay() ?? '—' }}
+                                {{ $patient->age()?->forDisplayFull() ?? '—' }}
                             </span>
                             <span class="bg-white/20 px-3 py-1 rounded-full text-sm font-medium">
                                 {{ $patient->gender ? ($patient->gender->value() === 'M' ? 'Masculino' : 'Femenino') : '—' }}
@@ -384,10 +384,7 @@
                     @endif
 
                     {{-- Laboratorio --}}
-                    @if (
-
-                        $latestConsultation->laboratoryRequests->isNotEmpty() &&
-                        $latestConsultation->laboratoryRequests->flatMap(fn ($r) => $r->items)->isNotEmpty()                    )
+                    @if ($latestConsultation->laboratoryRequests->isNotEmpty())
                         <div
                             class="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-700 p-5"
                         >
@@ -397,10 +394,22 @@
                                 Laboratorio Solicitado
                             </h3>
                             <ul class="space-y-1.5 text-sm">
-                                @foreach ($latestConsultation->laboratoryRequests->flatMap(fn ($r) => $r->items) as $item)
-                                    <li class="flex gap-2 items-start">
-                                        <span class="text-blue-500 mt-0.5">🧪</span>
-                                        <span class="text-zinc-700 dark:text-zinc-300">{{ $item->exam_name }}</span>
+                                @foreach ($latestConsultation->laboratoryRequests as $labRequest)
+                                    @php
+                                        $labExamName = $labRequest->items->first()?->exam_name ?? 'Sin examen';
+                                        $labReceived = ($labRequest->status ?? 'pending') === 'received';
+                                    @endphp
+
+                                    <li class="flex gap-2 items-center justify-between">
+                                        <span class="flex gap-2 items-start">
+                                            <span class="text-blue-500 mt-0.5">🧪</span>
+                                            <span class="text-zinc-700 dark:text-zinc-300">{{ $labExamName }}</span>
+                                        </span>
+                                        <span
+                                            class="text-[10px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded {{ $labReceived ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300' : 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300' }}"
+                                        >
+                                            {{ $labReceived ? 'Recibido' : 'Pendiente' }}
+                                        </span>
                                     </li>
                                 @endforeach
                             </ul>

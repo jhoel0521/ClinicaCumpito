@@ -68,6 +68,36 @@ class Age implements Stringable
         return $this->years().' años';
     }
 
+    /**
+     * Edad clínica detallada: años, meses y días (ej: "2 años, 3 meses y 15 días").
+     * Pensada para perfiles de pacientes pediátricos, donde la edad exacta
+     * define esquemas de vacunas y rangos de las gráficas OMS.
+     */
+    public function forDisplayFull(): string
+    {
+        $diff = $this->birthDate->diff($this->referenceDate);
+
+        $parts = [];
+
+        if ($diff->y > 0) {
+            $parts[] = $diff->y.' '.($diff->y === 1 ? 'año' : 'años');
+        }
+        if ($diff->m > 0) {
+            $parts[] = $diff->m.' '.($diff->m === 1 ? 'mes' : 'meses');
+        }
+        if ($diff->d > 0) {
+            $parts[] = $diff->d.' '.($diff->d === 1 ? 'día' : 'días');
+        }
+
+        if ($parts === []) {
+            return '0 días';
+        }
+
+        $last = array_pop($parts);
+
+        return $parts === [] ? $last : implode(', ', $parts).' y '.$last;
+    }
+
     public function __toString(): string
     {
         return $this->forDisplay();

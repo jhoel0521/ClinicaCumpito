@@ -46,4 +46,28 @@ describe('Age', function () {
 
         Age::fromDates('2026-03-10');
     })->throws(\InvalidArgumentException::class);
+
+    test('forDisplayFull muestra años, meses y días para un lactante', function () {
+        Carbon::setTestNow('2026-02-26');
+
+        $age = Age::fromDates('2025-11-10');
+
+        expect($age->forDisplayFull())->toBe('3 meses y 16 días');
+    });
+
+    test('forDisplayFull muestra años, meses y días para un preescolar', function () {
+        Carbon::setTestNow('2026-08-02');
+
+        $age = Age::fromDates('2024-04-17');
+
+        expect($age->forDisplayFull())->toBe('2 años, 3 meses y 16 días');
+    });
+
+    test('forDisplayFull usa singular y omite unidades en cero', function () {
+        Carbon::setTestNow('2026-08-02');
+
+        expect(Age::fromDates('2025-08-01')->forDisplayFull())->toBe('1 año y 1 día')
+            ->and(Age::fromDates('2024-08-02')->forDisplayFull())->toBe('2 años')
+            ->and(Age::fromDates('2026-08-02')->forDisplayFull())->toBe('0 días');
+    });
 });

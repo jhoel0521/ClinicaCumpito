@@ -9,11 +9,23 @@ class VaccineCatalogSeeder extends Seeder
 {
     public function run(): void
     {
+        // Limpieza por cambios del esquema (obs clienta ago-2026):
+        // - Hepatitis B al nacer eliminada del esquema.
+        // - Influenza 2ª dosis movida de 7 a 12 meses.
+        // Solo se borran registros sin aplicaciones cargadas (FK restrict en patient_vaccines).
+        Vaccine::where('name', 'Hepatitis B')
+            ->whereDoesntHave('patientVaccines')
+            ->delete();
+        Vaccine::where('name', 'Influenza')
+            ->where('dose_sequence', 2)
+            ->where('min_age_months', 7)
+            ->whereDoesntHave('patientVaccines')
+            ->delete();
+
         // Esquema PAI Bolivia (Programa Ampliado de Inmunización)
         $vaccines = [
             // Al nacer (0 meses)
             ['name' => 'BCG',             'disease_prevented' => 'Formas graves de Tuberculosis (meningitis, miliar)',     'recommended_age' => 'Al nacer',         'dose_sequence' => 1, 'min_age_months' => 0],
-            ['name' => 'Hepatitis B',     'disease_prevented' => 'Hepatitis B',                                            'recommended_age' => 'Al nacer',         'dose_sequence' => 1, 'min_age_months' => 0],
 
             // 2 meses
             ['name' => 'Pentavalente',    'disease_prevented' => 'Difteria, Tétanos, Coqueluche, Hepatitis B, Hib',       'recommended_age' => '2 meses',          'dose_sequence' => 1, 'min_age_months' => 2],
@@ -33,10 +45,8 @@ class VaccineCatalogSeeder extends Seeder
             ['name' => 'Antineumocócica', 'disease_prevented' => 'Neumonía y meningitis por Streptococcus pneumoniae',     'recommended_age' => '6 meses',          'dose_sequence' => 3, 'min_age_months' => 6],
             ['name' => 'Influenza',       'disease_prevented' => 'Influenza estacional',                                   'recommended_age' => '6 meses',          'dose_sequence' => 1, 'min_age_months' => 6],
 
-            // 7 meses
-            ['name' => 'Influenza',       'disease_prevented' => 'Influenza estacional',                                   'recommended_age' => '7 meses',          'dose_sequence' => 2, 'min_age_months' => 7],
-
             // 12 meses
+            ['name' => 'Influenza',       'disease_prevented' => 'Influenza estacional',                                   'recommended_age' => '12 meses',         'dose_sequence' => 2, 'min_age_months' => 12],
             ['name' => 'SRP',             'disease_prevented' => 'Sarampión, Rubéola, Parotiditis',                        'recommended_age' => '12 meses',         'dose_sequence' => 1, 'min_age_months' => 12],
             ['name' => 'Antiamarílica',   'disease_prevented' => 'Fiebre Amarilla',                                        'recommended_age' => '12 meses',         'dose_sequence' => 1, 'min_age_months' => 12],
             ['name' => 'Antineumocócica', 'disease_prevented' => 'Neumonía y meningitis por Streptococcus pneumoniae',     'recommended_age' => '12 meses',         'dose_sequence' => 4, 'min_age_months' => 12],

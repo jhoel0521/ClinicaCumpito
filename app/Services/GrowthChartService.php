@@ -79,6 +79,15 @@ class GrowthChartService implements GrowthChartServiceContract
         $grafica = OmsCatalogoGrafica::findOrFail($graficaId);
         $patient = Patient::with(['consultations.vitalSigns'])->findOrFail($patientId);
 
+        // Rango X disponible en la boleta OMS: puntos fuera de rango se omiten
+        // (el catálogo sembrado cubre 0–60 meses; extrapolar daría z-scores clínicamente erróneos).
+        $baseQuery = OmsDatoGrafica::query()->where('oms_catalogo_grafica_id', $graficaId);
+        $minXRaw = (clone $baseQuery)->min('x_value');
+        $maxXRaw = (clone $baseQuery)->max('x_value');
+
+        $minX = $minXRaw !== null ? (float) $minXRaw : null;
+        $maxX = $maxXRaw !== null ? (float) $maxXRaw : null;
+
         $datapoints = [];
 
         foreach ($patient->consultations as $consultation) {
@@ -96,6 +105,11 @@ class GrowthChartService implements GrowthChartServiceContract
             );
 
             if ($xValue === null || $measurement === null) {
+                continue;
+            }
+
+            // Fuera del rango de la boleta → no graficar (evita puntos falsos en "0 meses")
+            if ($minX !== null && $maxX !== null && ($xValue < $minX || $xValue > $maxX)) {
                 continue;
             }
 
@@ -155,18 +169,20 @@ class GrowthChartService implements GrowthChartServiceContract
         Patient $patient,
         \Carbon\CarbonInterface $consultDate,
     ): array {
+        // Sin fecha de nacimiento no se puede ubicar la edad en el eje X:
+        // se omite el punto en lugar de graficarlo falsamente en "0 meses".
         $ageMonths = $patient->date_of_birth
             ? Age::fromDates($patient->date_of_birth, $consultDate)->months()
-            : 0;
+            : null;
         $weight = $vitalSign->weight?->value();
         $height = $vitalSign->height?->value();
         $hc = $vitalSign->head_circumference?->value();
 
         return match ($tipoGrafica) {
-            'talla_edad' => [(float) $ageMonths, $height],
-            'peso_edad' => [(float) $ageMonths, $weight],
+            'talla_edad' => [$ageMonths !== null ? (float) $ageMonths : null, $height],
+            'peso_edad' => [$ageMonths !== null ? (float) $ageMonths : null, $weight],
             'peso_talla' => [$height, $weight],
-            'perimetro_cefalico' => [(float) $ageMonths, $hc],
+            'perimetro_cefalico' => [$ageMonths !== null ? (float) $ageMonths : null, $hc],
             default => [null, null],
         };
     }

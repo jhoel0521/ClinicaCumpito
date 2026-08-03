@@ -25,6 +25,9 @@ new class extends Component {
 
     public string $error = '';
 
+    /** Edad actual del paciente en meses (null si no tiene fecha de nacimiento). */
+    public ?int $patientAgeMonths = null;
+
     private const TIPO_MAP = [
         'peso' => 'peso_edad',
         'talla' => 'talla_edad',
@@ -96,11 +99,37 @@ new class extends Component {
         return self::EDAD_RANGES[$this->filterEdad]['max'] ?? 60;
     }
 
+    /**
+     * Aviso cuando el paciente no puede graficarse en la boleta seleccionada:
+     * falta su fecha de nacimiento o su edad supera el rango OMS disponible.
+     */
+    #[Computed]
+    public function rangeNotice(): ?string
+    {
+        if ($this->patientAgeMonths === null) {
+            return 'Registra la fecha de nacimiento del paciente para ubicar sus mediciones en la gráfica.';
+        }
+
+        $grafica = collect($this->graficas)->firstWhere('id', $this->selectedGraficaId);
+        $maxX = (int) round((float) ($grafica['max_x'] ?? 60));
+
+        if ($this->patientAgeMonths > $maxX) {
+            return "El paciente tiene {$this->patientAgeMonths} meses y esta boleta OMS solo cubre hasta {$maxX} meses. Sus mediciones no se grafican para evitar lecturas clínicas erróneas.";
+        }
+
+        return null;
+    }
+
     public function mount(string $patientId): void
     {
         $this->patientId = $patientId;
 
         $patient = Patient::findOrFail($patientId);
+
+        $this->patientAgeMonths = $patient->date_of_birth
+            ? (int) \Carbon\Carbon::parse($patient->date_of_birth)->diffInMonths(now())
+            : null;
+
         $graficasCollection = OmsCatalogoGrafica::query()
             ->where('sexo', $patient->gender?->value())
             ->orderBy('nombre')
@@ -329,6 +358,17 @@ new class extends Component {
                 class="rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-4 text-sm text-red-700 dark:text-red-300 mb-4"
             >
                 {{ $error }}
+            </div>
+        @endif
+
+        {{-- Aviso de paciente fuera de rango OMS --}}
+        @if ($this->rangeNotice)
+            <div
+                dusk="oms-range-notice"
+                class="rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 p-4 text-sm text-amber-800 dark:text-amber-300 mb-4 flex items-start gap-2"
+            >
+                <flux:icon.exclamation-triangle class="size-4 mt-0.5 shrink-0" />
+                <span>{{ $this->rangeNotice }}</span>
             </div>
         @endif
 

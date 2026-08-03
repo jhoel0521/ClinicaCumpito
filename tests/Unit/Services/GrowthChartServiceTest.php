@@ -126,4 +126,89 @@ describe('GrowthChartService', function () {
             ->and($data['percentile_datasets'][0]['data'])->toHaveCount(2)
             ->and($data['percentile_datasets'][1]['data'])->toHaveCount(2);
     });
+
+    describe('guardas de rango (obs clienta: niño de 8 años graficado en "0 meses")', function () {
+        beforeEach(function () {
+            // Boleta peso_edad con rango OMS real: 0–60 meses
+            $this->graficaEdad = OmsCatalogoGrafica::factory()->create([
+                'codigo' => 'UNIT_TEST_WFA_M',
+                'nombre' => 'Test Peso/Edad Niños',
+                'tipo_grafica' => 'peso_edad',
+                'sexo' => 'M',
+            ]);
+
+            OmsDatoGrafica::factory()->create([
+                'oms_catalogo_grafica_id' => $this->graficaEdad->id,
+                'x_value' => 0.0,
+                'l_value' => 0.3487, 'm_value' => 3.3, 's_value' => 0.11,
+            ]);
+            OmsDatoGrafica::factory()->create([
+                'oms_catalogo_grafica_id' => $this->graficaEdad->id,
+                'x_value' => 60.0,
+                'l_value' => 0.3487, 'm_value' => 18.0, 's_value' => 0.11,
+            ]);
+        });
+
+        test('no grafica en 0 meses cuando el paciente no tiene fecha de nacimiento', function () {
+            $patient = Patient::factory()->create([
+                'gender' => 'M',
+                'date_of_birth' => null,
+            ]);
+
+            $consultation = Consultation::factory()->create([
+                'patient_id' => $patient->id,
+                'consultation_date' => now(),
+            ]);
+            VitalSign::factory()->create([
+                'consultation_id' => $consultation->id,
+                'weight' => 35.0,
+            ]);
+
+            $result = $this->service->getPatientDatapoints($patient->id, $this->graficaEdad->id);
+
+            expect($result)->toBe([]);
+        });
+
+        test('omite mediciones de un paciente de 8 años (fuera del rango 0-60 meses)', function () {
+            $patient = Patient::factory()->create([
+                'gender' => 'M',
+                'date_of_birth' => now()->subYears(8)->toDateString(),
+            ]);
+
+            $consultation = Consultation::factory()->create([
+                'patient_id' => $patient->id,
+                'consultation_date' => now(),
+            ]);
+            VitalSign::factory()->create([
+                'consultation_id' => $consultation->id,
+                'weight' => 35.0,
+            ]);
+
+            $result = $this->service->getPatientDatapoints($patient->id, $this->graficaEdad->id);
+
+            expect($result)->toBe([]);
+        });
+
+        test('sigue graficando mediciones dentro del rango de la boleta', function () {
+            $patient = Patient::factory()->create([
+                'gender' => 'M',
+                'date_of_birth' => now()->subMonths(6)->toDateString(),
+            ]);
+
+            $consultation = Consultation::factory()->create([
+                'patient_id' => $patient->id,
+                'consultation_date' => now(),
+            ]);
+            VitalSign::factory()->create([
+                'consultation_id' => $consultation->id,
+                'weight' => 7.5,
+            ]);
+
+            $result = $this->service->getPatientDatapoints($patient->id, $this->graficaEdad->id);
+
+            expect($result)->toHaveCount(1)
+                ->and($result[0]['x'])->toBe(6.0)
+                ->and($result[0]['y'])->toBe(7.5);
+        });
+    });
 });

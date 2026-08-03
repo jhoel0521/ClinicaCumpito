@@ -384,7 +384,10 @@ new class extends Component {
 
             {{-- Lista de recetas --}}
             @forelse ($prescriptions as $pIndex => $prescription)
-                <div class="rounded-xl border border-gray-200 dark:border-zinc-700 overflow-hidden">
+                <div
+                    wire:key="prescription-{{ $prescription['id'] }}"
+                    class="rounded-xl border border-gray-200 dark:border-zinc-700 overflow-hidden"
+                >
                     {{-- Encabezado de receta --}}
                     <div
                         class="flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-zinc-800 border-b border-gray-200 dark:border-zinc-700"
@@ -458,6 +461,7 @@ new class extends Component {
                                     @foreach ($prescription['items'] as $iIndex => $item)
                                         {{-- Fila 1 — campos principales --}}
                                         <tr
+                                            wire:key="rx-item-{{ $item['id'] }}-main"
                                             class="bg-white dark:bg-zinc-900 hover:bg-gray-50/40 dark:hover:bg-zinc-800/30"
                                             dusk="rx-item"
                                         >
@@ -577,7 +581,10 @@ new class extends Component {
                                             @endif
                                         </tr>
                                         {{-- Fila 2 — instrucciones (compacta) --}}
-                                        <tr class="bg-gray-50/60 dark:bg-zinc-800/40">
+                                        <tr
+                                            wire:key="rx-item-{{ $item['id'] }}-instr"
+                                            class="bg-gray-50/60 dark:bg-zinc-800/40"
+                                        >
                                             <td colspan="5" class="border border-gray-200 dark:border-zinc-700 p-0">
                                                 @if (! $finalized)
                                                     <textarea

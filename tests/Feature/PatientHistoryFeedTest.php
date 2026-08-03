@@ -69,3 +69,40 @@ test('el feed identifica información clínica pendiente o ausente', function ()
         ->assertSeeTextInOrder(['Laboratorio solicitado', '1'])
         ->assertSeeText('Resultados pendientes');
 });
+
+test('el resumen del feed muestra cada examen una sola vez aunque tenga muchos parámetros', function (): void {
+    $user = User::factory()->create();
+    $patient = Patient::factory()->create();
+    $consultation = Consultation::factory()->create([
+        'patient_id' => $patient->id,
+        'status' => 'saved',
+    ]);
+
+    // Un coprológico con 7 parámetros + un hemograma con 10: como en la obs de la clienta
+    $coprologico = LaboratoryRequest::factory()->create([
+        'consultation_id' => $consultation->id,
+        'status' => 'pending',
+    ]);
+    LaboratoryRequestItem::factory()->count(7)->create([
+        'laboratory_request_id' => $coprologico->id,
+        'exam_name' => 'Coprológico (COPR)',
+    ]);
+
+    $hemograma = LaboratoryRequest::factory()->create([
+        'consultation_id' => $consultation->id,
+        'status' => 'received',
+    ]);
+    LaboratoryRequestItem::factory()->count(10)->create([
+        'laboratory_request_id' => $hemograma->id,
+        'exam_name' => 'Hemograma',
+    ]);
+
+    $response = $this->actingAs($user)->get(route('pacientes.feed', $patient))->assertOk();
+
+    $html = $response->getContent();
+
+    expect(substr_count($html, 'Coprológico (COPR)'))->toBe(1)
+        ->and(substr_count($html, 'Hemograma'))->toBe(1)
+        ->and(substr_count($html, 'Pendiente'))->toBeGreaterThanOrEqual(1)
+        ->and(substr_count($html, 'Con resultados'))->toBeGreaterThanOrEqual(1);
+});

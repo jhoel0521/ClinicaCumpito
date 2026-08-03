@@ -352,8 +352,9 @@ new class extends Component {
             foreach ($cat['exams'] as $exam) {
                 if ($exam['id'] === $examId) {
                     $this->selectedExamName = $exam['name'];
+                    // Ningún parámetro seleccionado por defecto: el usuario marca solo lo que necesita
                     $this->selectorParameters = array_map(
-                        fn ($p) => ['name' => $p, 'checked' => true],
+                        fn ($p) => ['name' => $p, 'checked' => false],
                         $exam['parameters'],
                     );
                     break 2;
@@ -373,6 +374,14 @@ new class extends Component {
 
         $this->selectorParameters[] = ['name' => $name, 'checked' => true];
         $this->customParamName = '';
+    }
+
+    /** Marca o desmarca todos los parámetros del selector de una vez. */
+    public function setAllParamsChecked(bool $checked): void
+    {
+        foreach ($this->selectorParameters as $idx => $param) {
+            $this->selectorParameters[$idx]['checked'] = $checked;
+        }
     }
 
     // ── Remove item ──
@@ -656,6 +665,24 @@ new class extends Component {
                                     Parámetros — {{ $selectedExamName }}
                                     <span class="font-normal text-gray-400 dark:text-zinc-500">(opcional)</span>
                                 </p>
+                                @if (count($selectorParameters) > 0)
+                                    <div class="flex gap-2 mb-2">
+                                        <button
+                                            wire:click="setAllParamsChecked(true)"
+                                            class="text-xs text-sky-600 dark:text-sky-400 hover:underline"
+                                        >
+                                            Todos
+                                        </button>
+                                        <span class="text-xs text-gray-300 dark:text-zinc-600">·</span>
+                                        <button
+                                            wire:click="setAllParamsChecked(false)"
+                                            class="text-xs text-sky-600 dark:text-sky-400 hover:underline"
+                                        >
+                                            Ninguno
+                                        </button>
+                                    </div>
+                                @endif
+
                                 @if (count($selectorParameters) > 0)
                                     <div class="space-y-1.5 mb-3">
                                         @foreach ($selectorParameters as $pIdx => $param)

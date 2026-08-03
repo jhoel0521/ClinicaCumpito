@@ -161,7 +161,7 @@ class LaboratoryCatalogSeeder extends Seeder
                         'name' => 'Coprológico (COPR)',
                         'description' => 'Examen general de heces, seriado x3 en días alternos.',
                         'parameters' => [
-                            'Consistencia', 'Color', 'pH',
+                            'Consistencia', 'Color', 'pH', 'Moco',
                             'Sangre oculta', 'Leucocitos fecales', 'Grasa neutral',
                             'Parásitos / Huevos', 'Levaduras',
                         ],

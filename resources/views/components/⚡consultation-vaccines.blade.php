@@ -29,12 +29,24 @@ new class extends Component {
      */
     public array $schedule = [];
 
+    /**
+     * Fecha de aplicación elegida por vacuna (vacuna_id → Y-m-d).
+     * Permite cargar esquemas previos de pacientes nuevos con su fecha real.
+     *
+     * @var array<string, string>
+     */
+    public array $applyDates = [];
+
+    /** Fecha de la consulta (Y-m-d): aplicaciones anteriores se marcan como "otro establecimiento". */
+    public string $consultationDate = '';
+
     public function mount(string $consultationId): void
     {
         $this->consultationId = $consultationId;
         $consultation = Consultation::with('patient')->findOrFail($consultationId);
         $this->patientId = $consultation->patient_id ?? '';
         $this->doctorId = $consultation->doctor_id ?? '';
+        $this->consultationDate = $consultation->consultation_date?->format('Y-m-d') ?? now()->format('Y-m-d');
 
         if ($consultation->patient?->date_of_birth) {
             $this->ageInMonths = (int) Carbon::parse($consultation->patient->date_of_birth)->diffInMonths(now());
@@ -110,40 +122,36 @@ new class extends Component {
             return;
         }
         $this->errorMessage = '';
-        try {
-            $dto = new PatientVaccineDTO(
-                vaccine_id: $vaccineId,
-                applied_at: now()->toDateTimeString(),
-                applied_by_doctor_id: $this->doctorId ?: null,
-                application_site: null,
-                dose_number: null,
-                notes: null,
-                applied_elsewhere: false,
-            );
-            app(PatientVaccineServiceContract::class)->create($this->consultationId, $dto);
-            $this->reload();
-        } catch (\Throwable $e) {
-            $this->errorMessage = 'Error al registrar vacuna: ' . $e->getMessage();
-        }
-    }
 
-    public function applyElsewhere(string $vaccineId): void
-    {
-        if ($this->finalized) {
+        // Fecha elegida por el usuario (por defecto hoy): permite cargar
+        // el esquema previo de un paciente nuevo con las fechas reales.
+        $rawDate = trim($this->applyDates[$vaccineId] ?? '');
+        $appliedAt = $rawDate !== '' ? Carbon::parse($rawDate) : now();
+
+        if ($appliedAt->isFuture()) {
+            $this->errorMessage = 'La fecha de aplicación no puede ser futura.';
+
             return;
         }
-        $this->errorMessage = '';
+
         try {
+            // Si la fecha es anterior a la consulta, la dosis se colocó en otro momento/lugar
+            $appliedElsewhere = $appliedAt
+                ->copy()
+                ->startOfDay()
+                ->lt(Carbon::parse($this->consultationDate)->startOfDay());
+
             $dto = new PatientVaccineDTO(
                 vaccine_id: $vaccineId,
-                applied_at: now()->toDateTimeString(),
-                applied_by_doctor_id: null,
+                applied_at: $appliedAt->toDateTimeString(),
+                applied_by_doctor_id: $appliedElsewhere ? null : ($this->doctorId ?: null),
                 application_site: null,
                 dose_number: null,
-                notes: 'Aplicada en otro establecimiento',
-                applied_elsewhere: true,
+                notes: $appliedElsewhere ? 'Registrada con fecha previa (esquema anterior)' : null,
+                applied_elsewhere: $appliedElsewhere,
             );
             app(PatientVaccineServiceContract::class)->create($this->consultationId, $dto);
+            unset($this->applyDates[$vaccineId]);
             $this->reload();
         } catch (\Throwable $e) {
             $this->errorMessage = 'Error al registrar vacuna: ' . $e->getMessage();
@@ -372,70 +380,44 @@ new class extends Component {
                                     {{-- Applied info / action buttons --}}
                                     @if ($isApplied)
                                         <div class="flex items-center gap-2">
-                                            @if ($isAppliedHere)
-                                                <span class="text-xs text-emerald-600 dark:text-emerald-400">
-                                                    {{ $vax['applied']['applied_at'] }}
-                                                </span>
-                                            @else
-                                                <span class="text-xs text-blue-500 dark:text-blue-400 italic">
-                                                    Otro establecimiento
-                                                </span>
-                                            @endif
+                                            <span
+                                                class="text-xs {{ $isAppliedHere ? 'text-emerald-600 dark:text-emerald-400' : 'text-blue-500 dark:text-blue-400' }}"
+                                            >
+                                                {{ $vax['applied']['applied_at'] }}
+                                                @if ($isElsewhere)
+                                                    <span class="italic">· otro establecimiento</span>
+                                                @endif
+                                            </span>
                                             @if (! $finalized && $vax['applied']['this_consult'])
                                                 <button
                                                     wire:click="removeApplied('{{ $vax['applied']['id'] }}')"
                                                     wire:loading.attr="disabled"
-                                                    title="Deshacer"
-                                                    dusk="vaccine-undo"
-                                                    class="text-gray-300 dark:text-zinc-600 hover:text-red-400 dark:hover:text-red-400 transition p-0.5 rounded"
+                                                    title="Marcar como NO aplicada"
+                                                    dusk="vaccine-no-btn"
+                                                    class="inline-flex items-center px-2 py-1 rounded-lg text-xs font-medium border border-gray-300 dark:border-zinc-600 text-gray-400 dark:text-zinc-500 hover:border-red-400 hover:text-red-500 dark:hover:text-red-400 transition"
                                                 >
-                                                    <svg
-                                                        class="w-3.5 h-3.5"
-                                                        fill="none"
-                                                        viewBox="0 0 24 24"
-                                                        stroke="currentColor"
-                                                    >
-                                                        <path
-                                                            stroke-linecap="round"
-                                                            stroke-linejoin="round"
-                                                            stroke-width="2"
-                                                            d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"
-                                                        />
-                                                    </svg>
+                                                    No
                                                 </button>
                                             @endif
                                         </div>
                                     @elseif (! $finalized && $isDue)
                                         <div class="flex items-center gap-1.5">
+                                            <input
+                                                type="date"
+                                                wire:model="applyDates.{{ $vax['vaccine_id'] }}"
+                                                max="{{ now()->format('Y-m-d') }}"
+                                                title="Fecha de aplicación (déjala vacía si es hoy)"
+                                                dusk="vaccine-date-{{ $vax['vaccine_id'] }}"
+                                                class="w-[7.5rem] px-1.5 py-1 text-xs border border-gray-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-800 text-gray-700 dark:text-gray-300 focus:ring-1 focus:ring-teal-500 focus:border-teal-500"
+                                            />
                                             <button
                                                 wire:click="applyVaccine('{{ $vax['vaccine_id'] }}')"
                                                 wire:loading.attr="disabled"
-                                                dusk="vaccine-apply-btn"
+                                                dusk="vaccine-si-btn"
+                                                title="Sí, tiene esta vacuna (usa la fecha indicada o hoy)"
                                                 class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-teal-600 hover:bg-teal-700 text-white transition disabled:opacity-50"
                                             >
-                                                <svg
-                                                    class="w-3 h-3"
-                                                    fill="none"
-                                                    viewBox="0 0 24 24"
-                                                    stroke="currentColor"
-                                                >
-                                                    <path
-                                                        stroke-linecap="round"
-                                                        stroke-linejoin="round"
-                                                        stroke-width="2.5"
-                                                        d="M12 4v16m8-8H4"
-                                                    />
-                                                </svg>
-                                                Aplicar hoy
-                                            </button>
-                                            <button
-                                                wire:click="applyElsewhere('{{ $vax['vaccine_id'] }}')"
-                                                wire:loading.attr="disabled"
-                                                dusk="vaccine-elsewhere-btn"
-                                                title="La madre informa que fue aplicada en otro establecimiento"
-                                                class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-white dark:bg-zinc-800 border border-blue-300 dark:border-blue-700 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition disabled:opacity-50"
-                                            >
-                                                Ya fue →
+                                                Sí
                                             </button>
                                         </div>
                                     @endif

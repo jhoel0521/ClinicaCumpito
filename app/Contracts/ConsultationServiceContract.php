@@ -14,6 +14,8 @@ interface ConsultationServiceContract
 
     public function delete(string $id): bool;
 
+    public function discardDraft(string $id): bool;
+
     public function find(string $id): ?Consultation;
 
     /**

@@ -22,9 +22,6 @@ new class extends Component {
 
     public string $errorMessage = '';
 
-    /** Prueba del talón al nacer (tamizaje neonatal): true = realizó, false = no realizó, null = sin dato */
-    public ?bool $heelPrickDone = null;
-
     public function mount(string $consultationId): void
     {
         $consultation = Consultation::with(['patient', 'doctor'])->findOrFail($consultationId);
@@ -38,24 +35,6 @@ new class extends Component {
         $this->patient = $consultation->patient;
         $this->patientName = $consultation->patient->full_name;
         $this->doctorName = $consultation->doctor->full_name;
-        $this->heelPrickDone = $consultation->patient->heel_prick_done;
-    }
-
-    /** Guarda si el paciente realizó o no la prueba del talón al nacer. */
-    public function saveHeelPrick(bool $done): void
-    {
-        if ($this->status === ConsultationStatus::FINALIZED || $this->patient === null) {
-            return;
-        }
-
-        $this->errorMessage = '';
-
-        try {
-            $this->patient->update(['heel_prick_done' => $done]);
-            $this->heelPrickDone = $done;
-        } catch (\Throwable $e) {
-            $this->errorMessage = 'Error al guardar la prueba del talón: ' . $e->getMessage();
-        }
     }
 
     public function saveDate(): void
@@ -118,6 +97,7 @@ new class extends Component {
     $statusColors = ['draft' => 'bg-gray-400', 'saved' => 'bg-yellow-400', 'finalized' => 'bg-green-400'];
     $statusLabels = ['draft' => 'Borrador', 'saved' => 'Guardada', 'finalized' => 'Finalizada'];
     $isFinalized = $status === 'finalized';
+    $isDraft = $status === 'draft';
 @endphp
 
 <div
@@ -170,6 +150,23 @@ new class extends Component {
                     </button>
                 @endif
 
+                @if ($isDraft)
+                    <form
+                        action="{{ route('consultas.discard-draft', $consultationId) }}"
+                        method="POST"
+                        onsubmit="return confirm('¿Descartar este borrador? La consulta no se podrá recuperar.');"
+                    >
+                        @csrf
+                        @method('DELETE')
+                        <button
+                            type="submit"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-red-500/90 hover:bg-red-400 text-white transition"
+                        >
+                            Descartar borrador
+                        </button>
+                    </form>
+                @endif
+
                 <a
                     href="{{ route('consultas.index') }}"
                     class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-white/10 hover:bg-white/20 text-blue-200 border border-white/20 transition"
@@ -181,7 +178,7 @@ new class extends Component {
     </div>
 
     {{-- Meta info --}}
-    <div class="grid grid-cols-2 md:grid-cols-4 divide-x divide-y md:divide-y-0 divide-gray-100 dark:divide-zinc-800">
+    <div class="grid grid-cols-1 md:grid-cols-3 divide-x divide-y md:divide-y-0 divide-gray-100 dark:divide-zinc-800">
         <div class="px-5 py-4">
             <p class="text-xs font-medium text-gray-400 dark:text-zinc-500 uppercase tracking-wide mb-1">Doctor</p>
             <p class="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">{{ $doctorName }}</p>
@@ -189,54 +186,6 @@ new class extends Component {
         <div class="px-5 py-4">
             <p class="text-xs font-medium text-gray-400 dark:text-zinc-500 uppercase tracking-wide mb-1">Paciente</p>
             <p class="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">{{ $patientName }}</p>
-        </div>
-        <div class="px-5 py-4" dusk="heel-prick-field">
-            <p class="text-xs font-medium text-gray-400 dark:text-zinc-500 uppercase tracking-wide mb-1">
-                Prueba del talón
-                @if (! $isFinalized)
-                    <span wire:loading wire:target="saveHeelPrick" class="ml-1 text-blue-400 normal-case font-normal">
-                        guardando…
-                    </span>
-                @endif
-            </p>
-            @if ($isFinalized)
-                <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                    @if ($heelPrickDone === true)
-                        Realizada
-                    @elseif ($heelPrickDone === false)
-                        No realizada
-                    @else
-                        Sin dato
-                    @endif
-                </p>
-            @else
-                <div class="flex gap-1.5">
-                    <button
-                        wire:click="saveHeelPrick(true)"
-                        dusk="heel-prick-si"
-                        @class([
-                            'px-3 py-1 rounded-lg text-xs font-semibold transition border',
-                            'bg-emerald-600 border-emerald-600 text-white' => $heelPrickDone === true,
-                            'border-gray-300 dark:border-zinc-600 text-gray-500 dark:text-zinc-400 hover:border-emerald-400 hover:text-emerald-600 dark:hover:text-emerald-400' =>
-                                $heelPrickDone !== true,
-                        ])
-                    >
-                        Sí
-                    </button>
-                    <button
-                        wire:click="saveHeelPrick(false)"
-                        dusk="heel-prick-no"
-                        @class([
-                            'px-3 py-1 rounded-lg text-xs font-semibold transition border',
-                            'bg-red-500 border-red-500 text-white' => $heelPrickDone === false,
-                            'border-gray-300 dark:border-zinc-600 text-gray-500 dark:text-zinc-400 hover:border-red-400 hover:text-red-500 dark:hover:text-red-400' =>
-                                $heelPrickDone !== false,
-                        ])
-                    >
-                        No
-                    </button>
-                </div>
-            @endif
         </div>
         <div class="px-5 py-4">
             <p class="text-xs font-medium text-gray-400 dark:text-zinc-500 uppercase tracking-wide mb-1">

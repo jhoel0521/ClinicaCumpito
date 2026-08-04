@@ -45,6 +45,54 @@ describe('ConsultationController', function () {
         ]);
     });
 
+    test('doctor puede descartar su propio borrador de consulta', function () {
+        $doctor = Doctor::factory()->create();
+        $user = User::factory()->create(['doctor_id' => $doctor->id]);
+        $patient = Patient::factory()->create();
+        $consultation = Consultation::factory()->create([
+            'patient_id' => $patient->id,
+            'doctor_id' => $doctor->id,
+            'status' => 'draft',
+        ]);
+
+        $this->actingAs($user)
+            ->delete(route('consultas.discard-draft', $consultation))
+            ->assertRedirect(route('pacientes.show', $patient));
+
+        $this->assertSoftDeleted('consultations', ['id' => $consultation->id]);
+    });
+
+    test('no permite descartar una consulta guardada', function () {
+        $doctor = Doctor::factory()->create();
+        $user = User::factory()->create(['doctor_id' => $doctor->id]);
+        $consultation = Consultation::factory()->create([
+            'doctor_id' => $doctor->id,
+            'status' => 'saved',
+        ]);
+
+        $this->actingAs($user)
+            ->delete(route('consultas.discard-draft', $consultation))
+            ->assertForbidden();
+
+        $this->assertDatabaseHas('consultations', ['id' => $consultation->id]);
+    });
+
+    test('doctor no puede descartar el borrador de otro doctor', function () {
+        $owner = Doctor::factory()->create();
+        $otherDoctor = Doctor::factory()->create();
+        $user = User::factory()->create(['doctor_id' => $otherDoctor->id]);
+        $consultation = Consultation::factory()->create([
+            'doctor_id' => $owner->id,
+            'status' => 'draft',
+        ]);
+
+        $this->actingAs($user)
+            ->delete(route('consultas.discard-draft', $consultation))
+            ->assertForbidden();
+
+        $this->assertDatabaseHas('consultations', ['id' => $consultation->id]);
+    });
+
     test('la ruta generica para crear consultas no existe', function () {
         $this->actingAs(User::factory()->create())
             ->get('/consultas/create')

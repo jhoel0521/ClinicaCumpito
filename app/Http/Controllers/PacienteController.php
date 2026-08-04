@@ -8,6 +8,8 @@ use App\Http\Requests\UpdatePacienteRequest;
 use App\Models\LaboratoryRequest;
 use App\Models\MedicalCondition;
 use App\Models\Patient;
+use App\Models\PatientVaccine;
+use App\Models\Vaccine;
 use App\Services\PacienteService;
 use Illuminate\View\View;
 
@@ -85,6 +87,26 @@ class PacienteController extends Controller
 
         $totalConsultaciones = $patient->consultations()->count();
 
+        $ageInMonths = $patient->date_of_birth === null
+            ? null
+            : (int) $patient->date_of_birth->diffInMonths(now());
+        $appliedVaccineIds = PatientVaccine::query()
+            ->where('patient_id', $patient->id)
+            ->pluck('vaccine_id');
+        $missingVaccinesCount = $ageInMonths === null
+            ? 0
+            : Vaccine::query()
+                ->whereNotNull('min_age_months')
+                ->where('min_age_months', '<=', $ageInMonths)
+                ->whereNotIn('id', $appliedVaccineIds)
+                ->count();
+        $latestAppliedVaccine = PatientVaccine::query()
+            ->where('patient_id', $patient->id)
+            ->with('vaccine')
+            ->orderByDesc('applied_at')
+            ->orderByDesc('created_at')
+            ->first();
+
         return view('pacientes.show', compact(
             'patient',
             'latestConsultation',
@@ -92,6 +114,8 @@ class PacienteController extends Controller
             'recentConsultasConReceta',
             'recentLaboratoryRequests',
             'totalConsultaciones',
+            'missingVaccinesCount',
+            'latestAppliedVaccine',
         ));
     }
 

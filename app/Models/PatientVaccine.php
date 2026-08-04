@@ -46,7 +46,7 @@ class PatientVaccine extends Model
     /** @return BelongsTo<Vaccine, $this> */
     public function vaccine(): BelongsTo
     {
-        return $this->belongsTo(Vaccine::class);
+        return $this->belongsTo(Vaccine::class)->withTrashed();
     }
 
     /** @return BelongsTo<Doctor, $this> */

@@ -2,8 +2,12 @@
 
 use App\Models\MedicalCondition;
 use App\Models\Patient;
+use App\Models\PatientVaccine;
 use App\Models\User;
+use App\Models\Vaccine;
 use Carbon\Carbon;
+use Illuminate\Database\Events\QueryExecuted;
+use Illuminate\Support\Facades\DB;
 
 beforeEach(function () {
     $this->user = User::factory()->create();
@@ -325,6 +329,54 @@ describe('PacienteController - Show', function () {
 
         $response->assertStatus(200)
             ->assertSee('14 días');
+
+        Carbon::setTestNow();
+    });
+
+    test('dashboard muestra la última vacuna aplicada', function () {
+        $patient = Patient::factory()->create(['date_of_birth' => '2024-01-01']);
+        $vaccineAnterior = Vaccine::factory()->create(['name' => 'Pentavalente 1']);
+        $vaccineReciente = Vaccine::factory()->create(['name' => 'SRP 1']);
+
+        PatientVaccine::factory()->create([
+            'patient_id' => $patient->id,
+            'vaccine_id' => $vaccineAnterior->id,
+            'applied_at' => '2025-01-15 09:00:00',
+        ]);
+        $latestAppliedVaccine = PatientVaccine::factory()->create([
+            'patient_id' => $patient->id,
+            'vaccine_id' => $vaccineReciente->id,
+            'applied_at' => '2025-06-20 09:00:00',
+        ]);
+        $vaccineReciente->delete();
+
+        $this->actingAs(User::factory()->create())
+            ->get(route('pacientes.show', $patient))
+            ->assertOk()
+            ->assertSee('La última vacuna fue:')
+            ->assertSee('SRP 1')
+            ->assertViewHas('latestAppliedVaccine', fn (PatientVaccine $vaccine) => $vaccine->is($latestAppliedVaccine));
+    });
+
+    test('dashboard consulta las vacunas con meses de edad enteros', function () {
+        Carbon::setTestNow('2026-08-04 17:00:00');
+        $patient = Patient::factory()->create(['date_of_birth' => '2022-08-04']);
+        Vaccine::factory()->create(['min_age_months' => 48]);
+        $vaccineQueryBindings = [];
+
+        DB::listen(function (QueryExecuted $query) use (&$vaccineQueryBindings): void {
+            if (str_contains($query->sql, 'from "vaccines"')) {
+                $vaccineQueryBindings = $query->bindings;
+            }
+        });
+
+        $this->actingAs(User::factory()->create())
+            ->get(route('pacientes.show', $patient))
+            ->assertOk()
+            ->assertViewHas('missingVaccinesCount', 1);
+
+        expect($vaccineQueryBindings)->toContain(48)
+            ->and(collect($vaccineQueryBindings)->contains(fn (mixed $binding) => is_float($binding)))->toBeFalse();
 
         Carbon::setTestNow();
     });

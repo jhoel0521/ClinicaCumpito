@@ -65,6 +65,12 @@ class Patient extends Model
         return $this->hasMany(Consultation::class, 'patient_id');
     }
 
+    /** @return HasMany<PatientVaccine, $this> */
+    public function patientVaccines(): HasMany
+    {
+        return $this->hasMany(PatientVaccine::class, 'patient_id');
+    }
+
     /** @return BelongsToMany<MedicalCondition, $this> */
     public function medicalConditions(): BelongsToMany
     {

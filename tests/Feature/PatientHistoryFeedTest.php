@@ -2,7 +2,6 @@
 
 use App\Models\Consultation;
 use App\Models\Doctor;
-use App\Models\LaboratoryItemResult;
 use App\Models\LaboratoryRequest;
 use App\Models\LaboratoryRequestItem;
 use App\Models\Patient;
@@ -24,7 +23,11 @@ test('el feed resume la información clínica registrada en cada consulta', func
     SoapNote::factory()->create(['consultation_id' => $consultation->id]);
 
     $prescription = Prescription::factory()->create(['consultation_id' => $consultation->id]);
-    PrescriptionItem::factory()->count(2)->create(['prescription_id' => $prescription->id]);
+    $medicationName = 'Medicamento que no debe aparecer en el feed';
+    PrescriptionItem::factory()->count(2)->create([
+        'prescription_id' => $prescription->id,
+        'medication_name' => $medicationName,
+    ]);
 
     $laboratoryRequest = LaboratoryRequest::factory()->create([
         'consultation_id' => $consultation->id,
@@ -32,21 +35,17 @@ test('el feed resume la información clínica registrada en cada consulta', func
     ]);
     $laboratoryItem = LaboratoryRequestItem::factory()->create([
         'laboratory_request_id' => $laboratoryRequest->id,
+        'exam_name' => 'Examen que no debe aparecer en el feed',
     ]);
-    LaboratoryItemResult::query()->create([
-        'laboratory_request_item_id' => $laboratoryItem->id,
-        'consultation_id' => $consultation->id,
-        'value' => '12.5',
-        'sort_order' => 0,
-    ]);
-
     $this->actingAs($user)
         ->get(route('pacientes.feed', $patient))
         ->assertOk()
         ->assertSeeText('SOAP registrado')
-        ->assertSeeTextInOrder(['Receta', '2', 'medicamentos'])
-        ->assertSeeTextInOrder(['Laboratorio solicitado', '1'])
-        ->assertSeeText('Resultados registrados');
+        ->assertSeeText('Receta emitida')
+        ->assertSeeText('Laboratorio solicitado')
+        ->assertSeeText('Laboratorios recibidos')
+        ->assertDontSeeText($laboratoryItem->exam_name)
+        ->assertDontSeeText($medicationName);
 });
 
 test('el feed identifica información clínica pendiente o ausente', function (): void {
@@ -66,11 +65,11 @@ test('el feed identifica información clínica pendiente o ausente', function ()
         ->assertOk()
         ->assertSeeText('SOAP pendiente')
         ->assertSeeText('Sin receta')
-        ->assertSeeTextInOrder(['Laboratorio solicitado', '1'])
-        ->assertSeeText('Resultados pendientes');
+        ->assertSeeText('Laboratorio solicitado')
+        ->assertSeeText('Laboratorios pendientes');
 });
 
-test('el resumen del feed muestra cada examen una sola vez aunque tenga muchos parámetros', function (): void {
+test('el resumen del feed no lista los exámenes ni parámetros solicitados', function (): void {
     $user = User::factory()->create();
     $patient = Patient::factory()->create();
     $consultation = Consultation::factory()->create([
@@ -97,12 +96,11 @@ test('el resumen del feed muestra cada examen una sola vez aunque tenga muchos p
         'exam_name' => 'Hemograma',
     ]);
 
-    $response = $this->actingAs($user)->get(route('pacientes.feed', $patient))->assertOk();
-
-    $html = $response->getContent();
-
-    expect(substr_count($html, 'Coprológico (COPR)'))->toBe(1)
-        ->and(substr_count($html, 'Hemograma'))->toBe(1)
-        ->and(substr_count($html, 'Pendiente'))->toBeGreaterThanOrEqual(1)
-        ->and(substr_count($html, 'Con resultados'))->toBeGreaterThanOrEqual(1);
+    $this->actingAs($user)
+        ->get(route('pacientes.feed', $patient))
+        ->assertOk()
+        ->assertSeeText('Laboratorio solicitado')
+        ->assertSeeText('Laboratorios pendientes')
+        ->assertDontSeeText('Coprológico (COPR)')
+        ->assertDontSeeText('Hemograma');
 });

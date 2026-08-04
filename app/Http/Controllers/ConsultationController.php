@@ -109,4 +109,23 @@ class ConsultationController extends Controller
             ]);
         }
     }
+
+    public function discardDraft(Consultation $consulta): RedirectResponse
+    {
+        $this->authorize('discard', $consulta);
+
+        $patientId = $consulta->patient_id;
+
+        try {
+            $this->service->discardDraft($consulta->id);
+
+            return redirect()
+                ->route('pacientes.show', $patientId)
+                ->with('success', 'Borrador de consulta descartado.');
+        } catch (\DomainException $exception) {
+            return back()->withErrors([
+                'status' => $exception->getMessage(),
+            ]);
+        }
+    }
 }

@@ -78,4 +78,21 @@ describe('ConsultationService', function () {
         expect($deleted)->toBeTrue();
         expect(Consultation::find($consultation->id))->toBeNull();
     });
+
+    test('discardDraft elimina únicamente una consulta en borrador', function () {
+        $service = new ConsultationService;
+        $consultation = Consultation::factory()->draft()->create();
+
+        $deleted = $service->discardDraft($consultation->id);
+
+        expect($deleted)->toBeTrue();
+        expect(Consultation::find($consultation->id))->toBeNull();
+    });
+
+    test('discardDraft falla para una consulta guardada', function () {
+        $service = new ConsultationService;
+        $consultation = Consultation::factory()->create(['status' => 'saved']);
+
+        $service->discardDraft($consultation->id);
+    })->throws(DomainException::class, 'Solo se pueden descartar consultas en borrador.');
 });

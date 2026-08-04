@@ -41,6 +41,17 @@ class ConsultationService implements ConsultationServiceContract
         return (bool) $consultation->delete();
     }
 
+    public function discardDraft(string $id): bool
+    {
+        $consultation = Consultation::findOrFail($id);
+
+        if ($this->statusValue($consultation) !== ConsultationStatus::DRAFT) {
+            throw new \DomainException('Solo se pueden descartar consultas en borrador.');
+        }
+
+        return (bool) $consultation->delete();
+    }
+
     public function find(string $id): ?Consultation
     {
         return Consultation::with(['patient', 'doctor'])->find($id);

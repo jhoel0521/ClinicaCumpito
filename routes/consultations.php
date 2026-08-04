@@ -19,6 +19,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::livewire('consultas', 'pages::consultas.index')->name('consultas.index');
 
+    Route::delete('consultas/{consulta}/borrador', [ConsultationController::class, 'discardDraft'])
+        ->name('consultas.discard-draft');
+
     Route::resource('consultas', ConsultationController::class)
         ->parameters(['consultas' => 'consulta'])
         ->except(['create', 'store', 'index']);

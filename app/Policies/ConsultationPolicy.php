@@ -4,6 +4,7 @@ namespace App\Policies;
 
 use App\Models\Consultation;
 use App\Models\User;
+use App\ValueObjects\ConsultationStatus;
 
 class ConsultationPolicy
 {
@@ -44,5 +45,14 @@ class ConsultationPolicy
     public function delete(User $user, Consultation $consultation): bool
     {
         return $user->hasRole('Admin');
+    }
+
+    public function discard(User $user, Consultation $consultation): bool
+    {
+        $status = $consultation->status instanceof ConsultationStatus
+            ? $consultation->status->value()
+            : (string) $consultation->status;
+
+        return $status === ConsultationStatus::DRAFT && $this->update($user, $consultation);
     }
 }

@@ -28,10 +28,8 @@ new class extends Component {
                 'doctor',
                 'soapNote',
                 'vitalSigns',
-                'prescriptions.items',
-                'laboratoryRequests.attachments',
-                'laboratoryRequests.items.attachments',
-                'laboratoryRequests.items.results',
+                'prescriptions',
+                'laboratoryRequests',
             ])
                 ->where('patient_id', $this->patient->id)
                 ->whereIn('status', ['saved', 'finalized'])
@@ -131,15 +129,11 @@ new class extends Component {
                         </div>
 
                         @php
-                            $prescriptionItemsCount = $consultation->prescriptions->sum(fn ($prescription) => $prescription->items->count());
-                            $laboratoryRequestsCount = $consultation->laboratoryRequests->count();
-                            $laboratoryResultsCount = $consultation->laboratoryRequests->sum(
-                                fn ($request) => $request->items->sum(fn ($item) => $item->results->count()),
+                            $hasPrescription = $consultation->prescriptions->isNotEmpty();
+                            $hasLaboratoryRequest = $consultation->laboratoryRequests->isNotEmpty();
+                            $hasPendingLaboratories = $consultation->laboratoryRequests->contains(
+                                fn ($request) => $request->isPending(),
                             );
-                            $laboratoryAttachmentsCount = $consultation->laboratoryRequests->sum(
-                                fn ($request) => $request->attachments->count() + $request->items->sum(fn ($item) => $item->attachments->count()),
-                            );
-                            $hasLaboratoryResults = $laboratoryResultsCount + $laboratoryAttachmentsCount > 0;
                         @endphp
 
                         {{-- Resumen clínico de la consulta --}}
@@ -159,13 +153,12 @@ new class extends Component {
                                 </span>
                             @endif
 
-                            @if ($prescriptionItemsCount > 0)
+                            @if ($hasPrescription)
                                 <span
                                     class="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:ring-blue-800"
                                 >
                                     <flux:icon.document-text class="size-3.5" />
-                                    Receta · {{ $prescriptionItemsCount }}
-                                    {{ $prescriptionItemsCount === 1 ? 'medicamento' : 'medicamentos' }}
+                                    Receta emitida
                                 </span>
                             @else
                                 <span
@@ -175,26 +168,25 @@ new class extends Component {
                                 </span>
                             @endif
 
-                            @if ($laboratoryRequestsCount > 0)
+                            @if ($hasLaboratoryRequest)
                                 <span
                                     class="inline-flex items-center gap-1 rounded-full bg-violet-50 px-2.5 py-1 text-xs font-medium text-violet-700 ring-1 ring-inset ring-violet-200 dark:bg-violet-900/30 dark:text-violet-300 dark:ring-violet-800"
                                 >
                                     <flux:icon.beaker class="size-3.5" />
-                                    Laboratorio solicitado · {{ $laboratoryRequestsCount }}
+                                    Laboratorio solicitado
                                 </span>
 
-                                @if ($hasLaboratoryResults)
-                                    <span
-                                        class="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-300 dark:ring-emerald-800"
-                                    >
-                                        <flux:icon.check-circle class="size-3.5" />
-                                        Resultados registrados
-                                    </span>
-                                @else
+                                @if ($hasPendingLaboratories)
                                     <span
                                         class="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700 ring-1 ring-inset ring-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:ring-amber-800"
                                     >
-                                        Resultados pendientes
+                                        Laboratorios pendientes
+                                    </span>
+                                @else
+                                    <span
+                                        class="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-300 dark:ring-emerald-800"
+                                    >
+                                        Laboratorios recibidos
                                     </span>
                                 @endif
                             @else
@@ -224,114 +216,6 @@ new class extends Component {
                                         {{ $consultation->soapNote->assessment }}
                                     </div>
                                 @endif
-                            </div>
-                        @endif
-
-                        {{-- Recetas --}}
-                        @if ($consultation->prescriptions->isNotEmpty())
-                            <div class="mt-4">
-                                <h4 class="text-xs font-bold uppercase text-zinc-500 mb-2 flex items-center gap-1">
-                                    <flux:icon.document-text class="size-3" />
-                                    Recetas
-                                </h4>
-                                <div class="overflow-hidden rounded-lg border border-zinc-200 dark:border-zinc-800">
-                                    <table class="w-full text-xs text-left">
-                                        <thead class="bg-zinc-50 dark:bg-zinc-800/50 text-zinc-600 dark:text-zinc-400">
-                                            <tr>
-                                                <th class="px-3 py-2 font-medium">Medicamento</th>
-                                                <th class="px-3 py-2 font-medium">Dosis</th>
-                                                <th class="px-3 py-2 font-medium">Frecuencia</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody class="divide-y divide-zinc-100 dark:divide-zinc-800">
-                                            @foreach ($consultation->prescriptions as $prescription)
-                                                @foreach ($prescription->items as $item)
-                                                    <tr class="bg-white dark:bg-zinc-900">
-                                                        <td
-                                                            class="px-3 py-2 font-medium text-zinc-900 dark:text-zinc-200"
-                                                        >
-                                                            {{ $item->medication_name }}
-                                                        </td>
-                                                        <td class="px-3 py-2">{{ $item->dosage }}</td>
-                                                        <td class="px-3 py-2">{{ $item->frequency }}</td>
-                                                    </tr>
-                                                @endforeach
-                                            @endforeach
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        @endif
-
-                        {{-- Laboratorios --}}
-                        @if ($consultation->laboratoryRequests->isNotEmpty())
-                            <div class="mt-4">
-                                <h4 class="text-xs font-bold uppercase text-zinc-500 mb-2 flex items-center gap-1">
-                                    <flux:icon.beaker class="size-3" />
-                                    Laboratorios
-                                </h4>
-                                <div class="overflow-hidden rounded-lg border border-zinc-200 dark:border-zinc-800">
-                                    <table class="w-full text-xs text-left">
-                                        <thead class="bg-zinc-50 dark:bg-zinc-800/50 text-zinc-600 dark:text-zinc-400">
-                                            <tr>
-                                                <th class="px-3 py-2 font-medium">Examen solicitado</th>
-                                                <th class="px-3 py-2 font-medium text-right">Estado</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody class="divide-y divide-zinc-100 dark:divide-zinc-800">
-                                            @foreach ($consultation->laboratoryRequests as $labReq)
-                                                @php
-                                                    // Un examen por línea (deduplicado): el detalle por
-                                                    // parámetro queda en la vista de detalle del laboratorio.
-                                                    $examNames = $labReq->items
-                                                        ->pluck('exam_name')
-                                                        ->unique()
-                                                        ->filter();
-                                                    $hasResults =
-                                                        $labReq->items->contains(fn ($item) => $item->results->isNotEmpty()) ||
-                                                        $labReq->attachments->isNotEmpty();
-                                                    $isReceived = ($labReq->status ?? 'pending') === 'received';
-                                                @endphp
-
-                                                @foreach ($examNames as $examName)
-                                                    <tr class="bg-white dark:bg-zinc-900">
-                                                        <td
-                                                            class="px-3 py-2 font-medium text-zinc-800 dark:text-zinc-200"
-                                                        >
-                                                            {{ $examName }}
-                                                        </td>
-                                                        <td class="px-3 py-2 text-right">
-                                                            @if ($isReceived || $hasResults)
-                                                                <span
-                                                                    class="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-300 dark:ring-emerald-800"
-                                                                >
-                                                                    Con resultados
-                                                                </span>
-                                                            @else
-                                                                <span
-                                                                    class="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-700 ring-1 ring-inset ring-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:ring-amber-800"
-                                                                >
-                                                                    Pendiente
-                                                                </span>
-                                                            @endif
-                                                        </td>
-                                                    </tr>
-                                                @endforeach
-
-                                                <tr class="bg-zinc-50 dark:bg-zinc-800/30">
-                                                    <td colspan="2" class="px-3 py-1.5 text-[10px] text-right">
-                                                        <a
-                                                            href="{{ route('laboratorios.show', $labReq) }}"
-                                                            class="text-teal-600 dark:text-teal-400 hover:underline"
-                                                        >
-                                                            Ver detalle y adjuntos &rarr;
-                                                        </a>
-                                                    </td>
-                                                </tr>
-                                            @endforeach
-                                        </tbody>
-                                    </table>
-                                </div>
                             </div>
                         @endif
                     </div>

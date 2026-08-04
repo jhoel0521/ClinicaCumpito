@@ -163,6 +163,62 @@
                     @else
                         <p class="text-zinc-400 dark:text-zinc-500 text-sm italic">Sin condiciones registradas</p>
                     @endif
+                    <!-- @if ($patient->heel_prick_done !== null)
+                            <div class="flex justify-between">
+                                <dt class="text-zinc-500 dark:text-zinc-400">Prueba del talón</dt>
+                                <dd class="font-medium text-zinc-800 dark:text-zinc-200">
+                                    {{ $patient->heel_prick_done ? 'Realizó' : 'No realizó' }}
+                                </dd>
+                            </div>
+                    @endif
+
+                    @if (! $patient->birth_weight && ! $patient->birth_height && ! $patient->birth_head_circumference && ! $patient->birth_type && ! $patient->birth_place && $patient->heel_prick_done === null)
+                        <p class="text-zinc-400 dark:text-zinc-500 text-sm italic">Sin datos registrados</p>
+                    @endif 
+                    pondemos un parrafo  bonito diciendo si se iso la prueba del talon o no, y si no se hizo, poner un aviso de que falta registrar la prueba del talon.
+                    -->
+
+                    <p class="text-zinc-400 dark:text-zinc-500 text-sm italic">
+                        @if ($patient->heel_prick_done === true)
+                            La <strong>Prueba del talón</strong> fue realizada.
+                        @elseif ($patient->heel_prick_done === false)
+                            La <strong>Prueba del talón</strong> no fue realizada.
+                        @else
+                            La <strong>Prueba del talón</strong> aún no ha sido registrada.
+                        @endif
+                    </p>
+
+                    <div class="mt-4 space-y-2">
+                        @if ($patient->heel_prick_done === null)
+                            <div class="p-3 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 flex items-start gap-2">
+                                <span class="text-amber-500 text-sm">⚠</span>
+                                <p class="text-xs text-amber-700 dark:text-amber-300 mt-0.5">
+                                    Falta registrar la <strong>Prueba del talón</strong>.
+                                </p>
+                            </div>
+                        @endif
+
+                        @php
+                            $ageInMonths = $patient->date_of_birth ? (int) $patient->date_of_birth->diffInMonths(now()) : null;
+                            $missingVaccinesCount = 0;
+                            if ($ageInMonths !== null) {
+                                $appliedVaccineIds = App\Models\PatientVaccine::where('patient_id', $patient->id)->pluck('vaccine_id')->toArray();
+                                $missingVaccinesCount = App\Models\Vaccine::whereNotNull('min_age_months')
+                                    ->where('min_age_months', '<=', $ageInMonths)
+                                    ->whereNotIn('id', $appliedVaccineIds)
+                                    ->count();
+                            }
+                        @endphp
+                        
+                        @if ($missingVaccinesCount > 0)
+                            <div class="p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 flex items-start gap-2">
+                                <span class="text-blue-500 text-sm">💉</span>
+                                <p class="text-xs text-blue-700 dark:text-blue-300 mt-0.5">
+                                    Tiene <strong>{{ $missingVaccinesCount }} vacuna{{ $missingVaccinesCount > 1 ? 's' : '' }}</strong> pendiente{{ $missingVaccinesCount > 1 ? 's' : '' }} de aplicar.
+                                </p>
+                            </div>
+                        @endif
+                    </div>
                 </div>
 
                 {{-- Datos al nacer --}}
@@ -215,11 +271,7 @@
                                 </dd>
                             </div>
                         @endif
-
-                        @if (! $patient->birth_weight && ! $patient->birth_height && ! $patient->birth_head_circumference)
-                            <p class="text-zinc-400 dark:text-zinc-500 italic">Sin datos registrados</p>
-                        @endif
-                    </dl>
+                                          </dl>
                 </div>
             </div>
         </section>

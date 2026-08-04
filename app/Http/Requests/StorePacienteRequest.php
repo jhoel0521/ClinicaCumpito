@@ -26,6 +26,7 @@ class StorePacienteRequest extends FormRequest
             'birth_head_circumference' => ['nullable', 'numeric', 'min:0.1', 'max:100'],
             'birth_type' => ['nullable', 'in:Normal,Cesarean'],
             'birth_place' => ['nullable', 'string', 'max:255'],
+            'heel_prick_done' => ['nullable', 'boolean'],
             'allergies' => ['nullable', 'string', 'max:1000'],
             'pathologies' => ['nullable', 'string', 'max:1000'],
             'surgeries' => ['nullable', 'string', 'max:1000'],

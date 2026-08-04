@@ -171,7 +171,7 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-4">
         {{-- Tipo de Parto --}}
         <div>
             <span class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Tipo de Parto</span>
@@ -209,6 +209,46 @@
                     </span>
                 </label>
             </div>
+        </div>
+
+        {{-- Prueba del Talón --}}
+        <div>
+            <span class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Prueba del Talón</span>
+            <div class="flex gap-2">
+                <label for="heel_prick_done_yes" class="relative flex-1 cursor-pointer">
+                    <input
+                        type="radio"
+                        id="heel_prick_done_yes"
+                        name="heel_prick_done"
+                        value="1"
+                        class="peer sr-only"
+                        {{ old('heel_prick_done', $patient?->heel_prick_done === true ? '1' : ($patient?->heel_prick_done === false ? '0' : '')) === '1' ? 'checked' : '' }}
+                    />
+                    <span
+                        class="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border-2 text-sm font-medium transition-all border-gray-200 dark:border-zinc-700 text-gray-500 dark:text-zinc-400 bg-white dark:bg-zinc-800 peer-checked:border-teal-500 peer-checked:bg-teal-50 dark:peer-checked:bg-teal-900/30 peer-checked:text-teal-700 dark:peer-checked:text-teal-300 hover:border-teal-300 hover:bg-teal-50 dark:hover:bg-zinc-700"
+                    >
+                        Realizó
+                    </span>
+                </label>
+                <label for="heel_prick_done_no" class="relative flex-1 cursor-pointer">
+                    <input
+                        type="radio"
+                        id="heel_prick_done_no"
+                        name="heel_prick_done"
+                        value="0"
+                        class="peer sr-only"
+                        {{ old('heel_prick_done', $patient?->heel_prick_done === true ? '1' : ($patient?->heel_prick_done === false ? '0' : '')) === '0' ? 'checked' : '' }}
+                    />
+                    <span
+                        class="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border-2 text-sm font-medium transition-all border-gray-200 dark:border-zinc-700 text-gray-500 dark:text-zinc-400 bg-white dark:bg-zinc-800 peer-checked:border-teal-500 peer-checked:bg-teal-50 dark:peer-checked:bg-teal-900/30 peer-checked:text-teal-700 dark:peer-checked:text-teal-300 hover:border-teal-300 hover:bg-teal-50 dark:hover:bg-zinc-700"
+                    >
+                        No Realizó
+                    </span>
+                </label>
+            </div>
+            @error('heel_prick_done')
+                <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+            @enderror
         </div>
 
         {{-- Lugar de Nacimiento --}}

@@ -234,19 +234,22 @@ new class extends Component {
 
                         {{-- Resumen SOAP --}}
                         @if ($consultation->soapNote)
-                            <div class="mb-4 grid gap-2" dusk="soap-cards-{{ $consultation->id }}">
+                            <div
+                                class="mb-3 divide-y divide-zinc-200 overflow-hidden rounded-lg border border-zinc-200 bg-white dark:divide-zinc-800 dark:border-zinc-800 dark:bg-zinc-900"
+                                dusk="soap-cards-{{ $consultation->id }}"
+                            >
                                 @foreach ($soapCards as $label => $content)
                                     @if (filled($content))
                                         <article
-                                            class="rounded-xl border border-zinc-100 bg-zinc-50/80 p-3 text-sm transition-colors duration-200 ease-out hover:border-teal-200 hover:bg-teal-50/60 dark:border-zinc-800 dark:bg-zinc-950/40 dark:hover:border-teal-900 dark:hover:bg-teal-950/20"
+                                            class="flex items-start gap-2 px-2 py-1.5 text-xs leading-4 transition-colors duration-200 ease-out hover:bg-teal-50/60 dark:hover:bg-teal-950/20"
                                         >
                                             <h4
-                                                class="mb-1 text-xs font-semibold uppercase tracking-wide text-teal-700 dark:text-teal-300"
+                                                class="w-[5.25rem] shrink-0 pt-px text-[10px] font-semibold uppercase tracking-wide text-teal-700 dark:text-teal-300"
                                             >
                                                 {{ $label }}
                                             </h4>
-                                            <p class="text-zinc-700 dark:text-zinc-300">
-                                                {{ Str::limit($content, 110) }}
+                                            <p class="line-clamp-2 min-w-0 text-zinc-700 dark:text-zinc-300">
+                                                {{ Str::limit($content, 80) }}
                                             </p>
                                         </article>
                                     @endif

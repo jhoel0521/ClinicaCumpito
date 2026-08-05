@@ -30,6 +30,7 @@ new class extends Component {
                 'vitalSigns',
                 'prescriptions',
                 'laboratoryRequests',
+                'patientVaccines',
             ])
                 ->where('patient_id', $this->patient->id)
                 ->whereIn('status', ['saved', 'finalized'])
@@ -142,6 +143,8 @@ new class extends Component {
                         @php
                             $hasPrescription = $consultation->prescriptions->isNotEmpty();
                             $hasLaboratoryRequest = $consultation->laboratoryRequests->isNotEmpty();
+                            $hasAppliedVaccine = $consultation->patientVaccines->isNotEmpty();
+                            $hasPendingLaboratories = $consultation->laboratoryRequests->contains(fn ($request) => $request->isPending());
                             $soapCards = [
                                 'Subjetivo' => $consultation->soapNote?->subjective,
                                 'Objetivo' => $consultation->soapNote?->objective,
@@ -163,7 +166,7 @@ new class extends Component {
                         @endphp
 
                         {{-- Resumen clínico de la consulta --}}
-                        <div class="mb-4 flex flex-wrap gap-2" dusk="consultation-summary-{{ $consultation->id }}">
+                        <div class="mb-3 flex flex-wrap gap-1.5" dusk="consultation-summary-{{ $consultation->id }}">
                             @if ($consultation->soapNote)
                                 <span
                                     class="inline-flex items-center gap-1 rounded-full bg-teal-50 px-2.5 py-1 text-xs font-medium text-teal-700 ring-1 ring-inset ring-teal-200 dark:bg-teal-900/30 dark:text-teal-300 dark:ring-teal-800"
@@ -180,21 +183,17 @@ new class extends Component {
                             @endif
 
                             @if ($hasPrescription)
-                                @foreach ($consultation->prescriptions as $prescription)
-                                    <a
-                                        href="{{ route('consultas.pdf.recetas.single', [$consultation, $prescription]) }}"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        class="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-200 transition-all duration-200 ease-out hover:-translate-y-px hover:bg-blue-100 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:bg-blue-900/30 dark:text-blue-300 dark:ring-blue-800 dark:hover:bg-blue-900/50 dark:focus:ring-offset-zinc-900"
-                                        title="Ver receta"
-                                        aria-label="Ver receta"
-                                        dusk="view-prescription-{{ $prescription->id }}"
-                                    >
-                                        <flux:icon.document-text class="size-3.5" />
-                                        Receta
-                                        <flux:icon.eye class="size-3.5" />
-                                    </a>
-                                @endforeach
+                                <a
+                                    href="{{ route('consultas.show', $consultation) }}#receta"
+                                    class="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-200 transition-all duration-200 ease-out hover:-translate-y-px hover:bg-blue-100 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:bg-blue-900/30 dark:text-blue-300 dark:ring-blue-800 dark:hover:bg-blue-900/50 dark:focus:ring-offset-zinc-900"
+                                    title="Abrir receta en la consulta"
+                                    aria-label="Abrir receta en la consulta"
+                                    dusk="view-prescription-{{ $consultation->id }}"
+                                >
+                                    <flux:icon.document-text class="size-3.5" />
+                                    Receta
+                                    <flux:icon.eye class="size-3.5" />
+                                </a>
                             @else
                                 <span
                                     class="inline-flex items-center gap-1 rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-500 ring-1 ring-inset ring-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:ring-zinc-700"
@@ -204,31 +203,41 @@ new class extends Component {
                             @endif
 
                             @if ($hasLaboratoryRequest)
-                                @foreach ($consultation->laboratoryRequests as $laboratoryRequest)
-                                    <a
-                                        href="{{ route('consultas.pdf.laboratorio.single', [$consultation, $laboratoryRequest]) }}"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        @class([
-                                            'inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset transition-all duration-200 ease-out hover:-translate-y-px hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-zinc-900',
-                                            'bg-amber-50 text-amber-700 ring-amber-200 hover:bg-amber-100 focus:ring-amber-500 dark:bg-amber-900/30 dark:text-amber-300 dark:ring-amber-800 dark:hover:bg-amber-900/50' => $laboratoryRequest->isPending(),
-                                            'bg-emerald-50 text-emerald-700 ring-emerald-200 hover:bg-emerald-100 focus:ring-emerald-500 dark:bg-emerald-900/30 dark:text-emerald-300 dark:ring-emerald-800 dark:hover:bg-emerald-900/50' => $laboratoryRequest->isReceived(),
-                                        ])
-                                        title="Ver solicitud de laboratorio"
-                                        aria-label="Ver solicitud de laboratorio {{ $laboratoryRequest->isPending() ? 'pendiente' : 'recibida' }}"
-                                        dusk="view-laboratory-{{ $laboratoryRequest->id }}"
-                                    >
-                                        <flux:icon.beaker class="size-3.5" />
-                                        Laboratorio {{ $laboratoryRequest->isPending() ? 'pendiente' : 'recibido' }}
-                                        <flux:icon.eye class="size-3.5" />
-                                    </a>
-                                @endforeach
+                                <a
+                                    href="{{ route('consultas.show', $consultation) }}#laboratorio"
+                                    @class([
+                                        'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset transition-all duration-200 ease-out hover:-translate-y-px hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-zinc-900',
+                                        'bg-amber-50 text-amber-700 ring-amber-200 hover:bg-amber-100 focus:ring-amber-500 dark:bg-amber-900/30 dark:text-amber-300 dark:ring-amber-800 dark:hover:bg-amber-900/50' => $hasPendingLaboratories,
+                                        'bg-emerald-50 text-emerald-700 ring-emerald-200 hover:bg-emerald-100 focus:ring-emerald-500 dark:bg-emerald-900/30 dark:text-emerald-300 dark:ring-emerald-800 dark:hover:bg-emerald-900/50' => ! $hasPendingLaboratories,
+                                    ])
+                                    title="Abrir laboratorio en la consulta"
+                                    aria-label="Abrir laboratorio {{ $hasPendingLaboratories ? 'pendiente' : 'recibido' }} en la consulta"
+                                    dusk="view-laboratory-{{ $consultation->id }}"
+                                >
+                                    <flux:icon.beaker class="size-3.5" />
+                                    Laboratorio {{ $hasPendingLaboratories ? 'pendiente' : 'recibido' }}
+                                    <flux:icon.eye class="size-3.5" />
+                                </a>
                             @else
                                 <span
                                     class="inline-flex items-center gap-1 rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-500 ring-1 ring-inset ring-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:ring-zinc-700"
                                 >
                                     Sin laboratorio
                                 </span>
+                            @endif
+
+                            @if ($hasAppliedVaccine)
+                                <a
+                                    href="{{ route('consultas.show', $consultation) }}#vacunas"
+                                    class="inline-flex items-center gap-1 rounded-full bg-teal-50 px-2 py-0.5 text-xs font-medium text-teal-700 ring-1 ring-inset ring-teal-200 transition-all duration-200 ease-out hover:-translate-y-px hover:bg-teal-100 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 dark:bg-teal-900/30 dark:text-teal-300 dark:ring-teal-800 dark:hover:bg-teal-900/50 dark:focus:ring-offset-zinc-900"
+                                    title="Abrir vacunas en la consulta"
+                                    aria-label="Abrir vacunas aplicadas en la consulta"
+                                    dusk="view-vaccines-{{ $consultation->id }}"
+                                >
+                                    <flux:icon.shield-check class="size-3.5" />
+                                    Vacuna aplicada
+                                    <flux:icon.eye class="size-3.5" />
+                                </a>
                             @endif
                         </div>
 

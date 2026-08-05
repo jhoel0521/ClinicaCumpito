@@ -4,8 +4,6 @@ Esta aplicación se despliega como un stack Docker Compose de producción. Inclu
 
 - Aplicación Laravel con PHP 8.4 y Apache.
 - PostgreSQL 17.
-- Worker para las colas de Laravel.
-- Scheduler para las tareas programadas.
 - Volúmenes persistentes para la base de datos y los archivos clínicos.
 
 Ningún puerto se publica directamente en el servidor. Solo el servicio `app` debe
@@ -41,8 +39,6 @@ comunican mediante sus nombres internos:
 
 ```text
 app -> postgres:5432
-queue -> postgres:5432
-scheduler -> postgres:5432
 ```
 
 ## 3. Variables obligatorias
@@ -109,14 +105,14 @@ Dominio:  https://clinica.example.com
 Puerto:   80
 ```
 
-No asignes dominios a estos servicios:
-
-- `postgres`
-- `queue`
-- `scheduler`
+No asignes un dominio al servicio `postgres`.
 
 Tampoco agregues `ports:` al Compose. Coolify puede alcanzar el puerto interno
 del servicio mediante su proxy sin exponerlo directamente en el servidor.
+
+En la configuración del recurso de Coolify, deja **Ports Exposes** vacío o en
+`80`. No uses `3000`: el contenedor web de este proyecto sirve Apache en el
+puerto 80.
 
 Activa HTTPS y la redirección de HTTP a HTTPS desde Coolify.
 
@@ -150,20 +146,17 @@ php artisan storage:link --force
 php artisan optimize
 ```
 
-4. Cuando `app` esté saludable, Coolify iniciará `queue` y `scheduler`.
-5. Abre el dominio configurado y verifica la pantalla de acceso.
+4. Abre el dominio configurado y verifica la pantalla de acceso.
 
 El seeder es idempotente: crea los roles faltantes sin duplicar los existentes.
 
 ## 8. Comprobaciones posteriores
 
-Los cuatro servicios deben estar ejecutándose:
+Los dos servicios deben estar ejecutándose:
 
 ```text
 app        healthy
 postgres   healthy
-queue      healthy
-scheduler  running
 ```
 
 Desde la terminal del servicio `app` puedes revisar las migraciones:
@@ -176,12 +169,6 @@ Comprueba el endpoint de salud:
 
 ```bash
 curl --fail http://127.0.0.1/up
-```
-
-Revisa que el worker esté procesando la cola:
-
-```bash
-php artisan queue:monitor default --max=100
 ```
 
 ## 9. Actualizaciones
@@ -224,22 +211,6 @@ host de base de datos.
 
 Revisa que el volumen `app_storage` esté montado y reinicia el servicio `app`.
 El entrypoint crea los directorios necesarios y corrige sus permisos al iniciar.
-
-### La aplicación responde, pero los trabajos no se procesan
-
-Revisa los logs del servicio `queue`. Su proceso esperado es:
-
-```bash
-php artisan queue:work --sleep=3 --tries=3 --timeout=90 --max-time=3600
-```
-
-### Las tareas programadas no se ejecutan
-
-Revisa los logs del servicio `scheduler`. Su proceso esperado es:
-
-```bash
-php artisan schedule:work
-```
 
 ## Documentación
 

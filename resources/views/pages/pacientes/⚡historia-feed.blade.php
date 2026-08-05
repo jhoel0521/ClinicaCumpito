@@ -44,16 +44,27 @@ new class extends Component {
     <div
         class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8"
         x-data="{
+        observer: null,
         observe() {
-            let observer = new IntersectionObserver((entries) => {
+            const trigger = this.$refs.loadMoreTrigger
+
+            if (!trigger) {
+                return
+            }
+
+            this.observer?.disconnect()
+            this.observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
                         @this.call('loadMore')
                     }
                 })
             }, { rootMargin: '200px' })
-            observer.observe(this.$refs.loadMoreTrigger)
-        }
+            this.observer.observe(trigger)
+        },
+        destroy() {
+            this.observer?.disconnect()
+        },
     }"
         x-init="observe"
     >
@@ -223,7 +234,7 @@ new class extends Component {
 
                         {{-- Resumen SOAP --}}
                         @if ($consultation->soapNote)
-                            <div class="mb-4 grid gap-2 sm:grid-cols-2" dusk="soap-cards-{{ $consultation->id }}">
+                            <div class="mb-4 grid gap-2" dusk="soap-cards-{{ $consultation->id }}">
                                 @foreach ($soapCards as $label => $content)
                                     @if (filled($content))
                                         <article
@@ -246,29 +257,29 @@ new class extends Component {
                         {{-- Medidas registradas --}}
                         @if ($consultation->vitalSigns)
                             <div
-                                class="flex w-fit max-w-full flex-wrap items-center gap-1 rounded-xl border border-zinc-200 bg-zinc-50/80 p-1.5 shadow-sm dark:border-zinc-800 dark:bg-zinc-950/40"
+                                class="inline-flex max-w-full items-stretch divide-x divide-zinc-200 overflow-visible rounded-lg border border-zinc-200 bg-white shadow-sm dark:divide-zinc-800 dark:border-zinc-800 dark:bg-zinc-900"
                                 dusk="vital-sign-cards-{{ $consultation->id }}"
                             >
                                 @foreach ($measurementCards as $label => $value)
                                     @if ($value)
                                         @php($badge = $measurementBadges[$label])
-                                        <div class="group/measurement relative">
+                                        <div class="group/measurement relative shrink-0">
                                             <div
                                                 tabindex="0"
                                                 role="note"
                                                 aria-label="{{ $label }}: {{ $value }}"
-                                                class="flex items-center gap-1.5 rounded-lg border border-transparent bg-white px-1.5 py-1 shadow-sm transition-all duration-200 ease-out hover:-translate-y-px hover:border-zinc-200 hover:shadow dark:bg-zinc-900 dark:hover:border-zinc-700"
+                                                class="flex h-8 items-center gap-1 px-1.5 transition-colors duration-200 ease-out hover:bg-zinc-50 focus:outline-none focus-visible:bg-zinc-50 dark:hover:bg-zinc-800/70 dark:focus-visible:bg-zinc-800/70"
                                             >
                                                 <span
                                                     @class([
-                                                        'flex size-6 shrink-0 items-center justify-center rounded-md text-[10px] font-bold tracking-tight transition-transform duration-200 ease-out group-hover/measurement:scale-105 group-focus-within/measurement:scale-105',
+                                                        'flex size-5 shrink-0 items-center justify-center rounded text-[9px] font-bold tracking-tight transition-transform duration-200 ease-out group-hover/measurement:scale-105 group-focus-within/measurement:scale-105',
                                                         $badge['class'],
                                                     ])
                                                 >
                                                     {{ $badge['short'] }}
                                                 </span>
                                                 <span
-                                                    class="whitespace-nowrap pr-1 text-xs font-semibold text-zinc-700 dark:text-zinc-200"
+                                                    class="whitespace-nowrap pr-0.5 text-[11px] font-semibold text-zinc-700 dark:text-zinc-200"
                                                 >
                                                     {{ $value }}
                                                 </span>

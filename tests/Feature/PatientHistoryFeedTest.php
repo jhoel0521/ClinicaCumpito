@@ -5,6 +5,7 @@ use App\Models\Doctor;
 use App\Models\LaboratoryRequest;
 use App\Models\LaboratoryRequestItem;
 use App\Models\Patient;
+use App\Models\PatientVaccine;
 use App\Models\Prescription;
 use App\Models\PrescriptionItem;
 use App\Models\SoapNote;
@@ -39,6 +40,7 @@ test('el feed resume la información clínica registrada en cada consulta', func
     ]);
 
     $prescription = Prescription::factory()->create(['consultation_id' => $consultation->id]);
+    Prescription::factory()->create(['consultation_id' => $consultation->id]);
     $medicationName = 'Medicamento que no debe aparecer en el feed';
     PrescriptionItem::factory()->count(2)->create([
         'prescription_id' => $prescription->id,
@@ -49,18 +51,29 @@ test('el feed resume la información clínica registrada en cada consulta', func
         'consultation_id' => $consultation->id,
         'status' => 'received',
     ]);
+    LaboratoryRequest::factory()->create([
+        'consultation_id' => $consultation->id,
+        'status' => 'received',
+    ]);
     $laboratoryItem = LaboratoryRequestItem::factory()->create([
         'laboratory_request_id' => $laboratoryRequest->id,
         'exam_name' => 'Examen que no debe aparecer en el feed',
     ]);
-    $this->actingAs($user)
+    PatientVaccine::factory()->create([
+        'consultation_id' => $consultation->id,
+        'patient_id' => $patient->id,
+    ]);
+
+    $response = $this->actingAs($user)
         ->get(route('pacientes.feed', $patient))
         ->assertOk()
         ->assertSeeText('SOAP registrado')
         ->assertSeeText('Receta')
         ->assertSeeText('Laboratorio recibido')
-        ->assertSee(route('consultas.pdf.recetas.single', [$consultation, $prescription]))
-        ->assertSee(route('consultas.pdf.laboratorio.single', [$consultation, $laboratoryRequest]))
+        ->assertSeeText('Vacuna aplicada')
+        ->assertSee(route('consultas.show', $consultation).'#receta')
+        ->assertSee(route('consultas.show', $consultation).'#laboratorio')
+        ->assertSee(route('consultas.show', $consultation).'#vacunas')
         ->assertSeeText('Subjetivo')
         ->assertSeeText(Str::limit($subjective, 80))
         ->assertDontSeeText($subjective)
@@ -71,6 +84,9 @@ test('el feed resume la información clínica registrada en cada consulta', func
         ->assertSeeText('48.3 cm')
         ->assertDontSeeText($laboratoryItem->exam_name)
         ->assertDontSeeText($medicationName);
+
+    expect(substr_count($response->getContent(), 'dusk="view-prescription-'.$consultation->id.'"'))->toBe(1)
+        ->and(substr_count($response->getContent(), 'dusk="view-laboratory-'.$consultation->id.'"'))->toBe(1);
 });
 
 test('el feed identifica información clínica pendiente o ausente', function (): void {
@@ -124,7 +140,6 @@ test('el resumen del feed no lista los exámenes ni parámetros solicitados', fu
         ->get(route('pacientes.feed', $patient))
         ->assertOk()
         ->assertSeeText('Laboratorio pendiente')
-        ->assertSeeText('Laboratorio recibido')
         ->assertDontSeeText('Coprológico (COPR)')
         ->assertDontSeeText('Hemograma');
 });

@@ -5,7 +5,9 @@ x-app: &app
     context: .
     dockerfile: Dockerfile
   image: clinica-cumpito:${IMAGE_TAG:-latest}
+  init: true
   restart: unless-stopped
+  stop_grace_period: 30s
   environment: &app-environment
     APP_NAME: ${APP_NAME:-VitalTrack Pediátrico}
     APP_ENV: production
@@ -29,7 +31,6 @@ x-app: &app
     SESSION_ENCRYPT: "true"
     SESSION_SECURE_COOKIE: "true"
     CACHE_STORE: database
-    QUEUE_CONNECTION: database
     FILESYSTEM_DISK: local
     MAIL_MAILER: ${MAIL_MAILER:-log}
     MAIL_SCHEME: ${MAIL_SCHEME:-null}
@@ -58,48 +59,16 @@ services:
       postgres:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "curl --fail --silent http://127.0.0.1/up >/dev/null"]
+      test: ["CMD-SHELL", "curl --fail --silent --show-error http://127.0.0.1/up >/dev/null"]
       interval: 15s
       timeout: 5s
       retries: 5
       start_period: 90s
 
-  queue:
-    <<: *app
-    command:
-      - php
-      - artisan
-      - queue:work
-      - --sleep=3
-      - --tries=3
-      - --timeout=90
-      - --max-time=3600
-    depends_on:
-      app:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD-SHELL", "pgrep -f 'queue:work' >/dev/null || exit 1"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
-      start_period: 60s
-
-  scheduler:
-    <<: *app
-    command: ["php", "artisan", "schedule:work"]
-    depends_on:
-      app:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD-SHELL", "pgrep -f 'schedule:work' >/dev/null || exit 1"]
-      interval: 60s
-      timeout: 5s
-      retries: 3
-      start_period: 30s
-
   postgres:
     image: postgres:17-alpine
     restart: unless-stopped
+    stop_grace_period: 60s
     environment:
       POSTGRES_DB: ${DB_DATABASE:-vitaltrack}
       POSTGRES_USER: ${DB_USERNAME:-vitaltrack}
@@ -117,7 +86,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
-      start_period: 20s
+      start_period: 30s
 
 networks:
   internal:

@@ -42,8 +42,6 @@ x-app: &app
     MAIL_FROM_NAME: ${MAIL_FROM_NAME:-VitalTrack Pediátrico}
   volumes:
     - app_storage:/var/www/html/storage
-  networks:
-    - internal
   security_opt:
     - no-new-privileges:true
 
@@ -53,8 +51,6 @@ services:
     environment:
       <<: *app-environment
       RUN_LARAVEL_SETUP: "true"
-    expose:
-      - "80"
     depends_on:
       postgres:
         condition: service_healthy
@@ -75,8 +71,6 @@ services:
       POSTGRES_PASSWORD: ${SERVICE_PASSWORD_64_POSTGRES}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    networks:
-      - internal
     security_opt:
       - no-new-privileges:true
     healthcheck:
@@ -87,10 +81,6 @@ services:
       timeout: 5s
       retries: 10
       start_period: 30s
-
-networks:
-  internal:
-    driver: bridge
 
 volumes:
   app_storage:

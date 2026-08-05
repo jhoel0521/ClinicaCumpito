@@ -100,7 +100,7 @@ new class extends Component {
 
                     {{-- Tarjeta de consulta --}}
                     <div
-                        class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-white dark:bg-zinc-900 p-5 rounded-2xl shadow-sm border border-zinc-200 dark:border-zinc-800 transition-all hover:shadow-md"
+                        class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-white dark:bg-zinc-900 p-5 rounded-2xl shadow-sm border border-zinc-200 dark:border-zinc-800 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-md"
                     >
                         {{-- Cabecera Tarjeta --}}
                         <div
@@ -111,7 +111,7 @@ new class extends Component {
                                     {{ $consultation->consultation_date->isoFormat('D [de] MMMM YYYY') }}
                                 </div>
                                 <h3 class="text-lg font-semibold text-zinc-900 dark:text-white leading-tight">
-                                    {{ $consultation->soapNote->subjective ?? 'Consulta Médica' }}
+                                    {{ Str::limit($consultation->soapNote?->subjective ?? 'Consulta médica', 72) }}
                                 </h3>
                                 <div class="text-xs text-zinc-500 mt-1 flex items-center gap-1">
                                     <flux:icon.user class="size-3" />
@@ -131,9 +131,24 @@ new class extends Component {
                         @php
                             $hasPrescription = $consultation->prescriptions->isNotEmpty();
                             $hasLaboratoryRequest = $consultation->laboratoryRequests->isNotEmpty();
-                            $hasPendingLaboratories = $consultation->laboratoryRequests->contains(
-                                fn ($request) => $request->isPending(),
-                            );
+                            $soapCards = [
+                                'Subjetivo' => $consultation->soapNote?->subjective,
+                                'Objetivo' => $consultation->soapNote?->objective,
+                                'Diagnóstico' => $consultation->soapNote?->assessment,
+                                'Plan' => $consultation->soapNote?->plan,
+                            ];
+                            $measurementCards = [
+                                'Peso' => $consultation->vitalSigns?->weight,
+                                'Talla' => $consultation->vitalSigns?->height,
+                                'Temperatura' => $consultation->vitalSigns?->temperature,
+                                'P. cefálico' => $consultation->vitalSigns?->head_circumference,
+                            ];
+                            $measurementBadges = [
+                                'Peso' => ['short' => 'P', 'class' => 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300'],
+                                'Talla' => ['short' => 'T', 'class' => 'bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300'],
+                                'Temperatura' => ['short' => '°', 'class' => 'bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300'],
+                                'P. cefálico' => ['short' => 'PC', 'class' => 'bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-300'],
+                            ];
                         @endphp
 
                         {{-- Resumen clínico de la consulta --}}
@@ -154,12 +169,21 @@ new class extends Component {
                             @endif
 
                             @if ($hasPrescription)
-                                <span
-                                    class="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:ring-blue-800"
-                                >
-                                    <flux:icon.document-text class="size-3.5" />
-                                    Receta emitida
-                                </span>
+                                @foreach ($consultation->prescriptions as $prescription)
+                                    <a
+                                        href="{{ route('consultas.pdf.recetas.single', [$consultation, $prescription]) }}"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        class="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-200 transition-all duration-200 ease-out hover:-translate-y-px hover:bg-blue-100 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:bg-blue-900/30 dark:text-blue-300 dark:ring-blue-800 dark:hover:bg-blue-900/50 dark:focus:ring-offset-zinc-900"
+                                        title="Ver receta"
+                                        aria-label="Ver receta"
+                                        dusk="view-prescription-{{ $prescription->id }}"
+                                    >
+                                        <flux:icon.document-text class="size-3.5" />
+                                        Receta
+                                        <flux:icon.eye class="size-3.5" />
+                                    </a>
+                                @endforeach
                             @else
                                 <span
                                     class="inline-flex items-center gap-1 rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-500 ring-1 ring-inset ring-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:ring-zinc-700"
@@ -169,26 +193,25 @@ new class extends Component {
                             @endif
 
                             @if ($hasLaboratoryRequest)
-                                <span
-                                    class="inline-flex items-center gap-1 rounded-full bg-violet-50 px-2.5 py-1 text-xs font-medium text-violet-700 ring-1 ring-inset ring-violet-200 dark:bg-violet-900/30 dark:text-violet-300 dark:ring-violet-800"
-                                >
-                                    <flux:icon.beaker class="size-3.5" />
-                                    Laboratorio solicitado
-                                </span>
-
-                                @if ($hasPendingLaboratories)
-                                    <span
-                                        class="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700 ring-1 ring-inset ring-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:ring-amber-800"
+                                @foreach ($consultation->laboratoryRequests as $laboratoryRequest)
+                                    <a
+                                        href="{{ route('consultas.pdf.laboratorio.single', [$consultation, $laboratoryRequest]) }}"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        @class([
+                                            'inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset transition-all duration-200 ease-out hover:-translate-y-px hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-zinc-900',
+                                            'bg-amber-50 text-amber-700 ring-amber-200 hover:bg-amber-100 focus:ring-amber-500 dark:bg-amber-900/30 dark:text-amber-300 dark:ring-amber-800 dark:hover:bg-amber-900/50' => $laboratoryRequest->isPending(),
+                                            'bg-emerald-50 text-emerald-700 ring-emerald-200 hover:bg-emerald-100 focus:ring-emerald-500 dark:bg-emerald-900/30 dark:text-emerald-300 dark:ring-emerald-800 dark:hover:bg-emerald-900/50' => $laboratoryRequest->isReceived(),
+                                        ])
+                                        title="Ver solicitud de laboratorio"
+                                        aria-label="Ver solicitud de laboratorio {{ $laboratoryRequest->isPending() ? 'pendiente' : 'recibida' }}"
+                                        dusk="view-laboratory-{{ $laboratoryRequest->id }}"
                                     >
-                                        Laboratorios pendientes
-                                    </span>
-                                @else
-                                    <span
-                                        class="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-300 dark:ring-emerald-800"
-                                    >
-                                        Laboratorios recibidos
-                                    </span>
-                                @endif
+                                        <flux:icon.beaker class="size-3.5" />
+                                        Laboratorio {{ $laboratoryRequest->isPending() ? 'pendiente' : 'recibido' }}
+                                        <flux:icon.eye class="size-3.5" />
+                                    </a>
+                                @endforeach
                             @else
                                 <span
                                     class="inline-flex items-center gap-1 rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-500 ring-1 ring-inset ring-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:ring-zinc-700"
@@ -198,24 +221,67 @@ new class extends Component {
                             @endif
                         </div>
 
-                        {{-- Contenido SOAP --}}
+                        {{-- Resumen SOAP --}}
                         @if ($consultation->soapNote)
-                            <div class="space-y-3 mb-4 text-sm text-zinc-700 dark:text-zinc-300">
-                                @if ($consultation->soapNote->objective)
-                                    <div>
-                                        <span class="font-semibold text-zinc-900 dark:text-white">Físico:</span>
-                                        {{ Str::limit($consultation->soapNote->objective, 150) }}
-                                    </div>
-                                @endif
+                            <div class="mb-4 grid gap-2 sm:grid-cols-2" dusk="soap-cards-{{ $consultation->id }}">
+                                @foreach ($soapCards as $label => $content)
+                                    @if (filled($content))
+                                        <article
+                                            class="rounded-xl border border-zinc-100 bg-zinc-50/80 p-3 text-sm transition-colors duration-200 ease-out hover:border-teal-200 hover:bg-teal-50/60 dark:border-zinc-800 dark:bg-zinc-950/40 dark:hover:border-teal-900 dark:hover:bg-teal-950/20"
+                                        >
+                                            <h4
+                                                class="mb-1 text-xs font-semibold uppercase tracking-wide text-teal-700 dark:text-teal-300"
+                                            >
+                                                {{ $label }}
+                                            </h4>
+                                            <p class="text-zinc-700 dark:text-zinc-300">
+                                                {{ Str::limit($content, 110) }}
+                                            </p>
+                                        </article>
+                                    @endif
+                                @endforeach
+                            </div>
+                        @endif
 
-                                @if ($consultation->soapNote->assessment)
-                                    <div
-                                        class="bg-teal-50 dark:bg-teal-900/20 p-2 rounded-lg border border-teal-100 dark:border-teal-800/50"
-                                    >
-                                        <span class="font-semibold text-teal-800 dark:text-teal-300">Dx:</span>
-                                        {{ $consultation->soapNote->assessment }}
-                                    </div>
-                                @endif
+                        {{-- Medidas registradas --}}
+                        @if ($consultation->vitalSigns)
+                            <div
+                                class="flex w-fit max-w-full flex-wrap items-center gap-1 rounded-xl border border-zinc-200 bg-zinc-50/80 p-1.5 shadow-sm dark:border-zinc-800 dark:bg-zinc-950/40"
+                                dusk="vital-sign-cards-{{ $consultation->id }}"
+                            >
+                                @foreach ($measurementCards as $label => $value)
+                                    @if ($value)
+                                        @php($badge = $measurementBadges[$label])
+                                        <div class="group/measurement relative">
+                                            <div
+                                                tabindex="0"
+                                                role="note"
+                                                aria-label="{{ $label }}: {{ $value }}"
+                                                class="flex items-center gap-1.5 rounded-lg border border-transparent bg-white px-1.5 py-1 shadow-sm transition-all duration-200 ease-out hover:-translate-y-px hover:border-zinc-200 hover:shadow dark:bg-zinc-900 dark:hover:border-zinc-700"
+                                            >
+                                                <span
+                                                    @class([
+                                                        'flex size-6 shrink-0 items-center justify-center rounded-md text-[10px] font-bold tracking-tight transition-transform duration-200 ease-out group-hover/measurement:scale-105 group-focus-within/measurement:scale-105',
+                                                        $badge['class'],
+                                                    ])
+                                                >
+                                                    {{ $badge['short'] }}
+                                                </span>
+                                                <span
+                                                    class="whitespace-nowrap pr-1 text-xs font-semibold text-zinc-700 dark:text-zinc-200"
+                                                >
+                                                    {{ $value }}
+                                                </span>
+                                            </div>
+                                            <span
+                                                role="tooltip"
+                                                class="pointer-events-none absolute bottom-[calc(100%+0.45rem)] left-1/2 z-20 -translate-x-1/2 translate-y-1 whitespace-nowrap rounded-md border border-zinc-200 bg-white px-2 py-1 text-[11px] font-medium text-zinc-700 opacity-0 shadow-md transition-all duration-200 ease-out group-hover/measurement:translate-y-0 group-hover/measurement:opacity-100 group-focus-within/measurement:translate-y-0 group-focus-within/measurement:opacity-100 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200"
+                                            >
+                                                {{ $label }}
+                                            </span>
+                                        </div>
+                                    @endif
+                                @endforeach
                             </div>
                         @endif
                     </div>

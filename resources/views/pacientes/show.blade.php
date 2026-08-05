@@ -192,6 +192,7 @@
                     @endif
                     <!-- @if ($patient->heel_prick_done !== null)
 
+
                             <div class="flex justify-between">
                                 <dt class="text-zinc-500 dark:text-zinc-400">Prueba del talón</dt>
                                 <dd class="font-medium text-zinc-800 dark:text-zinc-200">
@@ -201,10 +202,13 @@
                     @endif
 
 
+
                     @if (! $patient->birth_weight && ! $patient->birth_height && ! $patient->birth_head_circumference && ! $patient->birth_type && ! $patient->birth_place && $patient->heel_prick_done === null)
+
 
                         <p class="text-zinc-400 dark:text-zinc-500 text-sm italic">Sin datos registrados</p>
                     @endif
+
 
                     pondemos un parrafo  bonito diciendo si se iso la prueba del talon o no, y si no se hizo, poner un aviso de que falta registrar la prueba del talon.
                     -->

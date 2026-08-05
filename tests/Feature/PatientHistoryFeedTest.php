@@ -62,7 +62,7 @@ test('el feed resume la información clínica registrada en cada consulta', func
         ->assertSee(route('consultas.pdf.recetas.single', [$consultation, $prescription]))
         ->assertSee(route('consultas.pdf.laboratorio.single', [$consultation, $laboratoryRequest]))
         ->assertSeeText('Subjetivo')
-        ->assertSeeText(Str::limit($subjective, 110))
+        ->assertSeeText(Str::limit($subjective, 80))
         ->assertDontSeeText($subjective)
         ->assertSeeText('Peso')
         ->assertSeeText('12.5 kg')

@@ -34,8 +34,10 @@ compose.yaml
 8. No habilites **Connect to Predefined Network**.
 9. Guarda la configuración sin desplegar todavía.
 
-Coolify creará automáticamente una red privada para el stack. Los servicios se
-comunican mediante sus nombres internos:
+Coolify crea automáticamente la red privada del stack. No declares una red
+personalizada en `compose.yaml`: el proxy podría enrutar a una red equivocada y
+causar caídas intermitentes. Los servicios se comunican mediante sus nombres
+internos:
 
 ```text
 app -> postgres:5432
@@ -107,12 +109,9 @@ Puerto:   80
 
 No asignes un dominio al servicio `postgres`.
 
-Tampoco agregues `ports:` al Compose. Coolify puede alcanzar el puerto interno
-del servicio mediante su proxy sin exponerlo directamente en el servidor.
-
-En la configuración del recurso de Coolify, deja **Ports Exposes** vacío o en
-`80`. No uses `3000`: el contenedor web de este proyecto sirve Apache en el
-puerto 80.
+No agregues `ports:` ni configures **Ports Exposes** para este recurso Docker
+Compose. Coolify enruta el dominio asignado a `app`; como Apache escucha en el
+puerto 80, usa el dominio sin sufijo de puerto.
 
 Activa HTTPS y la redirección de HTTP a HTTPS desde Coolify.
 

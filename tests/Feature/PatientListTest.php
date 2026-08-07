@@ -4,6 +4,7 @@ use App\Models\Consultation;
 use App\Models\Doctor;
 use App\Models\Patient;
 use App\Models\User;
+use Livewire\Livewire;
 
 beforeEach(function (): void {
     $doctor = Doctor::factory()->create();
@@ -61,5 +62,39 @@ describe('PatientList - Listado mejorado (6.3)', function (): void {
 
         $response->assertOk()
             ->assertSee('Datos incompletos');
+    });
+
+    it('busca escribiendo solo el apellido "aguilar"', function (): void {
+        Patient::factory()->create(['full_name' => 'Aitana Aguilar']);
+        Patient::factory()->create(['full_name' => 'Carlos Mendoza']);
+
+        Livewire::test('patient-list')
+            ->set('search', 'aguilar')
+            ->assertSee('Aitana Aguilar')
+            ->assertDontSee('Carlos Mendoza');
+    });
+
+    it('busca escribiendo "aguilar aitana" (apellido primero)', function (): void {
+        Patient::factory()->create(['full_name' => 'Aitana Aguilar']);
+        Patient::factory()->create(['full_name' => 'Bruno Aguilar']);
+        Patient::factory()->create(['full_name' => 'Carlos Mendoza']);
+
+        Livewire::test('patient-list')
+            ->set('search', 'aguilar aitana')
+            ->assertSee('Aitana Aguilar')
+            ->assertDontSee('Bruno Aguilar')
+            ->assertDontSee('Carlos Mendoza');
+    });
+
+    it('busca escribiendo "aitana aguilar" (nombre primero)', function (): void {
+        Patient::factory()->create(['full_name' => 'Aitana Aguilar']);
+        Patient::factory()->create(['full_name' => 'Aitana Rojas']);
+        Patient::factory()->create(['full_name' => 'Bruno Aguilar']);
+
+        Livewire::test('patient-list')
+            ->set('search', 'aitana aguilar')
+            ->assertSee('Aitana Aguilar')
+            ->assertDontSee('Aitana Rojas')
+            ->assertDontSee('Bruno Aguilar');
     });
 });

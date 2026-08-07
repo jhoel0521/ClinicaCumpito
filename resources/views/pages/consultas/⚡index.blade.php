@@ -55,10 +55,15 @@ new class extends Component {
             'consultations' => Consultation::query()
                 ->with(['patient', 'doctor', 'laboratoryRequests'])
                 ->when($user->doctor_id, fn ($q) => $q->where('doctor_id', $user->doctor_id))
-                ->when(
-                    $this->search,
-                    fn ($q) => $q->whereHas('patient', fn ($q) => $q->where('full_name', 'like', "%{$this->search}%")),
-                )
+                ->when($this->search, function ($q) {
+                    $terms = preg_split('/\s+/', trim($this->search), -1, PREG_SPLIT_NO_EMPTY);
+
+                    $q->whereHas('patient', function ($q) use ($terms) {
+                        foreach ($terms as $term) {
+                            $q->whereRaw('LOWER(full_name) LIKE ?', ['%' . mb_strtolower($term) . '%']);
+                        }
+                    });
+                })
                 ->when($this->status, fn ($q) => $q->where('status', $this->status))
                 ->when($this->dateFrom, fn ($q) => $q->whereDate('consultation_date', '>=', $this->dateFrom))
                 ->when($this->dateTo, fn ($q) => $q->whereDate('consultation_date', '<=', $this->dateTo))

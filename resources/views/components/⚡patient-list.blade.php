@@ -35,7 +35,15 @@ new class extends Component {
             'patients' => Patient::query()
                 ->withCount('consultations')
                 ->when($this->search, function ($query) {
-                    $query->where('full_name', 'like', '%' . $this->search . '%');
+                    // Divide la búsqueda en términos ("aitana aguilar" -> ["aitana", "aguilar"])
+                    // y exige que cada uno aparezca (AND), sin distinguir mayúsculas ni orden.
+                    $terms = preg_split('/\s+/', trim($this->search), -1, PREG_SPLIT_NO_EMPTY);
+
+                    $query->where(function ($query) use ($terms) {
+                        foreach ($terms as $term) {
+                            $query->whereRaw('LOWER(full_name) LIKE ?', ['%' . mb_strtolower($term) . '%']);
+                        }
+                    });
                 })
                 ->when($this->filter === 'incomplete', function ($query) {
                     $query->where(function ($q) {

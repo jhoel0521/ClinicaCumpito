@@ -6,6 +6,7 @@ use App\ValueObjects\Age;
 use App\ValueObjects\BirthType;
 use App\ValueObjects\BloodGroup;
 use App\ValueObjects\Gender;
+use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -86,6 +87,18 @@ class Patient extends Model
         }
 
         return Age::fromDates($this->date_of_birth);
+    }
+
+    /**
+     * Edad del paciente en una fecha de referencia (ej. la fecha de una consulta).
+     */
+    public function ageAt(CarbonInterface|string|null $referenceDate): ?Age
+    {
+        if ($this->date_of_birth === null) {
+            return null;
+        }
+
+        return Age::fromDates($this->date_of_birth, $referenceDate);
     }
 
     public function hasCompleteBasicData(): bool

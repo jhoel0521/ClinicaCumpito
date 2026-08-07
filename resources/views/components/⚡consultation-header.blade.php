@@ -4,6 +4,7 @@ use App\Contracts\ConsultationServiceContract;
 use App\DTOs\ConsultationDTO;
 use App\Models\Consultation;
 use App\Models\Patient;
+use App\ValueObjects\Age;
 use App\ValueObjects\ConsultationStatus;
 use Livewire\Component;
 
@@ -35,6 +36,24 @@ new class extends Component {
         $this->patient = $consultation->patient;
         $this->patientName = $consultation->patient->full_name;
         $this->doctorName = $consultation->doctor->full_name;
+    }
+
+    /**
+     * Edad del paciente al momento de la consulta.
+     * En borradores usa la fecha actual (la consulta aún no ocurrió);
+     * en guardadas/finalizadas usa la fecha de la consulta.
+     */
+    public function ageAtConsultation(): ?Age
+    {
+        if ($this->patient?->date_of_birth === null) {
+            return null;
+        }
+
+        if ($this->status === ConsultationStatus::FINALIZED || $this->status === ConsultationStatus::SAVED) {
+            return $this->patient->ageAt($this->consultation_date ?: null);
+        }
+
+        return $this->patient->age();
     }
 
     public function saveDate(): void
@@ -186,6 +205,15 @@ new class extends Component {
         <div class="px-5 py-4">
             <p class="text-xs font-medium text-gray-400 dark:text-zinc-500 uppercase tracking-wide mb-1">Paciente</p>
             <p class="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">{{ $patientName }}</p>
+            @if ($this->ageAtConsultation())
+                <p class="text-xs text-gray-500 dark:text-zinc-400 mt-0.5">
+                    @if ($isDraft)
+                        Edad actual: {{ $this->ageAtConsultation()->forDisplayFull() }}
+                    @else
+                        Edad en la consulta: {{ $this->ageAtConsultation()->forDisplayFull() }}
+                    @endif
+                </p>
+            @endif
         </div>
         <div class="px-5 py-4">
             <p class="text-xs font-medium text-gray-400 dark:text-zinc-500 uppercase tracking-wide mb-1">

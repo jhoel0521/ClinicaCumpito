@@ -11,6 +11,7 @@ use App\Models\PrescriptionItem;
 use App\Models\SoapNote;
 use App\Models\User;
 use App\Models\VitalSign;
+use Carbon\Carbon;
 use Illuminate\Support\Str;
 
 test('el feed resume la información clínica registrada en cada consulta', function (): void {
@@ -142,4 +143,27 @@ test('el resumen del feed no lista los exámenes ni parámetros solicitados', fu
         ->assertSeeText('Laboratorio pendiente')
         ->assertDontSeeText('Coprológico (COPR)')
         ->assertDontSeeText('Hemograma');
+});
+
+test('el feed muestra la edad del paciente junto a la fecha de cada consulta', function (): void {
+    Carbon::setTestNow('2026-08-07 10:00:00');
+
+    $user = User::factory()->create();
+    // Nació el 7 de enero de 2026 -> el 7 de agosto de 2026 tiene 7 meses exactos
+    $patient = Patient::factory()->create([
+        'date_of_birth' => '2026-01-07',
+    ]);
+    $consultation = Consultation::factory()->create([
+        'patient_id' => $patient->id,
+        'status' => 'saved',
+        'consultation_date' => '2026-08-07 09:30:00',
+    ]);
+
+    $this->actingAs($user)
+        ->get(route('pacientes.feed', $patient))
+        ->assertOk()
+        ->assertSeeText('7 de agosto 2026')
+        ->assertSeeText('Edad: 7 meses');
+
+    Carbon::setTestNow();
 });

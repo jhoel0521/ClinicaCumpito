@@ -190,7 +190,7 @@
                             </span>
                         </p>
                     @endif
-                   
+
                     <div class="mt-4 space-y-2">
                         @if ($patient->heel_prick_done === null)
                             <div

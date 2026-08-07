@@ -122,6 +122,12 @@ new class extends Component {
                                 <div class="text-sm text-teal-600 dark:text-teal-400 font-bold mb-1">
                                     {{ $consultation->consultation_date->isoFormat('D [de] MMMM YYYY') }}
                                 </div>
+                                @if ($patientAgeAt = $patient->ageAt($consultation->consultation_date))
+                                    <div class="text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
+                                        Edad: {{ $patientAgeAt->forDisplayFull() }}
+                                    </div>
+                                @endif
+
                                 <h3 class="text-lg font-semibold text-zinc-900 dark:text-white leading-tight">
                                     {{ Str::limit($consultation->soapNote?->subjective ?? 'Consulta médica', 72) }}
                                 </h3>

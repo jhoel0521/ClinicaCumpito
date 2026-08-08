@@ -642,70 +642,74 @@
                 </a>
             </div>
 
-            @if ($recentConsultasConReceta->isNotEmpty())
-                <div class="space-y-4">
-                    @foreach ($recentConsultasConReceta as $consultation)
-                        <div
-                            class="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-700 p-5"
+            @if ($recentPrescriptions->isNotEmpty())
+                <div
+                    class="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-700 overflow-hidden"
+                >
+                    <table class="w-full text-sm">
+                        <thead
+                            class="bg-zinc-50 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 text-xs uppercase tracking-wide"
                         >
-                            <div class="flex items-center justify-between mb-3">
-                                <div class="flex gap-3 items-center text-sm text-zinc-500 dark:text-zinc-400">
-                                    <span class="font-medium text-zinc-800 dark:text-zinc-200">
-                                        {{ $consultation->consultation_date->format('d/m/Y') }}
-                                    </span>
-                                    <span>{{ $consultation->doctor?->full_name ?? '—' }}</span>
-                                </div>
-                                <div class="flex items-center gap-3">
-                                    @if ($consultation->prescriptions->isNotEmpty())
-                                        <a
-                                            href="{{ route('consultas.pdf.recetas.all', $consultation) }}"
-                                            target="_blank"
-                                            class="inline-flex items-center gap-1 text-xs font-medium text-emerald-600 dark:text-emerald-400 hover:underline"
-                                        >
-                                            <flux:icon.document-arrow-down class="size-3.5" />
-                                            PDF
-                                        </a>
-                                    @endif
+                            <tr>
+                                <th class="text-left px-4 py-3">Fecha</th>
+                                <th class="text-left px-4 py-3">Diagnóstico</th>
+                                <th class="text-center px-4 py-3">Cantidad</th>
+                                <th class="text-right px-4 py-3">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-zinc-100 dark:divide-zinc-800">
+                            @foreach ($recentPrescriptions as $prescription)
+                                @php
+                                    $medCount = $prescription->items->count();
+                                    $consultaReceta = $prescription->consultation;
+                                @endphp
 
-                                    <a
-                                        href="{{ route('consultas.show', $consultation->id) }}#receta"
-                                        class="text-xs text-teal-600 dark:text-teal-400 hover:underline"
-                                    >
-                                        Ver consulta →
-                                    </a>
-                                </div>
-                            </div>
-                            <div class="space-y-1.5">
-                                @forelse ($consultation->prescriptions as $prescription)
-                                    @php
-                                        $medCount = $prescription->items->count();
-                                    @endphp
-
-                                    <div
-                                        class="flex items-center justify-between gap-3 rounded-lg bg-zinc-50 dark:bg-zinc-800/50 px-3 py-2"
-                                    >
-                                        <div class="flex items-center gap-2 min-w-0">
-                                            <flux:icon.clipboard-document-list
-                                                class="size-4 text-purple-400 shrink-0"
-                                            />
-                                            <span class="text-sm font-medium text-zinc-800 dark:text-zinc-200 truncate">
-                                                {{ $prescription->reason ?: 'Receta médica' }}
+                                <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition">
+                                    <td class="px-4 py-3 whitespace-nowrap">
+                                        <span class="font-medium text-zinc-800 dark:text-zinc-200">
+                                            {{ $consultaReceta?->consultation_date?->format('d/m/Y') ?? '—' }}
+                                        </span>
+                                        @if ($consultaReceta?->doctor)
+                                            <span class="block text-xs text-zinc-400 dark:text-zinc-500">
+                                                {{ $consultaReceta->doctor->full_name }}
                                             </span>
-                                        </div>
+                                        @endif
+                                    </td>
+                                    <td class="px-4 py-3 text-zinc-700 dark:text-zinc-300">
+                                        {{ $prescription->reason ?: 'Receta médica' }}
+                                    </td>
+                                    <td class="px-4 py-3 text-center whitespace-nowrap">
                                         <span
-                                            class="shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300"
+                                            class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300"
                                         >
                                             💊 {{ $medCount }} {{ Str::plural('medicamento', $medCount) }}
                                         </span>
-                                    </div>
-                                @empty
-                                    <p class="text-sm text-zinc-400 dark:text-zinc-500">
-                                        Receta sin medicamentos registrados.
-                                    </p>
-                                @endforelse
-                            </div>
-                        </div>
-                    @endforeach
+                                    </td>
+                                    <td class="px-4 py-3 whitespace-nowrap text-right">
+                                        <div class="inline-flex items-center gap-3">
+                                            @if ($consultaReceta)
+                                                <a
+                                                    href="{{ route('consultas.pdf.recetas.single', [$consultaReceta, $prescription]) }}"
+                                                    target="_blank"
+                                                    class="inline-flex items-center gap-1 text-xs font-medium text-emerald-600 dark:text-emerald-400 hover:underline"
+                                                >
+                                                    <flux:icon.document-arrow-down class="size-3.5" />
+                                                    PDF
+                                                </a>
+                                                <a
+                                                    href="{{ route('consultas.show', $consultaReceta->id) }}#receta"
+                                                    class="inline-flex items-center gap-1 text-xs font-medium text-teal-600 dark:text-teal-400 hover:underline"
+                                                >
+                                                    Ver consulta
+                                                    <flux:icon.arrow-right class="size-3" />
+                                                </a>
+                                            @endif
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
                 </div>
             @else
                 <p class="text-zinc-400 dark:text-zinc-500 text-sm italic">Sin recetas registradas.</p>

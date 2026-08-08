@@ -96,7 +96,7 @@ test('el historial de recetas agrupa varias recetas de una misma consulta', func
         ->assertSeeText('2 medicamentos');
 });
 
-test('el historial de recetas muestra el enlace al PDF de la consulta', function (): void {
+test('el historial de recetas muestra el enlace al PDF de cada receta', function (): void {
     $doctor = Doctor::factory()->create();
     $user = User::factory()->create(['doctor_id' => $doctor->id]);
     $patient = Patient::factory()->create();
@@ -112,8 +112,46 @@ test('el historial de recetas muestra el enlace al PDF de la consulta', function
     $this->actingAs($user)
         ->get(route('pacientes.recetas', $patient))
         ->assertOk()
-        ->assertSee(route('consultas.pdf.recetas.all', $consultation))
-        ->assertSee('dusk="prescription-pdf-'.$consultation->id.'"', false);
+        ->assertSee(route('consultas.pdf.recetas.single', [$consultation, $prescription]))
+        ->assertSee('dusk="prescription-pdf-'.$prescription->id.'"', false);
+});
+
+test('el historial de recetas pagina y no muestra una página interminable', function (): void {
+    $doctor = Doctor::factory()->create();
+    $user = User::factory()->create(['doctor_id' => $doctor->id]);
+    $patient = Patient::factory()->create();
+
+    // Paciente recurrente con muchas recetas (como en la obs de la clienta)
+    foreach (range(1, 20) as $i) {
+        $consultation = Consultation::factory()->create([
+            'patient_id' => $patient->id,
+            'doctor_id' => $doctor->id,
+            'status' => 'finalized',
+            'consultation_date' => now()->subDays(20 - $i),
+        ]);
+        $prescription = Prescription::factory()->create([
+            'consultation_id' => $consultation->id,
+            'reason' => 'Diagnóstico '.str_pad((string) $i, 2, '0', STR_PAD_LEFT),
+        ]);
+        PrescriptionItem::factory()->create(['prescription_id' => $prescription->id]);
+    }
+
+    // Primera página: las 15 recetas más recientes, las 5 más antiguas quedan fuera
+    $this->actingAs($user)
+        ->get(route('pacientes.recetas', $patient))
+        ->assertOk()
+        ->assertSeeText('Diagnóstico 20')
+        ->assertSeeText('Diagnóstico 06')
+        ->assertDontSeeText('Diagnóstico 05')
+        ->assertDontSeeText('Diagnóstico 01');
+
+    // Página 2: las recetas más antiguas
+    $this->actingAs($user)
+        ->get(route('pacientes.recetas', [$patient, 'page' => 2]))
+        ->assertOk()
+        ->assertSeeText('Diagnóstico 05')
+        ->assertSeeText('Diagnóstico 01')
+        ->assertDontSeeText('Diagnóstico 20');
 });
 
 test('la sección de historial de recetas del perfil resume con diagnóstico y conteo', function (): void {

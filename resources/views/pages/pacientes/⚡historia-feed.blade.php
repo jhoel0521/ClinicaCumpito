@@ -29,7 +29,7 @@ new class extends Component {
                 'soapNote',
                 'vitalSigns',
                 'prescriptions',
-                'laboratoryRequests',
+                'laboratoryRequests.items.results',
                 'patientVaccines',
             ])
                 ->where('patient_id', $this->patient->id)
@@ -119,12 +119,41 @@ new class extends Component {
                             class="flex items-start justify-between mb-3 border-b border-zinc-100 dark:border-zinc-800 pb-3"
                         >
                             <div>
-                                <div class="text-sm text-teal-600 dark:text-teal-400 font-bold mb-1">
+                                <div
+                                    class="text-sm text-teal-600 dark:text-teal-400 font-bold mb-1 flex flex-wrap items-center gap-2"
+                                >
                                     {{ $consultation->consultation_date->isoFormat('D [de] MMMM YYYY') }}
+                                    @if ($consultation->status)
+                                        @php
+                                            $estadoValue = $consultation->status->value();
+                                        @endphp
+
+                                        <span
+                                            @class([
+                                                'inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide',
+                                                'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300' => $estadoValue === 'finalized',
+                                                'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300' => $estadoValue === 'saved',
+                                            ])
+                                        >
+                                            {{ $estadoValue === 'finalized' ? 'Finalizada' : 'Guardada' }}
+                                        </span>
+                                    @endif
+
+                                    @if ($consultation->type)
+                                        <span
+                                            class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400"
+                                        >
+                                            {{ $consultation->type->value() === 'manual' ? 'Manual' : 'Digital' }}
+                                        </span>
+                                    @endif
                                 </div>
                                 @if ($patientAgeAt = $patient->ageAt($consultation->consultation_date))
                                     <div class="text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
-                                        Edad: {{ $patientAgeAt->forDisplayFull() }}
+                                        Edad: {{ $patientAgeAt->forDisplayPediatric() }}
+                                        @if ($patientAgeAt->months() < 24)
+                                            ·
+                                            {{ $patientAgeAt->months() === 0 ? 'Control del recién nacido' : 'Control de los ' . $patientAgeAt->months() . ' ' . ($patientAgeAt->months() === 1 ? 'mes' : 'meses') }}
+                                        @endif
                                     </div>
                                 @endif
 
@@ -150,7 +179,6 @@ new class extends Component {
                             $hasPrescription = $consultation->prescriptions->isNotEmpty();
                             $hasLaboratoryRequest = $consultation->laboratoryRequests->isNotEmpty();
                             $hasAppliedVaccine = $consultation->patientVaccines->isNotEmpty();
-                            $hasPendingLaboratories = $consultation->laboratoryRequests->contains(fn ($request) => $request->isPending());
                             $soapCards = [
                                 'Subjetivo' => $consultation->soapNote?->subjective,
                                 'Objetivo' => $consultation->soapNote?->objective,
@@ -209,21 +237,33 @@ new class extends Component {
                             @endif
 
                             @if ($hasLaboratoryRequest)
-                                <a
-                                    href="{{ route('consultas.show', $consultation) }}#laboratorio"
-                                    @class([
-                                        'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset transition-all duration-200 ease-out hover:-translate-y-px hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-zinc-900',
-                                        'bg-amber-50 text-amber-700 ring-amber-200 hover:bg-amber-100 focus:ring-amber-500 dark:bg-amber-900/30 dark:text-amber-300 dark:ring-amber-800 dark:hover:bg-amber-900/50' => $hasPendingLaboratories,
-                                        'bg-emerald-50 text-emerald-700 ring-emerald-200 hover:bg-emerald-100 focus:ring-emerald-500 dark:bg-emerald-900/30 dark:text-emerald-300 dark:ring-emerald-800 dark:hover:bg-emerald-900/50' => ! $hasPendingLaboratories,
-                                    ])
-                                    title="Abrir laboratorio en la consulta"
-                                    aria-label="Abrir laboratorio {{ $hasPendingLaboratories ? 'pendiente' : 'recibido' }} en la consulta"
-                                    dusk="view-laboratory-{{ $consultation->id }}"
-                                >
-                                    <flux:icon.beaker class="size-3.5" />
-                                    Laboratorio {{ $hasPendingLaboratories ? 'pendiente' : 'recibido' }}
-                                    <flux:icon.eye class="size-3.5" />
-                                </a>
+                                @foreach ($consultation->laboratoryRequests as $labReq)
+                                    @php
+                                        $labHasResults = $labReq->items->flatMap(fn ($i) => $i->results)->isNotEmpty();
+                                    @endphp
+
+                                    <a
+                                        href="{{ route('consultas.show', $consultation) }}#laboratorio"
+                                        @class([
+                                            'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset transition-all duration-200 ease-out hover:-translate-y-px hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-zinc-900',
+                                            'bg-amber-50 text-amber-700 ring-amber-200 hover:bg-amber-100 focus:ring-amber-500 dark:bg-amber-900/30 dark:text-amber-300 dark:ring-amber-800 dark:hover:bg-amber-900/50' => $labReq->isPending(),
+                                            'bg-emerald-50 text-emerald-700 ring-emerald-200 hover:bg-emerald-100 focus:ring-emerald-500 dark:bg-emerald-900/30 dark:text-emerald-300 dark:ring-emerald-800 dark:hover:bg-emerald-900/50' => ! $labReq->isPending(),
+                                        ])
+                                        title="Abrir laboratorio en la consulta"
+                                        aria-label="Abrir laboratorio {{ $labReq->isPending() ? 'pendiente' : 'con resultados' }} en la consulta"
+                                        dusk="view-laboratory-{{ $labReq->id }}"
+                                    >
+                                        <flux:icon.beaker class="size-3.5" />
+                                        @if ($labReq->isPending())
+                                            Laboratorio pendiente
+                                        @elseif ($labHasResults)
+                                            Resultados disponibles
+                                        @else
+                                                Laboratorio recibido
+                                        @endif
+                                        <flux:icon.eye class="size-3.5" />
+                                    </a>
+                                @endforeach
                             @else
                                 <span
                                     class="inline-flex items-center gap-1 rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-500 ring-1 ring-inset ring-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:ring-zinc-700"

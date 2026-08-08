@@ -1,7 +1,7 @@
 <?php
 
 use Livewire\Component;
-use App\Models\LaboratoryItemResult;
+use App\Contracts\LaboratoryItemResultServiceContract;
 use App\Models\LaboratoryRequest;
 
 new class extends Component {
@@ -12,6 +12,16 @@ new class extends Component {
 
     public function mount(LaboratoryRequest $laboratorio): void
     {
+        $patient = $laboratorio->consultation?->patient;
+
+        abort_unless(
+            $patient !== null &&
+                auth()
+                    ->user()
+                    ?->can('view', $patient),
+            403,
+        );
+
         $laboratorio->load(['consultation.patient', 'consultation.doctor', 'items.results', 'attachments']);
         $this->laboratoryRequest = $laboratorio;
     }
@@ -26,13 +36,15 @@ new class extends Component {
         }
 
         try {
-            LaboratoryItemResult::create([
-                'laboratory_request_item_id' => $itemId,
-                'consultation_id' => null,
-                'value' => ! empty($data['value']) ? trim($data['value']) : null,
-                'report_text' => ! empty($data['report']) ? trim($data['report']) : null,
-                'is_abnormal' => ! empty($data['abnormal']),
-            ]);
+            app(LaboratoryItemResultServiceContract::class)->create(
+                $itemId,
+                [
+                    'value' => ! empty($data['value']) ? trim((string) $data['value']) : null,
+                    'report_text' => ! empty($data['report']) ? trim((string) $data['report']) : null,
+                    'is_abnormal' => ! empty($data['abnormal']),
+                ],
+                $this->laboratoryRequest->consultation_id,
+            );
 
             $this->newResults[$itemId] = [];
             $this->laboratoryRequest->load([
@@ -50,7 +62,7 @@ new class extends Component {
     {
         $this->errorMessage = '';
         try {
-            LaboratoryItemResult::findOrFail($resultId)->delete();
+            app(LaboratoryItemResultServiceContract::class)->delete($resultId);
             $this->laboratoryRequest->load([
                 'consultation.patient',
                 'consultation.doctor',

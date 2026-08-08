@@ -1,5 +1,6 @@
 <?php
 
+use App\Contracts\LaboratoryItemResultServiceContract;
 use App\Contracts\LaboratoryRequestItemServiceContract;
 use App\Contracts\LaboratoryRequestServiceContract;
 use App\DTOs\LaboratoryRequestDTO;
@@ -7,7 +8,6 @@ use App\DTOs\LaboratoryRequestItemDTO;
 use App\Models\Consultation;
 use App\Models\LaboratoryAttachment;
 use App\Models\LaboratoryCategory;
-use App\Models\LaboratoryItemResult;
 use App\Models\LaboratoryRequest;
 use App\ValueObjects\ConsultationStatus;
 use Illuminate\Support\Facades\Storage;
@@ -431,13 +431,15 @@ new class extends Component {
                     continue;
                 }
 
-                LaboratoryItemResult::create([
-                    'laboratory_request_item_id' => $itemId,
-                    'consultation_id' => $this->consultationId,
-                    'value' => ! empty($data['value']) ? trim($data['value']) : null,
-                    'report_text' => ! empty($data['report']) ? trim($data['report']) : null,
-                    'is_abnormal' => ! empty($data['abnormal']),
-                ]);
+                app(LaboratoryItemResultServiceContract::class)->create(
+                    $itemId,
+                    [
+                        'value' => ! empty($data['value']) ? trim((string) $data['value']) : null,
+                        'report_text' => ! empty($data['report']) ? trim((string) $data['report']) : null,
+                        'is_abnormal' => ! empty($data['abnormal']),
+                    ],
+                    $this->consultationId,
+                );
 
                 unset($this->newResults[$itemId]);
                 $saved = true;
@@ -456,7 +458,7 @@ new class extends Component {
         $this->errorMessage = '';
 
         try {
-            LaboratoryItemResult::findOrFail($resultId)->delete();
+            app(LaboratoryItemResultServiceContract::class)->delete($resultId);
             $this->reload();
         } catch (\Throwable $e) {
             $this->errorMessage = 'Error al eliminar resultado: ' . $e->getMessage();

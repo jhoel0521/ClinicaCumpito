@@ -817,7 +817,7 @@
 
             @php
                 $ultimasVacunas = App\Models\PatientVaccine::where('patient_id', $patient->id)
-                    ->with(['vaccine', 'appliedByDoctor'])
+                    ->with(['vaccine', 'appliedByDoctor', 'consultation'])
                     ->orderByDesc('applied_at')
                     ->limit(5)
                     ->get();
@@ -832,26 +832,51 @@
                             class="bg-zinc-50 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 text-xs uppercase tracking-wide"
                         >
                             <tr>
-                                <th class="text-left px-4 py-3">Fecha</th>
+                                <th class="text-left px-4 py-3">Fecha de aplicación</th>
                                 <th class="text-left px-4 py-3">Vacuna</th>
-                                <th class="text-left px-4 py-3">Dosis</th>
-                                <th class="text-left px-4 py-3">Administrado por</th>
+                                <th class="text-center px-4 py-3">Dosis</th>
+                                <th class="text-right px-4 py-3">Acciones</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-zinc-100 dark:divide-zinc-800">
                             @foreach ($ultimasVacunas as $pv)
                                 <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition">
-                                    <td class="px-4 py-3 font-medium text-zinc-800 dark:text-zinc-200">
-                                        {{ $pv->applied_at?->format('d/m/Y') ?? '—' }}
+                                    <td class="px-4 py-3 whitespace-nowrap">
+                                        <span class="font-medium text-zinc-800 dark:text-zinc-200">
+                                            {{ $pv->applied_at?->format('d/m/Y') ?? '—' }}
+                                        </span>
+                                        @if ($pv->appliedByDoctor)
+                                            <span class="block text-xs text-zinc-400 dark:text-zinc-500">
+                                                {{ $pv->appliedByDoctor->full_name }}
+                                            </span>
+                                        @endif
                                     </td>
                                     <td class="px-4 py-3 text-zinc-800 dark:text-zinc-200 font-medium">
                                         {{ $pv->vaccine->name }}
                                     </td>
-                                    <td class="px-4 py-3 text-zinc-600 dark:text-zinc-400">
-                                        {{ $pv->dose_number }}
+                                    <td class="px-4 py-3 text-center whitespace-nowrap">
+                                        @if ($pv->dose_number)
+                                            <span
+                                                class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-teal-100 dark:bg-teal-900/40 text-teal-700 dark:text-teal-300"
+                                            >
+                                                {{ $pv->dose_number }}ª
+                                            </span>
+                                        @else
+                                            <span class="text-zinc-400 dark:text-zinc-500">—</span>
+                                        @endif
                                     </td>
-                                    <td class="px-4 py-3 text-zinc-600 dark:text-zinc-400">
-                                        {{ $pv->applied_elsewhere ? 'Otro lugar' : $pv->appliedByDoctor?->full_name ?? '—' }}
+                                    <td class="px-4 py-3 whitespace-nowrap text-right">
+                                        @if ($pv->consultation)
+                                            <a
+                                                href="{{ route('consultas.show', $pv->consultation->id) }}#vacunas"
+                                                class="inline-flex items-center gap-1 text-xs font-medium text-teal-600 dark:text-teal-400 hover:underline"
+                                            >
+                                                Ver consulta
+                                                <flux:icon.arrow-right class="size-3" />
+                                            </a>
+                                        @else
+                                            <span class="text-zinc-400 dark:text-zinc-500">—</span>
+                                        @endif
                                     </td>
                                 </tr>
                             @endforeach

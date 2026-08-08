@@ -64,32 +64,53 @@ new class extends Component {
                             </span>
                             <span>{{ $consultation->doctor?->full_name ?? '—' }}</span>
                         </div>
-                        <a
-                            href="{{ route('consultas.show', $consultation->id) }}"
-                            class="text-xs text-teal-600 dark:text-teal-400 hover:underline"
-                            wire:navigate
-                        >
-                            Ver consulta →
-                        </a>
+                        <div class="flex items-center gap-3">
+                            @if ($consultation->prescriptions->isNotEmpty())
+                                <a
+                                    href="{{ route('consultas.pdf.recetas.all', $consultation) }}"
+                                    target="_blank"
+                                    class="inline-flex items-center gap-1 text-xs font-medium text-emerald-600 dark:text-emerald-400 hover:underline"
+                                    dusk="prescription-pdf-{{ $consultation->id }}"
+                                >
+                                    <flux:icon.document-arrow-down class="size-3.5" />
+                                    PDF
+                                </a>
+                            @endif
+
+                            <a
+                                href="{{ route('consultas.show', $consultation->id) }}#receta"
+                                class="text-xs text-teal-600 dark:text-teal-400 hover:underline"
+                                wire:navigate
+                            >
+                                Ver consulta →
+                            </a>
+                        </div>
                     </div>
-                    <ul class="space-y-1.5 text-sm">
-                        @foreach ($consultation->prescriptions->flatMap(fn ($p) => $p->items) as $item)
-                            <li class="flex gap-3 items-start">
-                                <span class="text-purple-400 flex-shrink-0">💊</span>
-                                <div class="text-zinc-700 dark:text-zinc-300">
-                                    <span class="font-medium">{{ $item->medication_name }}</span>
-                                    <span class="text-zinc-500 dark:text-zinc-400">
-                                        — {{ $item->dose }} · {{ $item->frequency }} · {{ $item->duration }}
+                    <div class="space-y-1.5">
+                        @forelse ($consultation->prescriptions as $prescription)
+                            @php
+                                $medCount = $prescription->items->count();
+                            @endphp
+
+                            <div
+                                class="flex items-center justify-between gap-3 rounded-lg bg-zinc-50 dark:bg-zinc-800/50 px-3 py-2"
+                            >
+                                <div class="flex items-center gap-2 min-w-0">
+                                    <flux:icon.clipboard-document-list class="size-4 text-purple-400 shrink-0" />
+                                    <span class="text-sm font-medium text-zinc-800 dark:text-zinc-200 truncate">
+                                        {{ $prescription->reason ?: 'Receta médica' }}
                                     </span>
-                                    @if ($item->instructions)
-                                        <span class="text-zinc-400 dark:text-zinc-500">
-                                            ({{ $item->instructions }})
-                                        </span>
-                                    @endif
                                 </div>
-                            </li>
-                        @endforeach
-                    </ul>
+                                <span
+                                    class="shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300"
+                                >
+                                    💊 {{ $medCount }} {{ Str::plural('medicamento', $medCount) }}
+                                </span>
+                            </div>
+                        @empty
+                            <p class="text-sm text-zinc-400 dark:text-zinc-500">Receta sin medicamentos registrados.</p>
+                        @endforelse
+                    </div>
                 </div>
             @endforeach
         </div>

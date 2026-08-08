@@ -23,8 +23,6 @@ new class extends Component {
 
     public string $errorMessage = '';
 
-    public bool $canDelete = false;
-
     public function mount(string $consultationId): void
     {
         $consultation = Consultation::with(['patient', 'doctor'])->findOrFail($consultationId);
@@ -38,10 +36,6 @@ new class extends Component {
         $this->patient = $consultation->patient;
         $this->patientName = $consultation->patient->full_name;
         $this->doctorName = $consultation->doctor->full_name;
-        $this->canDelete =
-            auth()
-                ->user()
-                ?->can('delete', $consultation) ?? false;
     }
 
     /**
@@ -188,35 +182,6 @@ new class extends Component {
                             class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-red-500/90 hover:bg-red-400 text-white transition"
                         >
                             Descartar borrador
-                        </button>
-                    </form>
-                @endif
-
-                @if ($canDelete && ! $isFinalized)
-                    @php
-                        $fechaEliminar = $consultation_date
-                            ? \Carbon\Carbon::parse($consultation_date)->format('d/m/Y')
-                            : 'fecha sin definir';
-                        $controlEliminar = $this->ageAtConsultation()?->months() ?? null;
-                        $confirmDelete =
-                            '¿Eliminar la consulta del ' .
-                            $fechaEliminar .
-                            ($controlEliminar !== null && $controlEliminar < 24
-                                ? ' (control de los ' . $controlEliminar . ' meses)'
-                                : '') .
-                            '? Esta acción no se puede deshacer.';
-                    @endphp
-
-                    <form action="{{ route('consultas.destroy', $consultationId) }}" method="POST">
-                        @csrf
-                        @method('DELETE')
-                        <button
-                            type="submit"
-                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-red-500/90 hover:bg-red-400 text-white transition"
-                            onclick="return confirm('{{ $confirmDelete }}');"
-                            dusk="delete-consultation"
-                        >
-                            Eliminar consulta
                         </button>
                     </form>
                 @endif

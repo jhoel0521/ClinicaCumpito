@@ -7,7 +7,6 @@ use App\Models\LaboratoryRequestItem;
 use App\Models\Patient;
 use App\Models\User;
 use Carbon\Carbon;
-use Livewire\Livewire;
 use Spatie\Permission\Models\Role;
 
 beforeEach(function (): void {
@@ -17,26 +16,6 @@ beforeEach(function (): void {
 
 afterEach(function (): void {
     Carbon::setTestNow();
-});
-
-test('el admin ve el botón de eliminar con fecha y control en la confirmación', function (): void {
-    $admin = User::factory()->create()->assignRole('Admin');
-    $doctor = Doctor::factory()->create();
-    // Nació el 7 de enero de 2026 -> el 7 de agosto de 2026 tiene 7 meses
-    $patient = Patient::factory()->create(['date_of_birth' => '2026-01-07']);
-    $consultation = Consultation::factory()->create([
-        'patient_id' => $patient->id,
-        'doctor_id' => $doctor->id,
-        'status' => 'saved',
-        'consultation_date' => '2026-08-07 09:30:00',
-    ]);
-
-    $response = $this->actingAs($admin)
-        ->get(route('consultas.show', $consultation))
-        ->assertOk();
-
-    $response->assertSee('dusk="delete-consultation"', false);
-    $response->assertSee('¿Eliminar la consulta del 07/08/2026 (control de los 7 meses)? Esta acción no se puede deshacer.');
 });
 
 test('el admin elimina una consulta guardada y deja de aparecer en el historial del paciente', function (): void {
@@ -105,18 +84,31 @@ test('un doctor sin rol admin no puede eliminar consultas', function (): void {
     $this->assertDatabaseHas('consultations', ['id' => $consultation->id, 'deleted_at' => null]);
 });
 
-test('el header no muestra el botón de eliminar para quienes no pueden borrar', function (): void {
+test('el header de consulta solo ofrece descartar borrador, sin botón de eliminar consulta', function (): void {
     $doctor = Doctor::factory()->create();
     $user = User::factory()->create(['doctor_id' => $doctor->id]);
     $patient = Patient::factory()->create();
-    $consultation = Consultation::factory()->create([
+
+    $draft = Consultation::factory()->create([
+        'patient_id' => $patient->id,
+        'doctor_id' => $doctor->id,
+        'status' => 'draft',
+    ]);
+    $saved = Consultation::factory()->create([
         'patient_id' => $patient->id,
         'doctor_id' => $doctor->id,
         'status' => 'saved',
     ]);
 
     Livewire::actingAs($user)
-        ->test('consultation-header', ['consultationId' => $consultation->id])
+        ->test('consultation-header', ['consultationId' => $draft->id])
         ->assertOk()
+        ->assertSeeText('Descartar borrador')
+        ->assertDontSee('dusk="delete-consultation"', false);
+
+    Livewire::actingAs($user)
+        ->test('consultation-header', ['consultationId' => $saved->id])
+        ->assertOk()
+        ->assertDontSeeText('Descartar borrador')
         ->assertDontSee('dusk="delete-consultation"', false);
 });

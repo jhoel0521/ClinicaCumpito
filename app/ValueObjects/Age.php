@@ -98,6 +98,38 @@ class Age implements Stringable
         return $parts === [] ? $last : implode(', ', $parts).' y '.$last;
     }
 
+    /**
+     * Edad pediátrica para consultas: en menores de 24 meses se expresa
+     * principalmente en meses (con días cuando corresponde, ej: "12 meses"
+     * o "7 meses y 3 días"); desde los 24 meses pasa al formato completo.
+     */
+    public function forDisplayPediatric(): string
+    {
+        $diff = $this->birthDate->diff($this->referenceDate);
+        $totalMonths = $diff->y * 12 + $diff->m;
+
+        if ($totalMonths < 24) {
+            $parts = [];
+
+            if ($totalMonths > 0) {
+                $parts[] = $totalMonths.' '.($totalMonths === 1 ? 'mes' : 'meses');
+            }
+            if ($diff->d > 0) {
+                $parts[] = $diff->d.' '.($diff->d === 1 ? 'día' : 'días');
+            }
+
+            if ($parts === []) {
+                return '0 días';
+            }
+
+            $last = array_pop($parts);
+
+            return $parts === [] ? $last : implode(', ', $parts).' y '.$last;
+        }
+
+        return $this->forDisplayFull();
+    }
+
     public function __toString(): string
     {
         return $this->forDisplay();

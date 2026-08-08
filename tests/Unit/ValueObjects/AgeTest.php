@@ -70,4 +70,23 @@ describe('Age', function () {
             ->and(Age::fromDates('2024-08-02')->forDisplayFull())->toBe('2 años')
             ->and(Age::fromDates('2026-08-02')->forDisplayFull())->toBe('0 días');
     });
+
+    test('forDisplayPediatric muestra 12 meses exactos en meses', function () {
+        Carbon::setTestNow('2026-01-07');
+
+        expect(Age::fromDates('2025-01-07')->forDisplayPediatric())->toBe('12 meses');
+    });
+
+    test('forDisplayPediatric muestra meses y días en menores de 24 meses', function () {
+        Carbon::setTestNow('2026-08-07');
+
+        expect(Age::fromDates('2026-01-01')->forDisplayPediatric())->toBe('7 meses y 6 días')
+            ->and(Age::fromDates('2026-08-07')->forDisplayPediatric())->toBe('0 días');
+    });
+
+    test('forDisplayPediatric usa años y meses desde los 24 meses', function () {
+        Carbon::setTestNow('2026-08-02');
+
+        expect(Age::fromDates('2024-04-17')->forDisplayPediatric())->toBe('2 años, 3 meses y 16 días');
+    });
 });

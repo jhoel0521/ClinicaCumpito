@@ -55,6 +55,28 @@ test('el banner de una consulta finalizada muestra la edad histórica aunque hoy
         ->assertDontSeeText('Edad actual');
 });
 
+test('una consulta a los 12 meses sigue mostrando "12 meses" aunque hoy tenga más edad', function (): void {
+    $doctor = Doctor::factory()->create();
+    $user = User::factory()->create(['doctor_id' => $doctor->id]);
+    // Nació el 7 de enero de 2025 -> el 7 de enero de 2026 tiene 12 meses exactos
+    $patient = Patient::factory()->create([
+        'date_of_birth' => '2025-01-07',
+    ]);
+    $consultation = Consultation::factory()->create([
+        'patient_id' => $patient->id,
+        'doctor_id' => $doctor->id,
+        'status' => 'finalized',
+        'consultation_date' => '2026-01-07 09:30:00',
+    ]);
+
+    // Hoy (agosto 2026) el paciente tiene 19 meses, pero la consulta debe mostrar 12
+    $this->actingAs($user)
+        ->get(route('consultas.show', $consultation))
+        ->assertOk()
+        ->assertSeeText('Edad en la consulta: 12 meses')
+        ->assertDontSeeText('Edad actual');
+});
+
 test('el banner de un borrador muestra la edad actual del paciente', function (): void {
     $doctor = Doctor::factory()->create();
     $user = User::factory()->create(['doctor_id' => $doctor->id]);

@@ -220,3 +220,8 @@ input[type="checkbox"] {
 .animate-fade-in-up {
     animation: fadeInUp 0.6s ease-out;
 }
+
+/* Elementos controlados por Alpine (modales, galerías) ocultos hasta montar */
+[x-cloak] {
+    display: none !important;
+}

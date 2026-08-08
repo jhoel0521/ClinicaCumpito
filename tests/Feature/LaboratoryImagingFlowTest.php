@@ -161,8 +161,6 @@ test('laboratorio de imagen: se pide en consulta 1, se cierra, y en consulta 2 s
         ->assertSeeText('informe-radiografia.pdf')
         ->assertSeeText('placa-axial.jpg')
         ->assertSeeText('Documentos Adjuntos');
-
-    // Los archivos quedaron guardados en el disco público
     $archivosEnDisco = Storage::disk('public')->allFiles('lab-attachments/'.$orden->id);
 
     expect($archivosEnDisco)->toHaveCount(2);

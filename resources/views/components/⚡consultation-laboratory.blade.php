@@ -1019,8 +1019,8 @@ new class extends Component {
                                     @endif
                                 @endif
 
-                                {{-- File attachments per item (received status only) --}}
-                                @if ($labReq['status'] === 'received')
+                                {{-- File attachments per item --}}
+                                @if ($labReq['status'] === 'received' || ! $finalized)
                                     @foreach ($labReq['items'] as $item)
                                         @if (count($item['attachments']) > 0 || ! $finalized)
                                             <div
@@ -1029,32 +1029,24 @@ new class extends Component {
                                                 <span class="text-xs text-gray-500 dark:text-gray-400 font-medium mr-1">
                                                     {{ $item['parameter_name'] ?? '(examen completo)' }}:
                                                 </span>
-                                                @foreach ($item['attachments'] as $att)
-                                                    <div
-                                                        class="inline-flex items-center gap-1 px-2 py-0.5 rounded border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-xs text-gray-700 dark:text-gray-300"
-                                                    >
-                                                        <a
-                                                            href="{{ $att['url'] }}"
-                                                            target="_blank"
-                                                            class="flex items-center gap-1 hover:text-sky-600 transition"
-                                                        >
-                                                            @if ($att['is_image'])
-                                                                <flux:icon.photo class="size-3.5 text-sky-500" />
-                                                            @else
-                                                                <flux:icon.document class="size-3.5 text-red-500" />
-                                                            @endif
-                                                            {{ $att['original_name'] ?? 'Archivo' }}
-                                                        </a>
-                                                        @if (! $finalized)
-                                                            <button
-                                                                wire:click="deleteAttachment('{{ $att['id'] }}')"
-                                                                class="ml-1 text-gray-400 hover:text-red-500 transition"
-                                                            >
-                                                                <flux:icon.x-mark class="size-3" />
-                                                            </button>
-                                                        @endif
-                                                    </div>
-                                                @endforeach
+                                                @php
+                                                    $itemViewerItems = collect($item['attachments'])
+                                                        ->map(
+                                                            fn ($att) => [
+                                                                'id' => $att['id'],
+                                                                'name' => $att['original_name'] ?? 'Archivo',
+                                                                'url' => $att['url'],
+                                                                'type' => $att['is_pdf'] ? 'pdf' : 'image',
+                                                            ],
+                                                        )
+                                                        ->values()
+                                                        ->all();
+                                                @endphp
+
+                                                <x-lab-attachments-viewer
+                                                    :items="$itemViewerItems"
+                                                    :can-delete="! $finalized"
+                                                />
 
                                                 @if (! $finalized)
                                                     @if ($attachingToItemId === $item['id'] && $attachingToRequestId === $labReq['id'])
@@ -1122,50 +1114,32 @@ new class extends Component {
                             </div>
                         @endif
 
-                        {{-- Archivos de toda la solicitud (solo si received) --}}
-                        @if ($labReq['status'] === 'received')
+                        {{-- Archivos de toda la solicitud (siempre que se pueda editar o ya esté recibida) --}}
+                        @if ($labReq['status'] === 'received' || ! $finalized)
                             <div class="rounded-xl border border-gray-200 dark:border-zinc-700 p-3">
                                 <p
                                     class="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide mb-2"
                                 >
                                     Archivos de la solicitud
                                 </p>
-                                <div class="flex flex-wrap gap-2 items-center">
-                                    @foreach ($labReq['orderAttachments'] as $att)
-                                        <div
-                                            class="inline-flex items-center gap-1 px-2 py-1 rounded border border-gray-200 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800 text-xs text-gray-700 dark:text-gray-300"
-                                        >
-                                            @if ($att['is_image'])
-                                                <a
-                                                    href="{{ $att['url'] }}"
-                                                    target="_blank"
-                                                    class="flex items-center gap-1 hover:text-sky-600 transition"
-                                                >
-                                                    <flux:icon.photo class="size-3.5 text-sky-500" />
-                                                    {{ $att['original_name'] ?? 'Imagen' }}
-                                                </a>
-                                            @else
-                                                <a
-                                                    href="{{ $att['url'] }}"
-                                                    target="_blank"
-                                                    class="flex items-center gap-1 hover:text-sky-600 transition"
-                                                >
-                                                    <flux:icon.document class="size-3.5 text-red-500" />
-                                                    {{ $att['original_name'] ?? 'Documento' }}
-                                                </a>
-                                            @endif
-                                            @if (! $finalized)
-                                                <button
-                                                    wire:click="deleteAttachment('{{ $att['id'] }}')"
-                                                    class="ml-1 text-gray-400 hover:text-red-500 transition"
-                                                >
-                                                    <flux:icon.x-mark class="size-3" />
-                                                </button>
-                                            @endif
-                                        </div>
-                                    @endforeach
+                                @php
+                                    $orderViewerItems = collect($labReq['orderAttachments'])
+                                        ->map(
+                                            fn ($att) => [
+                                                'id' => $att['id'],
+                                                'name' => $att['original_name'] ?? 'Archivo',
+                                                'url' => $att['url'],
+                                                'type' => $att['is_pdf'] ? 'pdf' : 'image',
+                                            ],
+                                        )
+                                        ->values()
+                                        ->all();
+                                @endphp
 
-                                    @if (! $finalized)
+                                <x-lab-attachments-viewer :items="$orderViewerItems" :can-delete="! $finalized" />
+
+                                @if (! $finalized)
+                                    <div class="mt-3">
                                         @if ($attachingToItemId === null && $attachingToRequestId === $labReq['id'])
                                             <label
                                                 class="inline-flex items-center gap-1.5 px-2 py-1 rounded border border-sky-300 dark:border-sky-700 bg-sky-50 dark:bg-sky-900/20 text-xs text-sky-700 dark:text-sky-300 cursor-pointer hover:bg-sky-100 transition"
@@ -1204,8 +1178,8 @@ new class extends Component {
                                                 Adjuntar a la solicitud
                                             </button>
                                         @endif
-                                    @endif
-                                </div>
+                                    </div>
+                                @endif
                             </div>
                         @endif
 

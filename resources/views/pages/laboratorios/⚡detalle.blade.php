@@ -2,13 +2,22 @@
 
 use Livewire\Component;
 use App\Contracts\LaboratoryItemResultServiceContract;
+use App\Models\LaboratoryAttachment;
 use App\Models\LaboratoryRequest;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Livewire\WithFileUploads;
 
 new class extends Component {
+    use WithFileUploads;
+
     public LaboratoryRequest $laboratoryRequest;
 
     public array $newResults = [];
     public string $errorMessage = '';
+
+    public bool $attachingToRequest = false;
+    public $newAttachmentFile = null;
 
     public function mount(LaboratoryRequest $laboratorio): void
     {
@@ -47,12 +56,7 @@ new class extends Component {
             );
 
             $this->newResults[$itemId] = [];
-            $this->laboratoryRequest->load([
-                'consultation.patient',
-                'consultation.doctor',
-                'items.results',
-                'attachments',
-            ]);
+            $this->reload();
         } catch (\Throwable $e) {
             $this->errorMessage = 'Error al guardar: ' . $e->getMessage();
         }
@@ -63,12 +67,7 @@ new class extends Component {
         $this->errorMessage = '';
         try {
             app(LaboratoryItemResultServiceContract::class)->delete($resultId);
-            $this->laboratoryRequest->load([
-                'consultation.patient',
-                'consultation.doctor',
-                'items.results',
-                'attachments',
-            ]);
+            $this->reload();
         } catch (\Throwable $e) {
             $this->errorMessage = 'Error al eliminar: ' . $e->getMessage();
         }
@@ -83,6 +82,68 @@ new class extends Component {
         } catch (\Throwable $e) {
             $this->errorMessage = 'Error: ' . $e->getMessage();
         }
+    }
+
+    public function openAttachment(): void
+    {
+        $this->attachingToRequest = true;
+        $this->newAttachmentFile = null;
+    }
+
+    public function uploadAttachment(): void
+    {
+        if (! $this->attachingToRequest) {
+            return;
+        }
+
+        $this->errorMessage = '';
+
+        $this->validate([
+            'newAttachmentFile' => ['required', 'file', 'mimes:jpeg,jpg,png,webp,pdf', 'max:10240'],
+        ]);
+
+        try {
+            $file = $this->newAttachmentFile;
+            $ext = $file->getClientOriginalExtension();
+            $mime = $file->getMimeType() ?? 'application/octet-stream';
+            $uuid = (string) Str::uuid();
+            $path = 'lab-attachments/' . $this->laboratoryRequest->id . '/' . $uuid . '.' . $ext;
+
+            $file->storeAs('lab-attachments/' . $this->laboratoryRequest->id, $uuid . '.' . $ext, 'public');
+
+            LaboratoryAttachment::create([
+                'laboratory_request_id' => $this->laboratoryRequest->id,
+                'laboratory_request_item_id' => null,
+                'file_path' => $path,
+                'original_name' => $file->getClientOriginalName(),
+                'mime_type' => $mime,
+            ]);
+
+            $this->newAttachmentFile = null;
+            $this->attachingToRequest = false;
+            $this->reload();
+        } catch (\Throwable $e) {
+            $this->errorMessage = 'Error al subir archivo: ' . $e->getMessage();
+        }
+    }
+
+    public function deleteAttachment(string $attachmentId): void
+    {
+        $this->errorMessage = '';
+
+        try {
+            $attachment = LaboratoryAttachment::findOrFail($attachmentId);
+            Storage::disk('public')->delete($attachment->file_path);
+            $attachment->delete();
+            $this->reload();
+        } catch (\Throwable $e) {
+            $this->errorMessage = 'Error al eliminar archivo: ' . $e->getMessage();
+        }
+    }
+
+    private function reload(): void
+    {
+        $this->laboratoryRequest->load(['consultation.patient', 'consultation.doctor', 'items.results', 'attachments']);
     }
 };
 ?>
@@ -269,7 +330,7 @@ new class extends Component {
             </div>
         </div>
 
-        @if ($laboratoryRequest->attachments->isNotEmpty())
+        @if ($laboratoryRequest->attachments->isNotEmpty() || $laboratoryRequest->status === 'pending')
             <div
                 class="bg-white dark:bg-zinc-900 shadow-sm border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6"
             >
@@ -278,33 +339,67 @@ new class extends Component {
                     Documentos Adjuntos
                 </h2>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                    @foreach ($laboratoryRequest->attachments as $att)
-                        <a
-                            href="{{ Storage::url($att->file_path) }}"
-                            target="_blank"
-                            class="flex items-center gap-3 p-3 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition group"
-                        >
-                            <div
-                                class="p-2 bg-white dark:bg-zinc-900 rounded-lg shadow-sm group-hover:shadow text-teal-600 dark:text-teal-400"
+                @php
+                    $viewerItems = $laboratoryRequest->attachments
+                        ->map(
+                            fn ($att) => [
+                                'id' => $att->id,
+                                'name' => $att->original_name ?? 'Archivo',
+                                'url' => Storage::url($att->file_path),
+                                'type' => $att->isPdf() ? 'pdf' : 'image',
+                            ],
+                        )
+                        ->values()
+                        ->all();
+                @endphp
+
+                <x-lab-attachments-viewer
+                    :items="$viewerItems"
+                    :can-delete="$laboratoryRequest->status === 'pending'"
+                />
+
+                @if ($laboratoryRequest->status === 'pending')
+                    <div class="mt-4 flex items-center gap-2">
+                        @if ($attachingToRequest)
+                            <label
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-sky-300 dark:border-sky-700 bg-sky-50 dark:bg-sky-900/20 text-sm text-sky-700 dark:text-sky-300 cursor-pointer hover:bg-sky-100 transition"
                             >
-                                @if (Str::endsWith(strtolower($att->file_path), '.pdf'))
-                                    <flux:icon.document-text class="size-6" />
-                                @else
-                                    <flux:icon.photo class="size-6" />
-                                @endif
-                            </div>
-                            <div class="overflow-hidden">
-                                <p
-                                    class="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate"
-                                    title="{{ $att->original_name }}"
+                                <flux:icon.paper-clip class="size-4" />
+                                Elegir archivo
+                                <input
+                                    type="file"
+                                    wire:model="newAttachmentFile"
+                                    accept=".jpg,.jpeg,.png,.webp,.pdf"
+                                    class="sr-only"
+                                />
+                            </label>
+                            @if ($newAttachmentFile)
+                                <button
+                                    wire:click="uploadAttachment"
+                                    wire:loading.attr="disabled"
+                                    class="px-3 py-1.5 text-sm rounded-lg bg-sky-600 hover:bg-sky-700 text-white transition disabled:opacity-50"
                                 >
-                                    {{ $att->original_name ?? 'Documento' }}
-                                </p>
-                            </div>
-                        </a>
-                    @endforeach
-                </div>
+                                    Subir
+                                </button>
+                            @endif
+
+                            <button
+                                wire:click="$set('attachingToRequest', false)"
+                                class="text-zinc-400 hover:text-zinc-600 transition text-sm"
+                            >
+                                ×
+                            </button>
+                        @else
+                            <button
+                                wire:click="openAttachment"
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-sky-300 dark:border-sky-700 text-sky-600 dark:text-sky-400 hover:bg-sky-50 dark:hover:bg-sky-900/20 transition text-sm font-medium"
+                            >
+                                <flux:icon.paper-clip class="size-4" />
+                                Adjuntar imagen / PDF como respaldo
+                            </button>
+                        @endif
+                    </div>
+                @endif
             </div>
         @endif
     </div>

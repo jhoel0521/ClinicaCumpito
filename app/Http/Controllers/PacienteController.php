@@ -5,10 +5,12 @@ namespace App\Http\Controllers;
 use App\DTOs\PacienteDTO;
 use App\Http\Requests\StorePacienteRequest;
 use App\Http\Requests\UpdatePacienteRequest;
+use App\Models\Consultation;
 use App\Models\LaboratoryRequest;
 use App\Models\MedicalCondition;
 use App\Models\Patient;
 use App\Models\PatientVaccine;
+use App\Models\Prescription;
 use App\Models\Vaccine;
 use App\Services\PacienteService;
 use Illuminate\View\View;
@@ -77,6 +79,17 @@ class PacienteController extends Controller
             ->limit(3)
             ->get();
 
+        $recentPrescriptions = Prescription::query()
+            ->whereHas('consultation', fn ($q) => $q->where('patient_id', $patient->id))
+            ->with(['items', 'consultation.doctor'])
+            ->orderByDesc(
+                Consultation::select('consultation_date')
+                    ->whereColumn('consultations.id', 'prescriptions.consultation_id')
+                    ->limit(1)
+            )
+            ->limit(3)
+            ->get();
+
         $recentLaboratoryRequests = LaboratoryRequest::whereHas(
             'consultation', fn ($q) => $q->where('patient_id', $patient->id)
         )
@@ -112,6 +125,7 @@ class PacienteController extends Controller
             'latestConsultation',
             'recentConsultations',
             'recentConsultasConReceta',
+            'recentPrescriptions',
             'recentLaboratoryRequests',
             'totalConsultaciones',
             'missingVaccinesCount',

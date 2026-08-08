@@ -80,6 +80,7 @@ RUN mkdir -p \
         storage/logs \
         bootstrap/cache \
     && chown -R www-data:www-data storage bootstrap/cache \
+    && ln -s /var/www/html/storage/app/public /var/www/html/public/storage \
     && chmod 755 /usr/local/bin/production-entrypoint
 
 ENTRYPOINT ["production-entrypoint"]

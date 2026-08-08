@@ -34,6 +34,10 @@
             <a href="#historial-vacunas" class="text-teal-600 dark:text-teal-400 hover:underline whitespace-nowrap">
                 Vacunas
             </a>
+            <span class="text-zinc-300 dark:text-zinc-600">·</span>
+            <a href="#controles-mensuales" class="text-teal-600 dark:text-teal-400 hover:underline whitespace-nowrap">
+                Controles
+            </a>
         </nav>
 
         {{-- ═══════════════════════════════════════════════════════════════════ --}}
@@ -517,6 +521,15 @@
         <hr class="border-zinc-200 dark:border-zinc-800" />
 
         {{-- ═══════════════════════════════════════════════════════════════════ --}}
+        {{-- SECCIÓN 3B: CONTROLES MENSUALES 0-24 MESES --}}
+        {{-- ═══════════════════════════════════════════════════════════════════ --}}
+        <section id="controles-mensuales" dusk="section-controles-mensuales" class="scroll-mt-16">
+            <livewire:monthly-follow-up :patient="$patient" />
+        </section>
+
+        <hr class="border-zinc-200 dark:border-zinc-800" />
+
+        {{-- ═══════════════════════════════════════════════════════════════════ --}}
         {{-- SECCIÓN 4: HISTORIAL DE CONSULTAS --}}
         {{-- ═══════════════════════════════════════════════════════════════════ --}}
         <section id="historial-consultas" dusk="section-historial-consultas" class="scroll-mt-16">
@@ -780,12 +793,21 @@
                                         </span>
                                     </td>
                                     <td class="px-4 py-3 text-right">
-                                        <a
-                                            href="{{ route('pacientes.laboratorios.show', [$patient, $lab]) }}"
-                                            class="text-teal-600 dark:text-teal-400 hover:underline text-xs font-medium"
-                                        >
-                                            Ver →
-                                        </a>
+                                        @if ($isPending)
+                                            <a
+                                                href="{{ route('pacientes.laboratorios.show', [$patient, $lab]) }}"
+                                                class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-xs font-medium transition"
+                                            >
+                                                Registrar resultados
+                                            </a>
+                                        @else
+                                            <a
+                                                href="{{ route('pacientes.laboratorios.show', [$patient, $lab]) }}"
+                                                class="text-teal-600 dark:text-teal-400 hover:underline text-xs font-medium"
+                                            >
+                                                Ver →
+                                            </a>
+                                        @endif
                                     </td>
                                 </tr>
                             @endforeach

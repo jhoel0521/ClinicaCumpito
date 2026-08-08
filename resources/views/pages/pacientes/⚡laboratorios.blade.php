@@ -105,13 +105,25 @@ new class extends Component {
                                     >
                                         {{ $labStatusLabel }}
                                     </span>
-                                    <a
-                                        href="{{ route('pacientes.laboratorios.show', [$patient, $lab]) }}"
-                                        class="text-xs text-teal-600 dark:text-teal-400 hover:underline font-medium"
-                                        wire:navigate
-                                    >
-                                        Ver →
-                                    </a>
+
+                                    @if ($isPending)
+                                        <a
+                                            href="{{ route('pacientes.laboratorios.show', [$patient, $lab]) }}"
+                                            class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-xs font-medium transition"
+                                            wire:navigate
+                                            dusk="register-results-{{ $lab->id }}"
+                                        >
+                                            Registrar resultados
+                                        </a>
+                                    @else
+                                        <a
+                                            href="{{ route('pacientes.laboratorios.show', [$patient, $lab]) }}"
+                                            class="text-xs text-teal-600 dark:text-teal-400 hover:underline font-medium"
+                                            wire:navigate
+                                        >
+                                            Ver →
+                                        </a>
+                                    @endif
                                 </div>
                             </div>
                         @endforeach

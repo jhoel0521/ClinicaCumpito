@@ -2,6 +2,7 @@
 
 use App\Models\Consultation;
 use App\Models\Doctor;
+use App\Models\LaboratoryItemResult;
 use App\Models\LaboratoryRequest;
 use App\Models\LaboratoryRequestItem;
 use App\Models\Patient;
@@ -87,7 +88,7 @@ test('el feed resume la información clínica registrada en cada consulta', func
         ->assertDontSeeText($medicationName);
 
     expect(substr_count($response->getContent(), 'dusk="view-prescription-'.$consultation->id.'"'))->toBe(1)
-        ->and(substr_count($response->getContent(), 'dusk="view-laboratory-'.$consultation->id.'"'))->toBe(1);
+        ->and(substr_count($response->getContent(), 'dusk="view-laboratory-'.$laboratoryRequest->id.'"'))->toBe(1);
 });
 
 test('el feed identifica información clínica pendiente o ausente', function (): void {
@@ -166,4 +167,74 @@ test('el feed muestra la edad del paciente junto a la fecha de cada consulta', f
         ->assertSeeText('Edad: 7 meses');
 
     Carbon::setTestNow();
+});
+
+test('el feed muestra el estado y el tipo de cada consulta', function (): void {
+    $user = User::factory()->create();
+    $patient = Patient::factory()->create();
+    Consultation::factory()->create([
+        'patient_id' => $patient->id,
+        'status' => 'finalized',
+        'type' => 'digital',
+    ]);
+    Consultation::factory()->create([
+        'patient_id' => $patient->id,
+        'status' => 'saved',
+        'type' => 'manual',
+    ]);
+
+    $this->actingAs($user)
+        ->get(route('pacientes.feed', $patient))
+        ->assertOk()
+        ->assertSeeText('Finalizada')
+        ->assertSeeText('Guardada')
+        ->assertSeeText('Digital')
+        ->assertSeeText('Manual');
+});
+
+test('el feed identifica el control mensual en menores de 24 meses', function (): void {
+    Carbon::setTestNow('2026-08-07 10:00:00');
+
+    $user = User::factory()->create();
+    $patient = Patient::factory()->create([
+        'date_of_birth' => '2026-01-07',
+    ]);
+    Consultation::factory()->create([
+        'patient_id' => $patient->id,
+        'status' => 'saved',
+        'consultation_date' => '2026-08-07 09:30:00',
+    ]);
+
+    $this->actingAs($user)
+        ->get(route('pacientes.feed', $patient))
+        ->assertOk()
+        ->assertSeeText('Control de los 7 meses');
+
+    Carbon::setTestNow();
+});
+
+test('el feed muestra "Resultados disponibles" cuando el laboratorio recibido tiene resultados', function (): void {
+    $user = User::factory()->create();
+    $patient = Patient::factory()->create();
+    $consultation = Consultation::factory()->create([
+        'patient_id' => $patient->id,
+        'status' => 'saved',
+    ]);
+    $labRequest = LaboratoryRequest::factory()->create([
+        'consultation_id' => $consultation->id,
+        'status' => 'received',
+    ]);
+    $item = LaboratoryRequestItem::factory()->create([
+        'laboratory_request_id' => $labRequest->id,
+    ]);
+    LaboratoryItemResult::factory()->create([
+        'laboratory_request_item_id' => $item->id,
+        'consultation_id' => $consultation->id,
+    ]);
+
+    $this->actingAs($user)
+        ->get(route('pacientes.feed', $patient))
+        ->assertOk()
+        ->assertSeeText('Resultados disponibles')
+        ->assertDontSeeText('Laboratorio recibido');
 });

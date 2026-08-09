@@ -66,6 +66,7 @@ new class extends Component {
                                 'id' => $i->id,
                                 'medication_name' => $i->medication_name,
                                 'dose' => $i->dose,
+                                'administration_route' => $i->administration_route ?? '',
                                 'quantity' => $i->quantity ?? '',
                                 'frequency' => $i->frequency,
                                 'duration' => $i->duration,
@@ -92,7 +93,15 @@ new class extends Component {
 
         $this->errorMessage = '';
 
-        $allowedFields = ['medication_name', 'dose', 'quantity', 'frequency', 'duration', 'instructions'];
+        $allowedFields = [
+            'medication_name',
+            'dose',
+            'administration_route',
+            'quantity',
+            'frequency',
+            'duration',
+            'instructions',
+        ];
         if (! in_array($field, $allowedFields, true)) {
             return;
         }
@@ -113,6 +122,7 @@ new class extends Component {
             $dto = new PrescriptionItemDTO(
                 medication_name: $item['medication_name'],
                 dose: $item['dose'],
+                administration_route: $item['administration_route'] !== '' ? $item['administration_route'] : null,
                 quantity: $item['quantity'] !== '' ? $item['quantity'] : null,
                 frequency: $item['frequency'],
                 duration: $item['duration'],
@@ -258,6 +268,7 @@ new class extends Component {
                     'id' => $item->id,
                     'medication_name' => '',
                     'dose' => '',
+                    'administration_route' => '',
                     'quantity' => '',
                     'frequency' => '',
                     'duration' => '',
@@ -440,6 +451,11 @@ new class extends Component {
                                         <th
                                             class="border border-gray-200 dark:border-zinc-700 px-2 py-1.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide"
                                         >
+                                            Vía
+                                        </th>
+                                        <th
+                                            class="border border-gray-200 dark:border-zinc-700 px-2 py-1.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide"
+                                        >
                                             Cantidad
                                         </th>
                                         <th
@@ -502,6 +518,25 @@ new class extends Component {
                                                 @else
                                                     <span class="block px-2 py-1.5 text-gray-700 dark:text-gray-300">
                                                         {{ $item['dose'] }}
+                                                    </span>
+                                                @endif
+                                            </td>
+                                            <td class="border border-gray-200 dark:border-zinc-700 p-0">
+                                                @if (! $finalized)
+                                                    <textarea
+                                                        x-data
+                                                        x-init="$el.value = $el.dataset.val || '';
+                                                    $el.style.height = $el.scrollHeight + 'px'"
+                                                        @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'"
+                                                        data-val="{{ $item['administration_route'] }}"
+                                                        wire:change="updateItemField('{{ $prescription['id'] }}', '{{ $item['id'] }}', 'administration_route', $event.target.value)"
+                                                        rows="1"
+                                                        placeholder="Vía (oral, tópica...)"
+                                                        class="{{ $inpCell }}"
+                                                    ></textarea>
+                                                @else
+                                                    <span class="block px-2 py-1.5 text-gray-700 dark:text-gray-300">
+                                                        {{ $item['administration_route'] ?: '—' }}
                                                     </span>
                                                 @endif
                                             </td>

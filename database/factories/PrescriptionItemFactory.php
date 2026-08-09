@@ -19,6 +19,7 @@ class PrescriptionItemFactory extends Factory
             'prescription_id' => Prescription::factory(),
             'medication_name' => $this->faker->words(2, true),
             'dose' => '5 ml',
+            'administration_route' => $this->faker->optional()->randomElement(['Oral', 'Tópica', 'Intramuscular', 'Inhalatoria']),
             'frequency' => 'Cada 8 horas',
             'duration' => '5 días',
             'instructions' => $this->faker->optional()->sentence(),

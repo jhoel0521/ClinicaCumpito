@@ -20,11 +20,12 @@
                 <table class="data-table">
                     <thead>
                         <tr>
-                            <th style="width: 26%">Medicamento</th>
-                            <th style="width: 18%">Dosis</th>
-                            <th style="width: 16%">Cantidad</th>
-                            <th style="width: 20%">Frecuencia</th>
-                            <th style="width: 20%">Duración</th>
+                            <th style="width: 24%">Medicamento</th>
+                            <th style="width: 14%">Dosis</th>
+                            <th style="width: 12%">Vía</th>
+                            <th style="width: 14%">Cantidad</th>
+                            <th style="width: 18%">Frecuencia</th>
+                            <th style="width: 18%">Duración</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -32,13 +33,14 @@
                             <tr>
                                 <td><strong>{{ $item->medication_name }}</strong></td>
                                 <td>{{ $item->dose ?: '—' }}</td>
+                                <td>{{ $item->administration_route ?: '—' }}</td>
                                 <td>{{ $item->quantity ?: '—' }}</td>
                                 <td>{{ $item->frequency ?: '—' }}</td>
                                 <td>{{ $item->duration ?: '—' }}</td>
                             </tr>
                             @if ($item->instructions)
                                 <tr class="instructions-row">
-                                    <td colspan="5">{{ $item->instructions }}</td>
+                                    <td colspan="6">{{ $item->instructions }}</td>
                                 </tr>
                             @endif
                         @endforeach

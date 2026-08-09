@@ -104,7 +104,7 @@ new class extends Component {
                                 <div class="inline-flex items-center gap-3">
                                     @if ($consultation)
                                         <a
-                                            href="{{ route('consultas.pdf.recetas.single', [$consultation, $prescription]) }}"
+                                            href="{{ route('documentos.recetas.preview', $prescription) }}"
                                             target="_blank"
                                             class="inline-flex items-center gap-1 text-xs font-medium text-emerald-600 dark:text-emerald-400 hover:underline"
                                             dusk="prescription-pdf-{{ $prescription->id }}"

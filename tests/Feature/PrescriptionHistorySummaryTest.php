@@ -112,7 +112,7 @@ test('el historial de recetas muestra el enlace al PDF de cada receta', function
     $this->actingAs($user)
         ->get(route('pacientes.recetas', $patient))
         ->assertOk()
-        ->assertSee(route('consultas.pdf.recetas.single', [$consultation, $prescription]))
+        ->assertSee(route('documentos.recetas.preview', $prescription))
         ->assertSee('dusk="prescription-pdf-'.$prescription->id.'"', false);
 });
 

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ClinicalDocumentController;
 use App\Http\Controllers\PacienteController;
 use Illuminate\Support\Facades\Route;
 
@@ -33,6 +34,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('laboratorios.show');
     Route::livewire('pacientes/{patient}/laboratorios/{laboratorio}', 'pages::laboratorios.detalle')
         ->name('pacientes.laboratorios.show');
+
+    // Documentos clínicos (módulo común de recetas y laboratorios)
+    Route::get('documentos/recetas/{prescription}/preview', [ClinicalDocumentController::class, 'recetaPreview'])
+        ->name('documentos.recetas.preview');
+    Route::get('documentos/recetas/{prescription}/pdf', [ClinicalDocumentController::class, 'recetaPdf'])
+        ->name('documentos.recetas.pdf');
+    Route::get('documentos/laboratorios/{laboratoryRequest}/preview', [ClinicalDocumentController::class, 'ordenPreview'])
+        ->name('documentos.laboratorios.preview');
+    Route::get('documentos/laboratorios/{laboratoryRequest}/pdf', [ClinicalDocumentController::class, 'ordenPdf'])
+        ->name('documentos.laboratorios.pdf');
 });
 
 require __DIR__.'/settings.php';

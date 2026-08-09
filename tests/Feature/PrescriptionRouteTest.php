@@ -88,3 +88,56 @@ test('la vía es opcional y se guarda como nula si no se indica', function (): v
 
     expect($updated->administration_route)->toBeNull();
 });
+
+test('la receta tiene un solo campo unificado de dosis y cantidad, sin cantidad separada', function (): void {
+    $doctor = Doctor::factory()->create();
+    $user = User::factory()->create(['doctor_id' => $doctor->id]);
+    $patient = Patient::factory()->create();
+    $consultation = Consultation::factory()->create([
+        'patient_id' => $patient->id,
+        'doctor_id' => $doctor->id,
+        'status' => 'saved',
+    ]);
+    $prescription = Prescription::factory()->create(['consultation_id' => $consultation->id]);
+    PrescriptionItem::factory()->create([
+        'prescription_id' => $prescription->id,
+        'dose' => '5 ml · 1 frasco 60 ml',
+    ]);
+
+    $response = $this->actingAs($user)
+        ->get(route('consultas.show', $consultation))
+        ->assertOk()
+        ->assertSeeText('Dosis / Cantidad')
+        ->assertDontSeeText('placeholder="Cantidad"')
+        ->assertDontSeeText('>Cantidad</th>');
+
+    expect($response->getContent())->not->toContain('quantity');
+});
+
+test('el PDF de receta muestra un solo campo unificado de dosis y cantidad', function (): void {
+    ClinicSetting::create(['name' => 'Clínica Cumpito Test']);
+    $doctor = Doctor::factory()->create();
+    $user = User::factory()->create(['doctor_id' => $doctor->id]);
+    $patient = Patient::factory()->create();
+    $consultation = Consultation::factory()->create([
+        'patient_id' => $patient->id,
+        'doctor_id' => $doctor->id,
+        'status' => 'finalized',
+    ]);
+    $prescription = Prescription::factory()->create(['consultation_id' => $consultation->id]);
+    PrescriptionItem::factory()->create([
+        'prescription_id' => $prescription->id,
+        'medication_name' => 'Amoxicilina',
+        'dose' => '5 ml · 1 frasco 60 ml',
+    ]);
+
+    $html = view('pdf.prescription-single', [
+        'consultation' => $consultation,
+        'prescription' => $prescription,
+        'clinic' => ClinicSetting::current(),
+    ])->render();
+
+    expect($html)->toContain('Dosis / Cantidad')
+        ->and($html)->toContain('5 ml · 1 frasco 60 ml')
+        ->and($html)->not->toContain('quantity');
+});

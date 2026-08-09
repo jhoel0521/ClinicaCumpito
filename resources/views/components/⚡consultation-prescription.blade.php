@@ -67,7 +67,6 @@ new class extends Component {
                                 'medication_name' => $i->medication_name,
                                 'dose' => $i->dose,
                                 'administration_route' => $i->administration_route ?? '',
-                                'quantity' => $i->quantity ?? '',
                                 'frequency' => $i->frequency,
                                 'duration' => $i->duration,
                                 'instructions' => $i->instructions ?? '',
@@ -93,15 +92,7 @@ new class extends Component {
 
         $this->errorMessage = '';
 
-        $allowedFields = [
-            'medication_name',
-            'dose',
-            'administration_route',
-            'quantity',
-            'frequency',
-            'duration',
-            'instructions',
-        ];
+        $allowedFields = ['medication_name', 'dose', 'administration_route', 'frequency', 'duration', 'instructions'];
         if (! in_array($field, $allowedFields, true)) {
             return;
         }
@@ -123,7 +114,6 @@ new class extends Component {
                 medication_name: $item['medication_name'],
                 dose: $item['dose'],
                 administration_route: $item['administration_route'] !== '' ? $item['administration_route'] : null,
-                quantity: $item['quantity'] !== '' ? $item['quantity'] : null,
                 frequency: $item['frequency'],
                 duration: $item['duration'],
                 instructions: $item['instructions'] !== '' ? $item['instructions'] : null,
@@ -254,7 +244,6 @@ new class extends Component {
             $dto = new PrescriptionItemDTO(
                 medication_name: '',
                 dose: '',
-                quantity: null,
                 frequency: '',
                 duration: '',
                 instructions: null,
@@ -269,7 +258,6 @@ new class extends Component {
                     'medication_name' => '',
                     'dose' => '',
                     'administration_route' => '',
-                    'quantity' => '',
                     'frequency' => '',
                     'duration' => '',
                     'instructions' => '',
@@ -446,17 +434,12 @@ new class extends Component {
                                         <th
                                             class="border border-gray-200 dark:border-zinc-700 px-2 py-1.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide"
                                         >
-                                            Dosis
+                                            Dosis / Cantidad
                                         </th>
                                         <th
                                             class="border border-gray-200 dark:border-zinc-700 px-2 py-1.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide"
                                         >
                                             Vía
-                                        </th>
-                                        <th
-                                            class="border border-gray-200 dark:border-zinc-700 px-2 py-1.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide"
-                                        >
-                                            Cantidad
                                         </th>
                                         <th
                                             class="border border-gray-200 dark:border-zinc-700 px-2 py-1.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide"
@@ -512,7 +495,7 @@ new class extends Component {
                                                         data-val="{{ $item['dose'] }}"
                                                         wire:change="updateItemField('{{ $prescription['id'] }}', '{{ $item['id'] }}', 'dose', $event.target.value)"
                                                         rows="1"
-                                                        placeholder="Dosis *"
+                                                        placeholder="Dosis y cantidad (ej: 5 ml, 1 frasco...)"
                                                         class="{{ $inpCell }}"
                                                     ></textarea>
                                                 @else
@@ -537,25 +520,6 @@ new class extends Component {
                                                 @else
                                                     <span class="block px-2 py-1.5 text-gray-700 dark:text-gray-300">
                                                         {{ $item['administration_route'] ?: '—' }}
-                                                    </span>
-                                                @endif
-                                            </td>
-                                            <td class="border border-gray-200 dark:border-zinc-700 p-0">
-                                                @if (! $finalized)
-                                                    <textarea
-                                                        x-data
-                                                        x-init="$el.value = $el.dataset.val || '';
-                                                    $el.style.height = $el.scrollHeight + 'px'"
-                                                        @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'"
-                                                        data-val="{{ $item['quantity'] }}"
-                                                        wire:change="updateItemField('{{ $prescription['id'] }}', '{{ $item['id'] }}', 'quantity', $event.target.value)"
-                                                        rows="1"
-                                                        placeholder="Cantidad"
-                                                        class="{{ $inpCell }}"
-                                                    ></textarea>
-                                                @else
-                                                    <span class="block px-2 py-1.5 text-gray-700 dark:text-gray-300">
-                                                        {{ $item['quantity'] ?: '—' }}
                                                     </span>
                                                 @endif
                                             </td>

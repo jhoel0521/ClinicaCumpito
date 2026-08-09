@@ -80,7 +80,6 @@ class PrescriptionService implements PrescriptionServiceContract
                 'prescription_id' => $prescriptionId,
                 'medication_name' => $medicationName,
                 'dose' => $templateItem->dose ?? '',
-                'quantity' => $templateItem->quantity,
                 'frequency' => $templateItem->frequency ?? '',
                 'duration' => $templateItem->duration ?? '',
                 'instructions' => $templateItem->instructions,

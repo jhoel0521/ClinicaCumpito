@@ -8,7 +8,6 @@ class PrescriptionItemDTO
         public readonly string $medication_name,
         public readonly string $dose,
         public readonly ?string $administration_route,
-        public readonly ?string $quantity,
         public readonly string $frequency,
         public readonly string $duration,
         public readonly ?string $instructions,
@@ -24,9 +23,6 @@ class PrescriptionItemDTO
             dose: (string) $data['dose'],
             administration_route: isset($data['administration_route']) && $data['administration_route'] !== ''
                 ? (string) $data['administration_route']
-                : null,
-            quantity: isset($data['quantity']) && $data['quantity'] !== ''
-                ? (string) $data['quantity']
                 : null,
             frequency: (string) $data['frequency'],
             duration: (string) $data['duration'],
@@ -45,7 +41,6 @@ class PrescriptionItemDTO
             'medication_name' => $this->medication_name,
             'dose' => $this->dose,
             'administration_route' => $this->administration_route,
-            'quantity' => $this->quantity,
             'frequency' => $this->frequency,
             'duration' => $this->duration,
             'instructions' => $this->instructions,

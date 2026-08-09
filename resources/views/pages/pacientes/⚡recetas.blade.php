@@ -66,7 +66,7 @@ new class extends Component {
                     <tr>
                         <th class="text-left px-4 py-3">Fecha</th>
                         <th class="text-left px-4 py-3">Diagnóstico</th>
-                        <th class="text-center px-4 py-3">Cantidad</th>
+                        <th class="text-center px-4 py-3">Medicamentos</th>
                         <th class="text-right px-4 py-3">Acciones</th>
                     </tr>
                 </thead>

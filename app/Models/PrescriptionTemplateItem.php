@@ -18,7 +18,6 @@ class PrescriptionTemplateItem extends Model
         'template_id',
         'custom_medication_name',
         'dose',
-        'quantity',
         'frequency',
         'duration',
         'instructions',

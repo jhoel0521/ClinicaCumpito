@@ -46,6 +46,25 @@ class ConsultationFactory extends Factory
         });
     }
 
+    public function configure(): static
+    {
+        return $this->afterMaking(function (Consultation $consultation): void {
+            // La fecha de consulta nunca puede ser anterior al nacimiento del
+            // paciente (Age lanza "fecha de nacimiento no puede ser futura").
+            $patient = Patient::query()->find($consultation->patient_id);
+
+            if ($patient?->date_of_birth === null) {
+                return;
+            }
+
+            $minDate = $patient->date_of_birth->copy()->addDay();
+
+            if ($consultation->consultation_date < $minDate) {
+                $consultation->consultation_date = $minDate;
+            }
+        });
+    }
+
     public function scanned(): self
     {
         return $this->state(function (array $attributes) {

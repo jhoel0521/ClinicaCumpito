@@ -19,7 +19,6 @@ class StorePrescriptionItemRequest extends FormRequest
         return [
             'medication_name' => ['required', 'string', 'max:255'],
             'dose' => ['required', 'string', 'max:255'],
-            'quantity' => ['nullable', 'string', 'max:255'],
             'frequency' => ['required', 'string', 'max:255'],
             'duration' => ['required', 'string', 'max:255'],
             'instructions' => ['nullable', 'string', 'max:2000'],

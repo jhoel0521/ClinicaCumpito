@@ -78,9 +78,7 @@
             {{-- Datos del paciente con líneas --}}
             @php
                 $pat = $consultation->patient;
-                $ageStr = $pat?->date_of_birth
-                    ? \App\ValueObjects\Age::fromDates($pat->date_of_birth, $consultation->consultation_date)->forDisplayPediatric()
-                    : '';
+                $ageStr = $pat?->date_of_birth ? \App\ValueObjects\Age::fromDates($pat->date_of_birth, $consultation->consultation_date)->forDisplayPediatric() : '';
             @endphp
 
             <table class="patient-row">

@@ -107,9 +107,7 @@
             {{-- Datos del paciente --}}
             @php
                 $pat = $consultation->patient;
-                $ageStr = $pat?->date_of_birth
-                    ? \App\ValueObjects\Age::fromDates($pat->date_of_birth, $consultation->consultation_date)->forDisplayPediatric()
-                    : '';
+                $ageStr = $pat?->date_of_birth ? \App\ValueObjects\Age::fromDates($pat->date_of_birth, $consultation->consultation_date)->forDisplayPediatric() : '';
                 $labs = $consultation->laboratoryRequests;
                 $total = $labs->count();
                 $cols = $total === 0 ? 1 : ($total === 1 ? 1 : ($total === 2 ? 2 : 3));

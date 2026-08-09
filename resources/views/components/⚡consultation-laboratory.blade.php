@@ -244,6 +244,7 @@ new class extends Component {
             $this->reload();
         } catch (\Throwable $e) {
             $this->errorMessage = 'Error al agregar laboratorio: ' . $e->getMessage();
+            $this->dispatch('notify', type: 'error', message: $this->errorMessage);
         }
     }
 
@@ -289,6 +290,7 @@ new class extends Component {
             }
         } catch (\Throwable $e) {
             $this->errorMessage = 'Error al eliminar: ' . $e->getMessage();
+            $this->dispatch('notify', type: 'error', message: $this->errorMessage);
         }
     }
 
@@ -335,6 +337,7 @@ new class extends Component {
             app(LaboratoryRequestServiceContract::class)->update($requestId, $dto);
         } catch (\Throwable $e) {
             $this->errorMessage = 'Error al guardar: ' . $e->getMessage();
+            $this->dispatch('notify', type: 'error', message: $this->errorMessage);
         }
     }
 
@@ -404,6 +407,7 @@ new class extends Component {
             $this->reload();
         } catch (\Throwable $e) {
             $this->errorMessage = 'Error al eliminar: ' . $e->getMessage();
+            $this->dispatch('notify', type: 'error', message: $this->errorMessage);
         }
     }
 
@@ -455,6 +459,7 @@ new class extends Component {
             }
         } catch (\Throwable $e) {
             $this->errorMessage = 'Error al guardar resultados: ' . $e->getMessage();
+            $this->dispatch('notify', type: 'error', message: $this->errorMessage);
         }
     }
 
@@ -467,6 +472,7 @@ new class extends Component {
             $this->reload();
         } catch (\Throwable $e) {
             $this->errorMessage = 'Error al eliminar resultado: ' . $e->getMessage();
+            $this->dispatch('notify', type: 'error', message: $this->errorMessage);
         }
     }
 
@@ -514,6 +520,7 @@ new class extends Component {
             $this->reload();
         } catch (\Throwable $e) {
             $this->errorMessage = 'Error al subir archivo: ' . $e->getMessage();
+            $this->dispatch('notify', type: 'error', message: $this->errorMessage);
         }
     }
 
@@ -528,6 +535,7 @@ new class extends Component {
             $this->reload();
         } catch (\Throwable $e) {
             $this->errorMessage = 'Error al eliminar archivo: ' . $e->getMessage();
+            $this->dispatch('notify', type: 'error', message: $this->errorMessage);
         }
     }
 }; ?>
@@ -818,7 +826,7 @@ new class extends Component {
                         @if (! $finalized)
                             <button
                                 wire:click="deleteLabRequest('{{ $labReq['id'] }}')"
-                                wire:confirm="¿Eliminar esta solicitud y todos sus datos?"
+                                data-swal-confirm="¿Eliminar esta solicitud y todos sus datos?"
                                 class="text-red-400 hover:text-red-600 dark:hover:text-red-300 transition p-1 flex-shrink-0"
                                 title="Eliminar"
                             >

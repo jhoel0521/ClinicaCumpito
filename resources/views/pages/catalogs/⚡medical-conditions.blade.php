@@ -143,7 +143,7 @@ new class extends Component {
                                 size="sm"
                                 icon="trash"
                                 wire:click="delete('{{ $condition->id }}')"
-                                wire:confirm="{{ __('¿Eliminar esta condición médica?') }}"
+                                data-swal-confirm="{{ __('¿Eliminar esta condición médica?') }}"
                             />
                         </td>
                     </tr>

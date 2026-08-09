@@ -21,15 +21,7 @@
             </div>
         </div>
 
-        <!-- Mensajes Flash -->
-        @if (session('success'))
-            <x-ui.alert type="success" class="mb-4">
-                <p class="flex items-center gap-2">
-                    <i class="fas fa-check-circle"></i>
-                    {{ session('success') }}
-                </p>
-            </x-ui.alert>
-        @endif
+        <!-- Mensajes Flash (toast en el layout) -->
 
         <!-- Componente de Búsqueda y Lista (Livewire) -->
         <livewire:patient-list />

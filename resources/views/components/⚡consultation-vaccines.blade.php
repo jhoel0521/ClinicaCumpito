@@ -130,6 +130,7 @@ new class extends Component {
 
         if ($appliedAt->isFuture()) {
             $this->errorMessage = 'La fecha de aplicación no puede ser futura.';
+            $this->dispatch('notify', type: 'error', message: $this->errorMessage);
 
             return;
         }
@@ -155,6 +156,7 @@ new class extends Component {
             $this->reload();
         } catch (\Throwable $e) {
             $this->errorMessage = 'Error al registrar vacuna: ' . $e->getMessage();
+            $this->dispatch('notify', type: 'error', message: $this->errorMessage);
         }
     }
 
@@ -169,6 +171,7 @@ new class extends Component {
             $this->reload();
         } catch (\Throwable $e) {
             $this->errorMessage = 'Error al eliminar: ' . $e->getMessage();
+            $this->dispatch('notify', type: 'error', message: $this->errorMessage);
         }
     }
 }; ?>

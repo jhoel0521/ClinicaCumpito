@@ -121,6 +121,7 @@ new class extends Component {
             app(PrescriptionItemServiceContract::class)->update($itemId, $dto);
         } catch (\Throwable $e) {
             $this->errorMessage = 'Error al guardar: ' . $e->getMessage();
+            $this->dispatch('notify', type: 'error', message: $this->errorMessage);
         }
     }
 
@@ -156,6 +157,7 @@ new class extends Component {
             }
         } catch (\Throwable $e) {
             $this->errorMessage = 'Error al crear receta: ' . $e->getMessage();
+            $this->dispatch('notify', type: 'error', message: $this->errorMessage);
         }
     }
 
@@ -172,6 +174,7 @@ new class extends Component {
             $this->reload();
         } catch (\Throwable $e) {
             $this->errorMessage = 'Error al aplicar plantilla: ' . $e->getMessage();
+            $this->dispatch('notify', type: 'error', message: $this->errorMessage);
         }
     }
 
@@ -190,6 +193,7 @@ new class extends Component {
             );
         } catch (\Throwable $e) {
             $this->errorMessage = 'Error al eliminar receta: ' . $e->getMessage();
+            $this->dispatch('notify', type: 'error', message: $this->errorMessage);
         }
     }
 
@@ -211,6 +215,7 @@ new class extends Component {
             }
         } catch (\Throwable $e) {
             $this->errorMessage = 'Error al eliminar medicamento: ' . $e->getMessage();
+            $this->dispatch('notify', type: 'error', message: $this->errorMessage);
         }
     }
 
@@ -229,6 +234,7 @@ new class extends Component {
             $this->reload();
         } catch (\Throwable $e) {
             $this->errorMessage = 'Error al crear receta con plantilla: ' . $e->getMessage();
+            $this->dispatch('notify', type: 'error', message: $this->errorMessage);
         }
     }
 
@@ -265,6 +271,7 @@ new class extends Component {
             }
         } catch (\Throwable $e) {
             $this->errorMessage = 'Error al agregar fila: ' . $e->getMessage();
+            $this->dispatch('notify', type: 'error', message: $this->errorMessage);
         }
     }
 }; ?>
@@ -411,7 +418,7 @@ new class extends Component {
                         @if (! $finalized)
                             <button
                                 wire:click="deletePrescription('{{ $prescription['id'] }}')"
-                                wire:confirm="¿Eliminar esta receta y todos sus medicamentos?"
+                                data-swal-confirm="¿Eliminar esta receta y todos sus medicamentos?"
                                 class="text-red-400 hover:text-red-600 dark:hover:text-red-300 transition p-1"
                                 title="Eliminar receta"
                             >
@@ -568,7 +575,7 @@ new class extends Component {
                                                 >
                                                     <button
                                                         wire:click="removeItem('{{ $prescription['id'] }}', '{{ $item['id'] }}')"
-                                                        wire:confirm="¿Eliminar este medicamento?"
+                                                        data-swal-confirm="¿Eliminar este medicamento?"
                                                         wire:loading.attr="disabled"
                                                         dusk="rx-remove-item"
                                                         class="p-1 rounded text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-300 transition"

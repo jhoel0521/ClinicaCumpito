@@ -70,6 +70,7 @@ new class extends Component {
             $this->saved = true;
         } catch (\Throwable $e) {
             $this->errorMessage = 'Error al guardar: ' . $e->getMessage();
+            $this->dispatch('notify', type: 'error', message: $this->errorMessage);
         }
     }
 }; ?>

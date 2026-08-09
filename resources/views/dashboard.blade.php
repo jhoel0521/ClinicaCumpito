@@ -270,48 +270,5 @@
             </div>
         </div>
 
-        {{-- Banner de estado del sistema --}}
-        <div
-            class="rounded-xl bg-gradient-to-r from-teal-600 to-teal-700 dark:from-teal-800 dark:to-teal-900 p-5 shadow-sm"
-        >
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div class="flex items-start gap-3">
-                    <i class="fas fa-check-circle text-teal-200 text-2xl mt-0.5"></i>
-                    <div>
-                        <h4 class="font-bold text-white">Sistema en operación</h4>
-                        <p class="text-teal-200 text-sm mt-0.5">
-                            Módulos activos: Pacientes · Consultas SOAP · Recetas · Laboratorios · Vacunas ·
-                            Plantillas · Catálogos · Gráficas OMS
-                        </p>
-                    </div>
-                </div>
-                <div class="flex flex-wrap gap-2 shrink-0">
-                    <div class="text-center bg-teal-500/40 rounded-lg px-3 py-1.5">
-                        <p class="text-white font-bold text-lg leading-none">
-                            {{ \App\Models\PrescriptionTemplate::count() }}
-                        </p>
-                        <p class="text-teal-200 text-xs">Plantillas</p>
-                    </div>
-                    <div class="text-center bg-teal-500/40 rounded-lg px-3 py-1.5">
-                        <p class="text-white font-bold text-lg leading-none">
-                            {{ \App\Models\Vaccine::count() }}
-                        </p>
-                        <p class="text-teal-200 text-xs">Vacunas PAI</p>
-                    </div>
-                    <div class="text-center bg-teal-500/40 rounded-lg px-3 py-1.5">
-                        <p class="text-white font-bold text-lg leading-none">
-                            {{ \App\Models\OmsCatalogoGrafica::count() }}
-                        </p>
-                        <p class="text-teal-200 text-xs">Boletas OMS</p>
-                    </div>
-                    <div class="text-center bg-teal-500/40 rounded-lg px-3 py-1.5">
-                        <p class="text-white font-bold text-lg leading-none">
-                            {{ \App\Models\LaboratoryExam::count() }}
-                        </p>
-                        <p class="text-teal-200 text-xs">Exámenes lab</p>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
 </x-layouts::app>

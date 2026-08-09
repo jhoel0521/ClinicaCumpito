@@ -71,7 +71,7 @@ test('el feed resume la información clínica registrada en cada consulta', func
         ->assertOk()
         ->assertSeeText('SOAP registrado')
         ->assertSeeText('Receta')
-        ->assertSeeText('Laboratorio recibido')
+        ->assertSeeText('Completado')
         ->assertSeeText('Vacuna aplicada')
         ->assertSee(route('consultas.show', $consultation).'#receta')
         ->assertSee(route('consultas.show', $consultation).'#laboratorio')
@@ -213,7 +213,7 @@ test('el feed identifica el control mensual en menores de 24 meses', function ()
     Carbon::setTestNow();
 });
 
-test('el feed muestra "Resultados disponibles" cuando el laboratorio recibido tiene resultados', function (): void {
+test('el feed muestra "Con resultado" cuando la orden pendiente tiene resultados y "Completado" si fue recibida', function (): void {
     $user = User::factory()->create();
     $patient = Patient::factory()->create();
     $consultation = Consultation::factory()->create([
@@ -222,7 +222,7 @@ test('el feed muestra "Resultados disponibles" cuando el laboratorio recibido ti
     ]);
     $labRequest = LaboratoryRequest::factory()->create([
         'consultation_id' => $consultation->id,
-        'status' => 'received',
+        'status' => 'pending',
     ]);
     $item = LaboratoryRequestItem::factory()->create([
         'laboratory_request_id' => $labRequest->id,
@@ -235,6 +235,7 @@ test('el feed muestra "Resultados disponibles" cuando el laboratorio recibido ti
     $this->actingAs($user)
         ->get(route('pacientes.feed', $patient))
         ->assertOk()
-        ->assertSeeText('Resultados disponibles')
-        ->assertDontSeeText('Laboratorio recibido');
+        ->assertSeeText('Con resultado')
+        ->assertDontSeeText('Laboratorio recibido')
+        ->assertDontSeeText('Resultados disponibles');
 });

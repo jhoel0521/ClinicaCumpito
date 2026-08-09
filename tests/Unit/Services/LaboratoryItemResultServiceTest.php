@@ -123,6 +123,73 @@ describe('LaboratoryItemResultService', function () {
             ->toThrow(DomainException::class);
     });
 
+    test('update modifica el valor y el informe de un resultado dentro de la ventana de 3 días', function () {
+        $service = app(LaboratoryItemResultService::class);
+        $consultation = Consultation::factory()->create(['status' => 'saved']);
+        $labRequest = LaboratoryRequest::factory()->create([
+            'consultation_id' => $consultation->id,
+            'status' => 'pending',
+        ]);
+        $item = LaboratoryRequestItem::factory()->create([
+            'laboratory_request_id' => $labRequest->id,
+        ]);
+        $result = LaboratoryItemResult::factory()->create([
+            'laboratory_request_item_id' => $item->id,
+            'consultation_id' => $consultation->id,
+            'value' => '10.0',
+            'is_abnormal' => false,
+        ]);
+
+        $updated = $service->update($result->id, [
+            'value' => '11.5',
+            'report_text' => 'Corregido tras revisión',
+            'is_abnormal' => true,
+        ]);
+
+        expect($updated->value)->toBe('11.5')
+            ->and($updated->report_text)->toBe('Corregido tras revisión')
+            ->and($updated->is_abnormal)->toBeTrue();
+    });
+
+    test('update falla fuera de la ventana de 3 días', function () {
+        $service = app(LaboratoryItemResultService::class);
+        $consultation = Consultation::factory()->create(['status' => 'saved']);
+        $labRequest = LaboratoryRequest::factory()->create([
+            'consultation_id' => $consultation->id,
+            'status' => 'pending',
+            'created_at' => now()->subDays(5),
+        ]);
+        $item = LaboratoryRequestItem::factory()->create([
+            'laboratory_request_id' => $labRequest->id,
+        ]);
+        $result = LaboratoryItemResult::factory()->create([
+            'laboratory_request_item_id' => $item->id,
+            'consultation_id' => $consultation->id,
+        ]);
+
+        expect(fn () => $service->update($result->id, ['value' => '9.0']))
+            ->toThrow(DomainException::class, '3 días');
+    });
+
+    test('update falla si la orden ya está recibida', function () {
+        $service = app(LaboratoryItemResultService::class);
+        $consultation = Consultation::factory()->create(['status' => 'saved']);
+        $labRequest = LaboratoryRequest::factory()->create([
+            'consultation_id' => $consultation->id,
+            'status' => 'received',
+        ]);
+        $item = LaboratoryRequestItem::factory()->create([
+            'laboratory_request_id' => $labRequest->id,
+        ]);
+        $result = LaboratoryItemResult::factory()->create([
+            'laboratory_request_item_id' => $item->id,
+            'consultation_id' => $consultation->id,
+        ]);
+
+        expect(fn () => $service->update($result->id, ['value' => '9.0']))
+            ->toThrow(DomainException::class);
+    });
+
     test('listByRequest retorna los resultados de la orden', function () {
         $service = app(LaboratoryItemResultService::class);
         $consultation = Consultation::factory()->create(['status' => 'saved']);

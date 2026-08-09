@@ -767,9 +767,18 @@
                                     $examName = $lab->items->first()?->exam_name ?? 'Sin examen';
                                     $count = $lab->items->count();
                                     $isPending = $lab->status === 'pending';
-                                    $badgeClass = $isPending
-                                        ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
-                                        : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400';
+                                    $hasResults = $lab->items->flatMap(fn ($i) => $i->results)->isNotEmpty();
+                                    $badgeClass = match (true) {
+                                        $isPending && ! $hasResults => 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+                                        $isPending => 'bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300',
+                                        default => 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+                                    };
+                                    $statusLabel = match (true) {
+                                        $isPending && ! $hasResults => 'Pendiente',
+                                        $isPending => 'Con resultado',
+                                        default => 'Completado',
+                                    };
+                                    $primerResultado = $lab->items->flatMap(fn ($i) => $i->results)->first();
                                 @endphp
 
                                 <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition">
@@ -789,11 +798,16 @@
                                         <span
                                             class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $badgeClass }}"
                                         >
-                                            {{ $isPending ? 'Pendiente' : 'Recibido' }}
+                                            {{ $statusLabel }}
                                         </span>
+                                        @if ($primerResultado && $primerResultado->value)
+                                            <span class="block text-xs text-zinc-500 dark:text-zinc-400 mt-1">
+                                                Resultado: {{ $primerResultado->value }}
+                                            </span>
+                                        @endif
                                     </td>
                                     <td class="px-4 py-3 text-right">
-                                        @if ($isPending)
+                                        @if ($isPending && ! $hasResults)
                                             <a
                                                 href="{{ route('pacientes.laboratorios.show', [$patient, $lab]) }}"
                                                 class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-xs font-medium transition"
@@ -805,7 +819,7 @@
                                                 href="{{ route('pacientes.laboratorios.show', [$patient, $lab]) }}"
                                                 class="text-teal-600 dark:text-teal-400 hover:underline text-xs font-medium"
                                             >
-                                                Ver →
+                                                {{ $isPending ? 'Ver detalle' : 'Ver →' }}
                                             </a>
                                         @endif
                                     </td>

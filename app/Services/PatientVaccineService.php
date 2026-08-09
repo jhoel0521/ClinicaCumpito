@@ -6,6 +6,7 @@ use App\Contracts\PatientVaccineServiceContract;
 use App\DTOs\PatientVaccineDTO;
 use App\Models\Consultation;
 use App\Models\PatientVaccine;
+use DomainException;
 use Illuminate\Support\Collection;
 
 class PatientVaccineService implements PatientVaccineServiceContract
@@ -13,6 +14,20 @@ class PatientVaccineService implements PatientVaccineServiceContract
     public function create(string $consultationId, PatientVaccineDTO $dto): PatientVaccine
     {
         $consultation = Consultation::findOrFail($consultationId);
+
+        $duplicateQuery = PatientVaccine::query()
+            ->where('patient_id', $consultation->patient_id)
+            ->where('vaccine_id', $dto->vaccine_id);
+
+        if ($dto->dose_number !== null) {
+            $duplicateQuery->where('dose_number', $dto->dose_number);
+        } else {
+            $duplicateQuery->whereNull('dose_number');
+        }
+
+        if ($duplicateQuery->exists()) {
+            throw new DomainException('Esta dosis de la vacuna ya fue registrada para el paciente.');
+        }
 
         $patientVaccine = PatientVaccine::create([
             'patient_id' => $consultation->patient_id,

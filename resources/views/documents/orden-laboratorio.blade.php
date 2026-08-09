@@ -1,5 +1,5 @@
 {{--
-    Orden de laboratorio en hoja oficio (215,9 × 330,2 mm).
+    Orden de laboratorio pediátrica en hoja oficio, sin fotografías.
     Recibe: $doc (App\DTOs\ClinicalDocumentDTO)
 --}}
 <!DOCTYPE html>
@@ -19,230 +19,432 @@
             }
 
             body {
-                font-family: Arial, Helvetica, sans-serif;
-                color: #101010;
-                background: #fff;
-                font-size: 3.4mm;
-                line-height: 1.45;
+                background: #f8fbfc;
+                color: #263238;
+                font-family:
+                    DejaVu Sans,
+                    sans-serif;
+                font-size: 3mm;
+                line-height: 1.4;
             }
 
-            /* Encabezado institucional repetido en cada página */
-            .page-header {
-                position: fixed;
+            .sheet {
+                position: relative;
+                width: 215.9mm;
+                padding-bottom: 20mm;
+                background: #fff;
+            }
+
+            .header {
+                position: relative;
+                height: 39mm;
+                overflow: hidden;
+                border-bottom: 1.5mm solid #f2ca36;
+                background: #dff4f5;
+            }
+
+            .header-band {
+                position: absolute;
                 top: 0;
                 left: 0;
-                right: 0;
-                background: #f7d2d7;
-                padding: 5mm 12mm 4mm;
-                border-bottom: 1.2mm solid #f4df00;
+                width: 7mm;
+                height: 39mm;
+                background: #3db9c5;
             }
 
-            .page-header .doctor {
-                font-size: 4.6mm;
-                font-weight: 800;
+            .header-circle {
+                position: absolute;
+                border-radius: 50%;
+                opacity: 0.85;
             }
 
-            .page-header .meta {
-                font-size: 3mm;
-                color: #333;
+            .circle-one {
+                top: -9mm;
+                right: 17mm;
+                width: 29mm;
+                height: 29mm;
+                background: #f3c7d0;
             }
 
-            .page-header .title {
-                margin-top: 1.5mm;
-                font-size: 4.4mm;
-                font-weight: 800;
-                letter-spacing: 0.3mm;
-                color: #a94f50;
+            .circle-two {
+                right: 4mm;
+                bottom: -8mm;
+                width: 20mm;
+                height: 20mm;
+                background: #d2e9a8;
+            }
+
+            .logo-mark {
+                position: absolute;
+                top: 10mm;
+                left: 17mm;
+                width: 17mm;
+                height: 17mm;
+                border-radius: 5mm;
+                background: #3db9c5;
+            }
+
+            .logo-mark::before,
+            .logo-mark::after {
+                position: absolute;
+                display: block;
+                background: #fff;
+                content: '';
+            }
+
+            .logo-mark::before {
+                top: 6.6mm;
+                left: 3.3mm;
+                width: 10.4mm;
+                height: 3.8mm;
+            }
+
+            .logo-mark::after {
+                top: 3.3mm;
+                left: 6.6mm;
+                width: 3.8mm;
+                height: 10.4mm;
+            }
+
+            .identity {
+                position: absolute;
+                top: 8.5mm;
+                left: 41mm;
+                width: 90mm;
+            }
+
+            .doctor-name {
+                color: #225f67;
+                font-size: 5mm;
+                font-weight: 700;
+                letter-spacing: 0.15mm;
+            }
+
+            .doctor-meta {
+                margin-top: 1.2mm;
+                color: #51747a;
+                font-size: 2.75mm;
+            }
+
+            .document-title {
+                position: absolute;
+                top: 11mm;
+                right: 14mm;
+                width: 63mm;
+                color: #a64e61;
+                font-size: 4.3mm;
+                font-weight: 700;
+                letter-spacing: 0.4mm;
+                line-height: 1.35;
+                text-align: right;
+            }
+
+            .document-subtitle {
+                position: absolute;
+                top: 27mm;
+                right: 14mm;
+                width: 63mm;
+                color: #6d7780;
+                font-size: 2.35mm;
+                text-align: right;
             }
 
             .content {
-                padding: 26mm 14mm 22mm;
+                padding: 7mm 14mm 26mm;
             }
 
-            .patient-box {
-                border: 0.3mm solid #d9d9d9;
-                border-radius: 2mm;
-                padding: 3.5mm 4mm;
-                margin-bottom: 4mm;
+            .patient-card {
+                margin-bottom: 5mm;
+                padding: 4mm 5mm;
+                border: 0.35mm solid #9ed9de;
+                border-radius: 2.5mm;
+                background: #f2fbfc;
             }
 
-            .patient-box .row {
-                display: flex;
-                gap: 6mm;
-                margin-bottom: 1.5mm;
-            }
-
-            .patient-box .row:last-child {
-                margin-bottom: 0;
-            }
-
-            .patient-box .label {
-                font-weight: 800;
-                text-transform: uppercase;
-                font-size: 2.9mm;
-                letter-spacing: 0.1mm;
-            }
-
-            .patient-box .value {
+            .patient-name {
+                margin-bottom: 2.8mm;
+                padding-bottom: 1.8mm;
+                border-bottom: 0.3mm solid #bee4e7;
+                color: #264f54;
+                font-size: 3.5mm;
                 font-weight: 700;
             }
 
-            .section-title {
-                font-size: 3.4mm;
-                font-weight: 800;
+            .patient-label,
+            .data-label {
+                color: #348f99;
+                font-size: 2.3mm;
+                font-weight: 700;
+                letter-spacing: 0.15mm;
                 text-transform: uppercase;
-                letter-spacing: 0.2mm;
-                color: #a94f50;
-                margin: 4mm 0 2mm;
-                border-bottom: 0.4mm solid #f7d2d7;
-                padding-bottom: 0.8mm;
+            }
+
+            .patient-table {
+                width: 100%;
+                border-collapse: collapse;
+                table-layout: fixed;
+            }
+
+            .patient-table td {
+                padding: 0.5mm 4mm 0.5mm 0;
+                vertical-align: top;
+            }
+
+            .data-value {
+                margin-top: 0.4mm;
+                font-size: 2.85mm;
+                font-weight: 700;
+            }
+
+            .diagnosis-card {
+                margin-bottom: 5mm;
+                padding: 3mm 4mm;
+                border-left: 1.3mm solid #f0c62d;
+                background: #fff9df;
+                font-size: 2.8mm;
+            }
+
+            .diagnosis-card strong {
+                color: #786100;
+            }
+
+            .section-heading {
+                margin: 5mm 0 3mm;
+                padding-bottom: 1.3mm;
+                border-bottom: 0.45mm solid #efbcc7;
+                color: #a64e61;
+                font-size: 3.6mm;
+                font-weight: 700;
+                letter-spacing: 0.3mm;
             }
 
             .study-group {
                 margin-bottom: 3mm;
+                padding: 2.8mm 4mm;
+                border-left: 1.2mm solid #3db9c5;
+                background: #f5fbfc;
+                page-break-inside: avoid;
             }
 
-            .study-group .group-name {
-                font-weight: 800;
-                font-size: 3.2mm;
-                color: #555;
+            .study-group:nth-of-type(even) {
+                border-left-color: #e89bad;
+                background: #fff7f9;
             }
 
-            .study-group ul {
-                list-style: none;
-                margin: 1mm 0 0 3mm;
-            }
-
-            .study-group li {
-                padding: 0.8mm 0 0.8mm 4mm;
-                position: relative;
-                break-inside: avoid;
-            }
-
-            .study-group li::before {
-                content: '☐';
-                position: absolute;
-                left: 0;
-                top: 0.8mm;
-                font-size: 3.2mm;
-            }
-
-            .study-group li .param {
-                color: #555;
+            .group-name {
+                margin-bottom: 1.5mm;
+                color: #267984;
                 font-size: 3mm;
+                font-weight: 700;
+                letter-spacing: 0.12mm;
+            }
+
+            .study-group:nth-of-type(even) .group-name {
+                color: #a65366;
+            }
+
+            .study-table {
+                width: 100%;
+                border-collapse: collapse;
+                table-layout: fixed;
+            }
+
+            .study-table td {
+                width: 50%;
+                padding: 0.9mm 4mm 0.9mm 0;
+                vertical-align: top;
+                font-size: 2.65mm;
+            }
+
+            .check {
+                display: inline-block;
+                margin-right: 1.4mm;
+                color: #178895;
+                font-family:
+                    DejaVu Sans Mono,
+                    monospace;
+                font-size: 2.8mm;
+                font-weight: 700;
+            }
+
+            .parameter {
+                color: #65757b;
+                font-size: 2.35mm;
             }
 
             .observations {
-                border: 0.3mm dashed #d9d9d9;
+                min-height: 14mm;
+                padding: 3.2mm 4mm;
+                border: 0.35mm dashed #c5afd5;
                 border-radius: 2mm;
-                padding: 3mm 4mm;
-                min-height: 12mm;
-                margin-top: 3mm;
+                background: #fbf7fd;
+                color: #574865;
+                font-size: 2.7mm;
             }
 
             .signature {
-                margin-top: 14mm;
-                width: 70mm;
+                width: 65mm;
+                margin: 15mm 0 0 auto;
+                color: #526269;
+                font-size: 2.55mm;
                 text-align: center;
-                font-size: 3mm;
-                color: #333;
             }
 
-            .signature .line {
-                border-bottom: 0.4mm solid #333;
-                margin-bottom: 1mm;
+            .signature-line {
+                margin-bottom: 1.2mm;
+                border-top: 0.35mm solid #7c8c92;
             }
 
-            .page-footer {
+            .footer {
                 position: fixed;
+                right: 0;
                 bottom: 0;
                 left: 0;
-                right: 0;
-                background: #cceaa3;
-                padding: 2.5mm 12mm;
-                font-size: 2.8mm;
-                color: #333;
-                display: flex;
-                justify-content: space-between;
+                height: 17mm;
+                border-top: 1.3mm solid #f0c62d;
+                background: #dcefbf;
+                color: #3e5338;
+            }
+
+            .footer-table {
+                width: 100%;
+                border-collapse: collapse;
+                table-layout: fixed;
+            }
+
+            .footer-table td {
+                width: 50%;
+                padding: 4.2mm 14mm 0;
+                font-size: 2.5mm;
+                vertical-align: middle;
+            }
+
+            .footer-contact {
+                font-weight: 700;
+                text-align: right;
             }
         </style>
     </head>
     <body>
-        <header class="page-header">
-            <div class="doctor">{{ $doc->doctorName }}</div>
-            <div class="meta">{{ $doc->specialty }}@if ($doc->phone)· {{ $doc->phone }}
-            @endif</div>
-            <div class="title">ORDEN DE LABORATORIO</div>
-        </header>
+        <main class="sheet" aria-label="Orden de laboratorio pediátrica">
+            <header class="header">
+                <span class="header-band"></span>
+                <span class="header-circle circle-one"></span>
+                <span class="header-circle circle-two"></span>
+                <span class="logo-mark" aria-hidden="true"></span>
 
-        <main class="content">
-            <div class="patient-box">
-                <div class="row">
-                    <span class="label">Paciente:</span>
-                    <span class="value">{{ $doc->patientName }}</span>
+                <div class="identity">
+                    <div class="doctor-name">{{ $doc->doctorName }}</div>
+                    <div class="doctor-meta">{{ $doc->specialty }}</div>
                 </div>
-                <div class="row">
-                    <span class="label">Fecha:</span>
-                    <span class="value">{{ $doc->dateText }}</span>
-                    <span class="label">Edad:</span>
-                    <span class="value">{{ $doc->ageText }}</span>
+
+                <div class="document-title">ORDEN DE LABORATORIO</div>
+                <div class="document-subtitle">Solicitud de estudios clínicos</div>
+            </header>
+
+            <section class="content">
+                <div class="patient-card">
+                    <div class="patient-name">
+                        <span class="patient-label">Paciente</span>
+                        · {{ $doc->patientName }}
+                    </div>
+                    <table class="patient-table" aria-label="Datos del paciente">
+                        <tr>
+                            <td>
+                                <div class="data-label">Fecha</div>
+                                <div class="data-value">{{ $doc->dateText }}</div>
+                            </td>
+                            <td>
+                                <div class="data-label">Edad</div>
+                                <div class="data-value">{{ $doc->ageText }}</div>
+                            </td>
+                            <td>
+                                <div class="data-label">Documento</div>
+                                <div class="data-value">Orden médica</div>
+                            </td>
+                        </tr>
+                    </table>
                 </div>
-                <div class="row">
-                    <span class="label">Consulta:</span>
-                    <span class="value">{{ $doc->dateText }}</span>
-                </div>
-            </div>
 
-            @if ($doc->diagnosis)
-                <div class="section-title">Diagnóstico / Motivo</div>
-                <p>{{ $doc->diagnosis }}</p>
-            @endif
-
-            <div class="section-title">Estudios solicitados</div>
-
-            @php
-                $groupOrder = ["Hematología", "Química sanguínea", "Orina", "Heces", "Serología", "Microbiología", "Hormonas", "Otros"];
-                $studies = collect($doc->items)->groupBy(fn ($s) => $s->category);
-            @endphp
-
-            @foreach ($groupOrder as $group)
-                @php($groupStudies = $studies->get($group) ?? collect())
-                @if ($groupStudies->isEmpty())
-                    @continue
+                @if ($doc->diagnosis)
+                    <div class="diagnosis-card">
+                        <strong>Diagnóstico presuntivo:</strong>
+                        {{ $doc->diagnosis }}
+                    </div>
                 @endif
 
-                <div class="study-group">
-                    <div class="group-name">{{ $group }}</div>
-                    <ul>
-                        @foreach ($groupStudies as $study)
-                            <li>
-                                {{ $study->exam_name }}
-                                @if ($study->parameter_name)
-                                    <span class="param">({{ $study->parameter_name }})</span>
-                                @endif
-                            </li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endforeach
+                <h1 class="section-heading">ESTUDIOS SOLICITADOS</h1>
 
-            @if ($doc->observations)
-                <div class="section-title">Observaciones</div>
-                <div class="observations">{{ $doc->observations }}</div>
-            @endif
+                @php
+                    $studies = collect($doc->items)->groupBy(fn ($study) => $study->category);
+                    $preferredOrder = [
+                        'Hematología',
+                        'Química Sanguínea',
+                        'Uroanálisis',
+                        'Microbiología',
+                        'Parasitología',
+                        'Inmunología / Serología',
+                        'Imagenología',
+                        'Otros',
+                    ];
+                    $groupOrder = collect($preferredOrder)
+                        ->filter(fn ($category) => $studies->has($category))
+                        ->concat($studies->keys()->reject(fn ($category) => in_array($category, $preferredOrder, true)));
+                @endphp
 
-            <div class="signature">
-                <div class="line"></div>
-                {{ $doc->doctorName }}
-                @if ($doc->phone)
-                    · {{ $doc->phone }}
+                @foreach ($groupOrder as $group)
+                    @php($groupStudies = $studies->get($group) ?? collect())
+                    @if ($groupStudies->isEmpty())
+                        @continue
+                    @endif
+
+                    <div class="study-group">
+                        <div class="group-name">{{ $group }}</div>
+                        <table class="study-table">
+                            @foreach ($groupStudies->chunk(2) as $row)
+                                <tr>
+                                    @foreach ($row as $study)
+                                        <td>
+                                            <span class="check">[x]</span>
+                                            {{ $study->exam_name }}
+                                            @if ($study->parameter_name)
+                                                <span class="parameter">({{ $study->parameter_name }})</span>
+                                            @endif
+                                        </td>
+                                    @endforeach
+
+                                    @if ($row->count() === 1)
+                                        <td></td>
+                                    @endif
+                                </tr>
+                            @endforeach
+                        </table>
+                    </div>
+                @endforeach
+
+                @if ($doc->observations)
+                    <h2 class="section-heading">OBSERVACIONES</h2>
+                    <div class="observations">{{ $doc->observations }}</div>
                 @endif
-            </div>
+
+                <div class="signature">
+                    <div class="signature-line"></div>
+                    {{ $doc->doctorName }}
+                </div>
+            </section>
+
+            <footer class="footer">
+                <table class="footer-table">
+                    <tr>
+                        <td>{{ $doc->specialty }}</td>
+                        <td class="footer-contact">
+                            @if ($doc->phone)
+                                Contacto · {{ $doc->phone }}
+                            @endif
+                        </td>
+                    </tr>
+                </table>
+            </footer>
         </main>
-
-        <footer class="page-footer">
-            <span>{{ $doc->doctorName }} · {{ $doc->specialty }}</span>
-            <span>{{ $doc->phone ?? "" }}</span>
-        </footer>
     </body>
 </html>

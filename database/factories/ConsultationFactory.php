@@ -21,7 +21,7 @@ class ConsultationFactory extends Factory
             'doctor_id' => Doctor::factory(),
             'type' => $this->faker->randomElement(['digital', 'manual']),
             'status' => $this->faker->randomElement(['draft', 'saved', 'finalized']),
-            'consultation_date' => $this->faker->dateTimeBetween('-6 months', 'now'),
+            'consultation_date' => $this->faker->dateTimeBetween('-6 months', '-1 day'),
             'scanned_file_path' => null,
             'scanned_file_name' => null,
             'pending_transcription' => false,

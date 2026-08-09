@@ -20,7 +20,7 @@ class PatientFactory extends Factory
             'responsible_doctor_id' => Doctor::factory(),
             'user_id' => null,
             'full_name' => $this->faker->name(),
-            'date_of_birth' => $this->faker->dateTimeBetween('-18 years', 'now'),
+            'date_of_birth' => $this->faker->dateTimeBetween('-18 years', '-1 day'),
             'gender' => $this->faker->randomElement(['M', 'F']),
             'birth_weight' => $this->faker->randomFloat(2, 2, 5),
             'birth_height' => $this->faker->randomFloat(2, 45, 55),

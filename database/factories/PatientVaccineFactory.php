@@ -22,7 +22,7 @@ class PatientVaccineFactory extends Factory
             'vaccine_id' => Vaccine::factory(),
             'applied_by_doctor_id' => null,
             'application_site' => $this->faker->optional()->company(),
-            'applied_at' => $this->faker->dateTimeBetween('-1 year', 'now'),
+            'applied_at' => $this->faker->dateTimeBetween('-1 year', '-1 day'),
             'dose_number' => $this->faker->numberBetween(1, 4),
             'notes' => $this->faker->optional()->sentence(),
         ];

@@ -197,7 +197,7 @@ new class extends Component {
                             size="sm"
                             icon="trash"
                             wire:click="delete('{{ $template->id }}')"
-                            wire:confirm="{{ __('¿Estás seguro de eliminar esta plantilla?') }}"
+                            data-swal-confirm="{{ __('¿Estás seguro de eliminar esta plantilla?') }}"
                         >
                             {{ __('Eliminar') }}
                         </flux:button>

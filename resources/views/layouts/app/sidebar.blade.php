@@ -236,6 +236,16 @@
 
         {{ $slot }}
 
+        @if (session('success') || session('error'))
+            <script>
+                (function () {
+                    var type = {{ session('error') ? "'error'" : "'success'" }};
+                    var message = @js(session('error') ?? session('success'));
+                    window.dispatchEvent(new CustomEvent('notify', { detail: { type: type, message: message } }));
+                })();
+            </script>
+        @endif
+
         @fluxScripts
     </body>
 </html>

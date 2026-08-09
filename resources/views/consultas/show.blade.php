@@ -1,14 +1,6 @@
 <x-layouts::app :title="'Consulta — ' . $consultation->patient->full_name">
     {{-- Header Livewire: estado, fecha editable, transición finalizar --}}
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
-        @if (session('success'))
-            <div
-                class="mb-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 px-4 py-3 text-sm text-green-700 dark:text-green-300"
-            >
-                {{ session('success') }}
-            </div>
-        @endif
-
         <livewire:consultation-header :consultationId="$consultation->id" />
     </div>
 

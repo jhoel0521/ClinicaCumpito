@@ -72,7 +72,7 @@
                 @if ($canDelete && $item['id'])
                     <button
                         wire:click="deleteAttachment('{{ $item['id'] }}')"
-                        wire:confirm="¿Eliminar este archivo adjunto?"
+                        data-swal-confirm="¿Eliminar este archivo adjunto?"
                         class="absolute -top-1.5 -right-1.5 p-1 rounded-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 text-zinc-400 hover:text-red-500 transition shadow-sm"
                         title="Eliminar adjunto"
                     >

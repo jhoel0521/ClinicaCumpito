@@ -72,6 +72,8 @@ new class extends Component {
             $this->persist($this->status);
         } catch (\Throwable $e) {
             $this->errorMessage = $e->getMessage();
+            $this->dispatch('notify', type: 'error', message: $this->errorMessage);
+            $this->dispatch('notify', type: 'error', message: $this->errorMessage);
         }
     }
 
@@ -86,6 +88,8 @@ new class extends Component {
             $this->redirect(route('consultas.show', $this->consultationId), navigate: true);
         } catch (\Throwable $e) {
             $this->errorMessage = $e->getMessage();
+            $this->dispatch('notify', type: 'error', message: $this->errorMessage);
+            $this->dispatch('notify', type: 'error', message: $this->errorMessage);
         }
     }
 
@@ -161,7 +165,7 @@ new class extends Component {
                         wire:click="finalize"
                         wire:loading.attr="disabled"
                         wire:target="finalize"
-                        wire:confirm="¿Finalizar la consulta? Esta acción no se puede deshacer."
+                        data-swal-confirm="¿Finalizar la consulta? Esta acción no se puede deshacer."
                         class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-green-400/90 hover:bg-green-300 text-green-900 transition disabled:opacity-50"
                     >
                         <span wire:loading.remove wire:target="finalize">Finalizar consulta</span>
@@ -173,7 +177,7 @@ new class extends Component {
                     <form
                         action="{{ route('consultas.discard-draft', $consultationId) }}"
                         method="POST"
-                        onsubmit="return confirm('¿Descartar este borrador? La consulta no se podrá recuperar.');"
+                        data-swal-form-confirm="¿Descartar este borrador? La consulta no se podrá recuperar."
                     >
                         @csrf
                         @method('DELETE')

@@ -126,6 +126,11 @@ new class extends Component {
         ])
             ->whereHas('consultation', fn ($q) => $q->where('patient_id', $consultation->patient_id))
             ->where('consultation_id', '!=', $this->consultationId)
+            ->where('status', 'pending')
+            // Solo las que siguen sin atender: las que ya tienen resultados
+            // registrados (aunque no se hayan marcado como recibidas) no
+            // deben volver a aparecer en cada consulta nueva.
+            ->whereDoesntHave('items.results')
             ->orderBy('created_at', 'desc')
             ->limit(10)
             ->get()

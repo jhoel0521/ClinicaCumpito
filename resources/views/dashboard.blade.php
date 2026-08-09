@@ -6,6 +6,7 @@
             ->count();
         $consultasFin = App\Models\Consultation::where('status', 'finalized')->count();
         $totalRecetas = App\Models\Prescription::count();
+        $labsPendientes = App\Models\LaboratoryRequest::where('status', 'pending')->count();
         $totalUsuarios = App\Models\User::count();
         $ultimasConsultas = App\Models\Consultation::with('patient')
             ->latest()
@@ -40,29 +41,56 @@
         </div>
 
         {{-- Estadísticas rápidas --}}
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            <div class="rounded-xl bg-white dark:bg-zinc-800 border border-gray-100 dark:border-zinc-700 p-4 shadow-sm">
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            <a
+                href="{{ route('pacientes.index') }}"
+                class="rounded-xl bg-white dark:bg-zinc-800 border border-gray-100 dark:border-zinc-700 p-4 shadow-sm hover:border-teal-300 dark:hover:border-teal-700 hover:shadow-md transition"
+                title="Ver pacientes"
+            >
                 <p class="text-gray-500 dark:text-gray-400 text-xs font-medium uppercase tracking-wide">Pacientes</p>
                 <p class="text-3xl font-bold text-teal-600 dark:text-teal-400 mt-1">{{ $totalPacientes }}</p>
                 <p class="text-gray-400 dark:text-gray-500 text-xs mt-1">Total registrados</p>
-            </div>
-            <div class="rounded-xl bg-white dark:bg-zinc-800 border border-gray-100 dark:border-zinc-700 p-4 shadow-sm">
+            </a>
+            <a
+                href="{{ route('consultas.index') }}"
+                class="rounded-xl bg-white dark:bg-zinc-800 border border-gray-100 dark:border-zinc-700 p-4 shadow-sm hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-md transition"
+                title="Ver consultas del mes"
+            >
                 <p class="text-gray-500 dark:text-gray-400 text-xs font-medium uppercase tracking-wide">
                     Consultas / mes
                 </p>
                 <p class="text-3xl font-bold text-blue-600 dark:text-blue-400 mt-1">{{ $consultasMes }}</p>
                 <p class="text-gray-400 dark:text-gray-500 text-xs mt-1">{{ now()->isoFormat('MMMM YYYY') }}</p>
-            </div>
-            <div class="rounded-xl bg-white dark:bg-zinc-800 border border-gray-100 dark:border-zinc-700 p-4 shadow-sm">
+            </a>
+            <a
+                href="{{ route('consultas.index', ['status' => 'finalized']) }}"
+                class="rounded-xl bg-white dark:bg-zinc-800 border border-gray-100 dark:border-zinc-700 p-4 shadow-sm hover:border-green-300 dark:hover:border-green-700 hover:shadow-md transition"
+                title="Ver consultas finalizadas"
+            >
                 <p class="text-gray-500 dark:text-gray-400 text-xs font-medium uppercase tracking-wide">Finalizadas</p>
                 <p class="text-3xl font-bold text-green-600 dark:text-green-400 mt-1">{{ $consultasFin }}</p>
                 <p class="text-gray-400 dark:text-gray-500 text-xs mt-1">Consultas cerradas</p>
-            </div>
-            <div class="rounded-xl bg-white dark:bg-zinc-800 border border-gray-100 dark:border-zinc-700 p-4 shadow-sm">
+            </a>
+            <a
+                href="{{ route('consultas.index') }}"
+                class="rounded-xl bg-white dark:bg-zinc-800 border border-gray-100 dark:border-zinc-700 p-4 shadow-sm hover:border-purple-300 dark:hover:border-purple-700 hover:shadow-md transition"
+                title="Ver consultas con recetas"
+            >
                 <p class="text-gray-500 dark:text-gray-400 text-xs font-medium uppercase tracking-wide">Recetas</p>
                 <p class="text-3xl font-bold text-purple-600 dark:text-purple-400 mt-1">{{ $totalRecetas }}</p>
                 <p class="text-gray-400 dark:text-gray-500 text-xs mt-1">Emitidas total</p>
-            </div>
+            </a>
+            <a
+                href="{{ route('consultas.index', ['labsFilter' => 'pending']) }}"
+                class="rounded-xl bg-white dark:bg-zinc-800 border border-gray-100 dark:border-zinc-700 p-4 shadow-sm hover:border-amber-300 dark:hover:border-amber-700 hover:shadow-md transition"
+                title="Ver laboratorios pendientes"
+            >
+                <p class="text-gray-500 dark:text-gray-400 text-xs font-medium uppercase tracking-wide">
+                    Labs pendientes
+                </p>
+                <p class="text-3xl font-bold text-amber-600 dark:text-amber-400 mt-1">{{ $labsPendientes }}</p>
+                <p class="text-gray-400 dark:text-gray-500 text-xs mt-1">Por registrar</p>
+            </a>
             <div
                 class="rounded-xl bg-white dark:bg-zinc-800 border border-gray-100 dark:border-zinc-700 p-4 shadow-sm col-span-2 md:col-span-1"
             >

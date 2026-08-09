@@ -36,6 +36,35 @@ class LaboratoryItemResultService implements LaboratoryItemResultServiceContract
         ]);
     }
 
+    public function update(string $laboratoryItemResultId, array $data): LaboratoryItemResult
+    {
+        $result = LaboratoryItemResult::with('item.laboratoryRequest')->findOrFail($laboratoryItemResultId);
+
+        $item = $result->item;
+
+        if (! $item || ! $item->laboratoryRequest) {
+            throw new DomainException('El ítem no pertenece a una orden de laboratorio.');
+        }
+
+        $request = $item->laboratoryRequest;
+
+        $this->ensureOrderAllowsResults($request);
+
+        if (! $this->snapshots->canEditLaboratoryResults($request->id)) {
+            throw new DomainException('La ventana de 3 días para editar resultados ha expirado.');
+        }
+
+        $result->update([
+            'value' => array_key_exists('value', $data) ? $data['value'] : $result->value,
+            'report_text' => array_key_exists('report_text', $data) ? $data['report_text'] : $result->report_text,
+            'is_abnormal' => array_key_exists('is_abnormal', $data)
+                ? (bool) $data['is_abnormal']
+                : (bool) $result->is_abnormal,
+        ]);
+
+        return $result->refresh();
+    }
+
     public function delete(string $laboratoryItemResultId): bool
     {
         $result = LaboratoryItemResult::with('item.laboratoryRequest')->findOrFail($laboratoryItemResultId);

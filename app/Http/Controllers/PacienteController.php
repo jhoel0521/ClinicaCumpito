@@ -93,7 +93,7 @@ class PacienteController extends Controller
         $recentLaboratoryRequests = LaboratoryRequest::whereHas(
             'consultation', fn ($q) => $q->where('patient_id', $patient->id)
         )
-            ->with(['items', 'consultation.doctor'])
+            ->with(['items.results', 'consultation.doctor'])
             ->orderByDesc('created_at')
             ->limit(5)
             ->get();

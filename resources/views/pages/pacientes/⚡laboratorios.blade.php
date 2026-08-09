@@ -27,7 +27,7 @@ new class extends Component {
                 ->where('patient_id', $this->patient->id)
                 ->whereHas('laboratoryRequests.items')
                 ->orderByDesc('consultation_date')
-                ->with(['laboratoryRequests.items', 'doctor'])
+                ->with(['laboratoryRequests.items.results', 'doctor'])
                 ->paginate(10),
         ];
     }
@@ -83,12 +83,18 @@ new class extends Component {
                                 $days = (int) $lab->created_at->diffInDays(now());
                                 $isPending = $lab->status === 'pending';
                                 $isUrgent = $isPending && $days >= 3;
+                                $hasResults = $lab->items->flatMap(fn ($i) => $i->results)->isNotEmpty();
                                 $labStatusClass = match (true) {
                                     $isUrgent => 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
-                                    $isPending => 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
+                                    $isPending && ! $hasResults => 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
+                                    $isPending => 'bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300',
                                     default => 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
                                 };
-                                $labStatusLabel = $isPending ? "Pendiente · {$days}d" : 'Recibido';
+                                $labStatusLabel = match (true) {
+                                    $isPending && ! $hasResults => "Pendiente · {$days}d",
+                                    $isPending => 'Con resultado',
+                                    default => 'Completado',
+                                };
                             @endphp
 
                             <div class="flex items-center justify-between gap-3 px-5 py-3">
@@ -106,7 +112,7 @@ new class extends Component {
                                         {{ $labStatusLabel }}
                                     </span>
 
-                                    @if ($isPending)
+                                    @if ($isPending && ! $hasResults)
                                         <a
                                             href="{{ route('pacientes.laboratorios.show', [$patient, $lab]) }}"
                                             class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-xs font-medium transition"
@@ -121,7 +127,7 @@ new class extends Component {
                                             class="text-xs text-teal-600 dark:text-teal-400 hover:underline font-medium"
                                             wire:navigate
                                         >
-                                            Ver →
+                                            {{ $isPending ? 'Ver detalle' : 'Ver →' }}
                                         </a>
                                     @endif
                                 </div>

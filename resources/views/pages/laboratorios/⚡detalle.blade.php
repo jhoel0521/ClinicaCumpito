@@ -14,6 +14,7 @@ new class extends Component {
     public LaboratoryRequest $laboratoryRequest;
 
     public array $newResults = [];
+    public array $editResults = [];
     public string $errorMessage = '';
 
     public bool $attachingToRequest = false;
@@ -31,8 +32,8 @@ new class extends Component {
             403,
         );
 
-        $laboratorio->load(['consultation.patient', 'consultation.doctor', 'items.results', 'attachments']);
         $this->laboratoryRequest = $laboratorio;
+        $this->reload();
     }
 
     public function saveResult(string $itemId): void
@@ -70,6 +71,24 @@ new class extends Component {
             $this->reload();
         } catch (\Throwable $e) {
             $this->errorMessage = 'Error al eliminar: ' . $e->getMessage();
+        }
+    }
+
+    public function updateResult(string $resultId): void
+    {
+        $this->errorMessage = '';
+        $data = $this->editResults[$resultId] ?? [];
+
+        try {
+            app(LaboratoryItemResultServiceContract::class)->update($resultId, [
+                'value' => isset($data['value']) ? trim((string) $data['value']) : null,
+                'report_text' => isset($data['report']) ? trim((string) $data['report']) : null,
+                'is_abnormal' => (bool) ($data['abnormal'] ?? false),
+            ]);
+
+            $this->reload();
+        } catch (\Throwable $e) {
+            $this->errorMessage = 'Error al guardar cambios: ' . $e->getMessage();
         }
     }
 
@@ -144,6 +163,18 @@ new class extends Component {
     private function reload(): void
     {
         $this->laboratoryRequest->load(['consultation.patient', 'consultation.doctor', 'items.results', 'attachments']);
+
+        $this->editResults = [];
+
+        foreach ($this->laboratoryRequest->items as $item) {
+            foreach ($item->results as $result) {
+                $this->editResults[$result->id] = [
+                    'value' => $result->value,
+                    'report' => $result->report_text,
+                    'abnormal' => (bool) $result->is_abnormal,
+                ];
+            }
+        }
     }
 };
 ?>
@@ -166,6 +197,15 @@ new class extends Component {
                     Solicitado el {{ $laboratoryRequest->created_at->isoFormat('D [de] MMMM YYYY') }} · Dr.
                     {{ $laboratoryRequest->consultation->doctor?->full_name ?? 'Desconocido' }}
                 </p>
+                <a
+                    href="{{ route('consultas.show', $laboratoryRequest->consultation_id) }}#laboratorio"
+                    class="inline-flex items-center gap-1 text-sm font-medium text-teal-600 dark:text-teal-400 hover:underline mt-1"
+                    wire:navigate
+                >
+                    Consulta del
+                    {{ optional($laboratoryRequest->consultation->consultation_date)->isoFormat('D [de] MMMM YYYY') }}
+                    <flux:icon.arrow-right class="size-3.5" />
+                </a>
             </div>
 
             <div class="flex items-center gap-3">
@@ -237,29 +277,56 @@ new class extends Component {
                                         >
                                             <th class="px-3 py-1.5 text-left font-medium">Valor</th>
                                             <th class="px-3 py-1.5 text-center font-medium w-8">⚠</th>
+                                            <th class="px-3 py-1.5 text-left font-medium">Registrado el</th>
                                             @if ($laboratoryRequest->status === 'pending')
+                                                <th class="px-3 py-1.5"></th>
                                                 <th class="w-6"></th>
                                             @endif
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-zinc-100 dark:divide-zinc-800">
                                         @foreach ($item->results as $result)
-                                            <tr class="bg-white dark:bg-zinc-900">
-                                                <td
-                                                    class="px-3 py-2 font-medium {{ $result->is_abnormal ? 'text-red-600 dark:text-red-400' : 'text-zinc-800 dark:text-zinc-200' }}"
-                                                >
-                                                    {{ $result->value ?: '—' }}
-                                                </td>
-                                                <td class="px-3 py-2 text-center">
-                                                    @if ($result->is_abnormal)
-                                                        <flux:icon.exclamation-triangle
-                                                            class="size-3.5 text-red-500 mx-auto"
+                                            @if ($laboratoryRequest->status === 'pending')
+                                                <tr class="bg-white dark:bg-zinc-900">
+                                                    <td class="px-3 py-2">
+                                                        <input
+                                                            wire:model="editResults.{{ $result->id }}.value"
+                                                            value="{{ $this->editResults[$result->id]['value'] ?? '' }}"
+                                                            type="text"
+                                                            placeholder="Valor"
+                                                            class="w-full px-2 py-1 border border-gray-300 dark:border-zinc-600 rounded bg-white dark:bg-zinc-900 text-gray-900 dark:text-gray-100 text-sm focus:ring-1 focus:ring-sky-500"
                                                         />
-                                                    @else
-                                                        <flux:icon.check class="size-3.5 text-green-500 mx-auto" />
-                                                    @endif
-                                                </td>
-                                                @if ($laboratoryRequest->status === 'pending')
+                                                        <textarea
+                                                            wire:model="editResults.{{ $result->id }}.report"
+                                                            rows="2"
+                                                            placeholder="Informe / texto libre (radiología, cultivos...)"
+                                                            class="mt-1 w-full px-2 py-1 border border-gray-300 dark:border-zinc-600 rounded bg-white dark:bg-zinc-900 text-gray-900 dark:text-gray-100 text-sm resize-none focus:ring-1 focus:ring-sky-500"
+                                                        >
+{{ $this->editResults[$result->id]['report'] ?? '' }}</textarea
+                                                        >
+                                                    </td>
+                                                    <td class="px-3 py-2 text-center">
+                                                        <input
+                                                            type="checkbox"
+                                                            wire:model="editResults.{{ $result->id }}.abnormal"
+                                                            class="rounded border-gray-300 text-red-500 focus:ring-red-400"
+                                                            title="Resultado anormal"
+                                                        />
+                                                    </td>
+                                                    <td
+                                                        class="px-3 py-2 text-xs text-zinc-500 dark:text-zinc-400 whitespace-nowrap"
+                                                    >
+                                                        {{ $result->created_at?->format('d/m/Y H:i') ?? '—' }}
+                                                    </td>
+                                                    <td class="px-2 py-2 text-right whitespace-nowrap">
+                                                        <button
+                                                            wire:click="updateResult('{{ $result->id }}')"
+                                                            wire:loading.attr="disabled"
+                                                            class="px-2.5 py-1 text-xs rounded bg-sky-600 hover:bg-sky-700 text-white transition disabled:opacity-50"
+                                                        >
+                                                            Guardar
+                                                        </button>
+                                                    </td>
                                                     <td class="px-2 py-2">
                                                         <button
                                                             wire:click="deleteResult('{{ $result->id }}')"
@@ -269,12 +336,34 @@ new class extends Component {
                                                             <flux:icon.x-mark class="size-3.5" />
                                                         </button>
                                                     </td>
-                                                @endif
-                                            </tr>
-                                            @if ($result->report_text)
+                                                </tr>
+                                            @else
+                                                <tr class="bg-white dark:bg-zinc-900">
+                                                    <td
+                                                        class="px-3 py-2 font-medium {{ $result->is_abnormal ? 'text-red-600 dark:text-red-400' : 'text-zinc-800 dark:text-zinc-200' }}"
+                                                    >
+                                                        {{ $result->value ?: '—' }}
+                                                    </td>
+                                                    <td class="px-3 py-2 text-center">
+                                                        @if ($result->is_abnormal)
+                                                            <flux:icon.exclamation-triangle
+                                                                class="size-3.5 text-red-500 mx-auto"
+                                                            />
+                                                        @else
+                                                            <flux:icon.check class="size-3.5 text-green-500 mx-auto" />
+                                                        @endif
+                                                    </td>
+                                                    <td
+                                                        class="px-3 py-2 text-xs text-zinc-500 dark:text-zinc-400 whitespace-nowrap"
+                                                    >
+                                                        {{ $result->created_at?->format('d/m/Y H:i') ?? '—' }}
+                                                    </td>
+                                                </tr>
+                                            @endif
+                                            @if ($laboratoryRequest->status !== 'pending' && $result->report_text)
                                                 <tr class="bg-zinc-50 dark:bg-zinc-800/50">
                                                     <td
-                                                        colspan="{{ $laboratoryRequest->status === 'pending' ? 3 : 2 }}"
+                                                        colspan="3"
                                                         class="px-3 py-2 text-xs text-zinc-600 dark:text-zinc-400 italic"
                                                     >
                                                         {{ $result->report_text }}

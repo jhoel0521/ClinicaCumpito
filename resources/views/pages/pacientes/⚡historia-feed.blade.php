@@ -240,26 +240,30 @@ new class extends Component {
                                 @foreach ($consultation->laboratoryRequests as $labReq)
                                     @php
                                         $labHasResults = $labReq->items->flatMap(fn ($i) => $i->results)->isNotEmpty();
+                                        $labPending = $labReq->isPending();
                                     @endphp
 
                                     <a
                                         href="{{ route('consultas.show', $consultation) }}#laboratorio"
                                         @class([
                                             'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset transition-all duration-200 ease-out hover:-translate-y-px hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-zinc-900',
-                                            'bg-amber-50 text-amber-700 ring-amber-200 hover:bg-amber-100 focus:ring-amber-500 dark:bg-amber-900/30 dark:text-amber-300 dark:ring-amber-800 dark:hover:bg-amber-900/50' => $labReq->isPending(),
-                                            'bg-emerald-50 text-emerald-700 ring-emerald-200 hover:bg-emerald-100 focus:ring-emerald-500 dark:bg-emerald-900/30 dark:text-emerald-300 dark:ring-emerald-800 dark:hover:bg-emerald-900/50' => ! $labReq->isPending(),
+                                            'bg-amber-50 text-amber-700 ring-amber-200 hover:bg-amber-100 focus:ring-amber-500 dark:bg-amber-900/30 dark:text-amber-300 dark:ring-amber-800 dark:hover:bg-amber-900/50' =>
+                                                $labPending && ! $labHasResults,
+                                            'bg-sky-50 text-sky-700 ring-sky-200 hover:bg-sky-100 focus:ring-sky-500 dark:bg-sky-900/30 dark:text-sky-300 dark:ring-sky-800 dark:hover:bg-sky-900/50' =>
+                                                $labPending && $labHasResults,
+                                            'bg-emerald-50 text-emerald-700 ring-emerald-200 hover:bg-emerald-100 focus:ring-emerald-500 dark:bg-emerald-900/30 dark:text-emerald-300 dark:ring-emerald-800 dark:hover:bg-emerald-900/50' => ! $labPending,
                                         ])
                                         title="Abrir laboratorio en la consulta"
-                                        aria-label="Abrir laboratorio {{ $labReq->isPending() ? 'pendiente' : 'con resultados' }} en la consulta"
+                                        aria-label="Abrir laboratorio {{ $labPending ? ($labHasResults ? 'con resultado' : 'pendiente') : 'completado' }} en la consulta"
                                         dusk="view-laboratory-{{ $labReq->id }}"
                                     >
                                         <flux:icon.beaker class="size-3.5" />
-                                        @if ($labReq->isPending())
+                                        @if ($labPending && ! $labHasResults)
                                             Laboratorio pendiente
-                                        @elseif ($labHasResults)
-                                            Resultados disponibles
+                                        @elseif ($labPending)
+                                            Con resultado
                                         @else
-                                                Laboratorio recibido
+                                            Completado
                                         @endif
                                         <flux:icon.eye class="size-3.5" />
                                     </a>

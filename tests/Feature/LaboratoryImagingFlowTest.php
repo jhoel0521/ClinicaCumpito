@@ -157,7 +157,7 @@ test('laboratorio de imagen: se pide en consulta 1, se cierra, y en consulta 2 s
     $this->actingAs($user)
         ->get(route('pacientes.laboratorios.show', [$patient, $orden]))
         ->assertOk()
-        ->assertSeeText('Sin hallazgos patológicos')
+        ->assertSee('Sin hallazgos patológicos')
         ->assertSeeText('informe-radiografia.pdf')
         ->assertSeeText('placa-axial.jpg')
         ->assertSeeText('Documentos Adjuntos');

@@ -312,26 +312,42 @@
                                         Imprimir todos
                                     </a>
                                     @foreach ($consultation->laboratoryRequests as $lab)
-                                        <a
-                                            href="{{ route('consultas.pdf.laboratorio.single', [$consultation, $lab]) }}"
-                                            target="_blank"
-                                            class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-white dark:bg-zinc-800 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-zinc-700 hover:bg-gray-50 transition"
+                                        <div
+                                            class="flex items-center justify-between gap-2 px-3 py-1.5 rounded-lg text-xs font-medium bg-white dark:bg-zinc-800 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-zinc-700 hover:bg-gray-50 transition"
                                         >
-                                            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    stroke-width="2"
-                                                    d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
-                                                />
-                                            </svg>
-                                            Solicitud #{{ $loop->index + 1 }}
-                                            @if ($lab->status === 'received')
-                                                <span class="ml-1 text-emerald-600 dark:text-emerald-400">
-                                                    (con resultados)
-                                                </span>
-                                            @endif
-                                        </a>
+                                            <a
+                                                href="{{ route('consultas.pdf.laboratorio.single', [$consultation, $lab]) }}"
+                                                target="_blank"
+                                                class="flex items-center gap-1.5 min-w-0"
+                                            >
+                                                <svg
+                                                    class="w-3 h-3 shrink-0"
+                                                    fill="none"
+                                                    viewBox="0 0 24 24"
+                                                    stroke="currentColor"
+                                                >
+                                                    <path
+                                                        stroke-linecap="round"
+                                                        stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
+                                                    />
+                                                </svg>
+                                                Solicitud #{{ $loop->index + 1 }}
+                                                @if ($lab->status === 'received')
+                                                    <span class="ml-1 text-emerald-600 dark:text-emerald-400">
+                                                        (con resultados)
+                                                    </span>
+                                                @endif
+                                            </a>
+                                            <a
+                                                href="{{ route('pacientes.laboratorios.show', [$consultation->patient, $lab]) }}"
+                                                class="text-purple-600 dark:text-purple-400 hover:underline shrink-0"
+                                                wire:navigate
+                                            >
+                                                Ver detalle
+                                            </a>
+                                        </div>
                                     @endforeach
                                 </div>
                             @endif

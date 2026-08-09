@@ -16,6 +16,14 @@ interface LaboratoryItemResultServiceContract
     public function create(string $laboratoryRequestItemId, array $data, ?string $consultationId = null): LaboratoryItemResult;
 
     /**
+     * Edita un resultado existente. Solo permitido dentro de la ventana de
+     * 3 días desde la creación de la orden (regla de inmutabilidad clínica).
+     *
+     * @param  array{value?: string|null, report_text?: string|null, is_abnormal?: bool}  $data
+     */
+    public function update(string $laboratoryItemResultId, array $data): LaboratoryItemResult;
+
+    /**
      * Elimina un resultado. Solo permitido dentro de la ventana de 3 días
      * desde la creación de la orden (regla de inmutabilidad clínica).
      */

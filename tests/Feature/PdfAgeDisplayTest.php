@@ -9,6 +9,7 @@ use App\Models\Patient;
 use App\Models\Prescription;
 use App\Models\PrescriptionItem;
 use App\Models\User;
+use App\Services\ClinicalDocumentService;
 use Carbon\Carbon;
 
 beforeEach(function (): void {
@@ -20,13 +21,13 @@ afterEach(function (): void {
     Carbon::setTestNow();
 });
 
-function renderPdf(string $view, array $data): string
+function renderDocument(string $view, mixed $doc): string
 {
-    return view($view, $data)->render();
+    return view($view, ['doc' => $doc])->render();
 }
 
 test('la receta impresa muestra la edad histórica en meses, no la edad actual', function (): void {
-    $doctor = Doctor::factory()->create();
+    $doctor = Doctor::factory()->create(['specialty' => 'Especialista en Pediatría']);
     $user = User::factory()->create(['doctor_id' => $doctor->id]);
     // Nació el 7 de enero de 2025: hoy (agosto 2026) tiene 19 meses,
     // pero la consulta fue a los 12 meses exactos
@@ -40,16 +41,12 @@ test('la receta impresa muestra la edad histórica en meses, no la edad actual',
     $prescription = Prescription::factory()->create(['consultation_id' => $consultation->id]);
     PrescriptionItem::factory()->create(['prescription_id' => $prescription->id]);
 
-    $html = renderPdf('pdf.prescription-single', [
-        'consultation' => $consultation,
-        'prescription' => $prescription,
-        'clinic' => ClinicSetting::current(),
-    ]);
+    $doc = app(ClinicalDocumentService::class)->receta($prescription);
+    $html = renderDocument('documents.receta', $doc);
 
-    expect($html)->toContain('Edad:')
+    expect($doc->ageText)->toBe('12 meses')
         ->and($html)->toContain('12 meses')
-        ->and($html)->not->toContain('19 meses')
-        ->and($html)->not->toContain('1 año(s)');
+        ->and($html)->not->toContain('19 meses');
 });
 
 test('la receta impresa de un paciente mayor de 2 años muestra años y meses', function (): void {
@@ -65,13 +62,11 @@ test('la receta impresa de un paciente mayor de 2 años muestra años y meses', 
     $prescription = Prescription::factory()->create(['consultation_id' => $consultation->id]);
     PrescriptionItem::factory()->create(['prescription_id' => $prescription->id]);
 
-    $html = renderPdf('pdf.prescription-single', [
-        'consultation' => $consultation,
-        'prescription' => $prescription,
-        'clinic' => ClinicSetting::current(),
-    ]);
+    $doc = app(ClinicalDocumentService::class)->receta($prescription);
+    $html = renderDocument('documents.receta', $doc);
 
-    expect($html)->toContain('2 años, 3 meses y 16 días');
+    expect($doc->ageText)->toBe('2 años, 3 meses y 16 días')
+        ->and($html)->toContain('2 años, 3 meses y 16 días');
 });
 
 test('la receta impresa de un lactante menor de 2 meses muestra meses y días', function (): void {
@@ -87,16 +82,12 @@ test('la receta impresa de un lactante menor de 2 meses muestra meses y días', 
     $prescription = Prescription::factory()->create(['consultation_id' => $consultation->id]);
     PrescriptionItem::factory()->create(['prescription_id' => $prescription->id]);
 
-    $html = renderPdf('pdf.prescription-single', [
-        'consultation' => $consultation,
-        'prescription' => $prescription,
-        'clinic' => ClinicSetting::current(),
-    ]);
+    $doc = app(ClinicalDocumentService::class)->receta($prescription);
 
-    expect($html)->toContain('7 meses y 6 días');
+    expect($doc->ageText)->toBe('7 meses y 6 días');
 });
 
-test('el laboratorio impreso usa la misma edad histórica del paciente', function (): void {
+test('la orden de laboratorio impresa usa la misma edad histórica del paciente', function (): void {
     $doctor = Doctor::factory()->create();
     $user = User::factory()->create(['doctor_id' => $doctor->id]);
     $patient = Patient::factory()->create(['date_of_birth' => '2025-01-07']);
@@ -112,17 +103,15 @@ test('el laboratorio impreso usa la misma edad histórica del paciente', functio
     ]);
     LaboratoryRequestItem::factory()->create(['laboratory_request_id' => $lab->id]);
 
-    $html = renderPdf('pdf.laboratory-single', [
-        'consultation' => $consultation,
-        'laboratoryRequest' => $lab,
-        'clinic' => ClinicSetting::current(),
-    ]);
+    $doc = app(ClinicalDocumentService::class)->ordenLaboratorio($lab);
+    $html = renderDocument('documents.orden-laboratorio', $doc);
 
-    expect($html)->toContain('12 meses')
+    expect($doc->ageText)->toBe('12 meses')
+        ->and($html)->toContain('12 meses')
         ->and($html)->not->toContain('19 meses');
 });
 
-test('los endpoints de PDF responden correctamente', function (): void {
+test('los endpoints de documentos responden con PDF', function (): void {
     $doctor = Doctor::factory()->create();
     $user = User::factory()->create(['doctor_id' => $doctor->id]);
     $patient = Patient::factory()->create(['date_of_birth' => '2025-01-07']);
@@ -136,12 +125,8 @@ test('los endpoints de PDF responden correctamente', function (): void {
     PrescriptionItem::factory()->create(['prescription_id' => $prescription->id]);
 
     $response = $this->actingAs($user)
-        ->get(route('consultas.pdf.recetas.single', [$consultation, $prescription]))
+        ->get(route('documentos.recetas.pdf', $prescription))
         ->assertOk();
 
     expect(str_contains((string) $response->headers->get('content-type'), 'application/pdf'))->toBeTrue();
-
-    $this->actingAs($user)
-        ->get(route('consultas.pdf.recetas.all', $consultation))
-        ->assertOk();
 });

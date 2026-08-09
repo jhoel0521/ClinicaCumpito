@@ -225,25 +225,9 @@
                             </p>
                             @if ($consultation->prescriptions->isNotEmpty())
                                 <div class="mt-3 space-y-1.5">
-                                    <a
-                                        href="{{ route('consultas.pdf.recetas.all', $consultation) }}"
-                                        target="_blank"
-                                        class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100 transition"
-                                    >
-                                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                stroke-width="2"
-                                                d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
-                                            />
-                                        </svg>
-                                        Imprimir todas
-                                    </a>
                                     @foreach ($consultation->prescriptions as $rx)
                                         <a
-                                            href="{{ route('consultas.pdf.recetas.single', [$consultation, $rx]) }}"
-                                            target="_blank"
+                                            href="{{ route('documentos.recetas.preview', $rx) }}"
                                             class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-white dark:bg-zinc-800 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-zinc-700 hover:bg-gray-50 transition"
                                         >
                                             <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -296,28 +280,12 @@
                             </p>
                             @if ($consultation->laboratoryRequests->isNotEmpty())
                                 <div class="mt-3 space-y-1.5">
-                                    <a
-                                        href="{{ route('consultas.pdf.laboratorio.all', $consultation) }}"
-                                        target="_blank"
-                                        class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 hover:bg-purple-100 transition"
-                                    >
-                                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                stroke-width="2"
-                                                d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
-                                            />
-                                        </svg>
-                                        Imprimir todos
-                                    </a>
                                     @foreach ($consultation->laboratoryRequests as $lab)
                                         <div
                                             class="flex items-center justify-between gap-2 px-3 py-1.5 rounded-lg text-xs font-medium bg-white dark:bg-zinc-800 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-zinc-700 hover:bg-gray-50 transition"
                                         >
                                             <a
-                                                href="{{ route('consultas.pdf.laboratorio.single', [$consultation, $lab]) }}"
-                                                target="_blank"
+                                                href="{{ route('documentos.laboratorios.preview', $lab) }}"
                                                 class="flex items-center gap-1.5 min-w-0"
                                             >
                                                 <svg

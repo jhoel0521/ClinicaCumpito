@@ -60,10 +60,8 @@ test('la receta impresa incluye la vía de administración', function (): void {
         'administration_route' => 'Oral',
     ]);
 
-    $html = view('pdf.prescription-single', [
-        'consultation' => $consultation,
-        'prescription' => $prescription,
-        'clinic' => ClinicSetting::current(),
+    $html = view('documents.receta', [
+        'doc' => app(\App\Services\ClinicalDocumentService::class)->receta($prescription),
     ])->render();
 
     expect($html)->toContain('Vía')
@@ -131,13 +129,11 @@ test('el PDF de receta muestra un solo campo unificado de dosis y cantidad', fun
         'dose' => '5 ml · 1 frasco 60 ml',
     ]);
 
-    $html = view('pdf.prescription-single', [
-        'consultation' => $consultation,
-        'prescription' => $prescription,
-        'clinic' => ClinicSetting::current(),
+    $html = view('documents.receta', [
+        'doc' => app(\App\Services\ClinicalDocumentService::class)->receta($prescription),
     ])->render();
 
-    expect($html)->toContain('Dosis / Cantidad')
-        ->and($html)->toContain('5 ml · 1 frasco 60 ml')
-        ->and($html)->not->toContain('quantity');
+    expect($html)->toContain('5 ml · 1 frasco 60 ml')
+        ->and($html)->not->toContain('quantity')
+        ->and($html)->not->toContain('>Cantidad<');
 });

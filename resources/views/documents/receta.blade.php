@@ -3,8 +3,7 @@
     Recibe: $doc (App\DTOs\ClinicalDocumentDTO)
 --}}
 @php
-    $background =
-        'data:image/jpeg;base64,' . base64_encode(file_get_contents(public_path('images/pdf/recetario-base.jpg')));
+    $background = 'data:image/jpeg;base64,' . base64_encode(file_get_contents(public_path('images/pdf/recetario-base.jpg')));
 @endphp
 
 <!DOCTYPE html>

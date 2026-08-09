@@ -44,7 +44,7 @@ test('el PDF de la receta conserva el formato vertical del diseño aprobado y ti
         ->and(preg_match_all('/\/Type\s*\/Page[^s]/', $binary))->toBe(1);
 });
 
-test('la receta incrusta el arte original y muestra los datos clínicos sobre el formulario', function (): void {
+test('la receta conserva el arte aprobado y muestra los datos clínicos', function (): void {
     $doctor = Doctor::factory()->create();
     $patient = Patient::factory()->create(['full_name' => 'Mateo Andrés Pérez']);
     $consultation = Consultation::factory()->create([
@@ -74,6 +74,40 @@ test('la receta incrusta el arte original y muestra los datos clínicos sobre el
         ->and($html)->toContain('Mantener buena hidratación.');
 });
 
+test('la orden de laboratorio usa color y estructura clínica sin imágenes', function (): void {
+    $doctor = Doctor::factory()->create([
+        'full_name' => 'Dra. Karen Zaconeta',
+        'specialty' => 'Pediatría',
+    ]);
+    $patient = Patient::factory()->create(['full_name' => 'Aitana Aguilar Pérez']);
+    $consultation = Consultation::factory()->create([
+        'patient_id' => $patient->id,
+        'doctor_id' => $doctor->id,
+        'status' => 'finalized',
+    ]);
+    $lab = LaboratoryRequest::factory()->create([
+        'consultation_id' => $consultation->id,
+        'status' => 'pending',
+        'presumptive_diagnosis' => 'Control pediátrico',
+        'observations' => 'Presentarse en ayunas.',
+    ]);
+    LaboratoryRequestItem::factory()->create([
+        'laboratory_request_id' => $lab->id,
+        'exam_name' => 'Hemograma',
+    ]);
+
+    $doc = app(ClinicalDocumentService::class)->ordenLaboratorio($lab);
+    $html = view('documents.orden-laboratorio', ['doc' => $doc])->render();
+
+    expect($html)->not->toContain('<img')
+        ->and($html)->not->toContain('data:image')
+        ->and($html)->toContain('ORDEN DE LABORATORIO')
+        ->and($html)->toContain('ESTUDIOS SOLICITADOS')
+        ->and($html)->toContain('Aitana Aguilar Pérez')
+        ->and($html)->toContain('Control pediátrico')
+        ->and($html)->toContain('Presentarse en ayunas.');
+});
+
 test('el PDF de la orden de laboratorio mide hoja oficio completa', function (): void {
     $doctor = Doctor::factory()->create();
     $user = User::factory()->create(['doctor_id' => $doctor->id]);
@@ -96,7 +130,8 @@ test('el PDF de la orden de laboratorio mide hoja oficio completa', function ():
     expect((float) $m[1])->toBeGreaterThan(610.0)
         ->and((float) $m[1])->toBeLessThan(614.0)
         ->and((float) $m[2])->toBeGreaterThan(934.0)
-        ->and((float) $m[2])->toBeLessThan(938.0);
+        ->and((float) $m[2])->toBeLessThan(938.0)
+        ->and(preg_match_all('/\/Type\s*\/Page[^s]/', $binary))->toBe(1);
 });
 
 test('la receta con demasiados medicamentos marca desbordamiento y bloquea la descarga', function (): void {
@@ -154,8 +189,10 @@ test('la orden de laboratorio agrupa los estudios por categoría', function (): 
 
     $catHematologia = LaboratoryCategory::factory()->create(['name' => 'Hematología']);
     $catOrina = LaboratoryCategory::factory()->create(['name' => 'Orina']);
+    $catImagenologia = LaboratoryCategory::factory()->create(['name' => 'Imagenología']);
     $examenHemograma = LaboratoryExam::factory()->create(['category_id' => $catHematologia->id, 'name' => 'Hemograma']);
     $examenOrina = LaboratoryExam::factory()->create(['category_id' => $catOrina->id, 'name' => 'Examen general de orina']);
+    $examenEcografia = LaboratoryExam::factory()->create(['category_id' => $catImagenologia->id, 'name' => 'Ecografía']);
 
     $lab = LaboratoryRequest::factory()->create(['consultation_id' => $consultation->id, 'status' => 'pending']);
     LaboratoryRequestItem::factory()->create([
@@ -170,6 +207,11 @@ test('la orden de laboratorio agrupa los estudios por categoría', function (): 
         'laboratory_request_id' => $lab->id,
         'exam_name' => 'Examen personalizado del doctor',
     ]);
+    LaboratoryRequestItem::factory()->create([
+        'laboratory_request_id' => $lab->id,
+        'exam_name' => $examenEcografia->name,
+        'parameter_name' => 'Abdominal',
+    ]);
 
     $doc = app(ClinicalDocumentService::class)->ordenLaboratorio($lab);
     $html = view('documents.orden-laboratorio', ['doc' => $doc])->render();
@@ -177,9 +219,13 @@ test('la orden de laboratorio agrupa los estudios por categoría', function (): 
     expect($doc->isValid())->toBeTrue()
         ->and($html)->toContain('Hematología')
         ->and($html)->toContain('Orina')
+        ->and($html)->toContain('Imagenología')
         ->and($html)->toContain('Otros')
+        ->and($html)->toContain('[x]')
         ->and($html)->toContain('Hemograma')
         ->and($html)->toContain('Examen general de orina')
+        ->and($html)->toContain('Ecografía')
+        ->and($html)->toContain('Abdominal')
         ->and($html)->toContain('Examen personalizado del doctor');
 });
 

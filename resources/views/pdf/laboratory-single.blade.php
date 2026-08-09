@@ -78,14 +78,9 @@
             {{-- Datos del paciente con líneas --}}
             @php
                 $pat = $consultation->patient;
-                $ageStr = '';
-                if ($pat?->date_of_birth) {
-                    $months = (int) \Carbon\Carbon::parse($pat->date_of_birth)->diffInMonths(now());
-                    $yrs = (int) floor($months / 12);
-                    $rem = $months % 12;
-                    $ageStr = $yrs > 0 ? "{$yrs} año(s)" : '';
-                    $ageStr .= $yrs > 0 && $rem > 0 ? " {$rem} mes(es)" : ($yrs === 0 ? "{$rem} mes(es)" : '');
-                }
+                $ageStr = $pat?->date_of_birth
+                    ? \App\ValueObjects\Age::fromDates($pat->date_of_birth, $consultation->consultation_date)->forDisplayPediatric()
+                    : '';
             @endphp
 
             <table class="patient-row">

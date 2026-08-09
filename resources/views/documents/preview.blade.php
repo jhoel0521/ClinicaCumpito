@@ -180,8 +180,8 @@
                 </div>
                 <p class="size-note">
                     {{ number_format($doc->paper->widthMm, 1) }} × {{ number_format($doc->paper->heightMm, 1) }} mm ·
-                    {{ $doc->title === 'receta' ? 'media hoja oficio · una sola página' : 'hoja oficio' }} · escala 100
-                    %
+                    {{ $doc->title === 'receta' ? 'formato del recetario · una sola página' : 'hoja oficio' }} · escala
+                    100 %
                 </p>
             </div>
         </main>

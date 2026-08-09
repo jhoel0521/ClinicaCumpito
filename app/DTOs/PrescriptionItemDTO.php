@@ -7,6 +7,7 @@ class PrescriptionItemDTO
     public function __construct(
         public readonly string $medication_name,
         public readonly string $dose,
+        public readonly ?string $administration_route,
         public readonly ?string $quantity,
         public readonly string $frequency,
         public readonly string $duration,
@@ -21,6 +22,9 @@ class PrescriptionItemDTO
         return new self(
             medication_name: (string) $data['medication_name'],
             dose: (string) $data['dose'],
+            administration_route: isset($data['administration_route']) && $data['administration_route'] !== ''
+                ? (string) $data['administration_route']
+                : null,
             quantity: isset($data['quantity']) && $data['quantity'] !== ''
                 ? (string) $data['quantity']
                 : null,
@@ -40,6 +44,7 @@ class PrescriptionItemDTO
         return [
             'medication_name' => $this->medication_name,
             'dose' => $this->dose,
+            'administration_route' => $this->administration_route,
             'quantity' => $this->quantity,
             'frequency' => $this->frequency,
             'duration' => $this->duration,

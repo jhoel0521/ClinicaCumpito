@@ -523,7 +523,8 @@
         {{-- ═══════════════════════════════════════════════════════════════════ --}}
         {{-- SECCIÓN 3B: CONTROLES MENSUALES 0-24 MESES --}}
         {{-- ═══════════════════════════════════════════════════════════════════ --}}
-        <section id="controles-mensuales" dusk="section-controles-mensuales" class="scroll-mt-16">
+        <section id="controles-mensuales" dusk="section-controles-mensuales" class="scroll-mt-16 space-y-6">
+            <livewire:monthly-calendar :patient="$patient" />
             <livewire:monthly-follow-up :patient="$patient" />
         </section>
 
@@ -922,6 +923,10 @@
             @else
                 <p class="text-zinc-400 dark:text-zinc-500 text-sm italic">Sin vacunas registradas.</p>
             @endif
+
+            <div class="mt-6">
+                <livewire:vaccine-schedule :patient="$patient" />
+            </div>
         </section>
     </div>
 </x-layouts::app>

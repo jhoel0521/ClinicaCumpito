@@ -71,15 +71,13 @@
         <td style="padding: 3px 6px; font-weight: bold">{{ $consultation->patient?->full_name ?? '—' }}</td>
         <td style="padding: 3px 0 3px 6px; color: #555; text-align: right">
             @if ($consultation->patient?->date_of_birth)
-                @php
-                    $months = (int) \Carbon\Carbon::parse($consultation->patient->date_of_birth)->diffInMonths(now());
-                    $years = (int) floor($months / 12);
-                    $rem = $months % 12;
-                    $ageStr = $years > 0 ? "{$years} año(s)" : '';
-                    $ageStr .= $years > 0 && $rem > 0 ? " {$rem} mes(es)" : ($years === 0 ? "{$rem} mes(es)" : '');
-                @endphp
-
-                Edad: {{ $ageStr }}
+                Edad:
+                {{
+                    \App\ValueObjects\Age::fromDates(
+                        $consultation->patient->date_of_birth,
+                        $consultation->consultation_date,
+                    )->forDisplayPediatric()
+                }}
             @endif
         </td>
     </tr>

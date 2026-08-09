@@ -22,16 +22,14 @@ class ClinicalDocumentService
     /** @var array<string, string>|null */
     private ?array $categoryMap = null;
 
-    /**
-     * Construye el documento de una receta (media hoja oficio).
-     */
+    /** Construye el documento sobre el formato vertical del recetario. */
     public function receta(Prescription $prescription): ClinicalDocumentDTO
     {
         $prescription->loadMissing(['consultation.patient', 'consultation.doctor', 'consultation.vitalSigns', 'items']);
         $consultation = $prescription->consultation;
 
         if ($consultation === null || $consultation->patient === null) {
-            return $this->documentWithErrors('receta', PaperSize::halfLegal(), ['No se puede generar la receta sin un paciente.']);
+            return $this->documentWithErrors('receta', PaperSize::prescription(), ['No se puede generar la receta sin un paciente.']);
         }
 
         $errors = $this->validateReceta($prescription, $consultation);
@@ -48,7 +46,7 @@ class ClinicalDocumentService
             ->values()
             ->all();
 
-        $paper = PaperSize::halfLegal();
+        $paper = PaperSize::prescription();
         $overflow = $this->estimateRecetaOverflow($items);
 
         return new ClinicalDocumentDTO(
@@ -213,9 +211,8 @@ class ClinicalDocumentService
      */
     private function estimateRecetaOverflow(array $items): bool
     {
-        // Área útil de medicamentos en mm (media oficio menos encabezado,
-        // datos del paciente, pie y márgenes).
-        $availableMm = 88.0;
+        // Área útil entre los datos del paciente y el pie ilustrado.
+        $availableMm = 124.0;
 
         $usedMm = 0.0;
 

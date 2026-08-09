@@ -10,6 +10,9 @@ class PaperSize
     /** Media hoja oficio: 215,9 × 165,1 mm */
     public const HALF_LEGAL = ['width' => 215.9, 'height' => 165.1];
 
+    /** Formato vertical del recetario aprobado en Canva. */
+    public const PRESCRIPTION = ['width' => 129.91, 'height' => 210.08];
+
     private function __construct(
         public readonly float $widthMm,
         public readonly float $heightMm,
@@ -19,6 +22,11 @@ class PaperSize
     public static function halfLegal(float $marginMm = 8): self
     {
         return new self(self::HALF_LEGAL['width'], self::HALF_LEGAL['height'], $marginMm);
+    }
+
+    public static function prescription(float $marginMm = 0): self
+    {
+        return new self(self::PRESCRIPTION['width'], self::PRESCRIPTION['height'], $marginMm);
     }
 
     public static function legal(float $marginMm = 10): self

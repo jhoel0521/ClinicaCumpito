@@ -18,7 +18,7 @@ beforeEach(function (): void {
     ClinicSetting::create(['name' => 'Clínica Cumpito Test']);
 });
 
-test('el PDF de la receta mide media hoja oficio y tiene una sola página', function (): void {
+test('el PDF de la receta conserva el formato vertical del diseño aprobado y tiene una sola página', function (): void {
     $doctor = Doctor::factory()->create();
     $user = User::factory()->create(['doctor_id' => $doctor->id]);
     $patient = Patient::factory()->create();
@@ -34,14 +34,44 @@ test('el PDF de la receta mide media hoja oficio y tiene una sola página', func
     $pdf = Pdf::loadView('documents.receta', ['doc' => $doc])->setPaper($doc->paper->toDompdf(), 'mm');
     $binary = $pdf->output();
 
-    // 215,9 × 165,1 mm = 612 × 468 pt (MediaBox del PDF)
+    // 129,91 × 210,08 mm = 368,25 × 595,5 pt, igual al PDF de Canva.
     preg_match('/\/MediaBox\s*\[\s*[\d.]+\s+[\d.]+\s+([\d.]+)\s+([\d.]+)\s*\]/', $binary, $m);
 
-    expect((float) $m[1])->toBeGreaterThan(610.0)
-        ->and((float) $m[1])->toBeLessThan(614.0)
-        ->and((float) $m[2])->toBeGreaterThan(466.0)
-        ->and((float) $m[2])->toBeLessThan(470.0)
+    expect((float) $m[1])->toBeGreaterThan(368.0)
+        ->and((float) $m[1])->toBeLessThan(369.0)
+        ->and((float) $m[2])->toBeGreaterThan(595.0)
+        ->and((float) $m[2])->toBeLessThan(596.0)
         ->and(preg_match_all('/\/Type\s*\/Page[^s]/', $binary))->toBe(1);
+});
+
+test('la receta incrusta el arte original y muestra los datos clínicos sobre el formulario', function (): void {
+    $doctor = Doctor::factory()->create();
+    $patient = Patient::factory()->create(['full_name' => 'Mateo Andrés Pérez']);
+    $consultation = Consultation::factory()->create([
+        'patient_id' => $patient->id,
+        'doctor_id' => $doctor->id,
+        'status' => 'finalized',
+        'consultation_date' => '2026-08-09 09:00:00',
+    ]);
+    $prescription = Prescription::factory()->create([
+        'consultation_id' => $consultation->id,
+        'reason' => 'Faringitis aguda',
+        'observations' => 'Mantener buena hidratación.',
+    ]);
+    PrescriptionItem::factory()->create([
+        'prescription_id' => $prescription->id,
+        'medication_name' => 'Paracetamol',
+    ]);
+
+    $doc = app(ClinicalDocumentService::class)->receta($prescription);
+    $html = view('documents.receta', ['doc' => $doc])->render();
+
+    expect($html)->toContain('data:image/jpeg;base64,')
+        ->and($html)->toContain('Mateo Andrés Pérez')
+        ->and($html)->toContain('09/08/2026')
+        ->and($html)->toContain('Faringitis aguda')
+        ->and($html)->toContain('Paracetamol')
+        ->and($html)->toContain('Mantener buena hidratación.');
 });
 
 test('el PDF de la orden de laboratorio mide hoja oficio completa', function (): void {

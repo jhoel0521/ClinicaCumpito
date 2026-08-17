@@ -318,6 +318,28 @@ Una subtarea se considera terminada solo si cumple todo:
 - Bug resuelto en Dusk test 14: `->type()` en `input[type="date"]` no funciona tras re-render Livewire → reemplazado con `nativeInputValueSetter` (JS prototype) + `dispatchEvent('input'/'change')`.
 - Siguiente fase recomendada: **7.4 Pruebas de precisión OMS** o **Fase 8 Calidad/Cierre Técnico**.
 
+### ✅ Actualización de ejecución (10-ago-2026) — Correcciones post-demo y sprints de refinamiento
+
+- **Demo con la clienta realizado**; las 10 observaciones post-demo (prueba del talón al nacer,
+  bug de `wire:key` en filas de recetas, catálogo de vacunas PAI actualizado, opción "moco" en
+  coprológico, parámetros de laboratorio sin preselección, edad en años/meses/días, fecha de
+  aplicación de vacunas, gráficas OMS fuera de rango 0-60 meses, flujo multi-día de laboratorios
+  pendientes, feed de historia deduplicado) quedaron **todas resueltas**.
+- Trabajo adicional en ~50 commits organizados en sprints (`git log`, sufijo "Sprint N PX"),
+  fuera del alcance MVP contractual original, entre los que destacan: módulo de documentos
+  clínicos imprimibles en PDF (recetas y órdenes de laboratorio, con membrete configurable vía
+  nueva tabla `clinic_settings`), resultados de laboratorio por parámetro (`laboratory_item_results`)
+  con adjuntos (`laboratory_attachments`), unificación de dosis/cantidad y vía de administración
+  en recetas, calendario mensual de controles y resumen de vacunas en la ficha del paciente,
+  dashboard con métricas reales, y reemplazo de notificaciones nativas por SweetAlert2.
+- **Estado actual: 551 tests PHP pasando** (2279 assertions) vía `php artisan test --parallel`
+  (~28s) · 14 tests Dusk.
+- Esquema de base de datos actualizado y documentado en `dbdiagram.md` (36 migraciones).
+- **Nota de auditoría**: las fases 7.4, 8.2, 8.3 y 9 seguían marcadas incompletas en el resumen
+  de la fase 24-feb-2026 más abajo; esta actualización no re-audita esos porcentajes en detalle
+  (requiere revisión específica de cobertura de autorización/regresión y despliegue) — solo dejó
+  constancia de que el trabajo post-MVP descrito arriba sí ocurrió y está probado.
+
 ---
 
 ## 📌 Orden recomendado de ejecución (sin recortar alcance)

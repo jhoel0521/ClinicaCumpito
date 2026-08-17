@@ -7,11 +7,13 @@ VitalTrack Pediátrico es un sistema web de gestión clínica diseñado específ
 ## 2. Stack Tecnológico (Laravel 12)
 
 - Backend: Laravel 12 (PHP 8.4+)
-- Base de Datos: PostgreSQL
-- Autenticación / APIs: Laravel Sanctum (Ideal si luego se separa el Front en React/Vue o App Móvil).
-- Autorización: spatie/laravel-permission (Para manejar roles futuros: Doctor, Enfermera, Secretaria).
-- Frontend Sugerido: Blade + Tailwind CSS + Chart.js (Para las gráficas de la OMS).
-- Manejo de Archivos: Laravel Storage (Local o S3) para guardar PDFs de laboratorios y escaneos físicos.
+- Base de Datos: PostgreSQL 17
+- Autenticación: Laravel Fortify (incluye 2FA). APIs/Sanctum quedan disponibles como base si luego se separa el Front en React/Vue o App Móvil.
+- Autorización: spatie/laravel-permission — implementado con 5 roles: Admin, Doctor, Enfermera, Secretaria, Técnico.
+- Frontend: Blade + Livewire 4 (componentes Volt de archivo único) + Flux UI + Tailwind CSS + Chart.js (para las gráficas de la OMS).
+- Manejo de Archivos: Laravel Storage (disco local) para escaneos históricos, adjuntos de laboratorio y logo de la clínica; los documentos de recetas/laboratorio se generan como PDF con `barryvdh/laravel-dompdf`.
+
+> Nota (actualizada 10-ago-2026): esta sección describía el stack propuesto al inicio del proyecto. El stack efectivamente implementado es el listado arriba; para el detalle verificado ver `AGENTS.md` y `ARCHITECTURE.md`.
 
 ## 3. Objetivos Clave (Lo que la Doctora Espera)
 
@@ -27,7 +29,11 @@ La doctora no quiere un sistema genérico, quiere sus "boletas" clásicas.
 
 Solución: Un motor de gráficas impulsado por Chart.js que replique las 50 boletas de la OMS (0 a 13 semanas, 0 a 6 meses, 0 a 5 años, 0 a 13 años (opcional en algunas tablas)).
 
-Regla de Oro: No se graficará el peso por petición expresa de la doctora. Solo Talla/Longitud y Perímetro Cefálico.
+Regla de Oro (histórica, ya no vigente): en el diseño original no se iba a graficar el peso por
+petición expresa de la doctora, solo Talla/Longitud y Perímetro Cefálico. El requerimiento
+cambió durante el desarrollo: el motor implementado (`GrowthChartService`) sí incluye peso —
+las 4 boletas sembradas son `peso_edad`, `talla_edad`, `peso_talla` y `perimetro_cefalico` (cada
+una por sexo). Se deja la nota como registro histórico de la decisión original.
 
 Doble Vista: Un "Modo Médico" (Líneas Z-Score: -3 a +3) para diagnóstico clínico, y un "Modo Padres" (Percentiles: P3 a P97) para explicar el crecimiento a la familia.
 

@@ -1,12 +1,13 @@
 # AGENTS.md — Clínica Cumpito / VitalTrack Pediátrico
 
-Sistema de gestión clínica pediátrica (Bolivia). **MVP ya presentado a la clienta**; estamos en correcciones post-demo → ver "Prioridades actuales".
+Sistema de gestión clínica pediátrica (Bolivia). **MVP ya presentado a la clienta**; la ronda de correcciones post-demo de agosto (10 observaciones) fue completada y desde entonces se sumaron ~50 commits de mejoras (documentos PDF, resultados de laboratorio por parámetro, configuración de marca de la clínica, dashboard con métricas reales) → ver "Estado actual" más abajo.
 
 ## Stack (verificado en composer.json / package.json)
 
 - Laravel 12 + PHP 8.4 · Livewire 4 + Volt · Flux UI · Tailwind CSS 4 · Chart.js 4
-- PostgreSQL en desarrollo y Dusk · tests PHP en SQLite `:memory:` (phpunit.xml)
+- PostgreSQL 17 en desarrollo y Dusk · tests PHP en SQLite `:memory:` (phpunit.xml)
 - Pest 4 · Laravel Dusk 8 · Pint (preset laravel) · PHPStan/Larastan **nivel 8** (`app/ config/ database/`)
+- `barryvdh/laravel-dompdf` (recetas/órdenes de laboratorio en PDF) · `phpoffice/phpspreadsheet` (seeder OMS) · SweetAlert2 (reemplazó notificaciones nativas del navegador)
 
 ## Comandos
 
@@ -16,7 +17,7 @@ docker compose -f dev-docker-compose.yml up -d --wait
 composer setup            # install + .env + key + migrate + npm install + build
 
 composer dev              # server (busca puerto libre desde 8000, scripts/serve.php) + queue + vite
-php artisan test --parallel              # suite completa (~45s; baseline ago-2026: 414 tests)
+php artisan test --parallel              # suite completa (~28s; baseline 10-ago-2026: 551 tests, 2279 assertions)
 php artisan test --filter=NombreDelTest  # un solo test
 composer lint             # pint --parallel (auto-fix)
 ./vendor/bin/phpstan analyse
@@ -49,8 +50,11 @@ npm run pre-commit        # gate completo: pint + phpstan + blade + tests
 - **Livewire 4**: NO pasar `Collection`s como props a Volt (Livewire asigna props antes de `mount()` → TypeError). Cargar datos desde DB dentro de `mount()`.
 - Lógica de negocio en `app/Services` + `app/Contracts` + `app/DTOs` + `app/ValueObjects` (+ `app/Actions`); bindings DI en `AppServiceProvider`. Controladores y Volt solo coordinan.
 - **Inmutabilidad clínica**: consulta `finalized` no se edita; plantillas se copian como snapshots (`ConsultationSnapshotService`); resultados de lab editables solo en ventana de 3 días.
-- **Gráficas OMS**: el catálogo sembrado cubre solo **0–60 meses** (peso_edad, talla_edad, peso_talla, perimetro_cefalico × M/F). `GrowthChartService` calcula z-scores LMS; render en `resources/js/app.js` (`Alpine.data('omsChart')`, modos padres/médico). Un paciente >5 años cae fuera de rango → ver obs #8.
-- Modelos: UUID + SoftDeletes. TZ America/La_Paz. UI 100% en español.
+- **Gráficas OMS**: el catálogo sembrado cubre **0–60 meses** (peso_edad, talla_edad, peso_talla, perimetro_cefalico × M/F). `GrowthChartService` calcula z-scores LMS; render en `resources/js/app.js` (`Alpine.data('omsChart')`, modos padres/médico). Pacientes fuera de ese rango se manejan como caso especial (commit `2e94667`), no se grafican en "0 meses" como antes.
+- **Documentos clínicos en PDF**: `ClinicalDocumentService` + `ClinicalDocumentController` (rutas `documentos/recetas/{prescription}/{preview,pdf}` y `documentos/laboratorios/{laboratoryRequest}/{preview,pdf}`) generan receta y orden de laboratorio con `barryvdh/laravel-dompdf`, con membrete de la clínica (`ClinicSetting`: nombre/dirección/teléfono/whatsapp/logo — única tabla de dominio con id autoincremental, no UUID).
+- **Resultados de laboratorio**: viven en `laboratory_item_results` (uno por parámetro, puede registrarse en una consulta posterior a la solicitud) + `laboratory_attachments` (imágenes/PDF, exactamente uno de `laboratory_request_id`/`laboratory_request_item_id` seteado). Las columnas de resultado que vivían directo en `laboratory_request_items` fueron eliminadas (migraciones `2026_03_20_100004`/`...005`).
+- **Recetas**: `dose` unifica los antiguos campos "dosis" y "cantidad" (migración `2026_08_09_000002`, la doctora los confundía) y `administration_route` es nuevo (`2026_08_09_000001`).
+- Modelos: UUID + SoftDeletes (excepto `clinic_settings`). TZ America/La_Paz. UI 100% en español.
 
 ## Convenciones del repo
 
@@ -60,28 +64,32 @@ npm run pre-commit        # gate completo: pint + phpstan + blade + tests
 - Frontend: dark mode agregando clases `dark:` sobre las clases base existentes (no reescribir secciones); colores por módulo (Pacientes teal, Consultas blue, Reportes purple); validar UX contra las 10 heurísticas de Nielsen (regla del proyecto).
 - Ediciones mínimas y quirúrgicas; reutilizar estilos y patrones existentes antes de crear nuevos.
 
-## Prioridades actuales — obs de la clienta post-demo (ago-2026)
+## Estado actual (10-ago-2026)
 
-Mapeo de las observaciones a archivos probables:
+Las 10 observaciones de la clienta del demo de agosto (prueba del talón, bug de `wire:key` en
+recetas, catálogo de vacunas, "moco" en heces, parámetros de laboratorio sin preselección, edad
+en años/meses/días, fecha de aplicación de vacunas, gráficas OMS fuera de rango, flujo multi-día
+de labs pendientes, feed de paciente deduplicado) **ya están resueltas**. Desde entonces el
+desarrollo siguió en sprints (ver `git log`, mensajes `feat(...)`/`fix(...)` con sufijo
+"Sprint N PX") agregando: documentos PDF imprimibles de recetas/laboratorios con membrete de la
+clínica, resultados de laboratorio por parámetro con adjuntos, calendario mensual de controles
+en la ficha del paciente, resumen de vacunas aplicadas/pendientes, dashboard con métricas reales
+(reemplazó contadores estáticos y el banner de estado del sistema, ahora eliminado), y
+SweetAlert2 en lugar de notificaciones nativas del navegador.
 
-1. **Nueva consulta**: agregar campo "Prueba del talón al nacer" (realizó / no realizó). No existe nada de `talón` hoy → migración + formulario de consulta.
-2. **Bug recetas**: al borrar una fila se borra otra → revisar keys/índices del `@foreach ($prescription['items'] as $iIndex => $item)` en `resources/views/components/⚡consultation-prescription.blade.php` (falta `wire:key` estable).
-3. **Vacunas**: eliminar Hepatitis; BCG y demás con respuesta solo Sí/No; agregar Influenza 6m / 12m / anual (la anual con fecha de colocación) → `database/seeders/VaccineCatalogSeeder.php`, `⚡consultation-vaccines`, `pages/pacientes/⚡vacunas`.
-4. **Laboratorio**: agregar opción "moco" en análisis de heces → `database/seeders/LaboratoryCatalogSeeder.php`.
-5. **Solicitar laboratorio**: hoy los parámetros vienen todos seleccionados por defecto (`checked` en `selectorParameters`) → que inicie sin selección, en `⚡consultation-laboratory.blade.php`.
-6. **Perfil paciente**: mostrar edad en años, meses y días (pacientes pequeños van seguido al médico) → `app/ValueObjects/Age.php::forDisplay()` y vistas de perfil.
-7. **Vacunas**: permitir registrar **fecha de aplicación** al cargar esquema previo de un paciente nuevo (hoy solo marca tiene/no tiene) → `patient_vaccines` + componentes de vacunas.
-8. **Gráficas OMS**: paciente de 8 años / 35 kg se grafica en "0 meses" → el catálogo solo llega a 60 meses; falta rango 5–13 años o guarda de fuera-de-rango en `GrowthChartService` / `⚡patient-oms-chart`.
-9. **Flujo multi-día**: paciente vuelve otro día con labs pendientes → verificar que los pendientes aparezcan al reabrir el historial (`pages/pacientes/⚡laboratorios`; ya existe integración de órdenes previas pendientes en consulta).
-10. **Resumen de paciente saturado**: el feed lista cada ítem de resultado como línea (se ve "Coprológico" ×7, "Hemograma" ×10). Mostrar solo exámenes solicitados, deduplicados, con estado → `pages/pacientes/⚡historia-feed.blade.php` + `tests/Feature/PatientHistoryFeedTest.php`.
+No hay una lista de prioridades pendientes documentada en este archivo; para el trabajo abierto,
+revisar `git log` reciente, issues/tablero del proyecto si existen, y las fases marcadas
+incompletas en `Roadmap de Desarrollo.md` (7.4 Pruebas de precisión OMS, 8.2/8.3 Autorización y
+regresión, Fase 9 Despliegue y Capacitación).
 
 ## Documentos de referencia
 
 - `Roadmap de Desarrollo.md` — estado por fases, DoD y política de tests (fuente de verdad del proceso).
-- `Biblia del Proyecto.md` — spec de dominio clínico.
-- `ARCHITECTURE.md` — visión hexagonal (parcialmente desactualizada: dice Laravel 11/MySQL; lo vigente es este archivo).
+- `Biblia del Proyecto.md` — spec de dominio clínico (documento de visión, no siempre refleja el estado exacto del código).
+- `ARCHITECTURE.md` — visión hexagonal, actualizada a Laravel 12/PostgreSQL.
+- `dbdiagram.md` — esquema real de base de datos, generado desde las migraciones.
 - `README-COOLIFY.md` + `Dockerfile` / `compose.yaml` / `nixpacks.toml` — despliegue.
 
 ---
 
-**Última actualización**: 2 de agosto de 2026 · Suite verificada: 414 tests PHP pasando (1789 assertions)
+**Última actualización**: 10 de agosto de 2026 · Suite verificada: 551 tests PHP pasando (2279 assertions)

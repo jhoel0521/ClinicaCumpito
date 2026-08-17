@@ -4,23 +4,27 @@ Sistema web de gestión clínica diseñado específicamente para consultorios pe
 
 ## ✨ Características Principales
 
-- **Gestión de Pacientes**: Registro completo con cálculo automático de edad
-- **Consultas Digitales**: Sistema híbrido que soporta tanto consultas digitales como historial en PDF
-- **Gráficas OMS**: Motor visual de crecimiento con 50 boletas OMS (0-13 semanas, 0-6 meses, 0-5 años, 0-13 años)
-- **Inmutabilidad Histórica**: Las transacciones se copian como snapshots para protección legal
-- **Automatización de Recetas y Laboratorios**: Plantillas precargadas (combos) con un solo clic
-- **Módulo PAI**: Esquema Nacional de Vacunación de Bolivia
-- **Control de Roles**: Doctora, Enfermera, Secretaria
+- **Gestión de Pacientes**: Registro completo, ficha con datos incompletos/completos, cálculo automático de edad (años/meses/días) y tamizaje neonatal ("prueba del talón")
+- **Consultas Digitales**: Sistema híbrido que soporta tanto consultas digitales (SOAP) como historial en PDF/imagen escaneado
+- **Gráficas OMS**: Motor visual de crecimiento (talla/edad, peso/edad, peso/talla, perímetro cefálico) con Modo Médico (Z-Score) y Modo Padres (Percentiles), tolerante a pacientes fuera del rango 0-60 meses
+- **Inmutabilidad Histórica**: Las transacciones (recetas y laboratorios) se copian como snapshots para protección legal; auditoría de cambios (`audit_logs`) en entidades críticas
+- **Automatización de Recetas y Laboratorios**: Plantillas precargadas (combos) con un solo clic, resultados de laboratorio por parámetro con adjuntos (imágenes/PDF)
+- **Documentos Clínicos Imprimibles**: Recetas y órdenes de laboratorio en PDF con membrete configurable de la clínica (logo, dirección, WhatsApp)
+- **Módulo PAI**: Esquema Nacional de Vacunación de Bolivia, con seguimiento de aplicadas/pendientes
+- **Control de Roles**: Admin, Doctor, Enfermera, Secretaria, Técnico (policies por rol y alcance)
 
 ## 🛠️ Stack Tecnológico
 
 - **Backend**: Laravel 12 (PHP 8.4+)
-- **Base de Datos**: PostgreSQL
-- **Autenticación**: Laravel Fortify + Sanctum
+- **Base de Datos**: PostgreSQL 17
+- **Autenticación**: Laravel Fortify (incluye 2FA) + Sanctum
 - **Autorización**: Spatie Laravel Permission
-- **Frontend**: Blade + Livewire + Flux UI
+- **Frontend**: Blade + Livewire 4 (componentes Volt de archivo único) + Flux UI + Tailwind CSS 4
 - **Gráficas**: Chart.js
-- **Testing**: Pest PHP
+- **Notificaciones UI**: SweetAlert2
+- **PDF**: barryvdh/laravel-dompdf
+- **Importación de datos**: PhpSpreadsheet (seeder de boletas OMS desde Excel)
+- **Testing**: Pest PHP + Laravel Dusk (browser), PHPStan/Larastan nivel 8, Laravel Pint
 
 ## 📋 Requisitos Previos
 
@@ -136,14 +140,16 @@ La aplicación está configurada para **America/La_Paz** (GMT-4)
 
 La interfaz está completamente en **Español** (es_ES)
 
-## 📖 Fases de Desarrollo
+## 📖 Estado del Proyecto
 
-1. **FASE 1**: Cimientos y Autenticación ✅
-2. **FASE 2**: Gestión de Pacientes y Consultas Básicas
-3. **FASE 3**: Motor de Ahorro de Tiempo (Plantillas)
-4. **FASE 4**: Módulo de Vacunas PAI
-5. **FASE 5**: Motor de la OMS (Gráficas)
-6. **FASE 6**: Pruebas y Entrega
+El MVP contractual (Fases 1-7 del roadmap: cimientos, catálogos, pacientes, consultas SOAP,
+plantillas, snapshots inmutables, motor OMS y flujo clínico Livewire) está completo y en
+producción. El proyecto ya tuvo demo con la clienta y actualmente está en una ronda de
+correcciones y mejoras post-demo (documentos imprimibles, resultados de laboratorio por
+parámetro con adjuntos, configuración de la clínica, etc.).
+
+Ver [`Roadmap de Desarrollo.md`](Roadmap%20de%20Desarrollo.md) para el detalle fase por fase
+y [`AGENTS.md`](AGENTS.md) para el estado técnico vigente (stack verificado, comandos, tests).
 
 ## 🤝 Contribuir
 
@@ -176,4 +182,4 @@ Para preguntas o sugerencias, contactar al equipo de desarrollo.
 
 ---
 
-**Última actualización**: 21 de febrero de 2026
+**Última actualización**: 10 de agosto de 2026

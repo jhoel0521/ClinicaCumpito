@@ -183,13 +183,13 @@ new class extends Component {
         <div class="flex items-center justify-between">
             <div>
                 <flux:button
-                    href="{{ route('pacientes.laboratorios', $laboratoryRequest->consultation->patient) }}"
+                    href="{{ route('pacientes.show', $laboratoryRequest->consultation->patient) }}"
                     variant="subtle"
                     size="sm"
                     icon="arrow-left"
                     class="mb-2"
                 >
-                    Volver a Laboratorios
+                    Volver al perfil
                 </flux:button>
                 <h1 class="text-2xl font-bold text-zinc-900 dark:text-white">Detalle de Laboratorio</h1>
                 <p class="text-sm text-zinc-500">

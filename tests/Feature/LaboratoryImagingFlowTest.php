@@ -21,14 +21,13 @@ use Livewire\Livewire;
  * 1. En la consulta 1 se solicita el examen (p. ej. Radiografía de tórax)
  *    y la consulta 1 se cierra (finalizada).
  * 2. En la consulta 2 (mismo paciente) la orden sigue pendiente y desde
- *    ahí se registran los resultados del estudio y se suben los anexos
- *    (informe PDF e imagen).
- * 3. Se valida que los resultados quedaron guardados, que el archivo PDF
- *    y la imagen existen físicamente en el storage, que el adjunto quedó
+ *    ahí se registran los resultados del estudio y se sube un único archivo.
+ * 3. Se valida que los resultados quedaron guardados, que reemplazar el PDF
+ *    por una imagen elimina el archivo anterior y que el adjunto quedó
  *    asociado a la orden correcta y que la orden sigue vinculada a la
  *    consulta 1 y al paciente correctos.
  */
-test('laboratorio de imagen: se pide en consulta 1, se cierra, y en consulta 2 se cargan resultados y anexo PDF que se guarda en disco', function (): void {
+test('laboratorio de imagen: conserva un único archivo por estudio y reemplaza el anterior', function (): void {
     Storage::fake('public');
 
     // ── Catálogo de imagenología ─────────────────────────────────────────────
@@ -128,7 +127,7 @@ test('laboratorio de imagen: se pide en consulta 1, se cierra, y en consulta 2 s
         ->and(Storage::disk('public')->exists($adjunto->file_path))->toBeTrue()
         ->and($adjunto->file_path)->toStartWith('lab-attachments/'.$orden->id.'/');
 
-    // ── Paso 6: se sube también la imagen del estudio ───────────────────────
+    // ── Paso 6: una nueva carga reemplaza el archivo completo del estudio ──
     $imagen = UploadedFile::fake()->image('placa-axial.jpg', 640, 480);
 
     $componente
@@ -137,14 +136,14 @@ test('laboratorio de imagen: se pide en consulta 1, se cierra, y en consulta 2 s
         ->call('uploadAttachment')
         ->assertHasNoErrors();
 
-    $adjuntoImagen = LaboratoryAttachment::query()
-        ->where('id', '!=', $adjunto->id)
-        ->sole();
+    $adjuntoImagen = LaboratoryAttachment::query()->sole();
 
-    expect($adjuntoImagen->original_name)->toBe('placa-axial.jpg')
+    expect($adjuntoImagen->id)->not->toBe($adjunto->id)
+        ->and($adjuntoImagen->original_name)->toBe('placa-axial.jpg')
         ->and($adjuntoImagen->mime_type)->toBe('image/jpeg')
         ->and($adjuntoImagen->isImage())->toBeTrue()
-        ->and(Storage::disk('public')->exists($adjuntoImagen->file_path))->toBeTrue();
+        ->and(Storage::disk('public')->exists($adjuntoImagen->file_path))->toBeTrue()
+        ->and(Storage::disk('public')->exists($adjunto->file_path))->toBeFalse();
 
     // ── Paso 7: la orden sigue asociada a la consulta 1 y al paciente ───────
     $orden->refresh();
@@ -158,10 +157,11 @@ test('laboratorio de imagen: se pide en consulta 1, se cierra, y en consulta 2 s
         ->get(route('pacientes.laboratorios.show', [$patient, $orden]))
         ->assertOk()
         ->assertSee('Sin hallazgos patológicos')
-        ->assertSeeText('informe-radiografia.pdf')
+        ->assertDontSeeText('informe-radiografia.pdf')
         ->assertSeeText('placa-axial.jpg')
-        ->assertSeeText('Documentos Adjuntos');
+        ->assertSeeText('Archivo del estudio')
+        ->assertSeeText('Un solo archivo para toda la solicitud');
     $archivosEnDisco = Storage::disk('public')->allFiles('lab-attachments/'.$orden->id);
 
-    expect($archivosEnDisco)->toHaveCount(2);
+    expect($archivosEnDisco)->toHaveCount(1);
 });

@@ -79,6 +79,11 @@ class AppServiceProvider extends ServiceProvider
         );
 
         $this->app->bind(
+            \App\Contracts\LaboratoryAttachmentServiceContract::class,
+            \App\Services\LaboratoryAttachmentService::class
+        );
+
+        $this->app->bind(
             \App\Contracts\ZScoreServiceContract::class,
             \App\Services\ZScoreService::class
         );

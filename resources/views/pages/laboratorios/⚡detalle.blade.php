@@ -1,11 +1,10 @@
 <?php
 
 use Livewire\Component;
+use App\Contracts\LaboratoryAttachmentServiceContract;
 use App\Contracts\LaboratoryItemResultServiceContract;
-use App\Models\LaboratoryAttachment;
 use App\Models\LaboratoryRequest;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
+use Illuminate\Http\UploadedFile;
 use Livewire\WithFileUploads;
 
 new class extends Component {
@@ -123,20 +122,15 @@ new class extends Component {
 
         try {
             $file = $this->newAttachmentFile;
-            $ext = $file->getClientOriginalExtension();
-            $mime = $file->getMimeType() ?? 'application/octet-stream';
-            $uuid = (string) Str::uuid();
-            $path = 'lab-attachments/' . $this->laboratoryRequest->id . '/' . $uuid . '.' . $ext;
 
-            $file->storeAs('lab-attachments/' . $this->laboratoryRequest->id, $uuid . '.' . $ext, 'public');
+            if (! $file instanceof UploadedFile) {
+                throw new \RuntimeException('El archivo seleccionado no es válido.');
+            }
 
-            LaboratoryAttachment::create([
-                'laboratory_request_id' => $this->laboratoryRequest->id,
-                'laboratory_request_item_id' => null,
-                'file_path' => $path,
-                'original_name' => $file->getClientOriginalName(),
-                'mime_type' => $mime,
-            ]);
+            app(LaboratoryAttachmentServiceContract::class)->replaceForRequest(
+                $this->laboratoryRequest->id,
+                $file,
+            );
 
             $this->newAttachmentFile = null;
             $this->attachingToRequest = false;
@@ -146,14 +140,13 @@ new class extends Component {
         }
     }
 
-    public function deleteAttachment(string $attachmentId): void
+    public function deleteAttachment(string $requestId, string $attachmentId): void
     {
         $this->errorMessage = '';
 
         try {
-            $attachment = LaboratoryAttachment::findOrFail($attachmentId);
-            Storage::disk('public')->delete($attachment->file_path);
-            $attachment->delete();
+            abort_unless(hash_equals($this->laboratoryRequest->id, $requestId), 403);
+            app(LaboratoryAttachmentServiceContract::class)->deleteForRequest($requestId, $attachmentId);
             $this->reload();
         } catch (\Throwable $e) {
             $this->errorMessage = 'Error al eliminar archivo: ' . $e->getMessage();
@@ -162,7 +155,13 @@ new class extends Component {
 
     private function reload(): void
     {
-        $this->laboratoryRequest->load(['consultation.patient', 'consultation.doctor', 'items.results', 'attachments']);
+        $this->laboratoryRequest->load([
+            'consultation.patient',
+            'consultation.doctor',
+            'items.results',
+            'items.attachments',
+            'attachments',
+        ]);
 
         $this->editResults = [];
 
@@ -419,22 +418,28 @@ new class extends Component {
             </div>
         </div>
 
-        @if ($laboratoryRequest->attachments->isNotEmpty() || $laboratoryRequest->status === 'pending')
+        @php
+            $studyAttachments = $laboratoryRequest->attachments
+                ->concat($laboratoryRequest->items->flatMap(fn ($item) => $item->attachments))
+                ->sortBy('created_at');
+        @endphp
+
+        @if ($studyAttachments->isNotEmpty() || $laboratoryRequest->status === 'pending')
             <div
                 class="bg-white dark:bg-zinc-900 shadow-sm border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6"
             >
                 <h2 class="text-lg font-bold mb-4 text-zinc-800 dark:text-zinc-100 flex items-center gap-2">
                     <flux:icon.paper-clip class="size-5" />
-                    Documentos Adjuntos
+                    Archivo del estudio
                 </h2>
 
                 @php
-                    $viewerItems = $laboratoryRequest->attachments
+                    $viewerItems = $studyAttachments
                         ->map(
                             fn ($att) => [
                                 'id' => $att->id,
                                 'name' => $att->original_name ?? 'Archivo',
-                                'url' => Storage::url($att->file_path),
+                                'url' => $att->url(),
                                 'type' => $att->isPdf() ? 'pdf' : 'image',
                             ],
                         )
@@ -445,48 +450,56 @@ new class extends Component {
                 <x-lab-attachments-viewer
                     :items="$viewerItems"
                     :can-delete="$laboratoryRequest->status === 'pending'"
+                    :request-id="$laboratoryRequest->id"
                 />
 
                 @if ($laboratoryRequest->status === 'pending')
-                    <div class="mt-4 flex items-center gap-2">
-                        @if ($attachingToRequest)
-                            <label
-                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-sky-300 dark:border-sky-700 bg-sky-50 dark:bg-sky-900/20 text-sm text-sky-700 dark:text-sky-300 cursor-pointer hover:bg-sky-100 transition"
-                            >
-                                <flux:icon.paper-clip class="size-4" />
-                                Elegir archivo
-                                <input
-                                    type="file"
-                                    wire:model="newAttachmentFile"
-                                    accept=".jpg,.jpeg,.png,.webp,.pdf"
-                                    class="sr-only"
-                                />
-                            </label>
-                            @if ($newAttachmentFile)
-                                <button
-                                    wire:click="uploadAttachment"
-                                    wire:loading.attr="disabled"
-                                    class="px-3 py-1.5 text-sm rounded-lg bg-sky-600 hover:bg-sky-700 text-white transition disabled:opacity-50"
+                    <div class="mt-4">
+                        <div class="flex items-center gap-2">
+                            @if ($attachingToRequest)
+                                <label
+                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-sky-300 dark:border-sky-700 bg-sky-50 dark:bg-sky-900/20 text-sm text-sky-700 dark:text-sky-300 cursor-pointer hover:bg-sky-100 transition"
                                 >
-                                    Subir
+                                    <flux:icon.paper-clip class="size-4" />
+                                    Elegir archivo
+                                    <input
+                                        type="file"
+                                        wire:model="newAttachmentFile"
+                                        accept=".jpg,.jpeg,.png,.webp,.pdf"
+                                        class="sr-only"
+                                    />
+                                </label>
+                                @if ($newAttachmentFile)
+                                    <button
+                                        wire:click="uploadAttachment"
+                                        wire:loading.attr="disabled"
+                                        class="px-3 py-1.5 text-sm rounded-lg bg-sky-600 hover:bg-sky-700 text-white transition disabled:opacity-50"
+                                    >
+                                        {{ count($viewerItems) > 0 ? 'Subir y reemplazar' : 'Subir archivo' }}
+                                    </button>
+                                @endif
+
+                                <button
+                                    wire:click="$set('attachingToRequest', false)"
+                                    class="text-zinc-400 hover:text-zinc-600 transition text-sm"
+                                >
+                                    ×
+                                </button>
+                            @else
+                                <button
+                                    wire:click="openAttachment"
+                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-sky-300 dark:border-sky-700 text-sky-600 dark:text-sky-400 hover:bg-sky-50 dark:hover:bg-sky-900/20 transition text-sm font-medium"
+                                >
+                                    <flux:icon.paper-clip class="size-4" />
+                                    {{ count($viewerItems) > 0 ? 'Reemplazar archivo' : 'Adjuntar archivo' }}
                                 </button>
                             @endif
+                        </div>
 
-                            <button
-                                wire:click="$set('attachingToRequest', false)"
-                                class="text-zinc-400 hover:text-zinc-600 transition text-sm"
-                            >
-                                ×
-                            </button>
-                        @else
-                            <button
-                                wire:click="openAttachment"
-                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-sky-300 dark:border-sky-700 text-sky-600 dark:text-sky-400 hover:bg-sky-50 dark:hover:bg-sky-900/20 transition text-sm font-medium"
-                            >
-                                <flux:icon.paper-clip class="size-4" />
-                                Adjuntar imagen / PDF como respaldo
-                            </button>
-                        @endif
+                        <p class="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
+                            Un solo archivo para toda la solicitud. Si el estudio tiene varias imágenes, únalas en un PDF
+                            antes de subirlo.
+                        </p>
                     </div>
                 @endif
             </div>

@@ -1,17 +1,16 @@
 <?php
 
+use App\Contracts\LaboratoryAttachmentServiceContract;
 use App\Contracts\LaboratoryItemResultServiceContract;
 use App\Contracts\LaboratoryRequestItemServiceContract;
 use App\Contracts\LaboratoryRequestServiceContract;
 use App\DTOs\LaboratoryRequestDTO;
 use App\DTOs\LaboratoryRequestItemDTO;
 use App\Models\Consultation;
-use App\Models\LaboratoryAttachment;
 use App\Models\LaboratoryCategory;
 use App\Models\LaboratoryRequest;
 use App\ValueObjects\ConsultationStatus;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
+use Illuminate\Http\UploadedFile;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
@@ -24,9 +23,9 @@ new class extends Component {
 
     /**
      * All lab orders for this consultation.
-     * Each entry: [id, examName, status, presumptive_diagnosis, observations, items, orderAttachments]
-     * items: [[id, parameter_name, results[], attachments[]]]
-     * orderAttachments: [[id, original_name, mime_type, url, is_image, is_pdf]]
+     * Each entry: [id, examName, status, presumptive_diagnosis, observations, items, studyAttachments]
+     * items: [[id, parameter_name, results[]]]
+     * studyAttachments: [[id, original_name, mime_type, url, is_image, is_pdf]]
      *
      * @var array<int, array<string, mixed>>
      */
@@ -69,8 +68,7 @@ new class extends Component {
     /** @var mixed */
     public $newAttachmentFile = null;
 
-    public ?string $attachingToItemId = null; // null = order-level, uuid = item-level
-    public ?string $attachingToRequestId = null; // which order receives an order-level attachment
+    public ?string $attachingToRequestId = null;
 
     public function mount(string $consultationId): void
     {
@@ -167,18 +165,6 @@ new class extends Component {
                         ],
                     )
                     ->all(),
-                'attachments' => $item->attachments
-                    ->map(
-                        fn ($a) => [
-                            'id' => $a->id,
-                            'original_name' => $a->original_name,
-                            'mime_type' => $a->mime_type,
-                            'url' => $a->url(),
-                            'is_image' => $a->isImage(),
-                            'is_pdf' => $a->isPdf(),
-                        ],
-                    )
-                    ->all(),
             ];
         }
 
@@ -189,7 +175,9 @@ new class extends Component {
             'presumptive_diagnosis' => $r->presumptive_diagnosis ?? '',
             'observations' => $r->observations ?? '',
             'items' => $items,
-            'orderAttachments' => $r->attachments
+            'studyAttachments' => $r->attachments
+                ->concat($r->items->flatMap(fn ($item) => $item->attachments))
+                ->sortBy('created_at')
                 ->map(
                     fn ($a) => [
                         'id' => $a->id,
@@ -269,17 +257,11 @@ new class extends Component {
         $this->errorMessage = '';
 
         try {
-            $req = LaboratoryRequest::with(['items.attachments', 'attachments'])->find($requestId);
-            if ($req) {
-                foreach ($req->attachments as $att) {
-                    Storage::disk('public')->delete($att->file_path);
-                }
-                foreach ($req->items as $item) {
-                    foreach ($item->attachments as $att) {
-                        Storage::disk('public')->delete($att->file_path);
-                    }
-                }
-            }
+            LaboratoryRequest::query()
+                ->where('consultation_id', $this->consultationId)
+                ->findOrFail($requestId);
+
+            app(LaboratoryAttachmentServiceContract::class)->deleteAllForRequest($requestId);
 
             app(LaboratoryRequestServiceContract::class)->delete($requestId);
 
@@ -478,10 +460,10 @@ new class extends Component {
 
     // ── Attachments ──
 
-    public function openAttachment(string $requestId, ?string $itemId = null): void
+    public function openAttachment(string $requestId): void
     {
+        $this->findPatientRequest($requestId);
         $this->attachingToRequestId = $requestId;
-        $this->attachingToItemId = $itemId;
         $this->newAttachmentFile = null;
     }
 
@@ -498,24 +480,19 @@ new class extends Component {
         ]);
 
         try {
+            $this->findPatientRequest($this->attachingToRequestId);
             $file = $this->newAttachmentFile;
-            $ext = $file->getClientOriginalExtension();
-            $mime = $file->getMimeType() ?? 'application/octet-stream';
-            $uuid = (string) Str::uuid();
-            $path = "lab-attachments/{$this->attachingToRequestId}/{$uuid}.{$ext}";
 
-            $file->storeAs('lab-attachments/' . $this->attachingToRequestId, "{$uuid}.{$ext}", 'public');
+            if (! $file instanceof UploadedFile) {
+                throw new \RuntimeException('El archivo seleccionado no es válido.');
+            }
 
-            LaboratoryAttachment::create([
-                'laboratory_request_id' => $this->attachingToItemId === null ? $this->attachingToRequestId : null,
-                'laboratory_request_item_id' => $this->attachingToItemId,
-                'file_path' => $path,
-                'original_name' => $file->getClientOriginalName(),
-                'mime_type' => $mime,
-            ]);
+            app(LaboratoryAttachmentServiceContract::class)->replaceForRequest(
+                $this->attachingToRequestId,
+                $file,
+            );
 
             $this->newAttachmentFile = null;
-            $this->attachingToItemId = null;
             $this->attachingToRequestId = null;
             $this->reload();
         } catch (\Throwable $e) {
@@ -524,19 +501,27 @@ new class extends Component {
         }
     }
 
-    public function deleteAttachment(string $attachmentId): void
+    public function deleteAttachment(string $requestId, string $attachmentId): void
     {
         $this->errorMessage = '';
 
         try {
-            $attachment = LaboratoryAttachment::findOrFail($attachmentId);
-            Storage::disk('public')->delete($attachment->file_path);
-            $attachment->delete();
+            $this->findPatientRequest($requestId);
+            app(LaboratoryAttachmentServiceContract::class)->deleteForRequest($requestId, $attachmentId);
             $this->reload();
         } catch (\Throwable $e) {
             $this->errorMessage = 'Error al eliminar archivo: ' . $e->getMessage();
             $this->dispatch('notify', type: 'error', message: $this->errorMessage);
         }
+    }
+
+    private function findPatientRequest(string $requestId): LaboratoryRequest
+    {
+        $consultation = Consultation::findOrFail($this->consultationId);
+
+        return LaboratoryRequest::query()
+            ->whereHas('consultation', fn ($query) => $query->where('patient_id', $consultation->patient_id))
+            ->findOrFail($requestId);
     }
 }; ?>
 
@@ -1032,79 +1017,6 @@ new class extends Component {
                                     @endif
                                 @endif
 
-                                {{-- File attachments per item --}}
-                                @if ($labReq['status'] === 'received' || ! $finalized)
-                                    @foreach ($labReq['items'] as $item)
-                                        @if (count($item['attachments']) > 0 || ! $finalized)
-                                            <div
-                                                class="px-4 py-2 border-t border-gray-100 dark:border-zinc-800 flex flex-wrap gap-2 items-center bg-gray-50 dark:bg-zinc-800/40"
-                                            >
-                                                <span class="text-xs text-gray-500 dark:text-gray-400 font-medium mr-1">
-                                                    {{ $item['parameter_name'] ?? '(examen completo)' }}:
-                                                </span>
-                                                @php
-                                                    $itemViewerItems = collect($item['attachments'])
-                                                        ->map(
-                                                            fn ($att) => [
-                                                                'id' => $att['id'],
-                                                                'name' => $att['original_name'] ?? 'Archivo',
-                                                                'url' => $att['url'],
-                                                                'type' => $att['is_pdf'] ? 'pdf' : 'image',
-                                                            ],
-                                                        )
-                                                        ->values()
-                                                        ->all();
-                                                @endphp
-
-                                                <x-lab-attachments-viewer
-                                                    :items="$itemViewerItems"
-                                                    :can-delete="! $finalized"
-                                                />
-
-                                                @if (! $finalized)
-                                                    @if ($attachingToItemId === $item['id'] && $attachingToRequestId === $labReq['id'])
-                                                        <label
-                                                            class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded border border-sky-300 dark:border-sky-700 bg-sky-50 dark:bg-sky-900/20 text-xs text-sky-700 dark:text-sky-300 cursor-pointer hover:bg-sky-100 transition"
-                                                        >
-                                                            <flux:icon.paper-clip class="size-3" />
-                                                            Elegir archivo
-                                                            <input
-                                                                type="file"
-                                                                wire:model="newAttachmentFile"
-                                                                accept=".jpg,.jpeg,.png,.webp,.pdf"
-                                                                class="sr-only"
-                                                            />
-                                                        </label>
-                                                        @if ($newAttachmentFile)
-                                                            <button
-                                                                wire:click="uploadAttachment"
-                                                                wire:loading.attr="disabled"
-                                                                class="px-2 py-0.5 text-xs rounded bg-sky-600 hover:bg-sky-700 text-white transition disabled:opacity-50"
-                                                            >
-                                                                Subir
-                                                            </button>
-                                                        @endif
-
-                                                        <button
-                                                            wire:click="$set('attachingToItemId', null)"
-                                                            class="text-gray-400 hover:text-gray-600 transition text-xs"
-                                                        >
-                                                            ×
-                                                        </button>
-                                                    @else
-                                                        <button
-                                                            wire:click="openAttachment('{{ $labReq['id'] }}', '{{ $item['id'] }}')"
-                                                            class="text-xs text-sky-600 dark:text-sky-400 hover:underline flex items-center gap-1"
-                                                        >
-                                                            <flux:icon.paper-clip class="size-3" />
-                                                            Adjuntar
-                                                        </button>
-                                                    @endif
-                                                @endif
-                                            </div>
-                                        @endif
-                                    @endforeach
-                                @endif
                             </div>
                         @else
                             <p class="text-xs text-gray-400 dark:text-zinc-500 italic">Sin parámetros definidos.</p>
@@ -1127,16 +1039,20 @@ new class extends Component {
                             </div>
                         @endif
 
-                        {{-- Archivos de toda la solicitud (siempre que se pueda editar o ya esté recibida) --}}
-                        @if ($labReq['status'] === 'received' || ! $finalized)
+                        {{-- Un único archivo para el estudio completo; los adjuntos antiguos se muestran juntos. --}}
+                        @php
+                            $canEditStudyFile = $labReq['status'] === 'pending' && ! $finalized;
+                        @endphp
+
+                        @if (count($labReq['studyAttachments']) > 0 || $canEditStudyFile)
                             <div class="rounded-xl border border-gray-200 dark:border-zinc-700 p-3">
                                 <p
                                     class="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide mb-2"
                                 >
-                                    Archivos de la solicitud
+                                    Archivo del estudio
                                 </p>
                                 @php
-                                    $orderViewerItems = collect($labReq['orderAttachments'])
+                                    $studyViewerItems = collect($labReq['studyAttachments'])
                                         ->map(
                                             fn ($att) => [
                                                 'id' => $att['id'],
@@ -1149,11 +1065,15 @@ new class extends Component {
                                         ->all();
                                 @endphp
 
-                                <x-lab-attachments-viewer :items="$orderViewerItems" :can-delete="! $finalized" />
+                                <x-lab-attachments-viewer
+                                    :items="$studyViewerItems"
+                                    :can-delete="$canEditStudyFile"
+                                    :request-id="$labReq['id']"
+                                />
 
-                                @if (! $finalized)
+                                @if ($canEditStudyFile)
                                     <div class="mt-3">
-                                        @if ($attachingToItemId === null && $attachingToRequestId === $labReq['id'])
+                                        @if ($attachingToRequestId === $labReq['id'])
                                             <label
                                                 class="inline-flex items-center gap-1.5 px-2 py-1 rounded border border-sky-300 dark:border-sky-700 bg-sky-50 dark:bg-sky-900/20 text-xs text-sky-700 dark:text-sky-300 cursor-pointer hover:bg-sky-100 transition"
                                             >
@@ -1172,7 +1092,7 @@ new class extends Component {
                                                     wire:loading.attr="disabled"
                                                     class="px-2 py-1 text-xs rounded bg-sky-600 hover:bg-sky-700 text-white transition disabled:opacity-50"
                                                 >
-                                                    Subir
+                                                    {{ count($studyViewerItems) > 0 ? 'Subir y reemplazar' : 'Subir archivo' }}
                                                 </button>
                                             @endif
 
@@ -1188,9 +1108,14 @@ new class extends Component {
                                                 class="text-xs text-sky-600 dark:text-sky-400 hover:underline flex items-center gap-1"
                                             >
                                                 <flux:icon.paper-clip class="size-3" />
-                                                Adjuntar a la solicitud
+                                                {{ count($studyViewerItems) > 0 ? 'Reemplazar archivo' : 'Adjuntar archivo' }}
                                             </button>
                                         @endif
+
+                                        <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                                            Un solo archivo para toda la solicitud. Si el estudio tiene varias imágenes,
+                                            únalas en un PDF antes de subirlo.
+                                        </p>
                                     </div>
                                 @endif
                             </div>

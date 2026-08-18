@@ -123,18 +123,42 @@
 
             <flux:sidebar.nav>
                 <div class="px-3 py-2">
-                    <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase mb-2">
-                        Tema
-                    </label>
-                    <select
+                    <button
+                        id="theme-toggle"
+                        type="button"
                         x-data
-                        x-model="$flux.appearance"
-                        class="w-full px-3 py-2 rounded-lg text-sm bg-white dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
+                        @click="$flux.appearance = $flux.appearance === 'dark' ? 'light' : 'dark'"
+                        class="w-full flex items-center justify-center gap-2 p-2 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition"
+                        aria-label="Cambiar tema"
                     >
-                        <option value="system">Sistema</option>
-                        <option value="dark">Oscuro</option>
-                        <option value="light">Claro</option>
-                    </select>
+                        <svg
+                            class="w-4 h-4 dark:hidden"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke-width="1.5"
+                            stroke="currentColor"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z"
+                            />
+                        </svg>
+                        <svg
+                            class="w-4 h-4 hidden dark:inline"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke-width="1.5"
+                            stroke="currentColor"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z"
+                            />
+                        </svg>
+                        <span class="text-sm font-medium">Tema</span>
+                    </button>
                 </div>
             </flux:sidebar.nav>
 

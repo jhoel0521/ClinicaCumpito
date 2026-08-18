@@ -12,17 +12,10 @@
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
 
         <script>
-            // Inicializar dark mode desde localStorage o preferencia del sistema
+            // Misma fuente de tema que la app (flux.appearance): solo claro u oscuro, por defecto claro.
             (function () {
-                const theme =
-                    localStorage.getItem('theme') ||
-                    (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-                if (theme === 'dark') {
-                    document.documentElement.classList.add('dark');
-                } else {
-                    document.documentElement.classList.remove('dark');
-                }
-                localStorage.setItem('theme', theme);
+                const appearance = localStorage.getItem('flux.appearance') || 'light';
+                document.documentElement.classList.toggle('dark', appearance === 'dark');
             })();
         </script>
 
@@ -539,7 +532,7 @@
 </html>
 
 <script>
-    // Toggle dark mode
+    // Toggle tema compartido con la app (flux.appearance)
     const themeToggle = document.getElementById('theme-toggle');
     if (themeToggle) {
         themeToggle.addEventListener('click', function () {
@@ -548,10 +541,10 @@
 
             if (isDark) {
                 html.classList.remove('dark');
-                localStorage.setItem('theme', 'light');
+                localStorage.setItem('flux.appearance', 'light');
             } else {
                 html.classList.add('dark');
-                localStorage.setItem('theme', 'dark');
+                localStorage.setItem('flux.appearance', 'dark');
             }
         });
     }

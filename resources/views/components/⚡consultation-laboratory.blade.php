@@ -487,10 +487,7 @@ new class extends Component {
                 throw new \RuntimeException('El archivo seleccionado no es válido.');
             }
 
-            app(LaboratoryAttachmentServiceContract::class)->replaceForRequest(
-                $this->attachingToRequestId,
-                $file,
-            );
+            app(LaboratoryAttachmentServiceContract::class)->replaceForRequest($this->attachingToRequestId, $file);
 
             $this->newAttachmentFile = null;
             $this->attachingToRequestId = null;
@@ -1016,7 +1013,6 @@ new class extends Component {
                                         </div>
                                     @endif
                                 @endif
-
                             </div>
                         @else
                             <p class="text-xs text-gray-400 dark:text-zinc-500 italic">Sin parámetros definidos.</p>

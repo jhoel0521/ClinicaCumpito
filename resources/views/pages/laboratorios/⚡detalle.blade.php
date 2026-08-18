@@ -127,10 +127,7 @@ new class extends Component {
                 throw new \RuntimeException('El archivo seleccionado no es válido.');
             }
 
-            app(LaboratoryAttachmentServiceContract::class)->replaceForRequest(
-                $this->laboratoryRequest->id,
-                $file,
-            );
+            app(LaboratoryAttachmentServiceContract::class)->replaceForRequest($this->laboratoryRequest->id, $file);
 
             $this->newAttachmentFile = null;
             $this->attachingToRequest = false;
@@ -497,8 +494,8 @@ new class extends Component {
                         </div>
 
                         <p class="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
-                            Un solo archivo para toda la solicitud. Si el estudio tiene varias imágenes, únalas en un PDF
-                            antes de subirlo.
+                            Un solo archivo para toda la solicitud. Si el estudio tiene varias imágenes, únalas en un
+                            PDF antes de subirlo.
                         </p>
                     </div>
                 @endif

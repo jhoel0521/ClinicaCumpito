@@ -20,6 +20,10 @@
             }
             localStorage.removeItem('theme');
         }
+        // Sin modo automático: solo claro u oscuro, por defecto claro.
+        if (!localStorage.getItem('flux.appearance')) {
+            localStorage.setItem('flux.appearance', 'light');
+        }
     })();
 </script>
 @fluxAppearance

@@ -15,3 +15,4 @@ dev-docker-compose.yml
 README.md
 phpunit.xml
 public/storage
+public/hot

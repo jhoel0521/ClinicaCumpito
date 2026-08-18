@@ -191,10 +191,18 @@ new class extends Component {
                 @endif
 
                 <a
-                    href="{{ route('consultas.index') }}"
+                    href="{{ route('pacientes.feed', $patient) }}"
                     class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-white/10 hover:bg-white/20 text-blue-200 border border-white/20 transition"
                 >
-                    Todas las consultas
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M9 12h6m-6 4h6M9 8h6M4 6a2 2 0 012-2h12a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6z"
+                        />
+                    </svg>
+                    Feed del paciente
                 </a>
             </div>
         </div>

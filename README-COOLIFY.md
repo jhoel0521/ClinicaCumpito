@@ -1,88 +1,46 @@
 # Despliegue en Coolify
 
-Esta aplicación se despliega como un stack Docker Compose de producción. Incluye:
-
-- Aplicación Laravel con PHP 8.4 y Apache.
-- PostgreSQL 17.
-- Volúmenes persistentes para la base de datos y los archivos clínicos.
-
-Ningún puerto se publica directamente en el servidor. Solo el servicio `app` debe
-recibir un dominio mediante el proxy de Coolify.
+La aplicación se despliega como **aplicación Docker individual** (build pack
+`Dockerfile`) y la base de datos **MariaDB** vive como **recurso independiente**
+en Coolify. Esta separación habilita las copias de seguridad automáticas de la
+base de datos (no funcionan con bases embebidas en Compose).
 
 ## 1. Requisitos
 
 - Una instancia de Coolify con un servidor configurado.
 - El repositorio Git accesible desde Coolify.
 - Un dominio apuntando a la dirección IP del servidor.
-- Docker Compose seleccionado como método de despliegue.
+- Build pack **Dockerfile** (el `Dockerfile` está en la raíz del repo).
 
-El archivo principal del despliegue es:
+## 2. Crear la base de datos MariaDB
 
-```text
-compose.yaml
-```
+1. En el proyecto y ambiente de la clínica: **New Resource → Database → MariaDB**.
+2. Desde la página del recurso, anota: **Internal Hostname**, puerto (`3306`),
+   usuario y contraseña. Se usarán en las variables de la aplicación.
 
-## 2. Crear el recurso en Coolify
+## 3. Variables de la aplicación
 
-1. Entra al proyecto y ambiente donde se desplegará la clínica.
-2. Selecciona **New Resource**.
-3. Selecciona **Docker Compose**.
-4. Conecta el repositorio Git.
-5. Selecciona la rama de producción.
-6. Indica `compose.yaml` como archivo Docker Compose.
-7. No habilites **Raw Compose Deployment**.
-8. No habilites **Connect to Predefined Network**.
-9. Guarda la configuración sin desplegar todavía.
-
-Coolify crea automáticamente la red privada del stack. No declares una red
-personalizada en `compose.yaml`: el proxy podría enrutar a una red equivocada y
-causar caídas intermitentes. Los servicios se comunican mediante sus nombres
-internos:
-
-```text
-app -> postgres:5432
-```
-
-## 3. Variables obligatorias
-
-Configura estas variables en la sección **Environment Variables** de Coolify:
+En la app **Environment Variables**:
 
 ```dotenv
 APP_KEY=base64:CAMBIAR_POR_UNA_CLAVE_REAL
 APP_URL=https://clinica.example.com
-```
-
-Genera `APP_KEY` desde una instalación local del proyecto:
-
-```bash
-php artisan key:generate --show
-```
-
-No cambies `APP_KEY` después de poner la aplicación en producción. Cambiarla
-invalidaría sesiones y datos cifrados previamente.
-
-El Compose utiliza la variable mágica:
-
-```dotenv
-SERVICE_PASSWORD_64_POSTGRES
-```
-
-Coolify genera esta contraseña automáticamente y entrega el mismo valor a
-Laravel y PostgreSQL. No es necesario crearla manualmente.
-
-## 4. Variables recomendadas
-
-Los siguientes valores tienen defaults seguros, pero pueden configurarse desde
-Coolify:
-
-```dotenv
-APP_NAME="VitalTrack Pediátrico"
+RUN_LARAVEL_SETUP=true
+DB_CONNECTION=mariadb
+DB_HOST=HOSTNAME_INTERNO_DE_LA_DB
+DB_PORT=3306
 DB_DATABASE=vitaltrack
-DB_USERNAME=vitaltrack
-LOG_LEVEL=error
+DB_USERNAME=usuario_de_la_db
+DB_PASSWORD=password_de_la_db
 ```
 
-Para correo SMTP:
+Genera `APP_KEY` con `php artisan key:generate --show`. **No cambies `APP_KEY`
+después del primer despliegue** (invalida sesiones y datos cifrados).
+
+`RUN_LARAVEL_SETUP=true` es obligatorio: el entrypoint de la imagen ejecuta las
+migraciones y tareas de inicialización al arrancar el contenedor.
+
+Correo SMTP (opcional):
 
 ```dotenv
 MAIL_MAILER=smtp
@@ -97,46 +55,11 @@ MAIL_FROM_NAME="VitalTrack Pediátrico"
 
 Si todavía no existe un proveedor SMTP, conserva `MAIL_MAILER=log`.
 
-## 5. Configurar el dominio
+## 4. Build pack y primer despliegue
 
-Asigna el dominio únicamente al servicio `app`:
-
-```text
-Servicio: app
-Dominio:  https://clinica.example.com
-Puerto:   80
-```
-
-No asignes un dominio al servicio `postgres`.
-
-No agregues `ports:` ni configures **Ports Exposes** para este recurso Docker
-Compose. Coolify enruta el dominio asignado a `app`; como Apache escucha en el
-puerto 80, usa el dominio sin sufijo de puerto.
-
-Activa HTTPS y la redirección de HTTP a HTTPS desde Coolify.
-
-## 6. Almacenamiento persistente
-
-El stack declara dos volúmenes:
-
-```text
-postgres_data  -> Base de datos PostgreSQL
-app_storage    -> Archivos privados, públicos y documentos clínicos
-```
-
-No elimines estos volúmenes durante una actualización. La opción de borrar
-volúmenes destruye permanentemente los datos persistentes.
-
-Configura copias de seguridad periódicas de PostgreSQL desde Coolify y respalda
-también el volumen `app_storage`.
-
-## 7. Primer despliegue
-
-Después de configurar las variables y el dominio:
-
-1. Pulsa **Deploy**.
-2. Espera a que `postgres` aparezca como saludable.
-3. El servicio `app` ejecutará automáticamente:
+1. Configuración de la app → Build Pack → **Dockerfile**.
+2. Asigna el dominio a la app (puerto `80`) y activa HTTPS con redirección.
+3. **Deploy**. El entrypoint ejecuta automáticamente:
 
 ```bash
 php artisan migrate --force
@@ -145,75 +68,88 @@ php artisan storage:link --force
 php artisan optimize
 ```
 
-4. Abre el dominio configurado y verifica la pantalla de acceso.
+## 5. Seed inicial completo (una sola vez)
 
-El seeder es idempotente: crea los roles faltantes sin duplicar los existentes.
+Las migraciones y los roles se cargan solos. Para el resto del catálogo, abre la
+terminal del contenedor `app` y ejecuta:
+
+```bash
+php artisan db:seed --force
+```
+
+Crea: configuración de la clínica, roles/permisos, condiciones médicas, catálogo
+de laboratorio, esquema PAI Bolivia, plantillas de recetas, datos OMS y los
+usuarios por defecto (`admin@clinica.com`). **No crea pacientes de prueba en
+producción.**
+
+Nota: `migrate:fresh` está prohibido en producción (protección contra borrados
+accidentales) y no hace falta: la base nueva se migra sola. El seeder completo es
+idempotente.
+
+## 6. Copias de seguridad
+
+### Destino S3-compatible
+
+Coolify guarda los backups en destinos S3-compatible. Dos opciones:
+
+- **MinIO local** (recomendado para empezar): New Resource → Service → MinIO,
+  con un volumen persistente. Anota las credenciales que genera.
+- **Bucket externo**: Backblaze B2, AWS S3, Wasabi, etc.
+
+### Backup programado de la base de datos
+
+1. Recurso MariaDB → **Backups** → crear schedule (ej. semanal: cron `0 2 * * 1`).
+2. Selecciona el destino y configura la **retención** (conservar las últimas N
+   copias; Coolify borra las antiguas automáticamente).
+3. Prueba con el botón **Backup** manual y verifica que el dump llegue al destino.
+
+### Almacenamiento de archivos clínicos
+
+El volumen de la app (`storage/`) contiene recetas, órdenes de laboratorio y
+adjuntos clínicos: **respáldalo también**. Opción recomendada: Scheduled Task en
+la app que comprima `storage/` hacia el mismo destino S3 (o copia manual
+periódica del volumen).
+
+## 7. Acceso manual on-demand (opcional)
+
+Si querés inspeccionar o exportar la base manualmente:
+
+- New Resource → Service → **phpMyAdmin**, conectado a la MariaDB.
+- Dejalo **detenido** (STOPPED) por defecto; encendelo solo cuando lo necesites
+  y volvelo a apagar.
 
 ## 8. Comprobaciones posteriores
 
-Los dos servicios deben estar ejecutándose:
-
-```text
-app        healthy
-postgres   healthy
-```
-
-Desde la terminal del servicio `app` puedes revisar las migraciones:
-
 ```bash
-php artisan migrate:status
+curl --fail http://127.0.0.1/up            # endpoint de salud
+php artisan migrate:status                 # migraciones aplicadas
 ```
 
-Comprueba el endpoint de salud:
-
-```bash
-curl --fail http://127.0.0.1/up
-```
+Abre el dominio y verifica el acceso con `admin@clinica.com`.
 
 ## 9. Actualizaciones
 
-Para desplegar una nueva versión:
-
-1. Envía los cambios a la rama configurada en Coolify.
-2. Crea primero una copia de seguridad de PostgreSQL.
-3. Pulsa **Redeploy**.
-4. Revisa los logs del servicio `app`.
-5. Verifica `/up` y el acceso a la aplicación.
+1. Crea primero una copia de seguridad (botón Backup o el schedule).
+2. Envía los cambios a la rama configurada → **Redeploy**.
+3. Revisa los logs del contenedor `app` y verifica `/up`.
 
 Las migraciones pendientes se ejecutan automáticamente antes de iniciar Apache.
-El worker se reinicia con la misma imagen de la aplicación.
 
 ## 10. Solución de problemas
 
-### Falta `APP_KEY`
+### Falta `APP_KEY` / error de conexión a la base
 
-Coolify impedirá el despliegue porque es una variable obligatoria. Genera una
-clave válida con:
-
-```bash
-php artisan key:generate --show
-```
-
-### La aplicación no conecta con PostgreSQL
-
-Comprueba que:
-
-```dotenv
-DB_HOST=postgres
-DB_PORT=5432
-```
-
-Estos valores ya están definidos en `compose.yaml`. No uses `localhost` como
-host de base de datos.
+- `APP_KEY`: genera una clave válida y no la cambies después.
+- Conexión: verifica `DB_HOST` (hostname interno del recurso MariaDB), `DB_PORT`,
+  `DB_USERNAME` y `DB_PASSWORD`. No uses `localhost` como host.
 
 ### Error de permisos en archivos
 
-Revisa que el volumen `app_storage` esté montado y reinicia el servicio `app`.
-El entrypoint crea los directorios necesarios y corrige sus permisos al iniciar.
+El entrypoint crea los directorios de `storage/` y corrige permisos al iniciar.
+Si el volumen `app_storage` está montado, reinicia el servicio `app`.
 
 ## Documentación
 
-- [Docker Compose en Coolify](https://coolify.io/docs/knowledge-base/docker/compose)
-- [Variables de entorno en Coolify](https://coolify.io/docs/knowledge-base/environment-variables)
-- [Almacenamiento persistente en Coolify](https://coolify.io/docs/knowledge-base/persistent-storage)
 - [Copias de seguridad de bases de datos](https://coolify.io/docs/databases/backups)
+- [Aplicaciones Docker en Coolify](https://coolify.io/docs/applications)
+- [Almacenamiento persistente en Coolify](https://coolify.io/docs/knowledge-base/persistent-storage)

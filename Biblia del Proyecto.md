@@ -7,7 +7,7 @@ VitalTrack Pediátrico es un sistema web de gestión clínica diseñado específ
 ## 2. Stack Tecnológico (Laravel 12)
 
 - Backend: Laravel 12 (PHP 8.4+)
-- Base de Datos: PostgreSQL 17
+- Base de Datos: MariaDB 11
 - Autenticación: Laravel Fortify (incluye 2FA). APIs/Sanctum quedan disponibles como base si luego se separa el Front en React/Vue o App Móvil.
 - Autorización: spatie/laravel-permission — implementado con 5 roles: Admin, Doctor, Enfermera, Secretaria, Técnico.
 - Frontend: Blade + Livewire 4 (componentes Volt de archivo único) + Flux UI + Tailwind CSS + Chart.js (para las gráficas de la OMS).

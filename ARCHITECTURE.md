@@ -226,10 +226,10 @@ Dependencias invertidas mediante inyección.
 
 ## Testing Strategy
 
-- **551 tests pasando** (2279 assertions) vía `php artisan test --parallel`, más 14 tests de navegador (Laravel Dusk) en `tests/Browser/ClinicalWorkflowTest.php`.
+- **562 tests pasando** (2308 assertions) vía `php artisan test --parallel`, más 14 tests de navegador (Laravel Dusk) en `tests/Browser/ClinicalWorkflowTest.php`.
 - **Unit:** `tests/Unit/Factories/`, `tests/Unit/ValueObjects/`, `tests/Unit/Services/`, `tests/Unit/Policies/`.
 - **Feature:** `tests/Feature/Auth/`, `tests/Feature/Settings/`, `tests/Feature/Seeders/` y un directorio por módulo clínico (pacientes, consultas, recetas, laboratorio, vacunas, catálogos, gráficas OMS).
-- **Test Database:** `RefreshDatabase` con SQLite en memoria (`phpunit.xml`); Dusk corre contra PostgreSQL real (`vitaltrack_dusk`).
+- **Test Database:** `RefreshDatabase` con SQLite en memoria (`phpunit.xml`); Dusk corre contra MariaDB real (`vitaltrack_dusk`).
 - **Regla del proyecto (no negociable):** todo cambio de código exige ≥1 test unitario y ≥1 test feature (ver [`Roadmap de Desarrollo.md`](Roadmap%20de%20Desarrollo.md) §"Política de pruebas").
 
 ## Estado de Implementación
@@ -244,7 +244,7 @@ Detalle fase por fase, con fechas y evidencia: [`Roadmap de Desarrollo.md`](Road
 ## Stack Tecnológico
 
 - **Framework:** Laravel 12 (PHP 8.4+)
-- **Database:** PostgreSQL 17
+- **Database:** MariaDB 11
 - **Testing:** Pest PHP + Laravel Dusk, PHPStan/Larastan nivel 8, Laravel Pint
 - **ORM:** Eloquent
 - **Validation:** Laravel Form Requests

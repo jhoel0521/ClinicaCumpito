@@ -16,7 +16,7 @@ Sistema web de gestión clínica diseñado específicamente para consultorios pe
 ## 🛠️ Stack Tecnológico
 
 - **Backend**: Laravel 12 (PHP 8.4+)
-- **Base de Datos**: PostgreSQL 17
+- **Base de Datos**: MariaDB 11
 - **Autenticación**: Laravel Fortify (incluye 2FA) + Sanctum
 - **Autorización**: Spatie Laravel Permission
 - **Frontend**: Blade + Livewire 4 (componentes Volt de archivo único) + Flux UI + Tailwind CSS 4
@@ -29,7 +29,7 @@ Sistema web de gestión clínica diseñado específicamente para consultorios pe
 ## 📋 Requisitos Previos
 
 - PHP 8.4+
-- PostgreSQL 12+
+- MariaDB 11+
 - Composer 2.8+
 - Node.js 18+ (para frontend assets)
 
@@ -50,7 +50,7 @@ Con Docker y Docker Compose instalados:
 docker compose -f dev-docker-compose.yml up -d --wait
 ```
 
-Esto inicia PostgreSQL en `127.0.0.1:5432` con la configuración incluida en
+Esto inicia MariaDB en `127.0.0.1:6306` con la configuración incluida en
 `.env.example`.
 
 ### 3. Instalar la aplicación
@@ -62,13 +62,13 @@ composer setup
 El comando instala las dependencias de PHP y Node, configura Laravel, ejecuta
 las migraciones y compila los assets.
 
-Para detener PostgreSQL:
+Para detener MariaDB:
 
 ```bash
 docker compose -f dev-docker-compose.yml down
 ```
 
-Para borrar también los datos locales de PostgreSQL:
+Para borrar también los datos locales de MariaDB:
 
 ```bash
 docker compose -f dev-docker-compose.yml down --volumes
@@ -77,9 +77,9 @@ docker compose -f dev-docker-compose.yml down --volumes
 La configuración de conexión local es:
 
 ```env
-DB_CONNECTION=pgsql
+DB_CONNECTION=mariadb
 DB_HOST=127.0.0.1
-DB_PORT=5432
+DB_PORT=6306
 DB_DATABASE=vitaltrack
 DB_USERNAME=root
 DB_PASSWORD=

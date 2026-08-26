@@ -5,19 +5,19 @@ Sistema de gestión clínica pediátrica (Bolivia). **MVP ya presentado a la cli
 ## Stack (verificado en composer.json / package.json)
 
 - Laravel 12 + PHP 8.4 · Livewire 4 + Volt · Flux UI · Tailwind CSS 4 · Chart.js 4
-- PostgreSQL 17 en desarrollo y Dusk · tests PHP en SQLite `:memory:` (phpunit.xml)
+- MariaDB 11 en desarrollo y Dusk · tests PHP en SQLite `:memory:` (phpunit.xml)
 - Pest 4 · Laravel Dusk 8 · Pint (preset laravel) · PHPStan/Larastan **nivel 8** (`app/ config/ database/`)
 - `barryvdh/laravel-dompdf` (recetas/órdenes de laboratorio en PDF) · `phpoffice/phpspreadsheet` (seeder OMS) · SweetAlert2 (reemplazó notificaciones nativas del navegador)
 
 ## Comandos
 
 ```bash
-# Setup inicial (PostgreSQL en 127.0.0.1:5432, DB vitaltrack / user root / sin password)
+# Setup inicial (MariaDB en 127.0.0.1:6306, DB vitaltrack / user root / sin password)
 docker compose -f dev-docker-compose.yml up -d --wait
 composer setup            # install + .env + key + migrate + npm install + build
 
 composer dev              # server (busca puerto libre desde 8000, scripts/serve.php) + queue + vite
-php artisan test --parallel              # suite completa (~28s; baseline 10-ago-2026: 551 tests, 2279 assertions)
+php artisan test --parallel              # suite completa (~32s; 26-ago-2026: 562 tests, 2308 assertions)
 php artisan test --filter=NombreDelTest  # un solo test
 composer lint             # pint --parallel (auto-fix)
 ./vendor/bin/phpstan analyse
@@ -31,7 +31,7 @@ npm run pre-commit        # gate completo: pint + phpstan + blade + tests
 
 - `php artisan dusk` / `php artisan dusk --filter=test_07`
 - `tests/DuskTestCase.php` levanta solo `php artisan serve --env=dusk.local` en **puerto 8000** (si el puerto ya responde, asume que la app corre) y lo mata al terminar.
-- **`.env.dusk.local` está gitignored**: crearlo desde `.env` con `DB_DATABASE=vitaltrack_dusk`. Dusk corre contra PostgreSQL real servido, NO sqlite.
+- **`.env.dusk.local` está gitignored**: crearlo desde `.env` con `DB_DATABASE=vitaltrack_dusk`. Dusk corre contra MariaDB real servido, NO sqlite.
 - Los 14 tests viven en un solo archivo: `tests/Browser/ClinicalWorkflowTest.php` (test_01…test_14).
 - Quirk: `->type()` falla en `input[type=date]` tras re-render Livewire → usar `nativeInputValueSetter` (JS) + `dispatchEvent('input'/'change')`.
 
@@ -86,7 +86,7 @@ regresión, Fase 9 Despliegue y Capacitación).
 
 - `Roadmap de Desarrollo.md` — estado por fases, DoD y política de tests (fuente de verdad del proceso).
 - `Biblia del Proyecto.md` — spec de dominio clínico (documento de visión, no siempre refleja el estado exacto del código).
-- `ARCHITECTURE.md` — visión hexagonal, actualizada a Laravel 12/PostgreSQL.
+- `ARCHITECTURE.md` — visión hexagonal, actualizada a Laravel 12/MariaDB.
 - `dbdiagram.md` — esquema real de base de datos, generado desde las migraciones.
 - `README-COOLIFY.md` + `Dockerfile` / `compose.yaml` / `nixpacks.toml` — despliegue.
 

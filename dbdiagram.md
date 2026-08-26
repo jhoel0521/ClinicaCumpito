@@ -1,7 +1,7 @@
 ```
 // ==========================================
 // Esquema real — generado a partir de database/migrations/ (36 migraciones)
-// Motor: PostgreSQL. PKs en UUID salvo excepción marcada.
+// Motor: MariaDB. PKs en UUID salvo excepción marcada.
 // No incluye tablas de infraestructura de Laravel (sessions, cache, jobs,
 // password_reset_tokens) ni las tablas de spatie/laravel-permission
 // (permissions, roles, model_has_roles, model_has_permissions,

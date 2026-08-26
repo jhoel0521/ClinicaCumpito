@@ -7,6 +7,7 @@ use App\Models\Consultation;
 use App\Models\Doctor;
 use App\Models\OmsCatalogoGrafica;
 use App\Models\User;
+use Illuminate\Support\Str;
 use Spatie\Permission\Models\Role;
 
 beforeEach(function (): void {
@@ -97,6 +98,21 @@ describe('AuditLog', function (): void {
         expect($log)->not->toBeNull()
             ->and($log->old_values)->toHaveKey('status')
             ->and($log->new_values)->toHaveKey('status');
+    });
+
+    test('la columna JSON guarda y recupera estructuras anidadas', function (): void {
+        $log = AuditLog::create([
+            'action' => 'updated',
+            'auditable_type' => Consultation::class,
+            'auditable_id' => (string) Str::uuid(),
+            'old_values' => ['diagnosis' => ['code' => 'J00', 'notes' => ['a', 'b']]],
+            'new_values' => ['diagnosis' => ['code' => 'J01', 'notes' => ['c']]],
+        ]);
+
+        $fresh = AuditLog::findOrFail($log->id);
+
+        expect($fresh->old_values)->toBe(['diagnosis' => ['code' => 'J00', 'notes' => ['a', 'b']]])
+            ->and($fresh->new_values)->toBe(['diagnosis' => ['code' => 'J01', 'notes' => ['c']]]);
     });
 
     test('AuditLog pertenece al usuario que realizó la acción', function (): void {

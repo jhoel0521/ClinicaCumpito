@@ -1,24 +1,24 @@
 name: clinica-cumpito-dev
 
 services:
-  postgres:
-    image: postgres:17-alpine
+  mariadb:
+    image: mariadb:11-alpine
     restart: unless-stopped
     environment:
-      POSTGRES_DB: vitaltrack
-      POSTGRES_USER: root
+      MARIADB_DATABASE: vitaltrack
       # Solo para desarrollo local. El puerto no se expone fuera del equipo.
-      POSTGRES_HOST_AUTH_METHOD: trust
+      MARIADB_ALLOW_EMPTY_ROOT_PASSWORD: "yes"
+      MARIADB_ROOT_HOST: "%"
     ports:
-      - "127.0.0.1:5432:5432"
+      - "127.0.0.1:6306:3306"
     volumes:
-      - postgres_dev_data:/var/lib/postgresql/data
+      - mariadb_dev_data:/var/lib/mysql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U root -d vitaltrack"]
+      test: ["CMD-SHELL", "mariadb-admin ping -h 127.0.0.1 -uroot"]
       interval: 5s
       timeout: 5s
       retries: 10
       start_period: 10s
 
 volumes:
-  postgres_dev_data:
+  mariadb_dev_data:

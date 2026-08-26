@@ -511,7 +511,7 @@
                             </li>
                             <li class="text-zinc-400 dark:text-zinc-500">
                                 <i class="fas fa-check-circle text-teal-500"></i>
-                                PostgreSQL
+                                MariaDB
                             </li>
                             <li class="text-zinc-400 dark:text-zinc-500">
                                 <i class="fas fa-check-circle text-teal-500"></i>

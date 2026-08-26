@@ -17,7 +17,11 @@ class DatabaseSeeder extends Seeder
             DefaultUsersSeeder::class,           // 1 usuario con todos los roles
             PrescriptionTemplateSeeder::class,   // plantillas: resfriado, vómitos, dengue, vitaminas
             WhoDataSeeder::class,
-            GrowthChartTestDataSeeder::class,
         ]);
+
+        // Pacientes de prueba para gráficas OMS (Aitana/Thiago): solo en desarrollo, nunca en producción.
+        if (! app()->isProduction()) {
+            $this->call(GrowthChartTestDataSeeder::class);
+        }
     }
 }

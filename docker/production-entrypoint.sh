@@ -21,4 +21,6 @@ if [ "${RUN_LARAVEL_SETUP:-false}" = "true" ]; then
     php artisan optimize
 fi
 
+php-fpm -D
+
 exec "$@"

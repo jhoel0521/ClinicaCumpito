@@ -1,3 +1,4 @@
+# ---- Etapa 1: dependencias Composer (solo producción) ----
 FROM composer:2 AS vendor
 
 WORKDIR /app
@@ -10,15 +11,14 @@ RUN composer install \
     --prefer-dist \
     --optimize-autoloader \
     --ignore-platform-req=ext-gd \
-    --no-scripts
-
-COPY . .
-RUN composer dump-autoload \
+    --no-scripts \
+    && composer dump-autoload \
     --no-dev \
     --classmap-authoritative \
     --no-interaction \
-    && php artisan package:discover --ansi
+    --no-scripts
 
+# ---- Etapa 2: assets frontend ----
 FROM node:22-alpine AS frontend
 
 WORKDIR /app
@@ -31,19 +31,26 @@ COPY resources ./resources
 COPY vite.config.js ./
 RUN npm run build
 
-FROM php:8.4-apache-bookworm
+# ---- Etapa 3: imagen final (Apache + PHP-FPM sobre Alpine) ----
+FROM php:8.4-fpm-alpine
 
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
 
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-        curl \
-        libfreetype6-dev \
-        libicu-dev \
-        libjpeg62-turbo-dev \
+# Extensiones PHP: librerías runtime primero (sobreviven al purge), build con deps temporales
+RUN apk add --no-cache \
+        icu-libs \
+        libpng \
+        freetype \
+        libjpeg-turbo \
+        libzip \
+        zlib \
+    && apk add --no-cache --virtual .build-deps \
+        $PHPIZE_DEPS \
+        icu-dev \
         libpng-dev \
+        freetype-dev \
+        libjpeg-turbo-dev \
         libzip-dev \
-        unzip \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j"$(nproc)" \
         bcmath \
@@ -53,20 +60,24 @@ RUN apt-get update \
         pcntl \
         pdo_mysql \
         zip \
-    && a2enmod rewrite headers \
-    && sed -ri \
-        -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' \
-        /etc/apache2/sites-available/*.conf \
-        /etc/apache2/apache2.conf \
-        /etc/apache2/conf-available/*.conf \
-    && echo 'ServerName localhost' >> /etc/apache2/apache2.conf \
-    && rm -rf /var/lib/apt/lists/*
+    && apk del .build-deps
+
+# Apache con proxy FCGI (PHP-FPM en 127.0.0.1:9000)
+RUN apk add --no-cache \
+        apache2 \
+        apache2-proxy \
+        curl \
+    && sed -i 's#/var/www/localhost/htdocs#/var/www/html/public#g' /etc/apache2/httpd.conf
 
 COPY docker/php-production.ini /usr/local/etc/php/conf.d/99-production.ini
+COPY docker/php-fpm-custom.conf /usr/local/etc/php-fpm.d/zz-custom.conf
+COPY docker/apache-vhost.conf /etc/apache2/conf.d/vitaltrack.conf
+COPY --from=vendor /usr/bin/composer /usr/local/bin/composer
 
 WORKDIR /var/www/html
 
-COPY --from=vendor --chown=www-data:www-data /app ./
+COPY . .
+COPY --from=vendor --chown=www-data:www-data /app/vendor ./vendor
 COPY --from=frontend --chown=www-data:www-data /app/public/build ./public/build
 COPY docker/production-entrypoint.sh /usr/local/bin/production-entrypoint
 
@@ -80,7 +91,14 @@ RUN mkdir -p \
         bootstrap/cache \
     && chown -R www-data:www-data storage bootstrap/cache \
     && ln -s /var/www/html/storage/app/public /var/www/html/public/storage \
-    && chmod 755 /usr/local/bin/production-entrypoint
+    && chmod 755 /usr/local/bin/production-entrypoint \
+    && composer dump-autoload --no-dev --classmap-authoritative --no-interaction --no-scripts \
+    && php artisan package:discover --ansi
+
+EXPOSE 80
+
+HEALTHCHECK --interval=15s --timeout=5s --start-period=90s --retries=5 \
+  CMD curl --fail --silent --show-error http://127.0.0.1/up || exit 1
 
 ENTRYPOINT ["production-entrypoint"]
-CMD ["apache2-foreground"]
+CMD ["httpd", "-DFOREGROUND"]

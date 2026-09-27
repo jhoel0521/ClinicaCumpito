@@ -20,7 +20,10 @@ class PatientFactory extends Factory
             'responsible_doctor_id' => Doctor::factory(),
             'user_id' => null,
             'full_name' => $this->faker->name(),
-            'date_of_birth' => $this->faker->dateTimeBetween('-18 years', '-1 day'),
+            // Relativo a now() (respeta Carbon::setTestNow): con '-18 years' Faker usa el
+            // reloj real y en tests con fecha congelada el paciente podía nacer después
+            // de la consulta.
+            'date_of_birth' => $this->faker->dateTimeBetween(now()->subYears(18), now()->subDay()),
             'gender' => $this->faker->randomElement(['M', 'F']),
             'birth_weight' => $this->faker->randomFloat(2, 2, 5),
             'birth_height' => $this->faker->randomFloat(2, 45, 55),

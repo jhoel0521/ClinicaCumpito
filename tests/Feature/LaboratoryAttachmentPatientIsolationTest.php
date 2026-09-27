@@ -17,6 +17,7 @@ use Livewire\Livewire;
  * médico -- puede leer el id de esa solicitud y manipular su archivo.
  */
 test('no se puede eliminar el archivo de un laboratorio de otro paciente', function (): void {
+    Storage::fake('local');
     Storage::fake('public');
 
     $doctor = Doctor::factory()->create();
@@ -33,7 +34,7 @@ test('no se puede eliminar el archivo de un laboratorio de otro paciente', funct
         'status' => 'pending',
     ]);
 
-    Storage::disk('public')->put('lab-attachments/'.$ordenA->id.'/estudio.pdf', 'contenido');
+    Storage::disk('local')->put('lab-attachments/'.$ordenA->id.'/estudio.pdf', 'contenido');
     $adjuntoA = LaboratoryAttachment::create([
         'laboratory_request_id' => $ordenA->id,
         'file_path' => 'lab-attachments/'.$ordenA->id.'/estudio.pdf',
@@ -55,7 +56,7 @@ test('no se puede eliminar el archivo de un laboratorio de otro paciente', funct
         ->call('deleteAttachment', $ordenA->id, $adjuntoA->id);
 
     expect(LaboratoryAttachment::query()->whereKey($adjuntoA->id)->exists())->toBeTrue()
-        ->and(Storage::disk('public')->exists($adjuntoA->file_path))->toBeTrue();
+        ->and(Storage::disk('local')->exists($adjuntoA->file_path))->toBeTrue();
 });
 
 test('no se puede abrir el formulario de adjunto de un laboratorio de otro paciente', function (): void {
@@ -88,6 +89,7 @@ test('no se puede abrir el formulario de adjunto de un laboratorio de otro pacie
 });
 
 test('no se puede reemplazar el archivo de un laboratorio de otro paciente vía uploadAttachment', function (): void {
+    Storage::fake('local');
     Storage::fake('public');
 
     $doctor = Doctor::factory()->create();

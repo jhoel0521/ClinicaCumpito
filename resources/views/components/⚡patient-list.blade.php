@@ -69,7 +69,7 @@ new class extends Component {
                 <flux:icon.magnifying-glass class="size-4" />
             </span>
             <x-ui.input
-                wire:model.live.debounce.300ms="search"
+                wire:model.live.debounce.700ms="search"
                 name="search"
                 type="text"
                 placeholder="Buscar por nombre..."

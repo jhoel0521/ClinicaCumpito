@@ -28,6 +28,7 @@ use Livewire\Livewire;
  *    consulta 1 y al paciente correctos.
  */
 test('laboratorio de imagen: conserva un único archivo por estudio y reemplaza el anterior', function (): void {
+    Storage::fake('local');
     Storage::fake('public');
 
     // ── Catálogo de imagenología ─────────────────────────────────────────────
@@ -124,7 +125,7 @@ test('laboratorio de imagen: conserva un único archivo por estudio y reemplaza 
         ->and($adjunto->original_name)->toBe('informe-radiografia.pdf')
         ->and($adjunto->mime_type)->toBe('application/pdf')
         ->and($adjunto->isPdf())->toBeTrue()
-        ->and(Storage::disk('public')->exists($adjunto->file_path))->toBeTrue()
+        ->and(Storage::disk('local')->exists($adjunto->file_path))->toBeTrue()
         ->and($adjunto->file_path)->toStartWith('lab-attachments/'.$orden->id.'/');
 
     // ── Paso 6: una nueva carga reemplaza el archivo completo del estudio ──
@@ -142,8 +143,8 @@ test('laboratorio de imagen: conserva un único archivo por estudio y reemplaza 
         ->and($adjuntoImagen->original_name)->toBe('placa-axial.jpg')
         ->and($adjuntoImagen->mime_type)->toBe('image/jpeg')
         ->and($adjuntoImagen->isImage())->toBeTrue()
-        ->and(Storage::disk('public')->exists($adjuntoImagen->file_path))->toBeTrue()
-        ->and(Storage::disk('public')->exists($adjunto->file_path))->toBeFalse();
+        ->and(Storage::disk('local')->exists($adjuntoImagen->file_path))->toBeTrue()
+        ->and(Storage::disk('local')->exists($adjunto->file_path))->toBeFalse();
 
     // ── Paso 7: la orden sigue asociada a la consulta 1 y al paciente ───────
     $orden->refresh();
@@ -161,7 +162,7 @@ test('laboratorio de imagen: conserva un único archivo por estudio y reemplaza 
         ->assertSeeText('placa-axial.jpg')
         ->assertSeeText('Archivo del estudio')
         ->assertSeeText('Un solo archivo para toda la solicitud');
-    $archivosEnDisco = Storage::disk('public')->allFiles('lab-attachments/'.$orden->id);
+    $archivosEnDisco = Storage::disk('local')->allFiles('lab-attachments/'.$orden->id);
 
     expect($archivosEnDisco)->toHaveCount(1);
 });

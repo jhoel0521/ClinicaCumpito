@@ -8,7 +8,7 @@ use App\Services\SoapNoteService;
 describe('SoapNoteService', function () {
     test('upsert crea nota soap para una consulta', function () {
         $service = new SoapNoteService;
-        $consultation = Consultation::factory()->create();
+        $consultation = Consultation::factory()->draft()->create();
 
         $dto = SoapNoteDTO::fromArray([
             'subjective' => 'Paciente con tos y fiebre',
@@ -26,7 +26,7 @@ describe('SoapNoteService', function () {
 
     test('upsert actualiza nota soap existente', function () {
         $service = new SoapNoteService;
-        $consultation = Consultation::factory()->create();
+        $consultation = Consultation::factory()->draft()->create();
         SoapNote::factory()->create([
             'consultation_id' => $consultation->id,
             'assessment' => 'Diagnóstico previo',

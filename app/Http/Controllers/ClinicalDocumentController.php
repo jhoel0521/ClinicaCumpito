@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Consultation;
 use App\Models\LaboratoryRequest;
 use App\Models\Prescription;
 use App\Services\ClinicalDocumentService;
@@ -16,6 +17,8 @@ class ClinicalDocumentController extends Controller
 
     public function recetaPreview(Prescription $prescription): View|Response|RedirectResponse
     {
+        $this->authorizeConsultation($prescription->consultation);
+
         $doc = $this->documents->receta($prescription);
 
         if ($doc->errors !== []) {
@@ -34,6 +37,8 @@ class ClinicalDocumentController extends Controller
 
     public function recetaPdf(Prescription $prescription): Response|RedirectResponse
     {
+        $this->authorizeConsultation($prescription->consultation);
+
         $doc = $this->documents->receta($prescription);
 
         if (! $doc->isValid()) {
@@ -50,6 +55,8 @@ class ClinicalDocumentController extends Controller
 
     public function ordenPreview(LaboratoryRequest $laboratoryRequest): View|Response|RedirectResponse
     {
+        $this->authorizeConsultation($laboratoryRequest->consultation);
+
         $doc = $this->documents->ordenLaboratorio($laboratoryRequest);
 
         $consultation = $laboratoryRequest->consultation;
@@ -76,6 +83,8 @@ class ClinicalDocumentController extends Controller
 
     public function ordenPdf(LaboratoryRequest $laboratoryRequest): Response|RedirectResponse
     {
+        $this->authorizeConsultation($laboratoryRequest->consultation);
+
         $doc = $this->documents->ordenLaboratorio($laboratoryRequest);
 
         $consultation = $laboratoryRequest->consultation;
@@ -93,5 +102,14 @@ class ClinicalDocumentController extends Controller
             ->setPaper($doc->paper->toDompdf(), 'mm');
 
         return $pdf->stream($doc->fileName());
+    }
+
+    private function authorizeConsultation(?Consultation $consultation): void
+    {
+        if (! $consultation instanceof Consultation) {
+            abort(404);
+        }
+
+        $this->authorize('view', $consultation);
     }
 }

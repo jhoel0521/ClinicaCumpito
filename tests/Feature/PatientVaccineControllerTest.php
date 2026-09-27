@@ -7,8 +7,8 @@ use App\Models\Vaccine;
 
 describe('PatientVaccineController', function () {
     test('usuario autenticado puede guardar vacuna aplicada', function () {
-        $user = User::factory()->create();
-        $consultation = Consultation::factory()->create();
+        $user = User::factory()->admin()->create();
+        $consultation = Consultation::factory()->draft()->create();
         $vaccine = Vaccine::factory()->create();
 
         $response = $this->actingAs($user)
@@ -29,7 +29,7 @@ describe('PatientVaccineController', function () {
     });
 
     test('usuario autenticado puede actualizar vacuna aplicada', function () {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
         $patientVaccine = PatientVaccine::factory()->create([
             'dose_number' => 1,
         ]);
@@ -53,8 +53,8 @@ describe('PatientVaccineController', function () {
     });
 
     test('falla validacion cuando vaccine_id no existe', function () {
-        $user = User::factory()->create();
-        $consultation = Consultation::factory()->create();
+        $user = User::factory()->admin()->create();
+        $consultation = Consultation::factory()->draft()->create();
 
         $response = $this->actingAs($user)
             ->post(route('consultas.patient-vaccines.store', $consultation->id), [

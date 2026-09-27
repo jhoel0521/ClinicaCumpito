@@ -6,11 +6,17 @@ use App\Models\Consultation;
 use App\Models\Vaccine;
 use App\ValueObjects\ConsultationStatus;
 use Carbon\Carbon;
+use App\Livewire\Concerns\AuthorizesConsultationEdits;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 new class extends Component {
+    use AuthorizesConsultationEdits;
+
+    #[Locked]
     public string $consultationId;
 
+    #[Locked]
     public string $patientId = '';
 
     public string $doctorId = '';
@@ -135,6 +141,22 @@ new class extends Component {
             return;
         }
 
+        $birthDate = \App\Models\Patient::query()
+            ->whereKey($this->patientId)
+            ->value('date_of_birth');
+        if (
+            $birthDate !== null &&
+            $appliedAt
+                ->copy()
+                ->startOfDay()
+                ->lt(Carbon::parse($birthDate)->startOfDay())
+        ) {
+            $this->errorMessage = 'La fecha de aplicación no puede ser anterior al nacimiento del paciente.';
+            $this->dispatch('notify', type: 'error', message: $this->errorMessage);
+
+            return;
+        }
+
         try {
             // Si la fecha es anterior a la consulta, la dosis se colocó en otro momento/lugar
             $appliedElsewhere = $appliedAt
@@ -167,6 +189,11 @@ new class extends Component {
         }
         $this->errorMessage = '';
         try {
+            // Solo se pueden quitar vacunas registradas en ESTA consulta.
+            \App\Models\PatientVaccine::query()
+                ->where('consultation_id', $this->consultationId)
+                ->findOrFail($patientVaccineId);
+
             app(PatientVaccineServiceContract::class)->delete($patientVaccineId);
             $this->reload();
         } catch (\Throwable $e) {

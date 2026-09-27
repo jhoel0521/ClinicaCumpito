@@ -8,7 +8,7 @@ use App\Services\VitalSignService;
 describe('VitalSignService', function () {
     test('upsert crea signos vitales para una consulta', function () {
         $service = new VitalSignService;
-        $consultation = Consultation::factory()->create();
+        $consultation = Consultation::factory()->draft()->create();
 
         $dto = VitalSignDTO::fromArray([
             'weight' => 12.5,
@@ -26,7 +26,7 @@ describe('VitalSignService', function () {
 
     test('upsert actualiza signos vitales existentes', function () {
         $service = new VitalSignService;
-        $consultation = Consultation::factory()->create();
+        $consultation = Consultation::factory()->draft()->create();
         VitalSign::factory()->create([
             'consultation_id' => $consultation->id,
             'weight' => 10,

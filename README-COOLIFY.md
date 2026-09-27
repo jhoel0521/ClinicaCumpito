@@ -32,7 +32,12 @@ DB_PORT=3306
 DB_DATABASE=vitaltrack
 DB_USERNAME=usuario_de_la_db
 DB_PASSWORD=password_de_la_db
+APP_TIMEZONE=America/La_Paz
+SESSION_LIFETIME=720
 ```
+
+`SESSION_LIFETIME=720` (una jornada) evita el error "página expirada" y la
+pérdida de lo escrito si la pestaña queda abierta entre pacientes.
 
 Genera `APP_KEY` con `php artisan key:generate --show`. **No cambies `APP_KEY`
 después del primer despliegue** (invalida sesiones y datos cifrados).
@@ -81,6 +86,11 @@ Crea: configuración de la clínica, roles/permisos, condiciones médicas, catá
 de laboratorio, esquema PAI Bolivia, plantillas de recetas, datos OMS y los
 usuarios por defecto (`admin@clinica.com`). **No crea pacientes de prueba en
 producción.**
+
+En producción `admin@clinica.com` **no** usa la contraseña `password`: se toma
+de la variable `DEFAULT_ADMIN_PASSWORD` o se genera una aleatoria que el seeder
+muestra una sola vez. Si el seed se corrió con una versión anterior, **cambia la
+contraseña ya**: `php artisan soporte:resetear-password admin@clinica.com`.
 
 Nota: `migrate:fresh` está prohibido en producción (protección contra borrados
 accidentales) y no hace falta: la base nueva se migra sola. El seeder completo es
@@ -135,7 +145,53 @@ Abre el dominio y verifica el acceso con `admin@clinica.com`.
 
 Las migraciones pendientes se ejecutan automáticamente antes de iniciar Apache.
 
-## 10. Solución de problemas
+## 10. Internet lento en el consultorio (EDGE/3G)
+
+La clínica usa internet móvil por hotspot. La imagen ya trae Apache con
+compresión de JSON, caché de `/build` y timeouts largos, y PHP/Livewire aceptan
+subidas de hasta 20 MB durante 15–30 minutos. Falta un ajuste en **Coolify**:
+
+1. **Timeout del proxy (Traefik v3 corta a los 60 s por defecto).** En
+   *Servers → Proxy → Configuration* agregar a los `command` de Traefik:
+
+   ```text
+   - '--entrypoints.http.transport.respondingTimeouts.readTimeout=900s'
+   - '--entrypoints.https.transport.respondingTimeouts.readTimeout=900s'
+   ```
+
+   y reiniciar el proxy. Sin esto, cualquier subida que tarde más de 60 s falla.
+
+2. **Verificar compresión** (debe responder `content-encoding: gzip`):
+
+   ```bash
+   curl -sI -H "Accept-Encoding: gzip" https://<dominio>/build/manifest.json | grep -i -E "content-encoding|cache-control"
+   ```
+
+   En el navegador (DevTools → Network) una petición `livewire/update` también
+   debe mostrar `content-encoding`.
+
+3. **Prueba antes de atender:** DevTools → Network → perfil personalizado
+   (100 kbps bajada / 50 kbps subida / 800 ms) y recorrer: login → paciente →
+   nueva consulta → SOAP → receta → subir foto de laboratorio.
+
+## 11. Soporte de usuarios
+
+El registro público y "¿Olvidó su contraseña?" están **desactivados**. Desde la
+terminal del servicio `app` en Coolify:
+
+```bash
+# Crear el usuario de la doctora (pide la contraseña de forma oculta)
+php artisan soporte:crear-usuario doctora@dominio.com "Dra. Nombre" \
+    --roles=Admin,Doctor --doctor="Dra. Nombre Apellido" --matricula=MP-XXXX
+
+# Resetear contraseña (agregar --quitar-2fa si perdió el celular del 2FA)
+php artisan soporte:resetear-password doctora@dominio.com
+```
+
+El usuario que atiende debe tener **perfil de doctor** (`--doctor`): las
+consultas se asocian a ese perfil y solo su dueño (o un Admin) puede editarlas.
+
+## 12. Solución de problemas
 
 ### Falta `APP_KEY` / error de conexión a la base
 

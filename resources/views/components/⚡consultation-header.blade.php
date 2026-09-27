@@ -6,9 +6,14 @@ use App\Models\Consultation;
 use App\Models\Patient;
 use App\ValueObjects\Age;
 use App\ValueObjects\ConsultationStatus;
+use App\Livewire\Concerns\AuthorizesConsultationEdits;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 new class extends Component {
+    use AuthorizesConsultationEdits;
+
+    #[Locked]
     public string $consultationId;
 
     public string $consultation_date = '';
@@ -35,7 +40,8 @@ new class extends Component {
         $this->consultation_date = optional($consultation->consultation_date)->format('Y-m-d\TH:i') ?? '';
         $this->patient = $consultation->patient;
         $this->patientName = $consultation->patient->full_name;
-        $this->doctorName = $consultation->doctor->full_name;
+        // doctor_id es nullable (consultas escaneadas sin doctor, doctor borrado).
+        $this->doctorName = $consultation->doctor?->full_name ?? 'Sin doctor asignado';
     }
 
     /**
@@ -49,11 +55,36 @@ new class extends Component {
             return null;
         }
 
-        if ($this->status === ConsultationStatus::FINALIZED || $this->status === ConsultationStatus::SAVED) {
-            return $this->patient->ageAt($this->consultation_date ?: null);
+        try {
+            if ($this->status === ConsultationStatus::FINALIZED || $this->status === ConsultationStatus::SAVED) {
+                return $this->patient->ageAt($this->consultation_date ?: null);
+            }
+
+            return $this->patient->age();
+        } catch (\InvalidArgumentException) {
+            // Datos antiguos con fecha de consulta anterior al nacimiento:
+            // no romper la página, solo omitir la edad.
+            return null;
+        }
+    }
+
+    /** @return array<string, mixed> */
+    private function consultationDateRules(): array
+    {
+        $rules = [
+            'required',
+            'date',
+            'before_or_equal:' .
+            now()
+                ->addMinutes(5)
+                ->format('Y-m-d H:i:s'),
+        ];
+
+        if ($this->patient?->date_of_birth !== null) {
+            $rules[] = 'after_or_equal:' . $this->patient->date_of_birth->format('Y-m-d');
         }
 
-        return $this->patient->age();
+        return ['consultation_date' => $rules];
     }
 
     public function saveDate(): void
@@ -63,16 +94,18 @@ new class extends Component {
         }
 
         $this->errorMessage = '';
-        $this->validate(
-            ['consultation_date' => ['required', 'date']],
-            ['consultation_date.required' => 'La fecha es obligatoria.', 'consultation_date.date' => 'Fecha inválida.'],
-        );
+        $this->validate($this->consultationDateRules(), [
+            'consultation_date.required' => 'La fecha es obligatoria.',
+            'consultation_date.date' => 'Fecha inválida.',
+            'consultation_date.before_or_equal' => 'La fecha de la consulta no puede ser futura.',
+            'consultation_date.after_or_equal' =>
+                'La fecha de la consulta no puede ser anterior al nacimiento del paciente.',
+        ]);
 
         try {
             $this->persist($this->status);
         } catch (\Throwable $e) {
             $this->errorMessage = $e->getMessage();
-            $this->dispatch('notify', type: 'error', message: $this->errorMessage);
             $this->dispatch('notify', type: 'error', message: $this->errorMessage);
         }
     }
@@ -83,12 +116,18 @@ new class extends Component {
             return;
         }
 
+        // No congelar para siempre una fecha incoherente (futura o previa al nacimiento).
+        $this->validate($this->consultationDateRules(), [
+            'consultation_date.before_or_equal' => 'La fecha de la consulta no puede ser futura.',
+            'consultation_date.after_or_equal' =>
+                'La fecha de la consulta no puede ser anterior al nacimiento del paciente.',
+        ]);
+
         try {
             $this->persist(ConsultationStatus::FINALIZED);
             $this->redirect(route('consultas.show', $this->consultationId), navigate: true);
         } catch (\Throwable $e) {
             $this->errorMessage = $e->getMessage();
-            $this->dispatch('notify', type: 'error', message: $this->errorMessage);
             $this->dispatch('notify', type: 'error', message: $this->errorMessage);
         }
     }

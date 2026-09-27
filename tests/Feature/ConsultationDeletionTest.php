@@ -21,7 +21,8 @@ afterEach(function (): void {
 test('el admin elimina una consulta guardada y deja de aparecer en el historial del paciente', function (): void {
     $admin = User::factory()->create()->assignRole('Admin');
     $doctor = Doctor::factory()->create();
-    $patient = Patient::factory()->create();
+    // Fecha fija: la factory usa la fecha real y el test congela 2026-08-07.
+    $patient = Patient::factory()->create(['date_of_birth' => '2024-01-15']);
     $consultation = Consultation::factory()->create([
         'patient_id' => $patient->id,
         'doctor_id' => $doctor->id,
@@ -53,7 +54,8 @@ test('el admin elimina una consulta guardada y deja de aparecer en el historial 
 test('una consulta finalizada no puede eliminarse', function (): void {
     $admin = User::factory()->create()->assignRole('Admin');
     $doctor = Doctor::factory()->create();
-    $patient = Patient::factory()->create();
+    // Fecha fija: la factory usa la fecha real y el test congela 2026-08-07.
+    $patient = Patient::factory()->create(['date_of_birth' => '2024-01-15']);
     $consultation = Consultation::factory()->create([
         'patient_id' => $patient->id,
         'doctor_id' => $doctor->id,
@@ -70,7 +72,8 @@ test('una consulta finalizada no puede eliminarse', function (): void {
 test('un doctor sin rol admin no puede eliminar consultas', function (): void {
     $doctor = Doctor::factory()->create();
     $user = User::factory()->create(['doctor_id' => $doctor->id]);
-    $patient = Patient::factory()->create();
+    // Fecha fija: la factory usa la fecha real y el test congela 2026-08-07.
+    $patient = Patient::factory()->create(['date_of_birth' => '2024-01-15']);
     $consultation = Consultation::factory()->create([
         'patient_id' => $patient->id,
         'doctor_id' => $doctor->id,
@@ -87,7 +90,8 @@ test('un doctor sin rol admin no puede eliminar consultas', function (): void {
 test('el header de consulta solo ofrece descartar borrador, sin botón de eliminar consulta', function (): void {
     $doctor = Doctor::factory()->create();
     $user = User::factory()->create(['doctor_id' => $doctor->id]);
-    $patient = Patient::factory()->create();
+    // Fecha fija: la factory usa la fecha real y el test congela 2026-08-07.
+    $patient = Patient::factory()->create(['date_of_birth' => '2024-01-15']);
 
     $draft = Consultation::factory()->create([
         'patient_id' => $patient->id,

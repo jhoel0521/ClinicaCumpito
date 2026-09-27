@@ -145,7 +145,7 @@ new class extends Component {
 
     <div class="mb-4">
         <flux:input
-            wire:model.live.debounce.300ms="search"
+            wire:model.live.debounce.700ms="search"
             placeholder="Buscar por nombre o código..."
             icon="magnifying-glass"
         />

@@ -6,7 +6,7 @@ use App\Models\User;
 
 describe('LaboratoryRequestController', function () {
     test('usuario autenticado puede guardar solicitud de laboratorio', function () {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
         $consultation = Consultation::factory()->create([
             'status' => 'saved',
         ]);
@@ -25,7 +25,7 @@ describe('LaboratoryRequestController', function () {
     });
 
     test('usuario autenticado puede actualizar solicitud de laboratorio', function () {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
         $consultation = Consultation::factory()->create([
             'status' => 'saved',
         ]);
@@ -48,7 +48,7 @@ describe('LaboratoryRequestController', function () {
     });
 
     test('usuario autenticado puede eliminar solicitud de laboratorio', function () {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
         $consultation = Consultation::factory()->create([
             'status' => 'saved',
         ]);
@@ -67,7 +67,7 @@ describe('LaboratoryRequestController', function () {
     });
 
     test('update retorna 404 si la orden no pertenece a la consulta', function () {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
         $consultation = Consultation::factory()->create(['status' => 'saved']);
         $otherConsultation = Consultation::factory()->create(['status' => 'saved']);
         $labRequest = LaboratoryRequest::factory()->create([
@@ -83,7 +83,7 @@ describe('LaboratoryRequestController', function () {
     });
 
     test('no permite crear solicitud de laboratorio en consulta finalizada', function () {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
         $consultation = Consultation::factory()->create([
             'status' => 'finalized',
         ]);

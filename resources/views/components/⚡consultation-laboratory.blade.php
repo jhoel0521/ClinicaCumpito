@@ -11,12 +11,16 @@ use App\Models\LaboratoryCategory;
 use App\Models\LaboratoryRequest;
 use App\ValueObjects\ConsultationStatus;
 use Illuminate\Http\UploadedFile;
+use App\Livewire\Concerns\AuthorizesConsultationEdits;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
 new class extends Component {
+    use AuthorizesConsultationEdits;
     use WithFileUploads;
 
+    #[Locked]
     public string $consultationId;
     public bool $finalized = false;
     public string $errorMessage = '';
@@ -1078,6 +1082,7 @@ new class extends Component {
                                                 <input
                                                     type="file"
                                                     wire:model="newAttachmentFile"
+                                                    data-compress-image
                                                     accept=".jpg,.jpeg,.png,.webp,.pdf"
                                                     class="sr-only"
                                                 />

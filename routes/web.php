@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ClinicalDocumentController;
+use App\Http\Controllers\LaboratoryAttachmentController;
 use App\Http\Controllers\PacienteController;
 use Illuminate\Support\Facades\Route;
 
@@ -34,6 +35,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('laboratorios.show');
     Route::livewire('pacientes/{patient}/laboratorios/{laboratorio}', 'pages::laboratorios.detalle')
         ->name('pacientes.laboratorios.show');
+    Route::get('laboratorios/adjuntos/{attachment}', [LaboratoryAttachmentController::class, 'show'])
+        ->name('laboratorios.adjuntos.show');
 
     // Documentos clínicos (módulo común de recetas y laboratorios)
     Route::get('documentos/recetas/{prescription}/preview', [ClinicalDocumentController::class, 'recetaPreview'])

@@ -6,7 +6,7 @@ use App\Models\User;
 
 describe('PrescriptionController', function () {
     test('usuario autenticado puede guardar receta', function () {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
         $consultation = Consultation::factory()->create([
             'status' => 'saved',
         ]);
@@ -25,7 +25,7 @@ describe('PrescriptionController', function () {
     });
 
     test('usuario autenticado puede actualizar receta', function () {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
         $consultation = Consultation::factory()->create([
             'status' => 'saved',
         ]);
@@ -48,7 +48,7 @@ describe('PrescriptionController', function () {
     });
 
     test('no permite crear receta en consulta finalizada', function () {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
         $consultation = Consultation::factory()->create([
             'status' => 'finalized',
         ]);

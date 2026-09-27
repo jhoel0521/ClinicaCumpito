@@ -93,6 +93,34 @@ describe('ScannedConsultation - Ruta de archivo', function () {
     });
 });
 
+describe('ScannedConsultation - Subida desde la ficha del paciente', function () {
+    beforeEach(function () {
+        Storage::fake('local');
+
+        $doctor = Doctor::factory()->create();
+        $this->user = User::factory()->create(['doctor_id' => $doctor->id]);
+        $this->patient = Patient::factory()->create();
+    });
+
+    it('crea la consulta manual con el archivo subido y redirige a la ficha', function () {
+        $file = UploadedFile::fake()->create('historia.pdf', 200, 'application/pdf');
+
+        Livewire\Livewire::actingAs($this->user)
+            ->test('patient-upload-scan', ['patient' => $this->patient])
+            ->set('scanDate', now()->subYear()->toDateString())
+            ->set('scanFile', $file)
+            ->call('upload')
+            ->assertHasNoErrors()
+            ->assertRedirect(route('pacientes.show', $this->patient));
+
+        $consultation = Consultation::query()->where('patient_id', $this->patient->id)->firstOrFail();
+
+        expect($consultation->scanned_file_name)->toBe('historia.pdf')
+            ->and($consultation->pending_transcription)->toBeTrue();
+        Storage::disk('local')->assertExists((string) $consultation->scanned_file_path);
+    });
+});
+
 describe('ScannedConsultation - Vista historial paciente', function () {
     beforeEach(function () {
         Storage::fake('local');

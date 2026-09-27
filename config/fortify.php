@@ -143,9 +143,10 @@ return [
     |
     */
 
+    // Registro público y "olvidé mi contraseña" desactivados: los usuarios los
+    // crea y resetea soporte (no hay SMTP y el registro abierto exponía los
+    // datos clínicos a cualquier cuenta nueva).
     'features' => [
-        Features::registration(),
-        Features::resetPasswords(),
         Features::emailVerification(),
         Features::twoFactorAuthentication([
             'confirm' => true,

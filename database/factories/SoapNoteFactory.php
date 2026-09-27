@@ -16,7 +16,8 @@ class SoapNoteFactory extends Factory
     public function definition(): array
     {
         return [
-            'consultation_id' => Consultation::factory(),
+            // Borrador: una consulta finalizada no admite cambios (tests deterministas).
+            'consultation_id' => Consultation::factory()->draft(),
             'subjective' => $this->faker->paragraph(),
             'objective' => $this->faker->paragraph(),
             'assessment' => $this->faker->paragraph(),

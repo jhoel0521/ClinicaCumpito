@@ -198,7 +198,7 @@ new class extends Component {
     @if ($tab === 'categories')
         <div class="space-y-4">
             <flux:input
-                wire:model.live.debounce.300ms="search"
+                wire:model.live.debounce.700ms="search"
                 placeholder="Buscar categoría..."
                 icon="magnifying-glass"
             />
@@ -257,7 +257,7 @@ new class extends Component {
     @else
         <div class="space-y-4">
             <flux:input
-                wire:model.live.debounce.300ms="search"
+                wire:model.live.debounce.700ms="search"
                 placeholder="Buscar examen..."
                 icon="magnifying-glass"
             />

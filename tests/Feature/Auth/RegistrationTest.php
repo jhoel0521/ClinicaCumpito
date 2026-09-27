@@ -1,21 +1,26 @@
 <?php
 
-test('registration screen can be rendered', function () {
-    $response = $this->get(route('register'));
+use Illuminate\Support\Facades\Route;
 
-    $response->assertOk();
+// El registro público está desactivado: los usuarios los crea soporte.
+
+test('registration routes are not registered', function () {
+    expect(Route::has('register'))->toBeFalse()
+        ->and(Route::has('register.store'))->toBeFalse();
 });
 
-test('new users can register', function () {
-    $response = $this->post(route('register.store'), [
-        'name' => 'John Doe',
-        'email' => 'test@example.com',
+test('registration screen returns not found', function () {
+    $this->get('/register')->assertNotFound();
+});
+
+test('guests cannot register through a direct post', function () {
+    $this->post('/register', [
+        'name' => 'Intruso',
+        'email' => 'intruso@example.com',
         'password' => 'password',
         'password_confirmation' => 'password',
     ]);
 
-    $response->assertSessionHasNoErrors()
-        ->assertRedirect(route('dashboard', absolute: false));
-
-    $this->assertAuthenticated();
+    $this->assertGuest();
+    $this->assertDatabaseMissing('users', ['email' => 'intruso@example.com']);
 });

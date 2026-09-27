@@ -3,7 +3,13 @@
     Recibe: $doc (App\DTOs\ClinicalDocumentDTO)
 --}}
 @php
-    $background = 'data:image/jpeg;base64,' . base64_encode(file_get_contents(public_path('images/pdf/recetario-base.jpg')));
+    // En pantalla (vista previa) se usa la URL: el navegador la descarga una
+    // sola vez y la reutiliza (internet lento). Dompdf necesita la imagen
+    // embebida en base64.
+    $background =
+        $screen ?? false
+            ? asset('images/pdf/recetario-base.jpg')
+            : 'data:image/jpeg;base64,' . base64_encode(file_get_contents(public_path('images/pdf/recetario-base.jpg')));
 @endphp
 
 <!DOCTYPE html>

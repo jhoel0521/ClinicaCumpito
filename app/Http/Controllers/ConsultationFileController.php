@@ -27,6 +27,12 @@ class ConsultationFileController extends Controller
         /** @var string $name */
         $name = $consulta->scanned_file_name ?? basename($path);
 
-        return Storage::disk('local')->response($path, $name);
+        $response = Storage::disk('local')->response($path, $name);
+
+        // El escaneo de una consulta no cambia: con internet lento conviene
+        // que el navegador lo reutilice en vez de descargarlo cada vez.
+        $response->headers->set('Cache-Control', 'private, max-age=86400');
+
+        return $response;
     }
 }

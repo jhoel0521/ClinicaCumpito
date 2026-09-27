@@ -6,8 +6,8 @@ use App\Models\VitalSign;
 
 describe('VitalSignController', function () {
     test('usuario autenticado puede guardar signos vitales', function () {
-        $user = User::factory()->create();
-        $consultation = Consultation::factory()->create();
+        $user = User::factory()->admin()->create();
+        $consultation = Consultation::factory()->draft()->create();
 
         $response = $this->actingAs($user)
             ->post(route('consultas.vital-signs.store', $consultation->id), [
@@ -26,7 +26,7 @@ describe('VitalSignController', function () {
     });
 
     test('usuario autenticado puede actualizar signos vitales', function () {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
         $vitalSign = VitalSign::factory()->create();
 
         $response = $this->actingAs($user)
@@ -46,8 +46,8 @@ describe('VitalSignController', function () {
     });
 
     test('falla validacion con temperatura fuera de rango', function () {
-        $user = User::factory()->create();
-        $consultation = Consultation::factory()->create();
+        $user = User::factory()->admin()->create();
+        $consultation = Consultation::factory()->draft()->create();
 
         $response = $this->actingAs($user)
             ->post(route('consultas.vital-signs.store', $consultation->id), [

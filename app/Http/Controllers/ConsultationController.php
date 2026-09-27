@@ -29,6 +29,22 @@ class ConsultationController extends Controller
         /** @var \App\Models\User $user */
         $user = auth()->user();
 
+        // Idempotencia: con internet lento es común tocar "+ Nueva Consulta"
+        // dos veces o reintentar tras un corte. Si ya hay un borrador de hoy
+        // para este paciente y doctor, se reutiliza en vez de duplicarlo.
+        $existingDraft = Consultation::query()
+            ->where('patient_id', $patient->id)
+            ->where('doctor_id', $user->doctor_id)
+            ->where('type', 'digital')
+            ->where('status', 'draft')
+            ->whereDate('consultation_date', now()->toDateString())
+            ->latest('created_at')
+            ->first();
+
+        if ($existingDraft !== null) {
+            return redirect()->route('consultas.show', $existingDraft->id);
+        }
+
         $dto = ConsultationDTO::fromArray([
             'patient_id' => $patient->id,
             'doctor_id' => $user->doctor_id,

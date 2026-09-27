@@ -6,7 +6,8 @@ class ConsultationDTO
 {
     public function __construct(
         public readonly string $patient_id,
-        public readonly string $doctor_id,
+        // Nullable: consultas escaneadas sin doctor o con el doctor eliminado.
+        public readonly ?string $doctor_id,
         public readonly string $type,
         public readonly string $status,
         public readonly string $consultation_date,
@@ -21,7 +22,7 @@ class ConsultationDTO
     {
         return new self(
             patient_id: (string) $data['patient_id'],
-            doctor_id: (string) $data['doctor_id'],
+            doctor_id: isset($data['doctor_id']) && $data['doctor_id'] !== '' ? (string) $data['doctor_id'] : null,
             type: (string) $data['type'],
             status: (string) ($data['status'] ?? 'saved'),
             consultation_date: (string) $data['consultation_date'],

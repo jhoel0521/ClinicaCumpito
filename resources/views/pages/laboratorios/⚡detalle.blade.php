@@ -462,6 +462,7 @@ new class extends Component {
                                     <input
                                         type="file"
                                         wire:model="newAttachmentFile"
+                                        data-compress-image
                                         accept=".jpg,.jpeg,.png,.webp,.pdf"
                                         class="sr-only"
                                     />

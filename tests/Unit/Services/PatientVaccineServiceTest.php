@@ -9,7 +9,7 @@ use App\Services\PatientVaccineService;
 describe('PatientVaccineService', function () {
     test('create registra una vacuna aplicada', function () {
         $service = new PatientVaccineService;
-        $consultation = Consultation::factory()->create();
+        $consultation = Consultation::factory()->draft()->create();
         $vaccine = Vaccine::factory()->create();
 
         $dto = PatientVaccineDTO::fromArray([
@@ -64,7 +64,7 @@ describe('PatientVaccineService', function () {
 
     test('listByConsultation retorna vacunas de una consulta', function () {
         $service = new PatientVaccineService;
-        $consultation = Consultation::factory()->create();
+        $consultation = Consultation::factory()->draft()->create();
         PatientVaccine::factory()->count(2)->create([
             'consultation_id' => $consultation->id,
         ]);

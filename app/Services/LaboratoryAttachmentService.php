@@ -20,7 +20,7 @@ class LaboratoryAttachmentService implements LaboratoryAttachmentServiceContract
         $directory = 'lab-attachments/'.$laboratoryRequestId;
         $path = $directory.'/'.$fileName;
 
-        $stored = $file->storeAs($directory, $fileName, 'public');
+        $stored = $file->storeAs($directory, $fileName, LaboratoryAttachment::DISK);
 
         if ($stored === false) {
             throw new \RuntimeException('No se pudo guardar el archivo del estudio.');
@@ -53,14 +53,14 @@ class LaboratoryAttachmentService implements LaboratoryAttachmentServiceContract
                 ]);
             });
         } catch (\Throwable $exception) {
-            Storage::disk('public')->delete($path);
+            Storage::disk(LaboratoryAttachment::DISK)->delete($path);
 
             throw $exception;
         }
 
         $previousPaths
             ->reject(fn (string $previousPath): bool => $previousPath === $path)
-            ->each(fn (string $previousPath) => Storage::disk('public')->delete($previousPath));
+            ->each(fn (string $previousPath) => $this->deleteFile($previousPath));
 
         return $attachment;
     }
@@ -74,7 +74,7 @@ class LaboratoryAttachmentService implements LaboratoryAttachmentServiceContract
         }
 
         $attachment = $this->queryForRequest($laboratoryRequestId)->findOrFail($attachmentId);
-        Storage::disk('public')->delete($attachment->file_path);
+        $this->deleteFile($attachment->file_path);
 
         return (bool) $attachment->delete();
     }
@@ -84,9 +84,19 @@ class LaboratoryAttachmentService implements LaboratoryAttachmentServiceContract
         $attachments = $this->queryForRequest($laboratoryRequestId)->get();
 
         $attachments->each(function (LaboratoryAttachment $attachment): void {
-            Storage::disk('public')->delete($attachment->file_path);
+            $this->deleteFile($attachment->file_path);
             $attachment->delete();
         });
+    }
+
+    /**
+     * Borra el archivo del disco privado y, si es un adjunto antiguo, también
+     * del disco público donde se guardaban antes.
+     */
+    private function deleteFile(string $path): void
+    {
+        Storage::disk(LaboratoryAttachment::DISK)->delete($path);
+        Storage::disk(LaboratoryAttachment::LEGACY_DISK)->delete($path);
     }
 
     /** @return Builder<LaboratoryAttachment> */

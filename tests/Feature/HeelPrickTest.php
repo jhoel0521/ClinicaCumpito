@@ -6,7 +6,7 @@ use App\Models\User;
 use Livewire\Livewire;
 
 test('la prueba del talón se registra al crear el paciente', function () {
-    $this->actingAs(User::factory()->create())
+    $this->actingAs(User::factory()->admin()->create())
         ->post(route('pacientes.store'), [
             'full_name' => 'Thiago Méndez',
             'date_of_birth' => '2022-08-04',

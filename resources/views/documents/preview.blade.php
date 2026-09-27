@@ -176,7 +176,7 @@
         <main class="stage">
             <div class="stage-inner">
                 <div class="sheet-wrapper">
-                    @include($documentView, ['doc' => $doc])
+                    @include($documentView, ['doc' => $doc, 'screen' => true])
                 </div>
                 <p class="size-note">
                     {{ number_format($doc->paper->widthMm, 1) }} × {{ number_format($doc->paper->heightMm, 1) }} mm ·

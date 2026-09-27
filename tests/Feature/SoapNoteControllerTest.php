@@ -6,8 +6,8 @@ use App\Models\User;
 
 describe('SoapNoteController', function () {
     test('usuario autenticado puede guardar nota soap', function () {
-        $user = User::factory()->create();
-        $consultation = Consultation::factory()->create();
+        $user = User::factory()->admin()->create();
+        $consultation = Consultation::factory()->draft()->create();
 
         $response = $this->actingAs($user)
             ->post(route('consultas.soap-notes.store', $consultation->id), [
@@ -26,7 +26,7 @@ describe('SoapNoteController', function () {
     });
 
     test('usuario autenticado puede actualizar nota soap', function () {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
         $soapNote = SoapNote::factory()->create([
             'assessment' => 'Diagnóstico inicial',
         ]);
@@ -48,8 +48,8 @@ describe('SoapNoteController', function () {
     });
 
     test('falla validacion cuando subjective excede tamaño maximo', function () {
-        $user = User::factory()->create();
-        $consultation = Consultation::factory()->create();
+        $user = User::factory()->admin()->create();
+        $consultation = Consultation::factory()->draft()->create();
 
         $response = $this->actingAs($user)
             ->post(route('consultas.soap-notes.store', $consultation->id), [

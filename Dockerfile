@@ -72,6 +72,8 @@ RUN apk add --no-cache \
 COPY docker/php-production.ini /usr/local/etc/php/conf.d/99-production.ini
 COPY docker/php-fpm-custom.conf /usr/local/etc/php-fpm.d/zz-custom.conf
 COPY docker/apache-vhost.conf /etc/apache2/conf.d/vitaltrack.conf
+# Internet móvil lento: compresión, caché de assets y timeouts largos de subida.
+COPY docker/apache-low-bandwidth.conf /etc/apache2/conf.d/zz-low-bandwidth.conf
 COPY --from=vendor /usr/bin/composer /usr/local/bin/composer
 
 WORKDIR /var/www/html

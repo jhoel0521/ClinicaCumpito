@@ -8,9 +8,14 @@ use App\Models\Consultation;
 use App\Models\Prescription;
 use App\Models\PrescriptionTemplate;
 use App\ValueObjects\ConsultationStatus;
+use App\Livewire\Concerns\AuthorizesConsultationEdits;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 new class extends Component {
+    use AuthorizesConsultationEdits;
+
+    #[Locked]
     public string $consultationId;
     public bool $finalized = false;
     public string $errorMessage = '';

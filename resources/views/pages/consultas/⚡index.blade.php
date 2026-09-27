@@ -100,7 +100,7 @@ new class extends Component {
         <div class="flex flex-wrap gap-3 items-end">
             <div class="flex-1 min-w-56">
                 <flux:input
-                    wire:model.live.debounce.300ms="search"
+                    wire:model.live.debounce.700ms="search"
                     placeholder="{{ __('Buscar paciente...') }}"
                     icon="magnifying-glass"
                 />

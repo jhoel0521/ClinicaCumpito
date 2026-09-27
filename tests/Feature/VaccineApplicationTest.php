@@ -8,7 +8,7 @@ use App\Models\Vaccine;
 use Livewire\Livewire;
 
 beforeEach(function () {
-    $this->actingAs(User::factory()->create());
+    $this->actingAs(User::factory()->admin()->create());
 
     $this->patient = Patient::factory()->create([
         'date_of_birth' => now()->subYears(2)->toDateString(),
@@ -38,12 +38,12 @@ test('marcar Sí registra la vacuna con la fecha de hoy por defecto', function (
 
 test('marcar Sí con una fecha previa carga el esquema anterior del paciente', function () {
     Livewire::test('consultation-vaccines', ['consultationId' => $this->consultation->id])
-        ->set("applyDates.{$this->vaccine->id}", '2024-03-15')
+        ->set("applyDates.{$this->vaccine->id}", now()->subYear()->format('Y-m-d'))
         ->call('applyVaccine', $this->vaccine->id);
 
     $registro = PatientVaccine::query()->sole();
 
-    expect($registro->applied_at->format('Y-m-d'))->toBe('2024-03-15')
+    expect($registro->applied_at->format('Y-m-d'))->toBe(now()->subYear()->format('Y-m-d'))
         ->and($registro->applied_elsewhere)->toBeTrue();
 });
 

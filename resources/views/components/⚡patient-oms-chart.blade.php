@@ -120,6 +120,15 @@ new class extends Component {
         return null;
     }
 
+    public function placeholder(): string
+    {
+        return <<<'HTML'
+        <div class="rounded-lg border border-gray-200 dark:border-zinc-700 p-8 text-center text-sm text-gray-500 dark:text-gray-400">
+            Cargando gráfica de crecimiento…
+        </div>
+        HTML;
+    }
+
     public function mount(string $patientId): void
     {
         $this->patientId = $patientId;
@@ -170,18 +179,9 @@ new class extends Component {
         $this->dispatchChartData();
     }
 
-    public function updatedFilterEdad(): void
-    {
-        $this->dispatch('oms-chart-range', maxX: $this->currentMaxX());
-    }
-
-    public function updatedMode(): void
-    {
-        $data = $this->chartData;
-        if ($data) {
-            $this->dispatch('oms-chart-mode', mode: $this->mode);
-        }
-    }
+    // `mode` y `filterEdad` se sincronizan diferidos (sin request propio): el
+    // cambio visual lo hace Alpine en el navegador y el valor llega al servidor
+    // con el próximo request (p. ej. al cambiar la medición).
 
     private function syncGraficaFromFilters(): void
     {
@@ -309,7 +309,8 @@ new class extends Component {
                                 type="radio"
                                 name="filterEdad"
                                 value="{{ $key }}"
-                                wire:model.live="filterEdad"
+                                wire:model="filterEdad"
+                                x-on:change="$dispatch('oms-chart-range', { maxX: {{ $range['max'] }} })"
                                 class="peer sr-only"
                             />
                             <div
@@ -331,7 +332,19 @@ new class extends Component {
                 </span>
                 <div class="flex gap-2" dusk="filter-vista">
                     <label class="cursor-pointer">
-                        <input type="radio" name="mode" value="padres" wire:model.live="mode" class="peer sr-only" />
+                        {{--
+                            Vista y rango se resuelven en el navegador: los datos ya
+                            están cargados y con internet lento cada viaje al
+                            servidor re-enviaba toda la gráfica.
+                        --}}
+                        <input
+                            type="radio"
+                            name="mode"
+                            value="padres"
+                            wire:model="mode"
+                            x-on:change="$dispatch('oms-chart-mode', { mode: 'padres' })"
+                            class="peer sr-only"
+                        />
                         <div
                             class="rounded-lg border px-4 py-2 text-sm font-medium transition peer-checked:border-violet-500 peer-checked:bg-violet-50 peer-checked:text-violet-700 peer-checked:ring-1 peer-checked:ring-violet-500 dark:peer-checked:border-violet-400 dark:peer-checked:bg-violet-900/30 dark:peer-checked:text-violet-300 border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:bg-gray-50 dark:border-zinc-700 dark:bg-zinc-800 dark:text-gray-400 dark:hover:border-zinc-600 dark:hover:bg-zinc-700/50"
                             dusk="btn-modo-padres"
@@ -340,7 +353,14 @@ new class extends Component {
                         </div>
                     </label>
                     <label class="cursor-pointer">
-                        <input type="radio" name="mode" value="medico" wire:model.live="mode" class="peer sr-only" />
+                        <input
+                            type="radio"
+                            name="mode"
+                            value="medico"
+                            wire:model="mode"
+                            x-on:change="$dispatch('oms-chart-mode', { mode: 'medico' })"
+                            class="peer sr-only"
+                        />
                         <div
                             class="rounded-lg border px-4 py-2 text-sm font-medium transition peer-checked:border-violet-500 peer-checked:bg-violet-50 peer-checked:text-violet-700 peer-checked:ring-1 peer-checked:ring-violet-500 dark:peer-checked:border-violet-400 dark:peer-checked:bg-violet-900/30 dark:peer-checked:text-violet-300 border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:bg-gray-50 dark:border-zinc-700 dark:bg-zinc-800 dark:text-gray-400 dark:hover:border-zinc-600 dark:hover:bg-zinc-700/50"
                             dusk="btn-modo-medico"

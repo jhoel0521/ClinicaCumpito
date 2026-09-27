@@ -65,7 +65,14 @@ return [
     |
     */
 
-    'timezone' => 'UTC',
+    // Las columnas datetime de PostgreSQL no guardan zona: si esto queda en
+    // UTC, las consultas de la tarde/noche se guardan con fecha del día
+    // siguiente. La clínica opera en Bolivia (GMT-4).
+    'timezone' => env('APP_TIMEZONE', 'America/La_Paz'),
+
+    // Contraseña inicial de admin@clinica.com en producción (DefaultUsersSeeder).
+    // Si falta, el seeder genera una aleatoria y la muestra una sola vez.
+    'default_admin_password' => env('DEFAULT_ADMIN_PASSWORD'),
 
     /*
     |--------------------------------------------------------------------------

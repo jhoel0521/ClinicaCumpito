@@ -14,7 +14,11 @@ class SoapNoteController extends Controller
     public function store(StoreSoapNoteRequest $request, Consultation $consulta): \Illuminate\Http\RedirectResponse
     {
         $dto = SoapNoteDTO::fromArray($request->validated());
-        $this->service->upsert($consulta->id, $dto);
+        try {
+            $this->service->upsert($consulta->id, $dto);
+        } catch (\DomainException $exception) {
+            return back()->withInput()->withErrors(['status' => $exception->getMessage()]);
+        }
 
         return redirect()->route('consultas.show', $consulta->id)
             ->with('success', 'Nota SOAP guardada exitosamente.');
@@ -23,7 +27,11 @@ class SoapNoteController extends Controller
     public function update(StoreSoapNoteRequest $request, Consultation $consulta): \Illuminate\Http\RedirectResponse
     {
         $dto = SoapNoteDTO::fromArray($request->validated());
-        $this->service->upsert($consulta->id, $dto);
+        try {
+            $this->service->upsert($consulta->id, $dto);
+        } catch (\DomainException $exception) {
+            return back()->withInput()->withErrors(['status' => $exception->getMessage()]);
+        }
 
         return redirect()->route('consultas.show', $consulta->id)
             ->with('success', 'Nota SOAP actualizada exitosamente.');
@@ -31,7 +39,11 @@ class SoapNoteController extends Controller
 
     public function destroy(Consultation $consulta): \Illuminate\Http\RedirectResponse
     {
-        $this->service->deleteByConsultation($consulta->id);
+        try {
+            $this->service->deleteByConsultation($consulta->id);
+        } catch (\DomainException $exception) {
+            return back()->withErrors(['status' => $exception->getMessage()]);
+        }
 
         return redirect()->route('consultas.show', $consulta->id)
             ->with('success', 'Nota SOAP eliminada exitosamente.');

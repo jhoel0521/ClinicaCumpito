@@ -22,12 +22,20 @@ new class extends Component {
 
     public function upload(): void
     {
-        $this->validate([
-            'scanFile' => 'required|file|mimes:pdf,jpg,jpeg,png|max:20480',
-            'scanDate' => 'required|date|before_or_equal:today',
-        ]);
+        $dateRules = ['required', 'date', 'before_or_equal:today'];
+        if ($this->patient->date_of_birth !== null) {
+            $dateRules[] = 'after_or_equal:' . $this->patient->date_of_birth->format('Y-m-d');
+        }
 
-        $patient = Patient::findOrFail($this->patientId);
+        $this->validate(
+            [
+                'scanFile' => 'required|file|mimes:pdf,jpg,jpeg,png|max:20480',
+                'scanDate' => $dateRules,
+            ],
+            ['scanDate.after_or_equal' => 'La fecha no puede ser anterior al nacimiento del paciente.'],
+        );
+
+        $patient = Patient::findOrFail($this->patient->id);
 
         /** @var \App\Models\User $uploader */
         $uploader = auth()->user();
@@ -92,6 +100,7 @@ new class extends Component {
                     <input
                         type="file"
                         wire:model="scanFile"
+                        data-compress-image
                         accept=".pdf,.jpg,.jpeg,.png"
                         class="w-full text-sm text-gray-700 dark:text-gray-300 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-teal-50 file:text-teal-700 dark:file:bg-teal-900/40 dark:file:text-teal-300 hover:file:bg-teal-100 dark:hover:file:bg-teal-900/60"
                     />

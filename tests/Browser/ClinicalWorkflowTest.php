@@ -782,6 +782,8 @@ class ClinicalWorkflowTest extends DuskTestCase
                 ->waitForText('Paciente Graficas OMS', 10)
                 ->assertPresent('[dusk="growth-chart-panel"]')
                 ->assertSee('Gráficas de Crecimiento OMS')
+                // La gráfica se carga en diferido (lazy).
+                ->waitFor('[dusk="oms-filters"]', 15)
                 ->assertSee('Perímetro Cefálico Niñas');
         });
     }

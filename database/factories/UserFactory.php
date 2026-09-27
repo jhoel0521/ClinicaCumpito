@@ -48,6 +48,16 @@ class UserFactory extends Factory
     }
 
     /**
+     * Usuario con rol Admin (puede editar cualquier consulta).
+     */
+    public function admin(): static
+    {
+        return $this->afterCreating(function (\App\Models\User $user): void {
+            $user->assignRole(\Spatie\Permission\Models\Role::firstOrCreate(['name' => 'Admin', 'guard_name' => 'web']));
+        });
+    }
+
+    /**
      * Indicate that the model has two-factor authentication configured.
      */
     public function withTwoFactor(): static

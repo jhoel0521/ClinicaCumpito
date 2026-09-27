@@ -114,7 +114,7 @@ describe('ConsultationController', function () {
                 'doctor_id' => $consultation->doctor_id,
                 'type' => 'manual',
                 'status' => 'saved',
-                'consultation_date' => now()->addDay()->format('Y-m-d H:i:s'),
+                'consultation_date' => now()->subDay()->format('Y-m-d H:i:s'),
             ]);
 
         $response->assertRedirect(route('consultas.show', $consultation->id));
@@ -139,7 +139,7 @@ describe('ConsultationController', function () {
                 'doctor_id' => $consultation->doctor_id,
                 'type' => 'manual',
                 'status' => 'saved',
-                'consultation_date' => now()->addDay()->format('Y-m-d H:i:s'),
+                'consultation_date' => now()->subDay()->format('Y-m-d H:i:s'),
             ]);
 
         $response->assertSessionHasErrors('status');

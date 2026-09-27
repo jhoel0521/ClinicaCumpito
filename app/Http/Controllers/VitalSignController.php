@@ -14,7 +14,11 @@ class VitalSignController extends Controller
     public function store(StoreVitalSignRequest $request, Consultation $consulta): \Illuminate\Http\RedirectResponse
     {
         $dto = VitalSignDTO::fromArray($request->validated());
-        $this->service->upsert($consulta->id, $dto);
+        try {
+            $this->service->upsert($consulta->id, $dto);
+        } catch (\DomainException $exception) {
+            return back()->withInput()->withErrors(['status' => $exception->getMessage()]);
+        }
 
         return redirect()->route('consultas.show', $consulta->id)
             ->with('success', 'Signos vitales guardados exitosamente.');
@@ -23,7 +27,11 @@ class VitalSignController extends Controller
     public function update(StoreVitalSignRequest $request, Consultation $consulta): \Illuminate\Http\RedirectResponse
     {
         $dto = VitalSignDTO::fromArray($request->validated());
-        $this->service->upsert($consulta->id, $dto);
+        try {
+            $this->service->upsert($consulta->id, $dto);
+        } catch (\DomainException $exception) {
+            return back()->withInput()->withErrors(['status' => $exception->getMessage()]);
+        }
 
         return redirect()->route('consultas.show', $consulta->id)
             ->with('success', 'Signos vitales actualizados exitosamente.');
@@ -31,7 +39,11 @@ class VitalSignController extends Controller
 
     public function destroy(Consultation $consulta): \Illuminate\Http\RedirectResponse
     {
-        $this->service->deleteByConsultation($consulta->id);
+        try {
+            $this->service->deleteByConsultation($consulta->id);
+        } catch (\DomainException $exception) {
+            return back()->withErrors(['status' => $exception->getMessage()]);
+        }
 
         return redirect()->route('consultas.show', $consulta->id)
             ->with('success', 'Signos vitales eliminados exitosamente.');

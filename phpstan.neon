@@ -13,6 +13,10 @@ parameters:
 
     ignoreErrors:
         # - '#PHPDoc tag @var [^ ]+ [^ ]+ is not subtype of [^ ]+ [^ ]+#'
+        # Se usa desde componentes Volt (.blade.php), que PHPStan no analiza.
+        -
+            identifier: trait.unused
+            path: app/Livewire/Concerns/AuthorizesConsultationEdits.php
 
     excludePaths:
         # - ./*/*/FileToBeExcluded.php

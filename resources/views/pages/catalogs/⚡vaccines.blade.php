@@ -100,7 +100,7 @@ new class extends Component {
     </div>
 
     <div class="mb-4">
-        <flux:input wire:model.live.debounce.300ms="search" placeholder="Buscar vacuna..." icon="magnifying-glass" />
+        <flux:input wire:model.live.debounce.700ms="search" placeholder="Buscar vacuna..." icon="magnifying-glass" />
     </div>
 
     <div

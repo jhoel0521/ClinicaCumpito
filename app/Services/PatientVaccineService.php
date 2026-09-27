@@ -6,6 +6,7 @@ use App\Contracts\PatientVaccineServiceContract;
 use App\DTOs\PatientVaccineDTO;
 use App\Models\Consultation;
 use App\Models\PatientVaccine;
+use App\ValueObjects\ConsultationStatus;
 use DomainException;
 use Illuminate\Support\Collection;
 
@@ -14,6 +15,7 @@ class PatientVaccineService implements PatientVaccineServiceContract
     public function create(string $consultationId, PatientVaccineDTO $dto): PatientVaccine
     {
         $consultation = Consultation::findOrFail($consultationId);
+        $this->ensureNotFinalized($consultation);
 
         $duplicateQuery = PatientVaccine::query()
             ->where('patient_id', $consultation->patient_id)
@@ -76,8 +78,19 @@ class PatientVaccineService implements PatientVaccineServiceContract
 
     public function delete(string $patientVaccineId): bool
     {
-        $patientVaccine = PatientVaccine::findOrFail($patientVaccineId);
+        $patientVaccine = PatientVaccine::with('consultation')->findOrFail($patientVaccineId);
+
+        if ($patientVaccine->consultation instanceof Consultation) {
+            $this->ensureNotFinalized($patientVaccine->consultation);
+        }
 
         return (bool) $patientVaccine->delete();
+    }
+
+    private function ensureNotFinalized(Consultation $consultation): void
+    {
+        if ($consultation->status instanceof ConsultationStatus && $consultation->status->isFinalized()) {
+            throw new DomainException('La consulta está finalizada: sus vacunas ya no se pueden modificar.');
+        }
     }
 }

@@ -71,11 +71,18 @@
                     </div>
                     <div class="flex gap-2 flex-shrink-0">
                         @if ($patient->hasCompleteBasicData())
-                            <form action="{{ route('consultas.quick-store', $patient->id) }}" method="POST">
+                            <form
+                                action="{{ route('consultas.quick-store', $patient->id) }}"
+                                method="POST"
+                                x-data="{ sending: false }"
+                                x-on:submit="sending = true"
+                            >
                                 @csrf
                                 <button
                                     type="submit"
                                     dusk="create-consultation"
+                                    x-bind:disabled="sending"
+                                    x-bind:class="sending && 'opacity-60 cursor-wait'"
                                     class="inline-flex items-center gap-1.5 bg-white text-teal-700 hover:bg-teal-50 font-semibold px-4 py-2 rounded-lg text-sm transition"
                                 >
                                     + Nueva Consulta
@@ -515,7 +522,11 @@
         {{-- ═══════════════════════════════════════════════════════════════════ --}}
         <section id="graficas-oms" dusk="growth-chart-panel" class="scroll-mt-16">
             <h2 class="text-xl font-bold text-zinc-800 dark:text-zinc-100 mb-4">Gráficas de Crecimiento OMS</h2>
-            <livewire:patient-oms-chart :patientId="$patient->id" />
+            {{--
+                lazy: la ficha se muestra primero; la gráfica (Chart.js + datos
+                OMS) se pide después, así no retrasa la página con red lenta.
+            --}}
+            <livewire:patient-oms-chart :patientId="$patient->id" lazy />
         </section>
 
         <hr class="border-zinc-200 dark:border-zinc-800" />

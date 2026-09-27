@@ -174,6 +174,7 @@ new class extends Component {
                         <input
                             type="file"
                             wire:model="scanFile"
+                            data-compress-image
                             accept=".pdf,.jpg,.jpeg,.png"
                             dusk="input-scan-file-old"
                             class="w-full text-sm text-zinc-700 dark:text-zinc-300 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-teal-50 file:text-teal-700 dark:file:bg-teal-900/40 dark:file:text-teal-300 hover:file:bg-teal-100"

@@ -7,7 +7,7 @@ use App\Models\User;
 
 describe('LaboratoryRequestItemController', function () {
     test('usuario autenticado puede guardar detalle de solicitud de laboratorio', function () {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
         $consultation = Consultation::factory()->create(['status' => 'saved']);
         LaboratoryRequest::factory()->create([
             'consultation_id' => $consultation->id,
@@ -26,7 +26,7 @@ describe('LaboratoryRequestItemController', function () {
     });
 
     test('usuario autenticado puede actualizar detalle de solicitud de laboratorio', function () {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
         $consultation = Consultation::factory()->create(['status' => 'saved']);
         $labRequest = LaboratoryRequest::factory()->create([
             'consultation_id' => $consultation->id,
@@ -50,7 +50,7 @@ describe('LaboratoryRequestItemController', function () {
     });
 
     test('usuario autenticado puede eliminar detalle de solicitud de laboratorio', function () {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
         $consultation = Consultation::factory()->create(['status' => 'saved']);
         $labRequest = LaboratoryRequest::factory()->create([
             'consultation_id' => $consultation->id,
@@ -68,7 +68,7 @@ describe('LaboratoryRequestItemController', function () {
     });
 
     test('falla validacion si exam_name esta vacio', function () {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
         $consultation = Consultation::factory()->create(['status' => 'saved']);
         LaboratoryRequest::factory()->create([
             'consultation_id' => $consultation->id,
@@ -83,7 +83,7 @@ describe('LaboratoryRequestItemController', function () {
     });
 
     test('retorna 404 si el item no pertenece a la consulta', function () {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
         $consultation = Consultation::factory()->create(['status' => 'saved']);
         $otherConsultation = Consultation::factory()->create(['status' => 'saved']);
         $labRequest = LaboratoryRequest::factory()->create([

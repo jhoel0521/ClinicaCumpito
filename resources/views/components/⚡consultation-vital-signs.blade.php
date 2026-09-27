@@ -4,9 +4,14 @@ use App\Contracts\VitalSignServiceContract;
 use App\DTOs\VitalSignDTO;
 use App\Models\Consultation;
 use App\ValueObjects\ConsultationStatus;
+use App\Livewire\Concerns\AuthorizesConsultationEdits;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 new class extends Component {
+    use AuthorizesConsultationEdits;
+
+    #[Locked]
     public string $consultationId;
 
     public ?float $weight = null;
@@ -139,6 +144,7 @@ new class extends Component {
                     </span>
                 @elseif ($saved)
                     <span
+                        wire:dirty.remove
                         class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300"
                     >
                         <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -153,6 +159,16 @@ new class extends Component {
                         Sin datos
                     </span>
                 @endif
+                {{-- Red lenta: dejar claro que hay cambios que todavía no llegaron al servidor. --}}
+                @unless ($finalized)
+                    <span
+                        wire:dirty
+                        class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300"
+                    >
+                        Sin guardar
+                    </span>
+                @endunless
+
                 <span wire:loading wire:target="save" class="text-xs text-blue-400 dark:text-blue-500">Guardando…</span>
             </div>
         </div>

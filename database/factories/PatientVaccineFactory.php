@@ -17,7 +17,8 @@ class PatientVaccineFactory extends Factory
     public function definition(): array
     {
         return [
-            'consultation_id' => Consultation::factory(),
+            // Borrador: una consulta finalizada no admite cambios (tests deterministas).
+            'consultation_id' => Consultation::factory()->draft(),
             'patient_id' => null,
             'vaccine_id' => Vaccine::factory(),
             'applied_by_doctor_id' => null,

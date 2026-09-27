@@ -106,22 +106,43 @@
                     </a>
                 </div>
 
-                @if ($consultation->isScannedPdf())
-                    <embed
-                        src="{{ route('consultas.archivo.serve', $consultation->id) }}"
-                        type="application/pdf"
-                        class="w-full"
-                        style="height: 420px"
-                    />
-                @else
-                    <div class="p-4 bg-white dark:bg-zinc-900 text-center">
-                        <img
-                            src="{{ route('consultas.archivo.serve', $consultation->id) }}"
-                            alt="Consulta escaneada"
-                            class="max-h-96 mx-auto rounded"
-                        />
+                {{--
+                    Carga bajo demanda: el escaneo puede pesar varios MB y con
+                    internet móvil lento bloquearía la consulta al abrirla.
+                --}}
+                <div x-data="{ show: false }">
+                    <div x-show="! show" class="p-4 bg-white dark:bg-zinc-900 text-center">
+                        <button
+                            type="button"
+                            x-on:click="show = true"
+                            dusk="btn-ver-escaneo"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium bg-amber-100 hover:bg-amber-200 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200 transition"
+                        >
+                            Ver documento aquí
+                        </button>
                     </div>
-                @endif
+
+                    <template x-if="show">
+                        <div>
+                            @if ($consultation->isScannedPdf())
+                                <embed
+                                    src="{{ route('consultas.archivo.serve', $consultation->id) }}"
+                                    type="application/pdf"
+                                    class="w-full"
+                                    style="height: 420px"
+                                />
+                            @else
+                                <div class="p-4 bg-white dark:bg-zinc-900 text-center">
+                                    <img
+                                        src="{{ route('consultas.archivo.serve', $consultation->id) }}"
+                                        alt="Consulta escaneada"
+                                        class="max-h-96 mx-auto rounded"
+                                    />
+                                </div>
+                            @endif
+                        </div>
+                    </template>
+                </div>
             </div>
         </div>
     @endif

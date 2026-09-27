@@ -7,7 +7,7 @@ use App\Models\User;
 
 describe('PrescriptionItemController', function () {
     test('usuario autenticado puede guardar detalle de receta', function () {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
         $consultation = Consultation::factory()->create(['status' => 'saved']);
         Prescription::factory()->create([
             'consultation_id' => $consultation->id,
@@ -31,7 +31,7 @@ describe('PrescriptionItemController', function () {
     });
 
     test('usuario autenticado puede actualizar detalle de receta', function () {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
         $consultation = Consultation::factory()->create(['status' => 'saved']);
         $prescription = Prescription::factory()->create([
             'consultation_id' => $consultation->id,
@@ -59,7 +59,7 @@ describe('PrescriptionItemController', function () {
     });
 
     test('falla validacion si medication_name es vacio', function () {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
         $consultation = Consultation::factory()->create(['status' => 'saved']);
         Prescription::factory()->create([
             'consultation_id' => $consultation->id,

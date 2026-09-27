@@ -49,6 +49,10 @@
                     <a data-auth-link class="text-xs" href="{{ route('password.request') }}" wire:navigate>
                         {{ __('¿Olvidó su contraseña?') }}
                     </a>
+                @else
+                    <span class="text-xs text-zinc-500 dark:text-zinc-400" data-test="password-support-hint">
+                        {{ __('¿Olvidó su contraseña? Contacte a soporte.') }}
+                    </span>
                 @endif
             </div>
 

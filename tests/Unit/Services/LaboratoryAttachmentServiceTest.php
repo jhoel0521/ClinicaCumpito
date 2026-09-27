@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Storage;
 
 describe('LaboratoryAttachmentService', function (): void {
     test('replaceForRequest conserva un único archivo y limpia adjuntos antiguos de la solicitud y sus parámetros', function (): void {
+        Storage::fake('local');
         Storage::fake('public');
 
         $request = LaboratoryRequest::factory()->create([
@@ -19,8 +20,8 @@ describe('LaboratoryAttachmentService', function (): void {
         ]);
         $item = LaboratoryRequestItem::factory()->create(['laboratory_request_id' => $request->id]);
 
-        Storage::disk('public')->put('lab-attachments/old-order.pdf', 'orden');
-        Storage::disk('public')->put('lab-attachments/old-item.jpg', 'parametro');
+        Storage::disk('local')->put('lab-attachments/old-order.pdf', 'orden');
+        Storage::disk('local')->put('lab-attachments/old-item.jpg', 'parametro');
 
         LaboratoryAttachment::create([
             'laboratory_request_id' => $request->id,
@@ -44,12 +45,13 @@ describe('LaboratoryAttachmentService', function (): void {
             ->and($attachment->laboratory_request_id)->toBe($request->id)
             ->and($attachment->laboratory_request_item_id)->toBeNull()
             ->and($attachment->original_name)->toBe('estudio-completo.pdf')
-            ->and(Storage::disk('public')->exists($attachment->file_path))->toBeTrue()
-            ->and(Storage::disk('public')->exists('lab-attachments/old-order.pdf'))->toBeFalse()
-            ->and(Storage::disk('public')->exists('lab-attachments/old-item.jpg'))->toBeFalse();
+            ->and(Storage::disk('local')->exists($attachment->file_path))->toBeTrue()
+            ->and(Storage::disk('local')->exists('lab-attachments/old-order.pdf'))->toBeFalse()
+            ->and(Storage::disk('local')->exists('lab-attachments/old-item.jpg'))->toBeFalse();
     });
 
     test('replaceForRequest no permite cambiar el archivo de una solicitud recibida', function (): void {
+        Storage::fake('local');
         Storage::fake('public');
 
         $request = LaboratoryRequest::factory()->create([
@@ -64,11 +66,12 @@ describe('LaboratoryAttachmentService', function (): void {
             ),
         )->toThrow(DomainException::class, 'solicitud pendiente');
 
-        expect(Storage::disk('public')->allFiles())->toBeEmpty()
+        expect(Storage::disk('local')->allFiles())->toBeEmpty()
             ->and(LaboratoryAttachment::query()->count())->toBe(0);
     });
 
     test('deleteForRequest rechaza un archivo que pertenece a otra solicitud', function (): void {
+        Storage::fake('local');
         Storage::fake('public');
 
         $request = LaboratoryRequest::factory()->create(['status' => 'pending']);

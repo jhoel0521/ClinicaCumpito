@@ -9,18 +9,10 @@ class VaccineCatalogSeeder extends Seeder
 {
     public function run(): void
     {
-        // Limpieza por cambios del esquema (obs clienta ago-2026):
-        // - Hepatitis B al nacer eliminada del esquema.
-        // - Influenza 2ª dosis movida de 7 a 12 meses.
-        // Solo se borran registros sin aplicaciones cargadas (FK restrict en patient_vaccines).
-        Vaccine::where('name', 'Hepatitis B')
-            ->whereDoesntHave('patientVaccines')
-            ->delete();
-        Vaccine::where('name', 'Influenza')
-            ->where('dose_sequence', 2)
-            ->where('min_age_months', 7)
-            ->whereDoesntHave('patientVaccines')
-            ->delete();
+        // No destructivo: solo agrega las vacunas que falten (firstOrCreate). La
+        // limpieza de ago-2026 (Hepatitis B al nacer, Influenza 2ª dosis a los
+        // 7 meses) ya se aplicó y se quitó para no borrar vacunas que el Admin
+        // vuelva a cargar desde el catálogo.
 
         // Esquema PAI Bolivia (Programa Ampliado de Inmunización)
         $vaccines = [

@@ -43,9 +43,10 @@ class DefaultUsersSeeder extends Seeder
             ]
         );
 
-        $user->syncRoles([$adminRole, $doctorRole, $tecnicoRole]);
-
+        // No destructivo: un usuario existente no se toca (ni contraseña ni roles).
         if ($user->wasRecentlyCreated) {
+            $user->syncRoles([$adminRole, $doctorRole, $tecnicoRole]);
+
             $this->command->info("✔ Usuario: admin@clinica.com / {$password}  →  Admin | Doctor | Tecnico");
             if (app()->isProduction()) {
                 $this->command->warn('Guarda esta contraseña ahora: no se volverá a mostrar (reseteo: php artisan soporte:resetear-password).');

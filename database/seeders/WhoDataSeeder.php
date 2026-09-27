@@ -130,7 +130,9 @@ class WhoDataSeeder extends Seeder
     public function run(): void
     {
         foreach ($this->charts as $cfg) {
-            $grafica = OmsCatalogoGrafica::updateOrCreate(
+            // No destructivo: solo crea lo que falta; no pisa ediciones hechas
+            // desde el catálogo OMS.
+            $grafica = OmsCatalogoGrafica::firstOrCreate(
                 ['codigo' => $cfg['codigo']],
                 [
                     'nombre' => $cfg['nombre'],
@@ -147,7 +149,7 @@ class WhoDataSeeder extends Seeder
             );
 
             foreach ($data as $row) {
-                OmsDatoGrafica::updateOrCreate(
+                OmsDatoGrafica::firstOrCreate(
                     ['oms_catalogo_grafica_id' => $grafica->id, 'x_value' => $row['x_value']],
                     array_merge($row, ['oms_catalogo_grafica_id' => $grafica->id]),
                 );

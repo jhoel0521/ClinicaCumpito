@@ -163,8 +163,11 @@ class PrescriptionTemplateSeeder extends Seeder
                 ]
             );
 
-            // Eliminar items previos para re-crearlos limpios (idempotente)
-            $template->items()->delete();
+            // No destructivo: los medicamentos se cargan solo al crear la
+            // plantilla. Si ya existía, se respetan las ediciones de la doctora.
+            if (! $template->wasRecentlyCreated) {
+                continue;
+            }
 
             foreach ($tplData['items'] as $item) {
                 [$medName, $form, $concentration] = $item['med'];

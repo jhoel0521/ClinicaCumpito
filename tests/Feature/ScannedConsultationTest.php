@@ -103,6 +103,9 @@ describe('ScannedConsultation - Subida desde la ficha del paciente', function ()
     });
 
     it('crea la consulta manual con el archivo subido y redirige a la ficha', function () {
+        // La fecha del escaneo no puede ser anterior al nacimiento del paciente.
+        $this->patient->update(['date_of_birth' => now()->subYears(3)->toDateString()]);
+
         $file = UploadedFile::fake()->create('historia.pdf', 200, 'application/pdf');
 
         Livewire\Livewire::actingAs($this->user)

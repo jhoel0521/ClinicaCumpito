@@ -25,6 +25,14 @@ class GrowthChartTestDataSeeder extends Seeder
 {
     public function run(): void
     {
+        // Datos de prueba que borran y recrean consultas: jamás en producción,
+        // ni siquiera si se invoca directo con --class.
+        if (app()->isProduction()) {
+            $this->command->warn('GrowthChartTestDataSeeder omitido: no se ejecuta en producción.');
+
+            return;
+        }
+
         $doctor = Doctor::firstOrCreate(
             ['license_number' => 'MP-001'],
             [

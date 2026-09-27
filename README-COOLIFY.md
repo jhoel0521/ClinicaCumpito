@@ -93,8 +93,12 @@ muestra una sola vez. Si el seed se corrió con una versión anterior, **cambia 
 contraseña ya**: `php artisan soporte:resetear-password admin@clinica.com`.
 
 Nota: `migrate:fresh` está prohibido en producción (protección contra borrados
-accidentales) y no hace falta: la base nueva se migra sola. El seeder completo es
-idempotente.
+accidentales) y no hace falta: la base nueva se migra sola.
+
+Los seeders son **no destructivos**: pueden correrse cuantas veces se quiera y
+solo agregan lo que falta. Nunca borran registros, nunca cambian contraseñas ni
+roles de usuarios existentes y nunca pisan lo editado desde la aplicación
+(datos y logo de la clínica, plantillas de receta, catálogos de vacunas y OMS).
 
 ## 6. Copias de seguridad
 

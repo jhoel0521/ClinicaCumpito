@@ -85,7 +85,9 @@ RUN mkdir -p \
         bootstrap/cache \
     && chown -R www-data:www-data storage bootstrap/cache \
     && ln -s /var/www/html/storage/app/public /var/www/html/public/storage \
-    && chmod 755 /usr/local/bin/production-entrypoint
+    && chmod 755 /usr/local/bin/production-entrypoint \
+    && composer dump-autoload --no-dev --classmap-authoritative --no-interaction --no-scripts \
+    && php artisan package:discover --ansi
 
 EXPOSE 80
 

@@ -425,6 +425,31 @@ new class extends Component {
             return z >= 0 ? Math.round((1 - p) * 100) : Math.round(p * 100);
         }
 
+        /**
+         * Chart.js llega como módulo ES asíncrono (bloque de assets de Livewire): con carga diferida
+         * (lazy) y red lenta el componente puede intentar dibujar antes de que
+         * exista window.Chart. Se espera al evento `chartjs:ready` y, si el
+         * script aún no está en la página, se agrega (un módulo con la misma URL
+         * se ejecuta una sola vez, así que no se duplica).
+         */
+        const chartJsUrl = @js(\Illuminate\Support\Facades\Vite::asset('resources/js/chart.js'));
+
+        function whenChartReady(callback) {
+            if (window.Chart) {
+                callback();
+                return;
+            }
+
+            window.addEventListener('chartjs:ready', () => callback(), { once: true });
+
+            if (!document.querySelector(`script[type="module"][src="${chartJsUrl}"]`)) {
+                const script = document.createElement('script');
+                script.type = 'module';
+                script.src = chartJsUrl;
+                document.head.appendChild(script);
+            }
+        }
+
         Alpine.data('omsChart', (initialData, xLabel, yLabel, initialMode, initialMaxX) => ({
             // La instancia de Chart.js se almacena en this.$el._chart (DOM, fuera del
             // estado reactivo de Alpine) para evitar que Livewire la envuelva en un Proxy
@@ -434,6 +459,7 @@ new class extends Component {
             _xL: null,
             _yL: null,
             _maxX: initialMaxX || null,
+            _pendingRender: null,
 
             init() {
                 if (initialData) {
@@ -466,6 +492,21 @@ new class extends Component {
             },
 
             render(data, xL, yL, mode, maxX) {
+                if (!window.Chart) {
+                    // Se guarda el último pedido: si llegan varios antes de que
+                    // cargue Chart.js, se dibuja solo el más reciente.
+                    const pending = !this._pendingRender;
+                    this._pendingRender = [data, xL, yL, mode, maxX];
+                    if (pending) {
+                        whenChartReady(() => {
+                            const args = this._pendingRender;
+                            this._pendingRender = null;
+                            this.render(...args);
+                        });
+                    }
+                    return;
+                }
+
                 const existing = this.$el._chart;
                 if (existing) {
                     existing.destroy();
@@ -539,7 +580,7 @@ new class extends Component {
                     xAxisConfig.max = this._maxX;
                 }
 
-                this.$el._chart = new Chart(canvas, {
+                this.$el._chart = new window.Chart(canvas, {
                     type: 'line',
                     data: {
                         labels: data.labels,

@@ -11,11 +11,6 @@ RUN composer install \
     --prefer-dist \
     --optimize-autoloader \
     --ignore-platform-req=ext-gd \
-    --no-scripts \
-    && composer dump-autoload \
-    --no-dev \
-    --classmap-authoritative \
-    --no-interaction \
     --no-scripts
 
 # ---- Etapa 2: assets frontend ----
@@ -24,7 +19,7 @@ FROM node:22-alpine AS frontend
 WORKDIR /app
 
 COPY package.json package-lock.json ./
-RUN npm ci
+RUN npm ci --prefer-offline --no-audit
 
 COPY --from=vendor /app/vendor ./vendor
 COPY resources ./resources
@@ -36,7 +31,7 @@ FROM php:8.4-fpm-alpine
 
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
 
-# Extensiones PHP: librerías runtime primero (sobreviven al purge), build con deps temporales
+# Todas las dependencias en un solo RUN para reducir layers
 RUN apk add --no-cache \
         icu-libs \
         libpng \
@@ -44,6 +39,9 @@ RUN apk add --no-cache \
         libjpeg-turbo \
         libzip \
         zlib \
+        apache2 \
+        apache2-proxy \
+        curl \
     && apk add --no-cache --virtual .build-deps \
         $PHPIZE_DEPS \
         icu-dev \
@@ -60,13 +58,7 @@ RUN apk add --no-cache \
         pcntl \
         pdo_mysql \
         zip \
-    && apk del .build-deps
-
-# Apache con proxy FCGI (PHP-FPM en 127.0.0.1:9000)
-RUN apk add --no-cache \
-        apache2 \
-        apache2-proxy \
-        curl \
+    && apk del .build-deps \
     && sed -i 's#/var/www/localhost/htdocs#/var/www/html/public#g' /etc/apache2/httpd.conf
 
 COPY docker/php-production.ini /usr/local/etc/php/conf.d/99-production.ini
@@ -93,9 +85,7 @@ RUN mkdir -p \
         bootstrap/cache \
     && chown -R www-data:www-data storage bootstrap/cache \
     && ln -s /var/www/html/storage/app/public /var/www/html/public/storage \
-    && chmod 755 /usr/local/bin/production-entrypoint \
-    && composer dump-autoload --no-dev --classmap-authoritative --no-interaction --no-scripts \
-    && php artisan package:discover --ansi
+    && chmod 755 /usr/local/bin/production-entrypoint
 
 EXPOSE 80
 

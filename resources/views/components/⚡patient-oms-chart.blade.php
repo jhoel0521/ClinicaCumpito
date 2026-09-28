@@ -406,6 +406,19 @@ new class extends Component {
                 <div class="relative rounded-xl border border-gray-200 dark:border-zinc-700" style="height: 360px">
                     <canvas dusk="chart-canvas"></canvas>
                 </div>
+
+                {{-- Texto explicativo para la doctora y los padres (se actualiza con Alpine). --}}
+                <div class="mt-3 space-y-1" dusk="oms-chart-summary">
+                    <p
+                        x-show="lastPointText()"
+                        x-text="lastPointText()"
+                        class="text-sm font-medium text-teal-700 dark:text-teal-300"
+                    ></p>
+                    <p x-show="! lastPointText()" class="text-sm text-gray-500 dark:text-gray-400">
+                        Todavía no hay mediciones del paciente en esta boleta.
+                    </p>
+                    <p x-text="legendText()" class="text-xs text-gray-500 dark:text-gray-400"></p>
+                </div>
             </div>
         @endif
     @endif
@@ -450,6 +463,73 @@ new class extends Component {
             }
         }
 
+        // ── Textos legibles para tooltip y resumen ──────────────────────────
+
+        function unitOf(label) {
+            const match = /\(([^)]+)\)/.exec(label || '');
+            return match ? match[1] : '';
+        }
+
+        function measureName(yLabelText) {
+            return (yLabelText || '').replace(/\s*\([^)]*\)/, '') || 'Medición';
+        }
+
+        function formatDate(iso) {
+            if (!iso) return '';
+            const [y, m, d] = String(iso).split('-');
+            return `${d}/${m}/${y}`;
+        }
+
+        function formatNumber(value) {
+            return Number(value).toFixed(1);
+        }
+
+        function formatAge(months) {
+            const total = Math.round(Number(months));
+            const monthsText = `${total} ${total === 1 ? 'mes' : 'meses'}`;
+            if (total < 24) return monthsText;
+
+            const years = Math.floor(total / 12);
+            const rest = total % 12;
+            const yearsText = `${years} años`;
+
+            return rest === 0
+                ? `${monthsText} (${yearsText})`
+                : `${monthsText} (${yearsText} y ${rest} ${rest === 1 ? 'mes' : 'meses'})`;
+        }
+
+        function isHeightAxis(xLabelText) {
+            return (xLabelText || '').startsWith('Talla');
+        }
+
+        function xTitle(xLabelText, x) {
+            return isHeightAxis(xLabelText) ? `Talla: ${formatNumber(x)} cm` : `Edad: ${formatAge(x)}`;
+        }
+
+        /** "a los 5 meses" / "a los 2 años y 2 meses (26 meses)". */
+        function ageSentence(months) {
+            const total = Math.round(Number(months));
+            if (total < 24) return `a los ${total} ${total === 1 ? 'mes' : 'meses'}`;
+
+            const years = Math.floor(total / 12);
+            const rest = total % 12;
+            const yearsText = rest === 0 ? `${years} años` : `${years} años y ${rest} ${rest === 1 ? 'mes' : 'meses'}`;
+
+            return `a los ${yearsText} (${total} meses)`;
+        }
+
+        function patientSentence(point, xLabelText, yLabelText, mode, startLower = false) {
+            const unit = unitOf(yLabelText);
+            const verb = measureName(yLabelText).startsWith('Peso') ? 'pesaba' : 'medía';
+            const when = isHeightAxis(xLabelText) ? `con ${formatNumber(point.x)} cm de talla` : ageSentence(point.x);
+            const detail =
+                mode === 'medico'
+                    ? `Z-score ${point.z_score} (${point.category})`
+                    : `percentil ~${zToPercentile(point.z_score)}`;
+
+            return `${startLower ? 'el' : 'El'} ${formatDate(point.date)}, ${when}, ${verb} ${formatNumber(point.y)} ${unit} · ${detail}`;
+        }
+
         Alpine.data('omsChart', (initialData, xLabel, yLabel, initialMode, initialMaxX) => ({
             // La instancia de Chart.js se almacena en this.$el._chart (DOM, fuera del
             // estado reactivo de Alpine) para evitar que Livewire la envuelva en un Proxy
@@ -473,6 +553,26 @@ new class extends Component {
                     c.destroy();
                     this.$el._chart = null;
                 }
+            },
+
+            /** Resumen fijo: la medición más reciente del paciente en esta boleta. */
+            lastPointText() {
+                const points = this._data?.patient_datapoints ?? [];
+                if (points.length === 0) return '';
+
+                const last = [...points].sort((a, b) => String(a.date).localeCompare(String(b.date))).at(-1);
+                const count = points.length === 1 ? '1 medición' : `${points.length} mediciones`;
+
+                return `Última medición: ${patientSentence(last, this._xL, this._yL, this._mode, true)} (${count} en la gráfica).`;
+            },
+
+            /** Qué significa cada línea, según la vista. */
+            legendText() {
+                const name = measureName(this._yL).toLowerCase();
+                if (this._mode === 'medico') {
+                    return `Líneas OMS de desvío estándar: la verde es la mediana; amarillas ±1 DS, naranjas ±2 DS y rojas ±3 DS. Cada punto es una medición del paciente. Pase el cursor o toque la gráfica para ver edad, medición, fecha y Z-score.`;
+                }
+                return `Línea verde: ${name} ideal para la edad (percentil 50). Líneas rojas punteadas: mínimo (P3) y máximo (P97) esperados; entre ellas está el rango normal. Cada punto es una medición del paciente. Pase el cursor o toque la gráfica para ver edad, medición y fecha.`;
             },
 
             setMode(m) {
@@ -567,6 +667,14 @@ new class extends Component {
                     pointHoverRadius: 8,
                 };
 
+                // Datos para el tooltip: unidad, vista y puntos del paciente. La
+                // tolerancia es medio paso del eje X (1 mes o 0,5 cm según boleta).
+                const unit = unitOf(yL);
+                const viewMode = this._mode;
+                const patientPoints = data.patient_datapoints.map((p) => ({ ...p }));
+                const step = data.labels.length > 1 ? Math.abs(data.labels[1] - data.labels[0]) : 1;
+                const tolerance = step / 2;
+
                 const xAxisConfig = {
                     grid: {
                         display: false,
@@ -614,25 +722,29 @@ new class extends Component {
                                 },
                                 padding: 10,
                                 cornerRadius: 6,
+                                // El modo "index" alinea por posición de dato: el punto del
+                                // paciente se busca aparte por su edad/talla real (afterBody).
+                                filter: (item) => item.dataset.type !== 'scatter',
                                 callbacks: {
+                                    title(items) {
+                                        return items.length ? xTitle(xL, items[0].label) : '';
+                                    },
                                     label(ctx) {
-                                        if (ctx.dataset.type === 'scatter') {
-                                            const p = ctx.raw;
-                                            if (ctx.chart.config.data.datasets.some((d) => d.label === '-3 DS')) {
-                                                return [
-                                                    `${xL}: ${p.x}`,
-                                                    `${yL}: ${p.y}`,
-                                                    `Z-Score: ${p.z_score} (${p.category})`,
-                                                    `Fecha: ${p.date}`,
-                                                ];
-                                            }
-                                            return [
-                                                `${yL}: ${p.y}`,
-                                                `~Percentil ${zToPercentile(p.z_score)}`,
-                                                `Fecha: ${p.date}`,
-                                            ];
-                                        }
-                                        return `${ctx.dataset.label}: ${ctx.parsed.y?.toFixed(2)}`;
+                                        return `${ctx.dataset.label}: ${formatNumber(ctx.parsed.y)} ${unit}`;
+                                    },
+                                    afterBody(items) {
+                                        if (!items.length) return [];
+
+                                        const x = Number(items[0].label);
+                                        const matches = patientPoints.filter((p) => Math.abs(p.x - x) <= tolerance);
+
+                                        if (matches.length === 0) return [];
+
+                                        return [
+                                            '',
+                                            'Paciente:',
+                                            ...matches.map((p) => patientSentence(p, xL, yL, viewMode)),
+                                        ];
                                     },
                                 },
                             },

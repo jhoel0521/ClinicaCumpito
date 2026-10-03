@@ -34,7 +34,10 @@ class ClinicalDocumentService
 
         $errors = $this->validateReceta($prescription, $consultation);
 
+        // La receta se puede imprimir antes de finalizar: se omiten las filas
+        // que aún están vacías (recién agregadas con "Añadir fila").
         $items = $prescription->items
+            ->filter(fn ($item) => trim((string) $item->medication_name) !== '')
             ->map(fn ($item) => MedicationItemDTO::fromArray([
                 'medication_name' => $item->medication_name,
                 'dose' => $item->dose,
@@ -156,7 +159,7 @@ class ClinicalDocumentService
     {
         $errors = [];
 
-        if ($prescription->items->isEmpty()) {
+        if ($prescription->items->every(fn ($item) => trim((string) $item->medication_name) === '')) {
             $errors[] = 'La receta no tiene medicamentos ni indicaciones.';
         }
 

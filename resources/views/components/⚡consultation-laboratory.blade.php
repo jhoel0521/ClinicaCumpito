@@ -192,11 +192,6 @@ new class extends Component {
             'id' => $r->id,
             'examName' => $r->examsLabel(),
             'exams' => $r->examNames(),
-            'printCategories' => collect($r->examNames())
-                ->map(fn ($name) => $this->categoryOfExam($name))
-                ->unique()
-                ->values()
-                ->all(),
             'status' => $r->status ?? 'pending',
             'presumptive_diagnosis' => $r->presumptive_diagnosis ?? '',
             'observations' => $r->observations ?? '',
@@ -216,20 +211,6 @@ new class extends Component {
                 )
                 ->all(),
         ];
-    }
-
-    /** Misma regla que el PDF: categoría del catálogo por nombre de examen. */
-    private function categoryOfExam(string $examName): string
-    {
-        foreach ($this->categories as $cat) {
-            foreach ($cat['exams'] as $exam) {
-                if ($exam['name'] === $examName) {
-                    return $cat['name'];
-                }
-            }
-        }
-
-        return 'Otros';
     }
 
     // ── New lab order (atomic: request + items) ──
@@ -279,6 +260,7 @@ new class extends Component {
 
             $this->cancelNewLabOrder();
             $this->reload();
+            $this->dispatch('lab-requests-changed');
         } catch (\Throwable $e) {
             $this->errorMessage = 'Error al agregar laboratorio: ' . $e->getMessage();
             $this->dispatch('notify', type: 'error', message: $this->errorMessage);
@@ -322,6 +304,7 @@ new class extends Component {
             if ($this->attachingToRequestId === $requestId) {
                 $this->attachingToRequestId = null;
             }
+            $this->dispatch('lab-requests-changed');
         } catch (\Throwable $e) {
             $this->errorMessage = 'Error al eliminar: ' . $e->getMessage();
             $this->dispatch('notify', type: 'error', message: $this->errorMessage);
@@ -369,6 +352,7 @@ new class extends Component {
                 presumptive_diagnosis: $r['presumptive_diagnosis'] !== '' ? $r['presumptive_diagnosis'] : null,
             );
             app(LaboratoryRequestServiceContract::class)->update($requestId, $dto);
+            $this->dispatch('lab-requests-changed');
         } catch (\Throwable $e) {
             $this->errorMessage = 'Error al guardar: ' . $e->getMessage();
             $this->dispatch('notify', type: 'error', message: $this->errorMessage);
@@ -442,6 +426,58 @@ new class extends Component {
 
         if (! $this->hasSelection($this->pickedExams[$examId]['params'], $this->pickedExams[$examId]['whole'])) {
             unset($this->pickedExams[$examId]);
+        }
+    }
+
+    /**
+     * Recupera el formulario a medio armar después de un F5 (borrador que el
+     * navegador guarda en sessionStorage). Se valida contra el catálogo: el
+     * borrador viene del cliente y no se confía en él.
+     *
+     * @param  array<string, mixed>  $draft
+     */
+    public function restoreDraft(array $draft): void
+    {
+        if ($this->finalized) {
+            return;
+        }
+
+        $picked = [];
+        foreach ((array) ($draft['picked'] ?? []) as $examId => $entry) {
+            $found = is_string($examId) && is_array($entry) ? $this->findExam($examId) : null;
+            if ($found === null) {
+                continue;
+            }
+
+            $params = [];
+            foreach ((array) ($entry['params'] ?? []) as $param) {
+                $name = is_array($param) ? trim((string) ($param['name'] ?? '')) : '';
+                if ($name !== '') {
+                    $params[] = ['name' => Str::limit($name, 255, ''), 'checked' => (bool) ($param['checked'] ?? false)];
+                }
+            }
+            $whole = $params === [] && (bool) ($entry['whole'] ?? false);
+
+            if ($this->hasSelection($params, $whole)) {
+                $picked[$examId] = ['name' => $found[1]['name'], 'category_id' => $found[0]['id'], 'whole' => $whole, 'params' => $params];
+            }
+        }
+
+        $diagnosis = Str::limit(trim((string) ($draft['diagnosis'] ?? '')), 1000, '');
+        $observations = Str::limit(trim((string) ($draft['observations'] ?? '')), 2000, '');
+
+        if ($picked === [] && $diagnosis === '' && $observations === '') {
+            return;
+        }
+
+        $this->pickedExams = $picked;
+        $this->newPresumptiveDiagnosis = $diagnosis;
+        $this->newObservations = $observations;
+        $this->showNewForm = true;
+
+        $activeExamId = $draft['activeExamId'] ?? null;
+        if (is_string($activeExamId) && $this->findExam($activeExamId) !== null) {
+            $this->selectExam($activeExamId);
         }
     }
 
@@ -590,6 +626,7 @@ new class extends Component {
         try {
             app(LaboratoryRequestItemServiceContract::class)->delete($itemId);
             $this->reload();
+            $this->dispatch('lab-requests-changed');
         } catch (\Throwable $e) {
             $this->errorMessage = 'Error al eliminar: ' . $e->getMessage();
             $this->dispatch('notify', type: 'error', message: $this->errorMessage);
@@ -725,7 +762,12 @@ new class extends Component {
     }
 }; ?>
 
-<section id="laboratorio" dusk="section-laboratory" class="scroll-mt-16">
+<section
+    id="laboratorio"
+    dusk="section-laboratory"
+    class="scroll-mt-16"
+    @unless ($finalized) x-data="labOrderDraft('{{ $consultationId }}')" @endunless
+>
     <div
         class="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-2xl shadow-sm overflow-hidden"
     >
@@ -1169,55 +1211,6 @@ new class extends Component {
                                 </option>
                             </select>
                         </div>
-                        {{-- Imprimir: orden completa, por categoría o por examen --}}
-                        <details class="relative shrink-0 ml-2" dusk="lab-print-menu">
-                            <summary
-                                class="list-none cursor-pointer inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium text-sky-700 dark:text-sky-300 hover:bg-sky-100 dark:hover:bg-sky-900/30 transition"
-                            >
-                                <flux:icon.printer class="size-4" />
-                                Imprimir
-                                <flux:icon.chevron-down class="size-3" />
-                            </summary>
-                            <div
-                                class="absolute right-0 z-20 mt-1 w-64 rounded-lg border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 shadow-lg py-1 text-sm"
-                            >
-                                <a
-                                    href="{{ route('documentos.laboratorios.preview', $labReq['id']) }}"
-                                    target="_blank"
-                                    class="block px-3 py-2 font-medium text-gray-800 dark:text-gray-200 hover:bg-sky-50 dark:hover:bg-sky-900/20"
-                                >
-                                    Orden completa
-                                </a>
-                                @if (count($labReq['printCategories']) > 1)
-                                    <p class="px-3 pt-2 pb-1 text-[10px] font-semibold uppercase tracking-wide text-gray-400">
-                                        Por categoría
-                                    </p>
-                                    @foreach ($labReq['printCategories'] as $printCategory)
-                                        <a
-                                            href="{{ route('documentos.laboratorios.preview', ['laboratoryRequest' => $labReq['id'], 'categoria' => $printCategory]) }}"
-                                            target="_blank"
-                                            class="block px-3 py-1.5 text-gray-700 dark:text-gray-300 hover:bg-sky-50 dark:hover:bg-sky-900/20"
-                                        >
-                                            {{ $printCategory }}
-                                        </a>
-                                    @endforeach
-                                @endif
-                                @if (count($labReq['exams']) > 1)
-                                    <p class="px-3 pt-2 pb-1 text-[10px] font-semibold uppercase tracking-wide text-gray-400">
-                                        Por examen
-                                    </p>
-                                    @foreach ($labReq['exams'] as $printExam)
-                                        <a
-                                            href="{{ route('documentos.laboratorios.preview', ['laboratoryRequest' => $labReq['id'], 'examen' => $printExam]) }}"
-                                            target="_blank"
-                                            class="block px-3 py-1.5 text-gray-700 dark:text-gray-300 hover:bg-sky-50 dark:hover:bg-sky-900/20"
-                                        >
-                                            {{ $printExam }}
-                                        </a>
-                                    @endforeach
-                                @endif
-                            </div>
-                        </details>
                         @if (! $finalized)
                             <button
                                 wire:click="deleteLabRequest('{{ $labReq['id'] }}')"

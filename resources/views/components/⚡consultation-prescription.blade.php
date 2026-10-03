@@ -124,6 +124,9 @@ new class extends Component {
                 instructions: $item['instructions'] !== '' ? $item['instructions'] : null,
             );
             app(PrescriptionItemServiceContract::class)->update($itemId, $dto);
+            if ($field === 'medication_name') {
+                $this->dispatch('prescriptions-changed');
+            }
         } catch (\Throwable $e) {
             $this->errorMessage = 'Error al guardar: ' . $e->getMessage();
             $this->dispatch('notify', type: 'error', message: $this->errorMessage);
@@ -160,6 +163,7 @@ new class extends Component {
                 ];
                 $this->addEmptyItem($prescription->id);
             }
+            $this->dispatch('prescriptions-changed');
         } catch (\Throwable $e) {
             $this->errorMessage = 'Error al crear receta: ' . $e->getMessage();
             $this->dispatch('notify', type: 'error', message: $this->errorMessage);
@@ -177,6 +181,7 @@ new class extends Component {
         try {
             app(PrescriptionServiceContract::class)->applyTemplate($prescriptionId, $templateId);
             $this->reload();
+            $this->dispatch('prescriptions-changed');
         } catch (\Throwable $e) {
             $this->errorMessage = 'Error al aplicar plantilla: ' . $e->getMessage();
             $this->dispatch('notify', type: 'error', message: $this->errorMessage);
@@ -196,6 +201,7 @@ new class extends Component {
             $this->prescriptions = array_values(
                 array_filter($this->prescriptions, fn ($p) => $p['id'] !== $prescriptionId),
             );
+            $this->dispatch('prescriptions-changed');
         } catch (\Throwable $e) {
             $this->errorMessage = 'Error al eliminar receta: ' . $e->getMessage();
             $this->dispatch('notify', type: 'error', message: $this->errorMessage);
@@ -218,6 +224,7 @@ new class extends Component {
                     array_filter($this->prescriptions[$pIndex]['items'], fn ($i) => $i['id'] !== $itemId),
                 );
             }
+            $this->dispatch('prescriptions-changed');
         } catch (\Throwable $e) {
             $this->errorMessage = 'Error al eliminar medicamento: ' . $e->getMessage();
             $this->dispatch('notify', type: 'error', message: $this->errorMessage);
@@ -237,6 +244,7 @@ new class extends Component {
             $prescription = app(PrescriptionServiceContract::class)->createForConsultation($this->consultationId, $dto);
             app(PrescriptionServiceContract::class)->applyTemplate($prescription->id, $templateId);
             $this->reload();
+            $this->dispatch('prescriptions-changed');
         } catch (\Throwable $e) {
             $this->errorMessage = 'Error al crear receta con plantilla: ' . $e->getMessage();
             $this->dispatch('notify', type: 'error', message: $this->errorMessage);

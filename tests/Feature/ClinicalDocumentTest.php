@@ -248,7 +248,7 @@ test('la vista previa muestra el documento con el nombre del paciente', function
         ->assertSee('Aitana Aguilar Pérez')
         ->assertSee('Descargar PDF')
         ->assertSee('Imprimir')
-        ->assertSee('Editar');
+        ->assertSee('Volver a la consulta');
 });
 
 test('no se genera receta sin medicamentos y redirige con error', function (): void {

@@ -75,10 +75,7 @@ class ClinicalDocumentController extends Controller
         return view('documents.preview', [
             'doc' => $doc,
             'documentView' => 'documents.orden-laboratorio',
-            'editUrl' => route('pacientes.laboratorios.show', [
-                $consultation?->patient_id,
-                $laboratoryRequest,
-            ]),
+            'editUrl' => route('consultas.show', $laboratoryRequest->consultation_id).'#laboratorio',
             'downloadUrl' => $doc->overflow ? null : route('documentos.laboratorios.pdf', array_filter([
                 'laboratoryRequest' => $laboratoryRequest,
                 'categoria' => $category,

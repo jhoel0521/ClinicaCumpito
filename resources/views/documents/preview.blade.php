@@ -1,7 +1,7 @@
 {{--
     Vista previa standalone de un documento clínico (sin layout de la app).
     Recibe: $doc (ClinicalDocumentDTO), $documentView (vista blade),
-    $editUrl, $downloadUrl
+    $editUrl (vuelve a la consulta), $downloadUrl
 --}}
 <!DOCTYPE html>
 <html lang="es">
@@ -151,16 +151,14 @@
                 <p>{{ $doc->patientName }} · {{ $doc->dateText }}</p>
             </div>
             <div class="actions">
-                <a class="btn" href="{{ $editUrl }}">← Editar</a>
-
                 @if ($doc->overflow)
                     <span class="btn danger" disabled>Contenido excede el espacio</span>
                 @elseif ($downloadUrl)
-                    <a class="btn primary" href="{{ $downloadUrl }}">Descargar PDF</a>
-                    <a class="btn" href="{{ $downloadUrl }}" target="_blank">Imprimir</a>
+                    <a class="btn primary" href="{{ $downloadUrl }}" dusk="preview-download">Descargar PDF</a>
+                    <a class="btn" href="{{ $downloadUrl }}" target="_blank" dusk="preview-print">Imprimir</a>
                 @endif
 
-                <a class="btn" href="{{ url()->previous() }}">Cerrar</a>
+                <a class="btn" href="{{ $editUrl }}" dusk="preview-back">← Volver a la consulta</a>
             </div>
         </div>
 

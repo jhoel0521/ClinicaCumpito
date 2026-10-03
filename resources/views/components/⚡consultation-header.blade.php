@@ -259,9 +259,9 @@ new class extends Component {
             @if ($this->ageAtConsultation())
                 <p class="text-xs text-gray-500 dark:text-zinc-400 mt-0.5">
                     @if ($isDraft)
-                        Edad actual: {{ $this->ageAtConsultation()->forDisplayPediatric() }}
+                        Edad actual: {{ $this->ageAtConsultation()->forDisplay() }}
                     @else
-                        Edad en la consulta: {{ $this->ageAtConsultation()->forDisplayPediatric() }}
+                        Edad en la consulta: {{ $this->ageAtConsultation()->forDisplay() }}
                     @endif
                 </p>
             @endif

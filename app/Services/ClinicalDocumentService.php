@@ -188,7 +188,7 @@ class ClinicalDocumentService
             return '—';
         }
 
-        return Age::fromDates($patient->date_of_birth, $consultation->consultation_date)->forDisplayPediatric();
+        return Age::fromDates($patient->date_of_birth, $consultation->consultation_date)->forDisplay();
     }
 
     private function dateText(Consultation $consultation): string

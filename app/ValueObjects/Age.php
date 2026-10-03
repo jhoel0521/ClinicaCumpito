@@ -45,89 +45,35 @@ class Age implements Stringable
         return (int) floor($this->birthDate->diffInDays($this->referenceDate));
     }
 
+    /**
+     * Formato único de edad en todo el sistema (perfil, lista, consulta,
+     * feed e impresos), pedido por la doctora:
+     *
+     * - Menos de 1 mes: días ("15 días").
+     * - De 1 a 12 meses: meses y días ("12 meses y 5 días"); la edad se
+     *   sigue contando en meses hasta cumplir 1 año y 1 mes.
+     * - Desde los 13 meses: años y meses, sin días ("1 año y 1 mes", "4 años").
+     */
     public function forDisplay(): string
-    {
-        $days = $this->days();
-
-        if ($days < 30) {
-            return $days.' '.($days === 1 ? 'día' : 'días');
-        }
-
-        if ($days < 90) {
-            $weeks = $this->weeks();
-
-            return $weeks.' '.($weeks === 1 ? 'semana' : 'semanas');
-        }
-
-        if ($this->years() < 2) {
-            $months = $this->months();
-
-            return $months.' '.($months === 1 ? 'mes' : 'meses');
-        }
-
-        return $this->years().' años';
-    }
-
-    /**
-     * Edad clínica detallada: años, meses y días (ej: "2 años, 3 meses y 15 días").
-     * Pensada para perfiles de pacientes pediátricos, donde la edad exacta
-     * define esquemas de vacunas y rangos de las gráficas OMS.
-     */
-    public function forDisplayFull(): string
-    {
-        $diff = $this->birthDate->diff($this->referenceDate);
-
-        $parts = [];
-
-        if ($diff->y > 0) {
-            $parts[] = $diff->y.' '.($diff->y === 1 ? 'año' : 'años');
-        }
-        if ($diff->m > 0) {
-            $parts[] = $diff->m.' '.($diff->m === 1 ? 'mes' : 'meses');
-        }
-        if ($diff->d > 0) {
-            $parts[] = $diff->d.' '.($diff->d === 1 ? 'día' : 'días');
-        }
-
-        if ($parts === []) {
-            return '0 días';
-        }
-
-        $last = array_pop($parts);
-
-        return $parts === [] ? $last : implode(', ', $parts).' y '.$last;
-    }
-
-    /**
-     * Edad pediátrica para consultas: en menores de 24 meses se expresa
-     * principalmente en meses (con días cuando corresponde, ej: "12 meses"
-     * o "7 meses y 3 días"); desde los 24 meses pasa al formato completo.
-     */
-    public function forDisplayPediatric(): string
     {
         $diff = $this->birthDate->diff($this->referenceDate);
         $totalMonths = $diff->y * 12 + $diff->m;
 
-        if ($totalMonths < 24) {
-            $parts = [];
-
-            if ($totalMonths > 0) {
-                $parts[] = $totalMonths.' '.($totalMonths === 1 ? 'mes' : 'meses');
-            }
-            if ($diff->d > 0) {
-                $parts[] = $diff->d.' '.($diff->d === 1 ? 'día' : 'días');
-            }
-
-            if ($parts === []) {
-                return '0 días';
-            }
-
-            $last = array_pop($parts);
-
-            return $parts === [] ? $last : implode(', ', $parts).' y '.$last;
+        if ($totalMonths === 0) {
+            return $diff->d.' '.($diff->d === 1 ? 'día' : 'días');
         }
 
-        return $this->forDisplayFull();
+        if ($totalMonths <= 12) {
+            $months = $totalMonths.' '.($totalMonths === 1 ? 'mes' : 'meses');
+
+            return $diff->d > 0 ? $months.' y '.$diff->d.' '.($diff->d === 1 ? 'día' : 'días') : $months;
+        }
+
+        $years = intdiv($totalMonths, 12);
+        $months = $totalMonths % 12;
+        $text = $years.' '.($years === 1 ? 'año' : 'años');
+
+        return $months > 0 ? $text.' y '.$months.' '.($months === 1 ? 'mes' : 'meses') : $text;
     }
 
     public function __toString(): string

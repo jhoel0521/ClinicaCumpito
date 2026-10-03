@@ -53,7 +53,7 @@
                         <h1 class="text-3xl font-bold">{{ $patient->full_name }}</h1>
                         <div class="flex flex-wrap gap-3 mt-3">
                             <span class="bg-white/20 px-3 py-1 rounded-full text-sm font-medium">
-                                {{ $patient->age()?->forDisplayFull() ?? '—' }}
+                                {{ $patient->age()?->forDisplay() ?? '—' }}
                             </span>
                             <span class="bg-white/20 px-3 py-1 rounded-full text-sm font-medium">
                                 {{ $patient->gender ? ($patient->gender->value() === 'M' ? 'Masculino' : 'Femenino') : '—' }}

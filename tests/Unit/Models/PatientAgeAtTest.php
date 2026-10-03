@@ -21,7 +21,7 @@ test('ageAt calcula la edad del paciente en una fecha de referencia', function (
 
     expect($age)->toBeInstanceOf(Age::class)
         ->and($age->months())->toBe(7)
-        ->and($age->forDisplayFull())->toBe('7 meses');
+        ->and($age->forDisplay())->toBe('7 meses');
 });
 
 test('ageAt devuelve la edad en una consulta pasada distinta a la actual', function (): void {

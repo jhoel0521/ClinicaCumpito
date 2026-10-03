@@ -78,7 +78,7 @@ new class extends Component {
                 <div>
                     <h1 class="text-2xl font-bold text-zinc-900 dark:text-white">{{ $patient->full_name }}</h1>
                     <p class="text-zinc-500 dark:text-zinc-400 text-sm">
-                        {{ $patient->age()?->forDisplayFull() ?? 'Edad desconocida' }} ·
+                        {{ $patient->age()?->forDisplay() ?? 'Edad desconocida' }} ·
                         {{ $patient->gender ? ($patient->gender->value() === 'M' ? 'Masculino' : 'Femenino') : '—' }}
                     </p>
                 </div>
@@ -149,7 +149,7 @@ new class extends Component {
                                 </div>
                                 @if ($patientAgeAt = $patient->ageAt($consultation->consultation_date))
                                     <div class="text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
-                                        Edad: {{ $patientAgeAt->forDisplayPediatric() }}
+                                        Edad: {{ $patientAgeAt->forDisplay() }}
                                         @if ($patientAgeAt->months() < 24)
                                             ·
                                             {{ $patientAgeAt->months() === 0 ? 'Control del recién nacido' : 'Control de los ' . $patientAgeAt->months() . ' ' . ($patientAgeAt->months() === 1 ? 'mes' : 'meses') }}

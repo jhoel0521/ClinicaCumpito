@@ -57,7 +57,7 @@ test('la receta impresa de un paciente mayor de 2 años muestra años y meses', 
         'patient_id' => $patient->id,
         'doctor_id' => $doctor->id,
         'status' => 'finalized',
-        'consultation_date' => '2026-08-02 09:00:00', // 2 años, 3 meses y 16 días
+        'consultation_date' => '2026-08-02 09:00:00', // 2 años, 3 meses y 16 días: desde los 13 meses se imprime en años y meses
     ]);
     $prescription = Prescription::factory()->create(['consultation_id' => $consultation->id]);
     PrescriptionItem::factory()->create(['prescription_id' => $prescription->id]);
@@ -65,8 +65,9 @@ test('la receta impresa de un paciente mayor de 2 años muestra años y meses', 
     $doc = app(ClinicalDocumentService::class)->receta($prescription);
     $html = renderDocument('documents.receta', $doc);
 
-    expect($doc->ageText)->toBe('2 años, 3 meses y 16 días')
-        ->and($html)->toContain('2 años, 3 meses y 16 días');
+    expect($doc->ageText)->toBe('2 años y 3 meses')
+        ->and($html)->toContain('2 años y 3 meses')
+        ->and($html)->not->toContain('16 días');
 });
 
 test('la receta impresa de un lactante menor de 2 meses muestra meses y días', function (): void {

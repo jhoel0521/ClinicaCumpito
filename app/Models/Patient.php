@@ -66,6 +66,12 @@ class Patient extends Model
         return $this->hasMany(Consultation::class, 'patient_id');
     }
 
+    /** @return HasMany<ScheduledVisit, $this> */
+    public function scheduledVisits(): HasMany
+    {
+        return $this->hasMany(ScheduledVisit::class);
+    }
+
     /** @return HasMany<PatientVaccine, $this> */
     public function patientVaccines(): HasMany
     {

@@ -532,11 +532,10 @@
         <hr class="border-zinc-200 dark:border-zinc-800" />
 
         {{-- ═══════════════════════════════════════════════════════════════════ --}}
-        {{-- SECCIÓN 3B: CONTROLES MENSUALES 0-24 MESES --}}
+        {{-- SECCIÓN 3B: SEGUIMIENTO (controles 0-12 meses + calendario + visitas) --}}
         {{-- ═══════════════════════════════════════════════════════════════════ --}}
-        <section id="controles-mensuales" dusk="section-controles-mensuales" class="scroll-mt-16 space-y-6">
-            <livewire:monthly-calendar :patient="$patient" />
-            <livewire:monthly-follow-up :patient="$patient" />
+        <section id="controles-mensuales" dusk="section-controles-mensuales" class="scroll-mt-16">
+            <livewire:patient-follow-up :patient="$patient" />
         </section>
 
         <hr class="border-zinc-200 dark:border-zinc-800" />

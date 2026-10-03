@@ -25,6 +25,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('pacientes.laboratorios');
     Route::livewire('pacientes/{patient}/vacunas', 'pages::pacientes.vacunas')
         ->name('pacientes.vacunas');
+    Route::livewire('pacientes/{patient}/visitas', 'pages::pacientes.visitas')
+        ->name('pacientes.visitas');
     Route::livewire('pacientes/{patient}/feed', 'pages::pacientes.historia-feed')
         ->name('pacientes.feed');
     Route::resource('pacientes', PacienteController::class)

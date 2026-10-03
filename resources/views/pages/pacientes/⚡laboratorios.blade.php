@@ -78,7 +78,7 @@ new class extends Component {
                     <div class="divide-y divide-zinc-100 dark:divide-zinc-800">
                         @foreach ($consultation->laboratoryRequests as $lab)
                             @php
-                                $examName = $lab->items->first()?->exam_name ?? 'Sin examen';
+                                $examName = $lab->examsLabel();
                                 $count = $lab->items->count();
                                 $days = (int) $lab->created_at->diffInDays(now());
                                 $isPending = $lab->status === 'pending';

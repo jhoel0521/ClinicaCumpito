@@ -249,12 +249,22 @@ new class extends Component {
         >
             <div class="px-6 py-4 border-b border-zinc-100 dark:border-zinc-800">
                 <h2 class="text-base font-bold text-zinc-800 dark:text-zinc-100">
-                    {{ $laboratoryRequest->items->first()?->exam_name ?? 'Examen' }}
+                    {{ $laboratoryRequest->examsLabel('Examen') }}
                 </h2>
             </div>
 
+            @php
+
+                $multiExam = count($laboratoryRequest->examNames()) > 1;
+
+            @endphp
             <div class="divide-y divide-zinc-100 dark:divide-zinc-800">
                 @foreach ($laboratoryRequest->items as $item)
+                    @if ($multiExam && ($loop->first || $laboratoryRequest->items[$loop->index - 1]->exam_name !== $item->exam_name))
+                        <div class="px-4 py-2 bg-zinc-50 dark:bg-zinc-800/50 text-xs font-bold uppercase tracking-wide text-zinc-600 dark:text-zinc-300">
+                            {{ $item->exam_name }}
+                        </div>
+                    @endif
                     <div class="p-4 space-y-3">
                         {{-- Nombre del parámetro --}}
                         @if ($item->parameter_name)

@@ -32,7 +32,9 @@ class LaboratoryRequest extends Model
     /** @return HasMany<LaboratoryRequestItem, $this> */
     public function items(): HasMany
     {
-        return $this->hasMany(LaboratoryRequestItem::class, 'laboratory_request_id');
+        return $this->hasMany(LaboratoryRequestItem::class, 'laboratory_request_id')
+            ->orderBy('created_at')
+            ->orderBy('id');
     }
 
     /** @return HasMany<LaboratoryAttachment, $this> */
@@ -41,6 +43,24 @@ class LaboratoryRequest extends Model
         return $this->hasMany(LaboratoryAttachment::class, 'laboratory_request_id')
             ->whereNull('laboratory_request_item_id')
             ->orderBy('sort_order');
+    }
+
+    /**
+     * Nombres de los exámenes de la orden, sin repetir y en orden de carga
+     * (una orden puede incluir varios exámenes de distintas categorías).
+     *
+     * @return array<int, string>
+     */
+    public function examNames(): array
+    {
+        return $this->items->pluck('exam_name')->filter()->unique()->values()->all();
+    }
+
+    public function examsLabel(string $empty = 'Sin examen'): string
+    {
+        $names = $this->examNames();
+
+        return $names === [] ? $empty : implode(', ', $names);
     }
 
     public function isPending(): bool

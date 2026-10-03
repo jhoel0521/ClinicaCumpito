@@ -11,6 +11,8 @@ use App\Models\LaboratoryCategory;
 use App\Models\LaboratoryRequest;
 use App\ValueObjects\ConsultationStatus;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use App\Livewire\Concerns\AuthorizesConsultationEdits;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
@@ -59,11 +61,28 @@ new class extends Component {
     public string $selectedExamName = '';
 
     /**
+     * Parámetros del examen activo (columna 3). Es un reflejo de
+     * $pickedExams[$selectedExamId]['params'] y se sincroniza en cada cambio.
+     *
      * @var array<int, array{name: string, checked: bool}>
      */
     public array $selectorParameters = [];
 
     public string $customParamName = '';
+
+    /** Check "Examen completo" del examen activo cuando no tiene parámetros en el catálogo. */
+    public bool $selectedExamWhole = false;
+
+    /**
+     * Exámenes de la orden (varios, de cualquier categoría): solo los que
+     * tienen algún parámetro marcado o "Examen completo". No se pierden al
+     * cambiar de categoría o de examen.
+     *
+     * @var array<string, array{name: string, category_id: string, whole: bool, params: array<int, array{name: string, checked: bool}>}>
+     */
+    public array $pickedExams = [];
+
+    public string $examSearch = '';
 
     // ── Add result state ──
     public array $newResults = [];
@@ -148,15 +167,12 @@ new class extends Component {
     /** @return array<string, mixed> */
     private function mapRequest(LaboratoryRequest $r): array
     {
-        $examName = '';
         $items = [];
 
         foreach ($r->items as $item) {
-            if ($examName === '') {
-                $examName = $item->exam_name;
-            }
             $items[] = [
                 'id' => $item->id,
+                'exam_name' => $item->exam_name,
                 'parameter_name' => $item->parameter_name,
                 'results' => $item->results
                     ->map(
@@ -174,7 +190,13 @@ new class extends Component {
 
         return [
             'id' => $r->id,
-            'examName' => $examName !== '' ? $examName : 'Sin examen',
+            'examName' => $r->examsLabel(),
+            'exams' => $r->examNames(),
+            'printCategories' => collect($r->examNames())
+                ->map(fn ($name) => $this->categoryOfExam($name))
+                ->unique()
+                ->values()
+                ->all(),
             'status' => $r->status ?? 'pending',
             'presumptive_diagnosis' => $r->presumptive_diagnosis ?? '',
             'observations' => $r->observations ?? '',
@@ -196,41 +218,64 @@ new class extends Component {
         ];
     }
 
+    /** Misma regla que el PDF: categoría del catálogo por nombre de examen. */
+    private function categoryOfExam(string $examName): string
+    {
+        foreach ($this->categories as $cat) {
+            foreach ($cat['exams'] as $exam) {
+                if ($exam['name'] === $examName) {
+                    return $cat['name'];
+                }
+            }
+        }
+
+        return 'Otros';
+    }
+
     // ── New lab order (atomic: request + items) ──
 
+    /**
+     * Crea UNA sola orden con todos los exámenes elegidos (de cualquier
+     * categoría). Cada parámetro marcado es un ítem; "Examen completo" es un
+     * ítem sin parámetro.
+     */
     public function submitNewLabOrder(): void
     {
-        if ($this->finalized || ! $this->selectedExamId) {
+        $this->syncActiveExam();
+
+        if ($this->finalized || $this->pickedExams === []) {
             return;
         }
 
         $this->errorMessage = '';
 
         try {
-            $dto = new LaboratoryRequestDTO(
-                observations: trim($this->newObservations) !== '' ? trim($this->newObservations) : null,
-                status: 'pending',
-                presumptive_diagnosis: trim($this->newPresumptiveDiagnosis) !== ''
-                    ? trim($this->newPresumptiveDiagnosis)
-                    : null,
-            );
+            DB::transaction(function (): void {
+                $dto = new LaboratoryRequestDTO(
+                    observations: trim($this->newObservations) !== '' ? trim($this->newObservations) : null,
+                    status: 'pending',
+                    presumptive_diagnosis: trim($this->newPresumptiveDiagnosis) !== ''
+                        ? trim($this->newPresumptiveDiagnosis)
+                        : null,
+                );
 
-            $req = app(LaboratoryRequestServiceContract::class)->createForConsultation($this->consultationId, $dto);
+                $req = app(LaboratoryRequestServiceContract::class)->createForConsultation($this->consultationId, $dto);
+                $items = app(LaboratoryRequestItemServiceContract::class);
 
-            $selected = array_filter($this->selectorParameters, fn ($p) => $p['checked']);
+                foreach ($this->pickedExamsByCategory() as $group) {
+                    foreach ($group['exams'] as $exam) {
+                        if ($exam['whole']) {
+                            $items->create($req->id, new LaboratoryRequestItemDTO(exam_name: $exam['name'], parameter_name: null));
 
-            if (! empty($selected)) {
-                foreach ($selected as $param) {
-                    $itemDto = new LaboratoryRequestItemDTO(
-                        exam_name: $this->selectedExamName,
-                        parameter_name: $param['name'],
-                    );
-                    app(LaboratoryRequestItemServiceContract::class)->create($req->id, $itemDto);
+                            continue;
+                        }
+
+                        foreach (array_filter($exam['params'], fn ($p) => $p['checked']) as $param) {
+                            $items->create($req->id, new LaboratoryRequestItemDTO(exam_name: $exam['name'], parameter_name: $param['name']));
+                        }
+                    }
                 }
-            } else {
-                $itemDto = new LaboratoryRequestItemDTO(exam_name: $this->selectedExamName, parameter_name: null);
-                app(LaboratoryRequestItemServiceContract::class)->create($req->id, $itemDto);
-            }
+            });
 
             $this->cancelNewLabOrder();
             $this->reload();
@@ -250,6 +295,9 @@ new class extends Component {
         $this->selectedExamName = '';
         $this->selectorParameters = [];
         $this->customParamName = '';
+        $this->selectedExamWhole = false;
+        $this->pickedExams = [];
+        $this->examSearch = '';
     }
 
     public function deleteLabRequest(string $requestId): void
@@ -331,43 +379,99 @@ new class extends Component {
 
     public function selectCategory(string $categoryId): void
     {
+        $this->syncActiveExam();
         $this->selectedCategoryId = $categoryId;
         $this->selectedExamId = null;
         $this->selectedExamName = '';
         $this->selectorParameters = [];
+        $this->selectedExamWhole = false;
     }
 
+    /**
+     * Solo navega: abre el examen en la columna de parámetros. El examen
+     * entra en la orden recién cuando se marca algún parámetro (o
+     * "Examen completo" si el catálogo no le define parámetros).
+     */
     public function selectExam(string $examId): void
     {
-        $this->selectedExamId = $examId;
-        $this->selectorParameters = [];
+        $this->syncActiveExam();
 
-        foreach ($this->categories as $cat) {
-            foreach ($cat['exams'] as $exam) {
-                if ($exam['id'] === $examId) {
-                    $this->selectedExamName = $exam['name'];
-                    // Ningún parámetro seleccionado por defecto: el usuario marca solo lo que necesita
-                    $this->selectorParameters = array_map(
-                        fn ($p) => ['name' => $p, 'checked' => false],
-                        $exam['parameters'],
-                    );
-                    break 2;
-                }
-            }
+        $found = $this->findExam($examId);
+        if ($found === null) {
+            return;
         }
 
+        [$cat, $exam] = $found;
+        $picked = $this->pickedExams[$examId] ?? null;
+
+        $this->selectedCategoryId = $cat['id'];
+        $this->selectedExamId = $examId;
+        $this->selectedExamName = $exam['name'];
+        // Ningún parámetro seleccionado por defecto: el usuario marca solo lo que necesita
+        $this->selectorParameters = $picked['params']
+            ?? array_map(fn ($p) => ['name' => $p, 'checked' => false], $exam['parameters']);
+        $this->selectedExamWhole = $picked['whole'] ?? false;
         $this->customParamName = '';
+    }
+
+    public function removePickedExam(string $examId): void
+    {
+        unset($this->pickedExams[$examId]);
+
+        if ($this->selectedExamId === $examId) {
+            $this->setAllParamsChecked(false);
+            $this->selectedExamWhole = false;
+        }
+    }
+
+    /** Quita un parámetro; si era el último, el examen sale de la orden. */
+    public function removePickedParam(string $examId, int $index): void
+    {
+        if (! isset($this->pickedExams[$examId]['params'][$index])) {
+            return;
+        }
+
+        if ($this->selectedExamId === $examId) {
+            $this->selectorParameters[$index]['checked'] = false;
+            $this->syncActiveExam();
+
+            return;
+        }
+
+        $this->pickedExams[$examId]['params'][$index]['checked'] = false;
+
+        if (! $this->hasSelection($this->pickedExams[$examId]['params'], $this->pickedExams[$examId]['whole'])) {
+            unset($this->pickedExams[$examId]);
+        }
+    }
+
+    /** Lleva el formulario al examen elegido desde el buscador. */
+    public function pickFromSearch(string $examId): void
+    {
+        $this->selectExam($examId);
+        $this->examSearch = '';
+    }
+
+    public function updatedSelectorParameters(): void
+    {
+        $this->syncActiveExam();
+    }
+
+    public function updatedSelectedExamWhole(): void
+    {
+        $this->syncActiveExam();
     }
 
     public function addCustomParam(): void
     {
         $name = trim($this->customParamName);
-        if ($name === '') {
+        if ($name === '' || $this->selectedExamId === null) {
             return;
         }
 
         $this->selectorParameters[] = ['name' => $name, 'checked' => true];
         $this->customParamName = '';
+        $this->syncActiveExam();
     }
 
     /** Marca o desmarca todos los parámetros del selector de una vez. */
@@ -376,6 +480,101 @@ new class extends Component {
         foreach ($this->selectorParameters as $idx => $param) {
             $this->selectorParameters[$idx]['checked'] = $checked;
         }
+
+        $this->syncActiveExam();
+    }
+
+    /**
+     * Exámenes elegidos agrupados por categoría, en el orden del catálogo.
+     *
+     * @return array<int, array{name: string, exams: array<string, array{name: string, category_id: string, whole: bool, params: array<int, array{name: string, checked: bool}>}>}>
+     */
+    public function pickedExamsByCategory(): array
+    {
+        $groups = [];
+
+        foreach ($this->categories as $cat) {
+            $exams = array_filter($this->pickedExams, fn ($e) => $e['category_id'] === $cat['id']);
+            if ($exams !== []) {
+                $groups[] = ['name' => $cat['name'], 'exams' => $exams];
+            }
+        }
+
+        return $groups;
+    }
+
+    /**
+     * Resultados del buscador (todas las categorías).
+     *
+     * @return array<int, array{id: string, name: string, category: string}>
+     */
+    public function searchResults(): array
+    {
+        $term = Str::lower(Str::ascii(trim($this->examSearch)));
+        if ($term === '') {
+            return [];
+        }
+
+        $results = [];
+        foreach ($this->categories as $cat) {
+            foreach ($cat['exams'] as $exam) {
+                if (str_contains(Str::lower(Str::ascii($exam['name'])), $term)) {
+                    $results[] = ['id' => $exam['id'], 'name' => $exam['name'], 'category' => $cat['name']];
+                }
+            }
+        }
+
+        return array_slice($results, 0, 12);
+    }
+
+    /**
+     * @return array{0: array{id: string, name: string}, 1: array{id: string, name: string, parameters: array<int, string>}}|null
+     */
+    private function findExam(string $examId): ?array
+    {
+        foreach ($this->categories as $cat) {
+            foreach ($cat['exams'] as $exam) {
+                if ($exam['id'] === $examId) {
+                    return [$cat, $exam];
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /** @param  array<int, array{name: string, checked: bool}>  $params */
+    private function hasSelection(array $params, bool $whole): bool
+    {
+        return $whole || array_filter($params, fn ($p) => $p['checked']) !== [];
+    }
+
+    /**
+     * Refleja los checks de la columna de parámetros en la orden: el examen
+     * activo está en la orden solo si tiene algo marcado.
+     */
+    private function syncActiveExam(): void
+    {
+        if ($this->selectedExamId === null || ($found = $this->findExam($this->selectedExamId)) === null) {
+            return;
+        }
+
+        $params = array_values($this->selectorParameters);
+        // "Examen completo" solo aplica a exámenes sin parámetros en el catálogo.
+        $whole = $params === [] && $this->selectedExamWhole;
+
+        if (! $this->hasSelection($params, $whole)) {
+            unset($this->pickedExams[$this->selectedExamId]);
+
+            return;
+        }
+
+        $this->pickedExams[$this->selectedExamId] = [
+            'name' => $found[1]['name'],
+            'category_id' => $found[0]['id'],
+            'whole' => $whole,
+            'params' => $params,
+        ];
     }
 
     // ── Remove item ──
@@ -600,6 +799,54 @@ new class extends Component {
                         </button>
                     </div>
 
+                    {{-- Buscador de exámenes (todas las categorías) --}}
+                    @php
+                        $searchResults = $this->searchResults();
+                    @endphp
+                    <div class="relative px-3 pt-3">
+                        <div class="relative">
+                            <flux:icon.magnifying-glass
+                                class="size-4 text-gray-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none"
+                            />
+                            <input
+                                wire:model.live.debounce.250ms="examSearch"
+                                wire:keydown.escape="$set('examSearch', '')"
+                                type="search"
+                                dusk="lab-exam-search"
+                                placeholder="Buscar examen… (ej: hemograma, eco, copro)"
+                                class="w-full pl-8 pr-3 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-900 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                            />
+                        </div>
+                        @if (trim($examSearch) !== '')
+                            <div
+                                class="absolute z-20 left-3 right-3 mt-1 rounded-lg border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 shadow-lg max-h-64 overflow-y-auto"
+                            >
+                                @forelse ($searchResults as $result)
+                                    <button
+                                        type="button"
+                                        wire:key="search-{{ $result['id'] }}"
+                                        wire:click="pickFromSearch('{{ $result['id'] }}')"
+                                        class="w-full flex items-center justify-between gap-3 px-3 py-2 text-left text-sm hover:bg-sky-50 dark:hover:bg-sky-900/20 transition"
+                                    >
+                                        <span class="flex items-center gap-2 text-gray-800 dark:text-gray-200">
+                                            @if (isset($pickedExams[$result['id']]))
+                                                <flux:icon.check class="size-4 text-sky-600" />
+                                            @endif
+                                            {{ $result['name'] }}
+                                        </span>
+                                        <span class="text-xs text-gray-400 dark:text-zinc-500 shrink-0">
+                                            {{ $result['category'] }}
+                                        </span>
+                                    </button>
+                                @empty
+                                    <p class="px-3 py-2 text-xs text-gray-400 dark:text-zinc-500 italic">
+                                        Ningún examen coincide con «{{ $examSearch }}».
+                                    </p>
+                                @endforelse
+                            </div>
+                        @endif
+                    </div>
+
                     {{-- Selector 3 columnas --}}
                     <div
                         class="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-sky-200 dark:divide-sky-800"
@@ -613,15 +860,30 @@ new class extends Component {
                                 Categoría
                             </p>
                             @foreach ($categories as $cat)
+                                @php
+                                    $pickedInCat = count(array_filter($pickedExams, fn ($e) => $e['category_id'] === $cat['id']));
+                                @endphp
                                 <button
+                                    wire:key="cat-{{ $cat['id'] }}"
                                     wire:click="selectCategory('{{ $cat['id'] }}')"
                                     @class([
-                                        'w-full text-left px-3 py-2 rounded-lg text-sm transition mb-1',
+                                        'w-full flex items-center justify-between gap-2 text-left px-3 py-2 rounded-lg text-sm transition mb-1',
                                         'bg-sky-600 text-white' => $selectedCategoryId === $cat['id'],
                                         'hover:bg-sky-100 dark:hover:bg-sky-900/30 text-gray-700 dark:text-gray-300' => $selectedCategoryId !== $cat['id'],
                                     ])
                                 >
-                                    {{ $cat['name'] }}
+                                    <span>{{ $cat['name'] }}</span>
+                                    @if ($pickedInCat > 0)
+                                        <span
+                                            @class([
+                                                'shrink-0 min-w-5 px-1.5 rounded-full text-xs font-semibold text-center',
+                                                'bg-white/25 text-white' => $selectedCategoryId === $cat['id'],
+                                                'bg-sky-100 dark:bg-sky-900/50 text-sky-700 dark:text-sky-300' => $selectedCategoryId !== $cat['id'],
+                                            ])
+                                        >
+                                            {{ $pickedInCat }}
+                                        </span>
+                                    @endif
                                 </button>
                             @endforeach
                         </div>
@@ -637,15 +899,33 @@ new class extends Component {
                                 @foreach ($categories as $cat)
                                     @if ($cat['id'] === $selectedCategoryId)
                                         @foreach ($cat['exams'] as $exam)
+                                            @php
+                                                $picked = $pickedExams[$exam['id']] ?? null;
+                                                $pickedCount = $picked === null ? 0 : ($picked['whole'] ? 1 : count(array_filter($picked['params'], fn ($p) => $p['checked'])));
+                                            @endphp
                                             <button
+                                                type="button"
+                                                wire:key="exam-{{ $exam['id'] }}"
                                                 wire:click="selectExam('{{ $exam['id'] }}')"
                                                 @class([
-                                                    'w-full text-left px-3 py-2 rounded-lg text-sm transition mb-1',
+                                                    'w-full flex items-center justify-between gap-2 text-left px-3 py-2 rounded-lg text-sm transition mb-1',
                                                     'bg-sky-600 text-white' => $selectedExamId === $exam['id'],
                                                     'hover:bg-sky-100 dark:hover:bg-sky-900/30 text-gray-700 dark:text-gray-300' => $selectedExamId !== $exam['id'],
                                                 ])
                                             >
-                                                {{ $exam['name'] }}
+                                                <span>{{ $exam['name'] }}</span>
+                                                @if ($pickedCount > 0)
+                                                    <span
+                                                        title="{{ $picked['whole'] ? 'Examen completo' : $pickedCount . ' parámetro(s) marcado(s)' }}"
+                                                        @class([
+                                                            'shrink-0 min-w-5 px-1.5 rounded-full text-xs font-semibold text-center',
+                                                            'bg-white/25 text-white' => $selectedExamId === $exam['id'],
+                                                            'bg-sky-100 dark:bg-sky-900/50 text-sky-700 dark:text-sky-300' => $selectedExamId !== $exam['id'],
+                                                        ])
+                                                    >
+                                                        {{ $picked['whole'] ? '✓' : $pickedCount }}
+                                                    </span>
+                                                @endif
                                             </button>
                                         @endforeach
                                     @endif
@@ -664,7 +944,6 @@ new class extends Component {
                                     class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2"
                                 >
                                     Parámetros — {{ $selectedExamName }}
-                                    <span class="font-normal text-gray-400 dark:text-zinc-500">(opcional)</span>
                                 </p>
                                 @if (count($selectorParameters) > 0)
                                     <div class="flex gap-2 mb-2">
@@ -687,10 +966,13 @@ new class extends Component {
                                 @if (count($selectorParameters) > 0)
                                     <div class="space-y-1.5 mb-3">
                                         @foreach ($selectorParameters as $pIdx => $param)
-                                            <label class="flex items-center gap-2 cursor-pointer group">
+                                            <label
+                                                wire:key="param-{{ $selectedExamId }}-{{ $pIdx }}"
+                                                class="flex items-center gap-2 cursor-pointer group"
+                                            >
                                                 <input
                                                     type="checkbox"
-                                                    wire:model="selectorParameters.{{ $pIdx }}.checked"
+                                                    wire:model.live="selectorParameters.{{ $pIdx }}.checked"
                                                     class="rounded border-gray-300 dark:border-zinc-600 text-sky-600 focus:ring-sky-500"
                                                 />
                                                 <span
@@ -702,9 +984,20 @@ new class extends Component {
                                         @endforeach
                                     </div>
                                 @else
-                                    <p class="text-xs text-gray-400 dark:text-zinc-500 italic mb-3">
-                                        Sin parámetros definidos — se agregará el examen completo.
-                                    </p>
+                                    {{-- Examen sin parámetros en el catálogo (ej. ecografía): se pide completo --}}
+                                    <label class="flex items-center gap-2 cursor-pointer group mb-3">
+                                        <input
+                                            type="checkbox"
+                                            wire:key="whole-{{ $selectedExamId }}"
+                                            wire:model.live="selectedExamWhole"
+                                            class="rounded border-gray-300 dark:border-zinc-600 text-sky-600 focus:ring-sky-500"
+                                        />
+                                        <span
+                                            class="text-sm text-gray-700 dark:text-gray-300 group-hover:text-sky-700 dark:group-hover:text-sky-400 transition"
+                                        >
+                                            Examen completo
+                                        </span>
+                                    </label>
                                 @endif
 
                                 <div class="flex gap-1.5 mt-2">
@@ -728,6 +1021,69 @@ new class extends Component {
                                 </p>
                             @endif
                         </div>
+                    </div>
+
+                    {{-- Exámenes en esta orden: espejo de solo lectura de los checks de arriba; solo permite borrar --}}
+                    <div class="border-t border-sky-200 dark:border-sky-800 px-4 py-3" dusk="lab-picked-exams">
+                        <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
+                            Exámenes en esta orden ({{ count($pickedExams) }})
+                        </p>
+                        @forelse ($this->pickedExamsByCategory() as $group)
+                            <div class="mb-2 last:mb-0" wire:key="picked-cat-{{ $group['name'] }}">
+                                <p class="text-xs font-bold text-sky-700 dark:text-sky-400">{{ $group['name'] }}</p>
+                                <ul class="mt-1 space-y-1 pl-3">
+                                    @foreach ($group['exams'] as $examId => $exam)
+                                        @php
+                                            $checkedParams = array_filter($exam['params'], fn ($p) => $p['checked']);
+                                        @endphp
+                                        <li wire:key="picked-{{ $examId }}" class="text-sm">
+                                            <div class="flex items-start justify-between gap-2">
+                                                <span class="text-gray-800 dark:text-gray-200">
+                                                    {{ $exam['name'] }}
+                                                    @if ($exam['whole'])
+                                                        <span class="text-xs text-gray-400 dark:text-zinc-500">
+                                                            (examen completo)
+                                                        </span>
+                                                    @endif
+                                                </span>
+                                                <button
+                                                    type="button"
+                                                    wire:click="removePickedExam('{{ $examId }}')"
+                                                    class="shrink-0 text-gray-400 hover:text-red-500 transition"
+                                                    title="Quitar {{ $exam['name'] }} de la orden"
+                                                >
+                                                    <flux:icon.trash class="size-4" />
+                                                </button>
+                                            </div>
+                                            @if ($checkedParams !== [])
+                                                <div class="mt-1 flex flex-wrap gap-1">
+                                                    @foreach ($checkedParams as $pIdx => $param)
+                                                        <span
+                                                            wire:key="picked-{{ $examId }}-{{ $pIdx }}"
+                                                            class="inline-flex items-center gap-1 pl-2 pr-1 py-0.5 rounded-full bg-white dark:bg-zinc-900 border border-sky-200 dark:border-sky-800 text-xs text-gray-700 dark:text-gray-300"
+                                                        >
+                                                            {{ $param['name'] }}
+                                                            <button
+                                                                type="button"
+                                                                wire:click="removePickedParam('{{ $examId }}', {{ $pIdx }})"
+                                                                class="text-gray-400 hover:text-red-500 transition"
+                                                                title="Quitar {{ $param['name'] }}"
+                                                            >
+                                                                <flux:icon.x-mark class="size-3" />
+                                                            </button>
+                                                        </span>
+                                                    @endforeach
+                                                </div>
+                                            @endif
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @empty
+                            <p class="text-xs text-gray-400 dark:text-zinc-500 italic">
+                                Marca los parámetros de cada examen arriba; puedes mezclar categorías en la misma orden.
+                            </p>
+                        @endforelse
                     </div>
 
                     {{-- Diagnóstico presuntivo + Observaciones + botones --}}
@@ -762,10 +1118,14 @@ new class extends Component {
                             <button
                                 wire:click="submitNewLabOrder"
                                 wire:loading.attr="disabled"
-                                @disabled(! $selectedExamId)
+                                @disabled($pickedExams === [])
                                 class="px-4 py-2 rounded-lg bg-sky-600 hover:bg-sky-700 text-white text-sm font-medium transition disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                Agregar
+                                @if (count($pickedExams) > 1)
+                                    Crear orden con {{ count($pickedExams) }} exámenes
+                                @else
+                                    Agregar
+                                @endif
                             </button>
                             <button
                                 wire:click="cancelNewLabOrder"
@@ -809,6 +1169,55 @@ new class extends Component {
                                 </option>
                             </select>
                         </div>
+                        {{-- Imprimir: orden completa, por categoría o por examen --}}
+                        <details class="relative shrink-0 ml-2" dusk="lab-print-menu">
+                            <summary
+                                class="list-none cursor-pointer inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium text-sky-700 dark:text-sky-300 hover:bg-sky-100 dark:hover:bg-sky-900/30 transition"
+                            >
+                                <flux:icon.printer class="size-4" />
+                                Imprimir
+                                <flux:icon.chevron-down class="size-3" />
+                            </summary>
+                            <div
+                                class="absolute right-0 z-20 mt-1 w-64 rounded-lg border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 shadow-lg py-1 text-sm"
+                            >
+                                <a
+                                    href="{{ route('documentos.laboratorios.preview', $labReq['id']) }}"
+                                    target="_blank"
+                                    class="block px-3 py-2 font-medium text-gray-800 dark:text-gray-200 hover:bg-sky-50 dark:hover:bg-sky-900/20"
+                                >
+                                    Orden completa
+                                </a>
+                                @if (count($labReq['printCategories']) > 1)
+                                    <p class="px-3 pt-2 pb-1 text-[10px] font-semibold uppercase tracking-wide text-gray-400">
+                                        Por categoría
+                                    </p>
+                                    @foreach ($labReq['printCategories'] as $printCategory)
+                                        <a
+                                            href="{{ route('documentos.laboratorios.preview', ['laboratoryRequest' => $labReq['id'], 'categoria' => $printCategory]) }}"
+                                            target="_blank"
+                                            class="block px-3 py-1.5 text-gray-700 dark:text-gray-300 hover:bg-sky-50 dark:hover:bg-sky-900/20"
+                                        >
+                                            {{ $printCategory }}
+                                        </a>
+                                    @endforeach
+                                @endif
+                                @if (count($labReq['exams']) > 1)
+                                    <p class="px-3 pt-2 pb-1 text-[10px] font-semibold uppercase tracking-wide text-gray-400">
+                                        Por examen
+                                    </p>
+                                    @foreach ($labReq['exams'] as $printExam)
+                                        <a
+                                            href="{{ route('documentos.laboratorios.preview', ['laboratoryRequest' => $labReq['id'], 'examen' => $printExam]) }}"
+                                            target="_blank"
+                                            class="block px-3 py-1.5 text-gray-700 dark:text-gray-300 hover:bg-sky-50 dark:hover:bg-sky-900/20"
+                                        >
+                                            {{ $printExam }}
+                                        </a>
+                                    @endforeach
+                                @endif
+                            </div>
+                        </details>
                         @if (! $finalized)
                             <button
                                 wire:click="deleteLabRequest('{{ $labReq['id'] }}')"
@@ -856,6 +1265,16 @@ new class extends Component {
                                     </thead>
                                     <tbody class="divide-y divide-gray-100 dark:divide-zinc-800">
                                         @foreach ($labReq['items'] as $item)
+                                            @if (count($labReq['exams']) > 1 && ($loop->first || $labReq['items'][$loop->index - 1]['exam_name'] !== $item['exam_name']))
+                                                <tr class="bg-sky-50/60 dark:bg-sky-900/10" dusk="lab-exam-group">
+                                                    <td
+                                                        colspan="5"
+                                                        class="px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-sky-700 dark:text-sky-400"
+                                                    >
+                                                        {{ $item['exam_name'] }}
+                                                    </td>
+                                                </tr>
+                                            @endif
                                             @if ($labReq['status'] === 'pending' && ! $finalized)
                                                 @if (count($item['results']) > 0)
                                                     {{-- Item already has a result: show read-only, no inputs --}}

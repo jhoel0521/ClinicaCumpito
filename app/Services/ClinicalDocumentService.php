@@ -75,8 +75,12 @@ class ClinicalDocumentService
 
     /**
      * Construye la orden de laboratorio (hoja oficio).
+     *
+     * Una orden puede incluir exámenes de varias categorías; con $category o
+     * $exam se imprime solo esa parte (p. ej. la ecografía en una hoja aparte
+     * porque se hace en otro lugar).
      */
-    public function ordenLaboratorio(LaboratoryRequest $laboratoryRequest): ClinicalDocumentDTO
+    public function ordenLaboratorio(LaboratoryRequest $laboratoryRequest, ?string $category = null, ?string $exam = null): ClinicalDocumentDTO
     {
         $laboratoryRequest->loadMissing(['consultation.patient', 'consultation.doctor', 'items']);
         $consultation = $laboratoryRequest->consultation;
@@ -84,8 +88,6 @@ class ClinicalDocumentService
         if ($consultation === null || $consultation->patient === null) {
             return $this->documentWithErrors('orden_laboratorio', PaperSize::legal(), ['No se puede generar la orden sin un paciente.']);
         }
-
-        $errors = $this->validateOrden($laboratoryRequest, $consultation);
 
         $items = $laboratoryRequest->items
             ->map(function ($item) {
@@ -95,8 +97,14 @@ class ClinicalDocumentService
                     category: $this->categoryFor($item->exam_name),
                 );
             })
+            ->filter(fn (LabStudyItemDTO $item) => ($category === null || $item->category === $category)
+                && ($exam === null || $item->exam_name === $exam))
             ->values()
             ->all();
+
+        $errors = $items === []
+            ? ['La orden no tiene estudios solicitados.']
+            : $this->validateOrden($laboratoryRequest, $consultation);
 
         return new ClinicalDocumentDTO(
             paper: PaperSize::legal(),

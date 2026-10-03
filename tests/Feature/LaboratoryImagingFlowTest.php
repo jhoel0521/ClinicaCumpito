@@ -60,6 +60,7 @@ test('laboratorio de imagen: conserva un único archivo por estudio y reemplaza 
         ->test('consultation-laboratory', ['consultationId' => $consulta1->id])
         ->call('selectCategory', $categoria->id)
         ->call('selectExam', $examen->id)
+        ->set('selectedExamWhole', true)
         ->call('submitNewLabOrder')
         ->assertHasNoErrors();
 

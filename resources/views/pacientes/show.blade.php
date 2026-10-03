@@ -473,7 +473,7 @@
                             <ul class="space-y-1.5 text-sm">
                                 @foreach ($latestConsultation->laboratoryRequests as $labRequest)
                                     @php
-                                        $labExamName = $labRequest->items->first()?->exam_name ?? 'Sin examen';
+                                        $labExamName = $labRequest->examsLabel();
                                         $labReceived = ($labRequest->status ?? 'pending') === 'received';
                                     @endphp
 
@@ -776,7 +776,7 @@
                         <tbody class="divide-y divide-zinc-100 dark:divide-zinc-800">
                             @foreach ($recentLaboratoryRequests as $lab)
                                 @php
-                                    $examName = $lab->items->first()?->exam_name ?? 'Sin examen';
+                                    $examName = $lab->examsLabel();
                                     $count = $lab->items->count();
                                     $isPending = $lab->status === 'pending';
                                     $hasResults = $lab->items->flatMap(fn ($i) => $i->results)->isNotEmpty();

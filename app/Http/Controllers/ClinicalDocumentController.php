@@ -9,6 +9,7 @@ use App\Services\ClinicalDocumentService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class ClinicalDocumentController extends Controller
@@ -53,11 +54,12 @@ class ClinicalDocumentController extends Controller
         return $pdf->stream($doc->fileName());
     }
 
-    public function ordenPreview(LaboratoryRequest $laboratoryRequest): View|Response|RedirectResponse
+    public function ordenPreview(Request $request, LaboratoryRequest $laboratoryRequest): View|Response|RedirectResponse
     {
         $this->authorizeConsultation($laboratoryRequest->consultation);
 
-        $doc = $this->documents->ordenLaboratorio($laboratoryRequest);
+        [$category, $exam] = $this->ordenFilter($request);
+        $doc = $this->documents->ordenLaboratorio($laboratoryRequest, $category, $exam);
 
         $consultation = $laboratoryRequest->consultation;
 
@@ -77,15 +79,20 @@ class ClinicalDocumentController extends Controller
                 $consultation?->patient_id,
                 $laboratoryRequest,
             ]),
-            'downloadUrl' => $doc->overflow ? null : route('documentos.laboratorios.pdf', $laboratoryRequest),
+            'downloadUrl' => $doc->overflow ? null : route('documentos.laboratorios.pdf', array_filter([
+                'laboratoryRequest' => $laboratoryRequest,
+                'categoria' => $category,
+                'examen' => $exam,
+            ])),
         ]);
     }
 
-    public function ordenPdf(LaboratoryRequest $laboratoryRequest): Response|RedirectResponse
+    public function ordenPdf(Request $request, LaboratoryRequest $laboratoryRequest): Response|RedirectResponse
     {
         $this->authorizeConsultation($laboratoryRequest->consultation);
 
-        $doc = $this->documents->ordenLaboratorio($laboratoryRequest);
+        [$category, $exam] = $this->ordenFilter($request);
+        $doc = $this->documents->ordenLaboratorio($laboratoryRequest, $category, $exam);
 
         $consultation = $laboratoryRequest->consultation;
 
@@ -102,6 +109,19 @@ class ClinicalDocumentController extends Controller
             ->setPaper($doc->paper->toDompdf(), 'mm');
 
         return $pdf->stream($doc->fileName());
+    }
+
+    /**
+     * Filtro opcional para imprimir solo una categoría o un examen de la orden.
+     *
+     * @return array{0: ?string, 1: ?string}
+     */
+    private function ordenFilter(Request $request): array
+    {
+        $category = trim((string) $request->query('categoria', ''));
+        $exam = trim((string) $request->query('examen', ''));
+
+        return [$category !== '' ? $category : null, $exam !== '' ? $exam : null];
     }
 
     private function authorizeConsultation(?Consultation $consultation): void

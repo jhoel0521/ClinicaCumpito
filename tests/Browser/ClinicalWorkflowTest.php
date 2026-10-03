@@ -506,6 +506,9 @@ class ClinicalWorkflowTest extends DuskTestCase
                     .find(b => b.textContent.trim() === '{$exam->name}').click();
             ");
             $browser->pause(500);
+            // El examen no tiene parámetros: se marca "Examen completo" para incluirlo en la orden.
+            $browser->script("document.querySelector('input[wire\\\\:model\\\\.live=\"selectedExamWhole\"]').click()");
+            $browser->pause(500);
             $browser->script("document.querySelector('button[wire\\\\:click=\"submitNewLabOrder\"]').click()");
             $browser->waitForText($exam->name, 10);
         });

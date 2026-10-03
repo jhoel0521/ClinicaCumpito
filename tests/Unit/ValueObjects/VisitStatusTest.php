@@ -48,6 +48,30 @@ test('si hay varias consultas en la ventana se toma la primera', function (): vo
         ->and($status->attendedOn()->format('Y-m-d'))->toBe('2026-10-12');
 });
 
+test('la consulta en la que se programó la visita no la cumple', function (): void {
+    // En la consulta del 03/10 a las 10:00 la doctora programa "vuelva el 07/10".
+    $status = VisitStatus::evaluate(
+        CarbonImmutable::parse('2026-10-07'),
+        [CarbonImmutable::parse('2026-10-03 10:00:00')],
+        CarbonImmutable::parse('2026-10-03'),
+        CarbonImmutable::parse('2026-10-03 10:20:00'),
+    );
+
+    expect($status->isPending())->toBeTrue();
+});
+
+test('una consulta posterior a la programación sí la cumple aunque sea antes de la fecha', function (): void {
+    $status = VisitStatus::evaluate(
+        CarbonImmutable::parse('2026-10-07'),
+        [CarbonImmutable::parse('2026-10-03 10:00:00'), CarbonImmutable::parse('2026-10-05 09:00:00')],
+        CarbonImmutable::parse('2026-10-05'),
+        CarbonImmutable::parse('2026-10-03 10:20:00'),
+    );
+
+    expect($status->value())->toBe(VisitStatus::ON_TIME)
+        ->and($status->attendedOn()->format('Y-m-d'))->toBe('2026-10-05');
+});
+
 test('la hora de la consulta no afecta el cálculo', function (): void {
     expect(evaluate('2026-10-10', ['2026-10-17 23:59:00'], '2026-12-01')->value())->toBe(VisitStatus::ON_TIME);
 });

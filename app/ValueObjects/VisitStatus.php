@@ -13,6 +13,9 @@ use Stringable;
  * - En el mes: vino más tarde, pero dentro de los 30 días siguientes.
  * - No vino: pasaron 30 días sin consulta.
  * - Pendiente: todavía no pasó la fecha o sigue dentro del margen.
+ *
+ * Solo cuentan las consultas posteriores al momento en que se programó la
+ * visita: la consulta en la que la doctora dice "vuelva en 4 días" no la cumple.
  */
 class VisitStatus implements Stringable
 {
@@ -36,16 +39,25 @@ class VisitStatus implements Stringable
     ) {}
 
     /**
-     * @param  iterable<CarbonInterface>  $consultationDates  fechas de consulta del paciente
+     * @param  iterable<CarbonInterface>  $consultationDates  fechas (con hora) de consulta del paciente
+     * @param  CarbonInterface|null  $scheduledAt  cuándo se programó la visita; las consultas anteriores no cuentan
      */
-    public static function evaluate(CarbonInterface $scheduledFor, iterable $consultationDates, CarbonInterface $today): self
-    {
+    public static function evaluate(
+        CarbonInterface $scheduledFor,
+        iterable $consultationDates,
+        CarbonInterface $today,
+        ?CarbonInterface $scheduledAt = null,
+    ): self {
         $scheduled = CarbonImmutable::parse($scheduledFor->format('Y-m-d'));
         $windowStart = $scheduled->subDays(self::DAYS_BEFORE);
         $lateEnd = $scheduled->addDays(self::LATE_DAYS_AFTER);
 
         $attended = null;
         foreach ($consultationDates as $date) {
+            if ($scheduledAt !== null && $date->lte($scheduledAt)) {
+                continue;
+            }
+
             $day = CarbonImmutable::parse($date->format('Y-m-d'));
             if ($day->betweenIncluded($windowStart, $lateEnd) && ($attended === null || $day->lt($attended))) {
                 $attended = $day;

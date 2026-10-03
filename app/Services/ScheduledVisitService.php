@@ -53,7 +53,7 @@ class ScheduledVisitService implements ScheduledVisitServiceContract
     {
         $visit = ScheduledVisit::findOrFail($scheduledVisitId);
 
-        $status = VisitStatus::evaluate($visit->scheduled_for, $this->consultationDates($visit->patient_id), CarbonImmutable::today());
+        $status = VisitStatus::evaluate($visit->scheduled_for, $this->consultationDates($visit->patient_id), CarbonImmutable::today(), $visit->created_at);
 
         // Las cumplidas o vencidas son historial del paciente: no se borran.
         if (! $status->isPending()) {
@@ -75,7 +75,7 @@ class ScheduledVisitService implements ScheduledVisitServiceContract
             ->get()
             ->map(fn (ScheduledVisit $visit) => [
                 'visit' => $visit,
-                'status' => VisitStatus::evaluate($visit->scheduled_for, $dates, $today),
+                'status' => VisitStatus::evaluate($visit->scheduled_for, $dates, $today, $visit->created_at),
             ])
             ->values();
     }
@@ -83,6 +83,62 @@ class ScheduledVisitService implements ScheduledVisitServiceContract
     public function summaryForPatient(string $patientId): array
     {
         return VisitStatus::summarize($this->listForPatient($patientId)->pluck('status'));
+    }
+
+    public function agenda(?string $doctorId, string $from, string $to): Collection
+    {
+        return $this->withStatus(
+            $this->doctorVisits($doctorId)
+                ->whereBetween('scheduled_for', [$from, $to])
+                ->get(),
+        );
+    }
+
+    public function overdue(?string $doctorId, int $days = VisitStatus::LATE_DAYS_AFTER): Collection
+    {
+        $today = CarbonImmutable::today();
+
+        return $this->withStatus(
+            $this->doctorVisits($doctorId)
+                ->whereBetween('scheduled_for', [$today->subDays($days)->format('Y-m-d'), $today->subDay()->format('Y-m-d')])
+                ->get(),
+        )
+            // Ya pasó la fecha y todavía no hay consulta: hay que llamarlo.
+            ->filter(fn (array $row) => $row['status']->isPending())
+            ->values();
+    }
+
+    /** @return \Illuminate\Database\Eloquent\Builder<ScheduledVisit> */
+    private function doctorVisits(?string $doctorId): \Illuminate\Database\Eloquent\Builder
+    {
+        return ScheduledVisit::query()
+            ->with('patient.user')
+            ->when($doctorId !== null, fn ($query) => $query->where('doctor_id', $doctorId))
+            ->orderBy('scheduled_for')
+            ->orderBy('created_at');
+    }
+
+    /**
+     * Estado de varias visitas con una sola consulta a la base.
+     *
+     * @param  \Illuminate\Support\Collection<int, ScheduledVisit>  $visits
+     * @return Collection<int, array{visit: ScheduledVisit, status: VisitStatus}>
+     */
+    private function withStatus(Collection $visits): Collection
+    {
+        $datesByPatient = Consultation::query()
+            ->whereIn('patient_id', $visits->pluck('patient_id')->unique()->values())
+            ->get(['patient_id', 'consultation_date'])
+            ->groupBy('patient_id')
+            ->map(fn ($rows) => $rows->map(fn ($c) => CarbonImmutable::parse($c->consultation_date))->values());
+        $today = CarbonImmutable::today();
+
+        return $visits
+            ->map(fn (ScheduledVisit $visit) => [
+                'visit' => $visit,
+                'status' => VisitStatus::evaluate($visit->scheduled_for, $datesByPatient->get($visit->patient_id, collect()), $today, $visit->created_at),
+            ])
+            ->values();
     }
 
     /**

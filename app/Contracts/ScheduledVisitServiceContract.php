@@ -26,4 +26,20 @@ interface ScheduledVisitServiceContract
      * @return array{on_time: int, late: int, missed: int, pending: int}
      */
     public function summaryForPatient(string $patientId): array;
+
+    /**
+     * Agenda del doctor entre dos fechas (Y-m-d, inclusive). Con $doctorId
+     * null devuelve las visitas de todos los doctores.
+     *
+     * @return Collection<int, array{visit: ScheduledVisit, status: VisitStatus}>
+     */
+    public function agenda(?string $doctorId, string $from, string $to): Collection;
+
+    /**
+     * Visitas cuya fecha ya pasó (últimos $days días) y el paciente todavía
+     * no vino: a quién hay que llamar.
+     *
+     * @return Collection<int, array{visit: ScheduledVisit, status: VisitStatus}>
+     */
+    public function overdue(?string $doctorId, int $days = 30): Collection;
 }

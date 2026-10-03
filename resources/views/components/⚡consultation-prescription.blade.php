@@ -255,6 +255,7 @@ new class extends Component {
             $dto = new PrescriptionItemDTO(
                 medication_name: '',
                 dose: '',
+                administration_route: null,
                 frequency: '',
                 duration: '',
                 instructions: null,
